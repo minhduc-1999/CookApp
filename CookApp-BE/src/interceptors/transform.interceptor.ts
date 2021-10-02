@@ -10,8 +10,9 @@ export class TransformResponse<Result> implements NestInterceptor<Result> {
     return next
       .handle()
       .pipe(map((data) => {
-        if (data instanceof Result)
-          return classToPlain(data.getResponseDTO());
+        console.log(data);
+        // if (data instanceof Result)
+        //   return data.getResponseDTO();
         return classToPlain(data);
       }));
   }

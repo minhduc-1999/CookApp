@@ -12,17 +12,17 @@ export class AppController {
     return this._appService.getHello();
   }
 
-  @Get('app/config')
-  getConfig() {
-    const result = this._appService.getAppConfig();
-    if (result.isError()) {
-      return {
-        meta: { ok: false, message: result.getErrorMessage() },
-      };
-    }
-    return {
-      meta: { ok: true },
-      data: result.getData(),
-    };
-  }
+  // @Get('app/config')
+  // getConfig() {
+  //   const result = this._appService.getAppConfig();
+  //   if (result.isError()) {
+  //     return {
+  //       meta: { ok: false, message: result.getErrorMessage() },
+  //     };
+  //   }
+  //   return {
+  //     meta: { ok: true },
+  //     data: result.getData(),
+  //   };
+  // }
 }

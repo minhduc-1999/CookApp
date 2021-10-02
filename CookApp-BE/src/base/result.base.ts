@@ -1,22 +1,21 @@
-import { ResponseDTO } from './dtos/response.dto';
-import { ResponseMetaDTO } from './dtos/responseMeta.dto';
-
-export enum ErrorCode {
-  NOTFOUND = 1,
-  NOTAUTHORIZED = 2,
-  ALREADYEXIST = 3,
-  NOTACCEPTED = 4,
-  UNEXPECTED = 5,
-}
+import { ErrorCode } from "enums/error_code.enum";
+import { ResponseDTO } from "./dtos/response.dto";
+import { ResponseMetaDTO, Status } from "./dtos/responseMeta.dto";
 
 export class Result<T> {
   private _isError: boolean;
   private _errorMessage: string;
   private _data: any | T;
   private _meta: any;
-  private _errorCode: number;
+  private _errorCode: ErrorCode;
 
-  constructor(isError = false, errorMessage = '', data = null, meta = null, errorCode = 0) {
+  constructor(
+    isError = false,
+    errorMessage = "",
+    data = null,
+    meta = null,
+    errorCode = null
+  ) {
     this.setIsError(isError);
     this.setErrorMessage(errorMessage);
     this.setErrorCode(errorCode);
@@ -57,7 +56,7 @@ export class Result<T> {
   }
 
   public setMeta(meta: any) {
-    if (typeof meta === 'object') {
+    if (typeof meta === "object") {
       this._meta = meta;
     }
   }
@@ -65,25 +64,28 @@ export class Result<T> {
     return this._errorCode;
   }
 
-  public setErrorCode(errorCode: number) {
+  public setErrorCode(errorCode: ErrorCode) {
     this._errorCode = errorCode;
   }
 
   public static ok<U>(data?, meta?) {
-    return new Result<U>(false, '', data, meta, null);
+    return new Result<U>(false, "", data, meta, null);
   }
 
   public static fail<U>(errorMessage: string, errorCode: number) {
     return new Result<U>(true, errorMessage, null, null, errorCode);
   }
 
-  public getResponseDTO(): ResponseDTO<T> | ResponseMetaDTO {
+  public getResponseDTO(): ResponseDTO<T> {
+    let status: Status;
     if (this._isError) {
+      status = "failure";
       return {
-        meta: { status: "FAILED", message: this._errorMessage },
+        meta: { status, message: this._errorMessage },
       };
     }
-    let meta = { status: "SUCCESS" };
+    status = "success";
+    let meta = { status };
     if (this._meta) {
       meta = { ...meta, ...this._meta };
     }

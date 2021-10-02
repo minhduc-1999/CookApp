@@ -1,22 +1,27 @@
-import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+import { ErrorCode } from 'enums/error_code.enum';
+
+export type Status = "success" | "failure";
 
 export class MetaDTO {
-  constructor(status: string, message: string) {
+  constructor(status: Status, message?: string, errorCode?: ErrorCode) {
     this.message = message;
     this.status = status;
+    this.errorCode = errorCode
   }
 
-  @ApiPropertyOptional()
   message?: string;
-  @ApiPropertyOptional()
-  status?: string;
+
+  status: Status;
+
+  @Expose({name: 'error_code'})
+  errorCode?: ErrorCode
 }
-// tslint:disable-next-line: max-classes-per-file
 export class ResponseMetaDTO {
-  constructor(message: string, status: string) {
-    this.meta = new MetaDTO(message, status);
+  constructor(status: Status, message: string, errorCode?: ErrorCode) {
+    this.meta = new MetaDTO(status, message, errorCode);
   }
 
-  @ApiProperty()
   meta: MetaDTO;
 }
+

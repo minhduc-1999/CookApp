@@ -1,20 +1,13 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { MetaDTO } from "./responseMeta.dto";
 
-class MetaDTO {
-  @ApiProperty()
-  ok: boolean;
-
-  @ApiProperty()
+class PageMetaDTO extends MetaDTO {
   limit: number;
 
-  @ApiProperty()
   offset: number;
 
-  @ApiProperty()
   total: number;
 }
 
 export class ResponsePageMetaDTO {
-  @ApiProperty()
-  meta: MetaDTO;
+  meta: PageMetaDTO;
 }
