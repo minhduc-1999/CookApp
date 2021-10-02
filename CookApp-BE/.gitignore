@@ -3,7 +3,7 @@ dist/
 .env.staging
 node_modules/
 stack/
-.env
+*.env
 attachments/
 .docker.env
 *.rest
