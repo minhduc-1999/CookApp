@@ -1,11 +1,11 @@
-import { Model } from "mongoose";
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { User, UserDocument } from "../domains/schemas/user.schema";
+import { RegisterDTO } from "../dtos/createUser.dto";
 
+export interface IUserService {
+}
 @Injectable()
-class UsersService {
-  constructor(@InjectModel(User.name) private _userModel: Model<UserDocument>) {}
+class UserService implements IUserService {
+  constructor() {}
 }
 
-export default UsersService;
+export default UserService;

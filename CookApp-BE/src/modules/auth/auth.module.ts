@@ -5,7 +5,11 @@ import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
 import { ConfigModule } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
+import { UserRepository } from "./adapters/out/repositories/user.repository";
 import { UserModel } from "./domains/schemas/user.schema";
+import AuthenticationService from "./services/authentication.service";
+import UserService from "./services/user.service";
+import { RegisterCommandHandler } from "./useCases/register";
 
 @Module({
   imports: [
@@ -21,6 +25,20 @@ import { UserModel } from "./domains/schemas/user.schema";
     CqrsModule,
   ],
   controllers: [AuthController],
-  providers: [],
+  providers: [
+    {
+      provide: "IUserService",
+      useClass: UserService,
+    },
+    {
+      provide: "IUserRepository",
+      useClass: UserRepository,
+    },
+    {
+      provide: "IAuthentication",
+      useClass: AuthenticationService,
+    },
+    RegisterCommandHandler,
+  ],
 })
 export class AuthModule {}

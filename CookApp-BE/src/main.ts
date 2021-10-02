@@ -40,9 +40,11 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api')
 
-  app.useGlobalPipes(new ValidationPipe({
-    disableErrorMessages: configService.get('app.env') === 'production',
-  }));
+  app.useGlobalPipes(
+    new ValidationPipe({
+      disableErrorMessages: configService.get("app.env") === "production",
+    })
+  );
 
   app.useGlobalInterceptors(new ErrorsInterceptor(), new TransformResponse())
 
@@ -53,9 +55,6 @@ async function bootstrap() {
     .setTitle("API SPECS COOKAPP 1.0")
     .setDescription("The COOKAPP API description")
     .setVersion("1.0")
-    .addTag("Authentication")
-    .addTag("Admin")
-    .addTag("User")
     .addBearerAuth()
     .addServer("http://localhost:3000")
     .build();
