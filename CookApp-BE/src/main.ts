@@ -53,7 +53,9 @@ async function bootstrap() {
     .setTitle("API SPECS COOKAPP 1.0")
     .setDescription("The COOKAPP API description")
     .setVersion("1.0")
-    .addTag("message-queue")
+    .addTag("Authentication")
+    .addTag("Admin")
+    .addTag("User")
     .addBearerAuth()
     .addServer("http://localhost:3000")
     .build();
