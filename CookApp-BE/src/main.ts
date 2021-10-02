@@ -4,10 +4,6 @@ import {
   NestExpressApplication,
   ExpressAdapter,
 } from '@nestjs/platform-express';
-import {
-  initializeTransactionalContext,
-  patchTypeORMRepositoryWithBaseRepository,
-} from 'typeorm-transactional-cls-hooked';
 import * as Sentry from '@sentry/node';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { AppModule } from './app.module';
@@ -23,8 +19,6 @@ const morganFormat =
   ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
 
 async function bootstrap() {
-  initializeTransactionalContext();
-  patchTypeORMRepositoryWithBaseRepository();
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(),

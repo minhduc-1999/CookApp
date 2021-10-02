@@ -1,25 +1,30 @@
-import { MailerModule } from '@nestjs-modules/mailer';
-import { HandlebarsAdapter } from '@nestjs-modules/mailer/dist/adapters/handlebars.adapter';
-import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { APP_INTERCEPTOR } from '@nestjs/core';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import 'dotenv/config';
-import { AuthModule } from 'modules/auth/auth.module';
-import { RavenModule } from 'nest-raven';
-import { ConfigModule, ConfigService } from 'nestjs-config';
-import * as path from 'path';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
-import './boilerplate.polyfill';
-import { TraceIdInterceptor } from './interceptors/trace-id-interceptor.service';
-import { contextMiddleware } from './middleware/context.middelware';
-
+import { MailerModule } from "@nestjs-modules/mailer";
+import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
+import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
+import { APP_INTERCEPTOR } from "@nestjs/core";
+import { MongooseModule } from "@nestjs/mongoose";
+import "dotenv/config";
+import { AuthModule } from "modules/auth/auth.module";
+import { RavenModule } from "nest-raven";
+import { ConfigModule, ConfigService } from "nestjs-config";
+import * as path from "path";
+import { AppController } from "./app.controller";
+import { AppService } from "./app.service";
+import "./boilerplate.polyfill";
+import { TraceIdInterceptor } from "./interceptors/trace-id-interceptor.service";
+import { contextMiddleware } from "./middleware/context.middelware";
 
 @Module({
   imports: [
-    ConfigModule.load(path.resolve(__dirname, 'config', '**/!(*.d).{ts,js}')),
-    TypeOrmModule.forRootAsync({
-      useFactory: (config: ConfigService) => config.get('database'),
+    ConfigModule.load(path.resolve(__dirname, "config", "**/!(*.d).{ts,js}")),
+    MongooseModule.forRootAsync({
+      useFactory: async (config: ConfigService) => {
+        const { username, password, database, host } = config.get("database");
+        return {
+          uri: `mongodb://${username}:${password}@${host}`,
+          dbName: database,
+        };
+      },
       inject: [ConfigService],
     }),
     RavenModule,
@@ -29,14 +34,14 @@ import { contextMiddleware } from './middleware/context.middelware';
         from: process.env.DEFAULT_FROM,
       },
       template: {
-        dir: __dirname + '/templates',
+        dir: __dirname + "/templates",
         adapter: new HandlebarsAdapter(),
         options: {
           strict: true,
         },
       },
     }),
-    AuthModule
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [
@@ -49,6 +54,6 @@ import { contextMiddleware } from './middleware/context.middelware';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer): MiddlewareConsumer | void {
-    consumer.apply(contextMiddleware).forRoutes('*');
+    consumer.apply(contextMiddleware).forRoutes("*");
   }
 }
