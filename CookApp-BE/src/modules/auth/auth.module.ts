@@ -9,6 +9,7 @@ import { UserRepository } from "./adapters/out/repositories/user.repository";
 import { UserModel } from "./domains/schemas/user.schema";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
+import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
 import { RegisterCommandHandler } from "./useCases/register";
 
 @Module({
@@ -39,6 +40,7 @@ import { RegisterCommandHandler } from "./useCases/register";
       useClass: AuthenticationService,
     },
     RegisterCommandHandler,
+    BasicAuthStrategy
   ],
 })
 export class AuthModule {}

@@ -1,4 +1,4 @@
-import { ErrorCode } from 'enums/error_code.enum';
+import { ErrorCode } from 'enums/errorCode.enum';
 
 export type Status = "success" | "failure";
 
@@ -21,5 +21,12 @@ export class ResponseMetaDTO {
   }
 
   meta: MetaDTO;
+
+  public static fail<U>(
+    message: string,
+    errorCode: ErrorCode
+  ): ResponseMetaDTO {
+    return new ResponseMetaDTO("failure", message, errorCode);
+  }
 }
 

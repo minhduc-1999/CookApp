@@ -1,4 +1,4 @@
-import { ErrorCode } from "enums/error_code.enum";
+import { ErrorCode } from "enums/errorCode.enum";
 import { PageMetaDto } from "./dtos/pageMeta.dto";
 import { ResponseDTO } from "./dtos/response.dto";
 import { MetaDTO, Status } from "./dtos/responseMeta.dto";

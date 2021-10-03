@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseInterceptors } from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, Req, UseGuards, UseInterceptors } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import { ApiTags } from "@nestjs/swagger";
 import { Public } from "decorators/public.decorator";
@@ -8,6 +8,7 @@ import { RegisterCommand } from "modules/auth/useCases/register";
 import MongooseClassSerializerInterceptor from "interceptors/mongooseClassSerializer.interceptor";
 import { User } from "modules/auth/domains/schemas/user.schema";
 import { Result } from "base/result.base";
+import { BasicAuthGuard } from "guards/basic.guard";
 
 @Controller()
 @ApiTags("Authentication")
@@ -23,8 +24,11 @@ export class AuthController {
     return Result.ok(result, { message: "Register successfully" });
   }
 
+  @HttpCode(200)
+  @UseGuards(BasicAuthGuard)
+  @UseInterceptors(MongooseClassSerializerInterceptor(User))
   @Post("login")
-  async login(@Body() body: LoginDTO): Promise<any> {
-    return "login";
+  async login(@Req() req): Promise<any> {
+    return Result.ok(req.user, { message: "Login successfully"});
   }
 }
