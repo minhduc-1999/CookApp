@@ -1,28 +1,29 @@
-
-
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/LoginScreen/SignUpActivity.dart';
-import 'package:flutter_app/constants.dart';
+import 'package:flutter_app/LoginScreen/LoginActivity.dart';
+import 'package:flutter_app/LoginScreen/LoginButton.dart';
+import 'package:flutter_app/LoginScreen/TextFieldContainer.dart';
 
-import 'LoginButton.dart';
+import '../constants.dart';
 import 'RoundedPasswordFeild.dart';
 import 'RoundedTextField.dart';
-import 'TextFieldContainer.dart';
 
-class LoginActivity extends StatelessWidget {
+class SignUpActivity extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Body(),
     );
   }
+
 }
 
 class Body extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
+    Size size = MediaQuery
+        .of(context)
+        .size;
+
     return Container(
       height: size.height,
       width: double.infinity,
@@ -37,21 +38,26 @@ class Body extends StatelessWidget {
                   height: size.height * 0.06,
                 ),
                 Text(
-                  "Log in",
+                  "Sign Up",
                   style: TextStyle(
                       fontSize: size.height * 0.03, color: Colors.black),
                 ),
                 SizedBox(
-                  height: size.height * 0.06,
+                  height: size.height * 0.05,
                 ),
+                /*TextFieldContainer(
+                  child: RoundedTextField(
+                    icon: Icons.email,
+                    controller: emailController,
+                    hintText: "Email",
+                  ),
+                ),*/
                 TextFieldContainer(
                   child: RoundedTextField(
+                    icon: Icons.person,
                     controller: usernameController,
                     hintText: "Username",
                   ),
-                ),
-                SizedBox(
-                  height: size.height * 0.01,
                 ),
                 TextFieldContainer(
                   child: RoundedPasswordField(
@@ -59,23 +65,16 @@ class Body extends StatelessWidget {
                     controller: passwordController,
                   ),
                 ),
-                SizedBox(
-                  height: size.height * 0.01,
-                ),
-                Container(
-                  child: Text(
-                    "Forgot Password?",
-                    style: TextStyle(
-                        fontSize: 16.0,
-                        color: appPrimaryColor),
+                TextFieldContainer(
+                  child: RoundedPasswordField(
+                    hintText: "Confirm Password",
+                    controller: repeatPasswordController,
                   ),
                 ),
-                SizedBox(
-                  height: size.height * 0.03,
-                ),
                 LoginButton(
-                  text: "Log in",
+                  text: "Sign up",
                   press: () {
+
                   },
                 ),
                 SizedBox(
@@ -84,33 +83,25 @@ class Body extends StatelessWidget {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: <Widget>[
-                    Text("Don't have an account? ",
+                    Text("Already an account? ",
                         style: TextStyle(
-                          color: Colors.black
-                        ),
-                    ),
+                  fontSize: 16.0,)),
                     GestureDetector(
                       onTap: () {
                         Navigator.pop(context);
                         Navigator.push(context, MaterialPageRoute(
                           builder: (context) {
-                            return SignUpActivity();
+                            return LoginActivity();
                           },
                         ));
                       },
                       child: Text(
-                        "Sign up",
-                        style: TextStyle(
-                            fontSize: 16.0,
-                            color: appPrimaryColor),
+                        "Login here",
+                        style: TextStyle(color: appPrimaryColor,
+                          fontSize: 16.0,),
                       ),
                     ),
-
-
                   ],
-                ),
-                SizedBox(
-                  height: size.height * 0.05,
                 ),
               ],
             ),
@@ -119,7 +110,9 @@ class Body extends StatelessWidget {
       ),
     );
   }
-  TextEditingController usernameController = new TextEditingController();
-  TextEditingController passwordController = new TextEditingController();
-}
 
+  //TextEditingController emailController = new TextEditingController();
+  TextEditingController passwordController = new TextEditingController();
+  TextEditingController usernameController = new TextEditingController();
+  TextEditingController repeatPasswordController = new TextEditingController();
+}
