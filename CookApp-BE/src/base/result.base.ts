@@ -1,6 +1,7 @@
 import { ErrorCode } from "enums/error_code.enum";
+import { PageMetaDto } from "./dtos/pageMeta.dto";
 import { ResponseDTO } from "./dtos/response.dto";
-import { ResponseMetaDTO, Status } from "./dtos/responseMeta.dto";
+import { MetaDTO, Status } from "./dtos/responseMeta.dto";
 
 export class Result<T> {
   private _isError: boolean;
@@ -68,11 +69,11 @@ export class Result<T> {
     this._errorCode = errorCode;
   }
 
-  public static ok<U>(data?, meta?) {
+  public static ok<U>(data?, meta?: Partial<MetaDTO & PageMetaDto>) {
     return new Result<U>(false, "", data, meta, null);
   }
 
-  public static fail<U>(errorMessage: string, errorCode: number) {
+  public static fail<U>(errorMessage: string, errorCode: ErrorCode) {
     return new Result<U>(true, errorMessage, null, null, errorCode);
   }
 

@@ -15,6 +15,7 @@ import * as cookieParser from 'cookie-parser';
 import { TransformResponse } from './interceptors/transform.interceptor';
 import { ErrorsInterceptor } from './interceptors/errors.interceptor';
 import { HttpExceptionFilter } from 'exception_filter/http-exception.filter';
+import { ConvertResponse } from 'interceptors/convert-response.service';
 
 const morganFormat =
   ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
@@ -47,7 +48,7 @@ async function bootstrap() {
     })
   );
 
-  app.useGlobalInterceptors(new ErrorsInterceptor(), new TransformResponse())
+  app.useGlobalInterceptors(new ErrorsInterceptor(), new TransformResponse(), new ConvertResponse())
 
   app.useGlobalFilters(new HttpExceptionFilter());
 

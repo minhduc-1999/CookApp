@@ -1,4 +1,3 @@
-import { Expose } from 'class-transformer';
 import { ErrorCode } from 'enums/error_code.enum';
 
 export type Status = "success" | "failure";
@@ -14,7 +13,6 @@ export class MetaDTO {
 
   status: Status;
 
-  @Expose({name: 'error_code'})
   errorCode?: ErrorCode
 }
 export class ResponseMetaDTO {

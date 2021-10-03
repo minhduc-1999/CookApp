@@ -7,18 +7,20 @@ import { RegisterDTO } from "modules/auth/dtos/createUser.dto";
 import { RegisterCommand } from "modules/auth/useCases/register";
 import MongooseClassSerializerInterceptor from "interceptors/mongooseClassSerializer.interceptor";
 import { User } from "modules/auth/domains/schemas/user.schema";
+import { Result } from "base/result.base";
 
 @Controller()
 @ApiTags("Authentication")
-@UseInterceptors(MongooseClassSerializerInterceptor(User))
 export class AuthController {
   constructor(private _commandBus: CommandBus) {}
 
   @Post("register")
   @Public()
+  @UseInterceptors(MongooseClassSerializerInterceptor(User))
   async register(@Body() body: RegisterDTO) {
     const registerCommand = new RegisterCommand(body);
-    return await this._commandBus.execute(registerCommand);
+    const result = await this._commandBus.execute(registerCommand);
+    return Result.ok(result, { message: "Register successfully" });
   }
 
   @Post("login")
