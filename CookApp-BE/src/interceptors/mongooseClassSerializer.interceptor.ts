@@ -15,7 +15,9 @@ function MongooseClassSerializerInterceptor(
        if (document instanceof Result) {
          const data = document.getData();
          if (data instanceof Document) {
-           document.setData(plainToClass(classToIntercept, data.toJSON()));
+           const transformData = plainToClass(classToIntercept, data.toJSON())
+           transformData._id = data.id;
+           document.setData(transformData);
          }
          return document.getResponseDTO();
        }

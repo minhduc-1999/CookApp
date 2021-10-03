@@ -4,7 +4,6 @@ import {
   IsNotEmpty,
   IsOptional,
   IsNumber,
-  IsDate,
   IsDateString,
   IsPositive,
 } from "class-validator";
@@ -30,6 +29,7 @@ export class ProfileDTO {
   @IsDateString()
   @ApiProperty({ type: Date, format: "date" })
   @ApiPropertyOptional()
+  @IsNotEmpty()
   birthDate?: Date;
 
   @ApiProperty({ type: String })

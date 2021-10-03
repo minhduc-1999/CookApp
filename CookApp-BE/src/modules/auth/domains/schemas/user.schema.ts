@@ -19,7 +19,7 @@ export class User extends AbstractSchema {
   @Prop({unique: true})
   email: string;
 
-  @Prop({unique: true})
+  @Prop()
   phone: string;
 
   @Prop()

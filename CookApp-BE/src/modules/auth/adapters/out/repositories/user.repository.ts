@@ -7,7 +7,7 @@ import { RegisterDTO } from "modules/auth/dtos/createUser.dto";
 import { Model } from "mongoose";
 
 export interface IUserRepository {
-  createUser(userData: RegisterDTO): Promise<UserDocument>;
+  createUser(userData: RegisterDTO): Promise<User>;
 }
 
 @Injectable()
@@ -15,8 +15,8 @@ export class UserRepository implements IUserRepository {
   constructor(
     @InjectModel(User.name) private _userModel: Model<UserDocument>
   ) {}
-  createUser(userData: RegisterDTO): Promise<UserDocument> {
+  createUser(userData: RegisterDTO): Promise<User> {
     const createdUser = new this._userModel(userData);
-    return createdUser.save();
+    return createdUser.save()
   }
 }

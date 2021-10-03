@@ -5,7 +5,7 @@ import { UserRepository } from "../adapters/out/repositories/user.repository";
 import { MongoErrorCode } from "enums/mongo_error_code.enum";
 import { ErrorCode } from "enums/error_code.enum";
 import { ResponseMetaDTO } from "base/dtos/responseMeta.dto";
-import { Result } from "base/result.base";
+import { AuditDTO } from "base/dtos/audix.dto";
 
 export interface IAuthentication {
   register(registerDto: RegisterDTO): Promise<any>;
@@ -16,12 +16,17 @@ class AuthenticationService implements IAuthentication {
   async register(registerDto: RegisterDTO): Promise<any> {
     const hashedPassword = await bcrypt.hashSync(registerDto.password, 10);
     try {
+      const audit = new AuditDTO({
+        createdBy: 'system'
+      })
       const createdUser = await this._userRepo.createUser({
         ...registerDto,
+        ...audit,
         password: hashedPassword,
       });
       return createdUser
     } catch (error) {
+      console.error(error)
       if (error.code === MongoErrorCode.DUPLICATE_KEY)
         throw new BadRequestException(new ResponseMetaDTO('failure', "This user is already existed", ErrorCode.ACCOUNT_ALREADY_EXISTED))
       throw new InternalServerErrorException();
