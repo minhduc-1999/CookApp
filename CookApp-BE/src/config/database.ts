@@ -7,4 +7,5 @@ export default {
   password: UtilsService.getConfig("MONGO_PASSWORD", "admin"),
   database: UtilsService.getConfig("MONGO_DATABASE"),
   host: UtilsService.getConfig("MONGO_HOST"),
+  connectionString: UtilsService.getConfig("CONNECTION_STRING"),
 };

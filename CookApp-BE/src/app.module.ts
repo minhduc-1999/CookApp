@@ -19,9 +19,9 @@ import { contextMiddleware } from "./middleware/context.middelware";
     ConfigModule.load(path.resolve(__dirname, "config", "**/!(*.d).{ts,js}")),
     MongooseModule.forRootAsync({
       useFactory: async (config: ConfigService) => {
-        const { username, password, database, host } = config.get("database");
+        const { connectionString, database } = config.get("database");
         return {
-          uri: `mongodb://${username}:${password}@${host}`,
+          uri: connectionString,
           dbName: database,
         };
       },
