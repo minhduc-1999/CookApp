@@ -10,6 +10,7 @@ import { UserModel } from "./domains/schemas/user.schema";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
+import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
 
 @Module({
@@ -18,7 +19,7 @@ import { RegisterCommandHandler } from "./useCases/register";
     HttpModule,
     MongooseModule.forFeature([UserModel]),
     JwtModule.register({
-      secretOrPrivateKey: process.env.JWT_PRIVATE_KEY,
+      secret: process.env.JWT_PRIVATE_KEY,
       signOptions: {
         expiresIn: process.env.JWT_EXPIRES_IN,
       },
@@ -40,6 +41,7 @@ import { RegisterCommandHandler } from "./useCases/register";
       useClass: AuthenticationService,
     },
     RegisterCommandHandler,
+    LoginCommandHandler,
     BasicAuthStrategy
   ],
 })

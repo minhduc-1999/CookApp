@@ -8,6 +8,8 @@ import { ResponseMetaDTO } from "base/dtos/responseMeta.dto";
 import { classToPlain } from "class-transformer";
 import { Response } from "express";
 import e = require("express");
+import * as snakeCaseKeys from "snakecase-keys";
+
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -24,6 +26,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
     if (!(meta instanceof ResponseMetaDTO)) {
       meta = new ResponseMetaDTO("failure", message, errorCode);
     }
-    response.status(status).json(classToPlain(meta));
+    response.status(status).json(snakeCaseKeys(classToPlain(meta)));
   }
 }

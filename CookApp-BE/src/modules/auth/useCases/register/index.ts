@@ -1,8 +1,14 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
+import { RegisterDTO } from "modules/auth/dtos/createUser.dto";
+import { UserDTO } from "modules/auth/dtos/user.dto";
 import { IAuthentication } from "modules/auth/services/authentication.service";
-import { RegisterCommand } from "./register.command";
-
+export class RegisterCommand implements ICommand {
+  registerDto: RegisterDTO;
+  constructor(registerDto: RegisterDTO) {
+    this.registerDto = registerDto;
+  }
+}
 @CommandHandler(RegisterCommand)
 export class RegisterCommandHandler
   implements ICommandHandler<RegisterCommand> {
@@ -10,10 +16,9 @@ export class RegisterCommandHandler
     @Inject("IAuthentication")
     private _authService: IAuthentication
   ) {}
-  async execute(command: RegisterCommand): Promise<string> {
+  async execute(command: RegisterCommand): Promise<UserDTO> {
     return this._authService.register(command.registerDto);
   }
 }
 
-export { RegisterCommand } from "./register.command";
 

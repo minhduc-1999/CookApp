@@ -14,14 +14,26 @@ import { AuditDTO } from "base/dtos/audix.dto";
 import { User } from "../domains/schemas/user.schema";
 import { isEmail } from "class-validator";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { JwtService } from "@nestjs/jwt";
+import { UserDTO } from "../dtos/user.dto";
 
 export interface IAuthentication {
-  register(registerDto: RegisterDTO): Promise<any>;
-  getAuthUser(usernameOrEmail: string, password: string): Promise<User>;
+  register(registerDto: RegisterDTO): Promise<UserDTO>;
+  getAuthUser(usernameOrEmail: string, password: string): Promise<UserDTO>;
+  login(user: UserDTO): Promise<any>;
 }
 @Injectable()
 class AuthenticationService implements IAuthentication {
-  constructor(@Inject("IUserRepository") private _userRepo: UserRepository) {}
+  constructor(
+    @Inject("IUserRepository") private _userRepo: UserRepository,
+    private jwtService: JwtService
+  ) {}
+  async login(user: UserDTO): Promise<any> {
+    const payload = { username: user.username, sub: user.id };
+    return {
+      accessToken: this.jwtService.sign(payload)
+    }
+  }
 
   private async verifyPassword(
     plainTextPassword: string,
@@ -41,7 +53,10 @@ class AuthenticationService implements IAuthentication {
     }
   }
 
-  async getAuthUser(usernameOrEmail: string, password: string): Promise<User> {
+  async getAuthUser(
+    usernameOrEmail: string,
+    password: string
+  ): Promise<UserDTO> {
     let user: User;
     if (isEmail(usernameOrEmail))
       user = await this._userRepo.getUserByEmail(usernameOrEmail);
@@ -53,11 +68,12 @@ class AuthenticationService implements IAuthentication {
           ErrorCode.INVALID_CREDENTIAL
         )
       );
+    console.log("[]", user.id);
     await this.verifyPassword(password, user.password);
-    return user;
+    return new UserDTO(user);
   }
 
-  async register(registerDto: RegisterDTO): Promise<any> {
+  async register(registerDto: RegisterDTO): Promise<UserDTO> {
     const hashedPassword = await bcrypt.hashSync(registerDto.password, 10);
     try {
       const audit = new AuditDTO({
@@ -68,7 +84,7 @@ class AuthenticationService implements IAuthentication {
         ...audit,
         password: hashedPassword,
       });
-      return createdUser;
+      return new UserDTO(createdUser);
     } catch (error) {
       console.error(error);
       if (error.code === MongoErrorCode.DUPLICATE_KEY)

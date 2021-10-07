@@ -5,11 +5,9 @@ import { Public } from "decorators/public.decorator";
 import { LoginDTO } from "modules/auth/dtos/login.dto";
 import { RegisterDTO } from "modules/auth/dtos/createUser.dto";
 import { RegisterCommand } from "modules/auth/useCases/register";
-import MongooseClassSerializerInterceptor from "interceptors/mongooseClassSerializer.interceptor";
-import { User } from "modules/auth/domains/schemas/user.schema";
 import { Result } from "base/result.base";
 import { BasicAuthGuard } from "guards/basic.guard";
-import { ConvertResponse } from "interceptors/convert-response.service";
+import { LoginCommand } from "modules/auth/useCases/login";
 
 @Controller()
 @ApiTags("Authentication")
@@ -18,7 +16,6 @@ export class AuthController {
 
   @Post("register")
   @Public()
-  @UseInterceptors(MongooseClassSerializerInterceptor(User))
   async register(@Body() body: RegisterDTO) {
     const registerCommand = new RegisterCommand(body);
     const result = await this._commandBus.execute(registerCommand);
@@ -27,12 +24,13 @@ export class AuthController {
 
   @HttpCode(200)
   @UseGuards(BasicAuthGuard)
-  @UseInterceptors(MongooseClassSerializerInterceptor(User), ConvertResponse)
   @ApiBody({
     type: LoginDTO,
   })
   @Post("login")
   async login(@Req() req): Promise<any> {
-    return Result.ok(req.user, { message: "Login successfully" });
+    const loginCommand = new LoginCommand(req.user);
+    const result = await this._commandBus.execute(loginCommand)
+    return Result.ok(result, { message: "Login successfully" });
   }
 }

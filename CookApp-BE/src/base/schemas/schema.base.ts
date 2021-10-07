@@ -2,6 +2,7 @@ import { Prop } from "@nestjs/mongoose";
 import { Exclude } from "class-transformer";
 
 export abstract class AbstractSchema {
+  id: string
 
   @Prop({ name: "created_by" })
   @Exclude()
