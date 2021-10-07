@@ -9,18 +9,18 @@ import {
 } from "class-validator";
 import { Sex } from "enums/sex.enum";
 
-export class ProfileDTO {
+export class UpdateProfileDTO {
   @IsNumber()
   @IsNotEmpty()
   @IsOptional()
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: Number, default: 170 })
   @ApiPropertyOptional()
   @IsPositive()
-  height: number;
+  height?: number;
 
   @IsNumber()
   @IsNotEmpty()
-  @ApiProperty({ type: Number })
+  @ApiProperty({ type: Number , default: 40})
   @ApiPropertyOptional()
   @IsOptional()
   @IsPositive()
@@ -44,3 +44,5 @@ export class ProfileDTO {
   @ApiPropertyOptional()
   sex?: Sex;
 }
+
+export type ProfileDTO = NonNullable<UpdateProfileDTO>;

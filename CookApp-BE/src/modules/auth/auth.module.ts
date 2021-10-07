@@ -5,6 +5,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
 import { ConfigModule } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
+import { UserController } from "./adapters/in/user.controller";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
 import { UserModel } from "./domains/schemas/user.schema";
 import AuthenticationService from "./services/authentication.service";
@@ -12,6 +13,7 @@ import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
 import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
+import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 
 @Module({
   imports: [
@@ -26,7 +28,7 @@ import { RegisterCommandHandler } from "./useCases/register";
     }),
     CqrsModule,
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, UserController],
   providers: [
     {
       provide: "IUserService",
@@ -42,7 +44,8 @@ import { RegisterCommandHandler } from "./useCases/register";
     },
     RegisterCommandHandler,
     LoginCommandHandler,
-    BasicAuthStrategy
+    UpdateProfileCommandHandler,
+    BasicAuthStrategy,
   ],
 })
 export class AuthModule {}

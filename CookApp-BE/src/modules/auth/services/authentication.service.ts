@@ -6,7 +6,7 @@ import {
 } from "@nestjs/common";
 import { RegisterDTO } from "../dtos/createUser.dto";
 import * as bcrypt from "bcrypt";
-import { UserRepository } from "../adapters/out/repositories/user.repository";
+import { IUserRepository } from "../adapters/out/repositories/user.repository";
 import { MongoErrorCode } from "enums/mongoErrorCode.enum";
 import { ErrorCode } from "enums/errorCode.enum";
 import { ResponseMetaDTO } from "base/dtos/responseMeta.dto";
@@ -25,7 +25,7 @@ export interface IAuthentication {
 @Injectable()
 class AuthenticationService implements IAuthentication {
   constructor(
-    @Inject("IUserRepository") private _userRepo: UserRepository,
+    @Inject("IUserRepository") private _userRepo: IUserRepository,
     private jwtService: JwtService
   ) {}
   async login(user: UserDTO): Promise<any> {
