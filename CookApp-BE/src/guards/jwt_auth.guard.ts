@@ -3,7 +3,7 @@ import { Injectable, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
 @Injectable()
-export class AuthGuard extends NestAuthGuard('jwt') {
+export class JwtAuthGuard extends NestAuthGuard('jwt') {
   constructor(private readonly reflector: Reflector) {
     super();
   }

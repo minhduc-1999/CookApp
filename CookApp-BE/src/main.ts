@@ -59,22 +59,28 @@ async function bootstrap() {
   /**
    * Swagger API
    */
+  const APP_HOST = configService.get('app.host');
+  const APP_PORT = configService.get('app.port');
+
   const options = new DocumentBuilder()
     .setTitle("API SPECS COOKAPP 1.0")
     .setDescription("The COOKAPP API description")
     .setVersion("1.0")
     .addBearerAuth()
-    .addServer("http://localhost:3000")
+    .addServer(`http://localhost:${APP_PORT}`)
     .build();
   const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup('docs', app, document);
+  SwaggerModule.setup("docs", app, document, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
 
   if (configService.get('app.env') === 'production') {
     Sentry.init({ dsn: configService.get('app.sentryUrl') });
   }
 
-  const APP_HOST = configService.get('app.host');
-  const APP_PORT = configService.get('app.port');
+  
   const logLevels: LogLevel[] =
     configService.get('app.env') === 'production'
       ? ['log', 'error', 'warn']

@@ -17,7 +17,7 @@ class UserService implements IUserService {
     const user = await this._userRepo.getUserById(userId);
     if (!user) throw new NotFoundException(ResponseDTO.fail('User not found', ErrorCode.USER_NOT_FOUND))
     const a = await this._userRepo.updateUserProfile(userId, profileDto)
-    console.log(a)
+    console.log("", a)
     return null;
   }
   async getProfile(id: string): Promise<UserDTO> {
