@@ -11,7 +11,6 @@ import { verify } from 'jsonwebtoken';
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   use(req: Request | any, res: Response, next: Function) {
-    console.log('-------------');
     let token: string = req.headers['authorization'];
     if (token && token.startsWith('Bearer ')) {
       try {

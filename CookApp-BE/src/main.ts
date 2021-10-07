@@ -48,7 +48,7 @@ async function bootstrap() {
     })
   );
 
-  app.useGlobalInterceptors(new ErrorsInterceptor(), new TransformResponse(), new ConvertResponse())
+  app.useGlobalInterceptors(new ErrorsInterceptor(), new TransformResponse())
 
   app.useGlobalFilters(new HttpExceptionFilter());
 
