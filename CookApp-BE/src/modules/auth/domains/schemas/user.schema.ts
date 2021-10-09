@@ -1,24 +1,21 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
-import { Exclude, Expose, Type } from "class-transformer";
+import { Type } from "class-transformer";
+import { ProfileDTO } from "modules/auth/dtos/profile.dto";
 import { Document } from "mongoose";
 import { UserProfile, UserProfileSchema } from "./user_profile.schema";
 
 export type UserDocument = User & Document;
 
 @Schema()
-@Exclude()
 export class User extends AbstractSchema {
-
-  @Prop({uniques: true, name: 'user_name'})
-  @Expose()
+  @Prop({ uniques: true })
   username: string;
 
   @Prop()
   password: string;
 
-  @Prop({unique: true})
-  @Expose()
+  @Prop({ unique: true })
   email: string;
 
   @Prop()
@@ -27,22 +24,21 @@ export class User extends AbstractSchema {
   @Prop()
   avatar: string;
 
-  @Prop()
-  @Expose()
+  @Prop({ schemaName: "display_name" })
   displayName: string;
 
-  @Prop({ type: UserProfileSchema})
+  @Prop({
+    type: UserProfileSchema,
+    get: (profile: UserProfile) => new ProfileDTO(profile),
+  })
   @Type(() => UserProfile)
-  @Expose()
-  profile: UserProfile
+  profile: UserProfile;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
 
 export const UserModel: ModelDefinition = {
-    name: User.name,
-    schema: UserSchema,
-    collection: 'users'
-}
-
-
+  name: User.name,
+  schema: UserSchema,
+  collection: "users",
+};

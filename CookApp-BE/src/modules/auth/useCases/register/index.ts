@@ -1,6 +1,6 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
-import { RegisterDTO } from "modules/auth/dtos/createUser.dto";
+import { RegisterDTO } from "modules/auth/dtos/register.dto";
 import { UserDTO } from "modules/auth/dtos/user.dto";
 import { IAuthentication } from "modules/auth/services/authentication.service";
 export class RegisterCommand implements ICommand {

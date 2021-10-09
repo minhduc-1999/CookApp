@@ -10,10 +10,12 @@ import { AuthController } from "./adapters/in/auth.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
 import { UserModel } from "./domains/schemas/user.schema";
+import { UserProfileModel } from "./domains/schemas/user_profile.schema";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
@@ -52,6 +54,7 @@ import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
     RegisterCommandHandler,
     LoginCommandHandler,
     UpdateProfileCommandHandler,
+    GetProfileQueryHandler,
     BasicAuthStrategy,
     JwtStrategy
   ],

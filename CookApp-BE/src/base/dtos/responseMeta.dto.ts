@@ -29,4 +29,3 @@ export class ResponseMetaDTO {
     return new ResponseMetaDTO("failure", message, errorCode);
   }
 }
-

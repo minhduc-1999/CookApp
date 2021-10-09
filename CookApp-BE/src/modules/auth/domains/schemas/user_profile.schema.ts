@@ -18,14 +18,23 @@ export class UserProfile extends AbstractSchema {
   sex: Sex;
 
   @Prop()
-  fullName: string;
+  firstName: string;
 
   @Prop()
-  birthDate: Date;
+  lastName: string;
+
+  @Prop()
+  birthDate: number;
+
+  fullName: string;
 
 }
 
 export const UserProfileSchema = SchemaFactory.createForClass(UserProfile);
+
+UserProfileSchema.virtual('fullName').get(function (this: UserProfileDocument) {
+  return `${this.firstName ? this.firstName: ''} ${this.lastName ? this.lastName : ''}`.trim()
+})
 
 export const UserProfileModel: ModelDefinition = {
   name: UserProfile.name,

@@ -2,25 +2,20 @@ import { Prop } from "@nestjs/mongoose";
 import { Exclude } from "class-transformer";
 
 export abstract class AbstractSchema {
-  id: string
+  id: string;
 
-  @Prop({ name: "created_by" })
-  @Exclude()
+  @Prop({ schemaName: "created_by", required: true })
   createdBy: string;
 
-  @Prop({ name: "updated_at" })
-  @Exclude()
-  updatedAt: Date;
+  @Prop({ schemaName: "updated_at", required: true })
+  updatedAt: number;
 
-  @Prop({ name: "updated_by" })
-  @Exclude()
+  @Prop({ schemaName: "updated_by", required: true })
   updatedBy: string;
 
-  @Prop({ name: "deleted_at" })
-  @Exclude()
-  deletedAt: Date;
+  @Prop({ schemaName: "deleted_at" })
+  deletedAt: number;
 
-  @Prop({ name: "deleted_by" })
-  @Exclude()
+  @Prop({ schemaName: "deleted_by" })
   deletedBy: string;
 }

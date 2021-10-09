@@ -1,5 +1,6 @@
 import { Inject } from "@nestjs/common";
 import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
+import { ProfileDTO } from "modules/auth/dtos/profile.dto";
 import { UserDTO } from "modules/auth/dtos/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
 
