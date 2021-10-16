@@ -5,10 +5,9 @@ import {
   Post,
   Req,
   UseGuards,
-  UseInterceptors,
 } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { ApiBearerAuth, ApiBody, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiTags } from "@nestjs/swagger";
 import { Public } from "decorators/public.decorator";
 import { LoginDTO } from "modules/auth/dtos/login.dto";
 import { RegisterCommand } from "modules/auth/useCases/register";

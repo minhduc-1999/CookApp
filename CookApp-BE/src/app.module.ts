@@ -5,6 +5,7 @@ import { APP_INTERCEPTOR } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
 import { AuthModule } from "modules/auth/auth.module";
+import { UserModule } from "modules/user/user.module";
 import { RavenModule } from "nest-raven";
 import { ConfigModule, ConfigService } from "nestjs-config";
 import * as path from "path";
@@ -42,6 +43,7 @@ import { contextMiddleware } from "./middleware/context.middelware";
       },
     }),
     AuthModule,
+    UserModule
   ],
   controllers: [AppController],
   providers: [

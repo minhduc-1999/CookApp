@@ -12,8 +12,8 @@ import { ProfileDTO } from "./profile.dto";
 
 export class UserDTO extends AuditDTO {
   @IsNotEmpty()
+  @ApiProperty({ type: String })
   @IsString()
-  @ApiProperty({type: String})
   username: string;
 
   @Exclude({ toPlainOnly: true })

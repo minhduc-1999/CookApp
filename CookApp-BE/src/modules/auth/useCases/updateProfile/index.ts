@@ -1,6 +1,6 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
-import { ProfileDTO, UpdateProfileDTO } from "modules/auth/dtos/profile.dto";
+import { UpdateProfileDTO } from "modules/auth/dtos/profile.dto";
 import { UserDTO } from "modules/auth/dtos/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
 
