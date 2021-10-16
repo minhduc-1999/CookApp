@@ -10,7 +10,6 @@ import { AuthController } from "./adapters/in/auth.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
 import { UserModel } from "./domains/schemas/user.schema";
-import { UserProfileModel } from "./domains/schemas/user_profile.schema";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";

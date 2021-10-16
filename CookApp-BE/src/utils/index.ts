@@ -1,3 +1,5 @@
+import _ = require("lodash");
+
 export { default as time } from "./time";
 
 export function createUpdatingNestedObject<T>(
@@ -7,10 +9,12 @@ export function createUpdatingNestedObject<T>(
   const keys = Object.keys(updateObj).filter(
     (key) => updateObj[key] !== null && updateObj[key] !== undefined
   );
-  const updatingObj = {};
+  const updatingObj: Partial<T> = {};
   keys.forEach((key) => {
     updatingObj[`${childName}.${key}`] = updateObj[key];
   });
+
+  updatingObj["updatedAt"] = _.now();
 
   return updatingObj;
 }

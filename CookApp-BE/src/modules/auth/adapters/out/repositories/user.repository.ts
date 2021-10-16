@@ -54,7 +54,7 @@ export class UserRepository implements IUserRepository {
     if (!userDoc) return null;
 
     const userDto = new UserDTO(userDoc);
-    userDto.id = userDoc.id;
+    // userDto.id = userDoc.id;
     return userDto;
   }
 
@@ -62,7 +62,7 @@ export class UserRepository implements IUserRepository {
     const userDoc = await this._userModel.findOne({ email: email }).exec();
     if (!userDoc) return null;
     const userDto = new UserDTO(userDoc);
-    userDto.id = userDoc.id;
+    // userDto.id = userDoc.id;
     return userDto;
   }
 
@@ -72,16 +72,20 @@ export class UserRepository implements IUserRepository {
       .exec();
     if (!userDoc) return null;
     const userDto = new UserDTO(userDoc);
-    userDto.id = userDoc.id;
+    // userDto.id = userDoc.id;
     return userDto;
   }
 
   async createUser(userData: RegisterDTO): Promise<UserDTO> {
-    const createdUser = new this._userModel(userData);
-    let userDoc: UserDocument;
+    const createdUser = new this._userModel(new User(userData));
     try {
-      userDoc = await createdUser.save();
+      const userDoc = await createdUser.save();
+      if (!userDoc) return null;
+      const userDto = new UserDTO(userDoc);
+      userDto.id = userDoc.id;
+      return userDto;
     } catch (error) {
+      console.error(error)
       if (error.code === MongoErrorCode.DUPLICATE_KEY)
         throw new BadRequestException(
           ResponseMetaDTO.fail(
@@ -90,10 +94,6 @@ export class UserRepository implements IUserRepository {
           )
         );
       throw new InternalServerErrorException();
-    }
-    if (!userDoc) return null;
-    const userDto = new UserDTO(userDoc);
-    userDto.id = userDoc.id;
-    return userDto;
+    }    
   }
 }

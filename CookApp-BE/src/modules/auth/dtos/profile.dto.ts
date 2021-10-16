@@ -1,6 +1,12 @@
 import { ApiPropertyOptional, PartialType } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audix.dto";
-import { IsString, IsNotEmpty, IsOptional, IsPositive, IsEnum } from "class-validator";
+import {
+  IsString,
+  IsNotEmpty,
+  IsOptional,
+  IsPositive,
+  IsEnum,
+} from "class-validator";
 import { IsMeaningfullString } from "decorators/IsMeaningfullString.decorator";
 import { Sex } from "enums/sex.enum";
 
@@ -42,15 +48,15 @@ export class ProfileDTO extends AuditDTO {
   @IsString()
   fullName?: string;
 
-  constructor(profile: Partial<ProfileDTO>) {
+  constructor(profile?: Partial<ProfileDTO>) {
     super(profile);
-    if (profile.birthDate) this.birthDate = profile.birthDate;
-    if (profile.height) this.height = profile.height;
-    if (profile.weight) this.weight = profile.weight;
-    if (profile.fullName) this.fullName = profile.fullName;
-    if (profile.firstName) this.firstName = profile.firstName;
-    if (profile.lastName) this.lastName = profile.lastName;
-    if (profile.sex) this.sex = profile.sex;
+    this.birthDate = profile?.birthDate;
+    this.height = profile?.height;
+    this.weight = profile?.weight;
+    this.fullName = profile?.fullName;
+    this.firstName = profile?.firstName;
+    this.lastName = profile?.lastName;
+    this.sex = profile?.sex;
   }
 }
 
