@@ -2,8 +2,10 @@ import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
 import { Type } from "class-transformer";
 import { PostDTO } from "modules/user/dtos/post.dto";
+import { UserDTO } from "modules/user/dtos/user.dto";
+import * as mongoose from "mongoose";
 import { Document } from "mongoose";
-import { User, UserSchema } from "./user.schema";
+import { User } from "./user.schema";
 
 export type PostDocument = Post & Document;
 
@@ -13,28 +15,28 @@ export class Post extends AbstractSchema {
   content: string;
 
   @Prop({
-    type: UserSchema
+    type: mongoose.Schema.Types.ObjectId,
+    ref: User.name,
   })
   @Type(() => User)
   author: User;
 
-
   @Prop({
-    type: [String]
+    type: [String],
   })
   images: string[];
 
   @Prop({
-    type: [String]
+    type: [String],
   })
   videos: string[];
 
-
-  constructor(postDto: Partial<PostDTO>) {
-    super(postDto);
-    this.content = postDto?.content;
-    this.images = postDto?.images;
-    this.videos = postDto?.videos;
+  constructor(post: Partial<PostDTO>, author: Partial<UserDTO>) {
+    super(post);
+    this.content = post?.content;
+    this.images = post?.images;
+    this.videos = post?.videos;
+    this.author = new User(author);
   }
 }
 

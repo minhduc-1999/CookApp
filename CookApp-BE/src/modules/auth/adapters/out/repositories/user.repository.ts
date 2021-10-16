@@ -45,16 +45,13 @@ export class UserRepository implements IUserRepository {
     );
     if (!userDoc) return null;
     const user = new UserDTO(userDoc);
-    user.id = userDoc.id;
     return user;
   }
 
   async getUserById(id: string): Promise<UserDTO> {
     const userDoc = await this._userModel.findOne({ id: id }).exec();
     if (!userDoc) return null;
-
     const userDto = new UserDTO(userDoc);
-    // userDto.id = userDoc.id;
     return userDto;
   }
 
@@ -62,7 +59,6 @@ export class UserRepository implements IUserRepository {
     const userDoc = await this._userModel.findOne({ email: email }).exec();
     if (!userDoc) return null;
     const userDto = new UserDTO(userDoc);
-    // userDto.id = userDoc.id;
     return userDto;
   }
 
@@ -72,7 +68,6 @@ export class UserRepository implements IUserRepository {
       .exec();
     if (!userDoc) return null;
     const userDto = new UserDTO(userDoc);
-    // userDto.id = userDoc.id;
     return userDto;
   }
 
@@ -82,7 +77,6 @@ export class UserRepository implements IUserRepository {
       const userDoc = await createdUser.save();
       if (!userDoc) return null;
       const userDto = new UserDTO(userDoc);
-      userDto.id = userDoc.id;
       return userDto;
     } catch (error) {
       console.error(error)

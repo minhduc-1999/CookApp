@@ -1,6 +1,5 @@
 import { Body, Controller, Post, Req, UseInterceptors } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { FilesInterceptor } from "@nestjs/platform-express";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
 import { CreatePostDTO, PostDTO } from "modules/user/dtos/post.dto";

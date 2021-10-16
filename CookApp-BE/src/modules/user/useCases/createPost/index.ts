@@ -5,10 +5,10 @@ import { UserDTO } from "modules/user/dtos/user.dto";
 import { IPostService } from "modules/user/services/post.service";
 
 export class CreatePostCommand implements ICommand {
-  user: UserDTO;
+  author: UserDTO;
   postDto: CreatePostDTO;
-  constructor(user: UserDTO, post: CreatePostDTO) {
-    this.user = user;
+  constructor(author: UserDTO, post: CreatePostDTO) {
+    this.author = author;
     this.postDto = post;
   }
 }
@@ -21,6 +21,6 @@ export class CreatePostCommandHandler
     private _postService: IPostService
   ) {}
   async execute(command: CreatePostCommand): Promise<PostDTO> {
-    return this._postService.createPost(command.postDto);
+    return this._postService.createPost(command.postDto, command.author);
   }
 }
