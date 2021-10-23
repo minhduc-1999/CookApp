@@ -9,8 +9,10 @@ import { PostModel } from "./domains/schemas/post.schema";
 import { UserModel } from "./domains/schemas/user.schema";
 import { PostService } from "./services/post.service";
 import { CreatePostCommandHandler } from "./useCases/createPost";
+import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 
-const commandHandler = [CreatePostCommandHandler];
+const commandHandlers = [CreatePostCommandHandler];
+const queryHandlers = [GetPostDetailQueryHandler]
 const services = [
   {
     provide: "IPostService",
@@ -32,6 +34,6 @@ const repositories = [
     CqrsModule,
   ],
   controllers: [PostController],
-  providers: [...commandHandler, ...services, ...repositories],
+  providers: [...commandHandlers, ...services, ...repositories, ...queryHandlers],
 })
 export class UserModule {}
