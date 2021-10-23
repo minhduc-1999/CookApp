@@ -1,31 +1,17 @@
-import { ErrorCode } from 'enums/errorCode.enum';
-
-export type Status = "success" | "failure";
-
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { ErrorCode } from "enums/errorCode.enum";
 export class MetaDTO {
-  constructor(status: Status, message?: string, errorCode?: ErrorCode) {
+  constructor(ok: boolean, message?: string, errorCode?: ErrorCode) {
     this.message = message;
-    this.status = status;
-    this.errorCode = errorCode
+    this.ok = ok;
+    this.errorCode = errorCode;
   }
-
+  @ApiPropertyOptional({ type: String })
   message?: string;
 
-  status: Status;
-
-  errorCode?: ErrorCode
-}
-export class ResponseMetaDTO {
-  constructor(status: Status, message: string, errorCode?: ErrorCode) {
-    this.meta = new MetaDTO(status, message, errorCode);
-  }
-
-  meta: MetaDTO;
-
-  public static fail<U>(
-    message: string,
-    errorCode: ErrorCode
-  ): ResponseMetaDTO {
-    return new ResponseMetaDTO("failure", message, errorCode);
-  }
+  @ApiProperty({ type: Boolean })
+  ok: boolean;
+  
+  @ApiPropertyOptional({ enum: ErrorCode, writeOnly: true })
+  errorCode?: ErrorCode;
 }

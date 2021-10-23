@@ -1,4 +1,4 @@
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audix.dto";
 import { Exclude, Type } from "class-transformer";
 import {
@@ -12,6 +12,7 @@ import { ProfileDTO } from "./profile.dto";
 
 export class UserDTO extends AuditDTO {
   @IsNotEmpty()
+  @ApiProperty({ type: String })
   @IsString()
   @ApiProperty({type: String})
   username: string;
@@ -19,19 +20,24 @@ export class UserDTO extends AuditDTO {
   @Exclude({ toPlainOnly: true })
   password: string;
 
+  @ApiProperty({ type: String })
   @IsEmail()
   email: string;
 
+  @ApiPropertyOptional({ type: String })
   @IsPhoneNumber("VN")
   phone: string;
 
+  @ApiPropertyOptional({ type: String })
   @IsString()
   avatar: string;
 
+  @ApiPropertyOptional({ type: ProfileDTO })
   @Type(() => ProfileDTO)
   profile: ProfileDTO;
 
   @IsMongoId()
+  @ApiProperty({ type: String })
   id: string;
 
   constructor(user: Partial<UserDTO>) {
