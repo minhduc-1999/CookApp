@@ -9,10 +9,10 @@ import { RegisterDTO } from "modules/auth/dtos/register.dto";
 import { UpdateProfileDTO } from "modules/auth/dtos/profile.dto";
 import { UserDTO } from "modules/auth/dtos/user.dto";
 import { Model } from "mongoose";
-import { ResponseMetaDTO } from "base/dtos/responseMeta.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { MongoErrorCode } from "enums/mongoErrorCode.enum";
 import { createUpdatingNestedObject } from "utils";
+import { ResponseDTO } from "base/dtos/response.dto";
 
 export interface IUserRepository {
   createUser(userData: RegisterDTO): Promise<UserDTO>;
@@ -88,7 +88,7 @@ export class UserRepository implements IUserRepository {
       console.error(error)
       if (error.code === MongoErrorCode.DUPLICATE_KEY)
         throw new BadRequestException(
-          ResponseMetaDTO.fail(
+          ResponseDTO.fail(
             "This user is already existed",
             ErrorCode.ACCOUNT_ALREADY_EXISTED
           )

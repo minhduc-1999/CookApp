@@ -4,12 +4,9 @@ import {
   ArgumentsHost,
   HttpException,
 } from "@nestjs/common";
-import { ResponseMetaDTO } from "base/dtos/responseMeta.dto";
+import { ResponseDTO } from "base/dtos/response.dto";
 import { classToPlain } from "class-transformer";
 import { Response } from "express";
-import e = require("express");
-import * as snakeCaseKeys from "snakecase-keys";
-
 
 @Catch(HttpException)
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -21,11 +18,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
       process.env["APP_ENV"] === "producion"
         ? exception.message
         : exception.getResponse()["message"];
-    const errorCode = exception.getResponse()['errorCode'] || undefined
-    let meta: ResponseMetaDTO = exception.getResponse() as ResponseMetaDTO;
-    if (!(meta instanceof ResponseMetaDTO)) {
-      meta = new ResponseMetaDTO("failure", message, errorCode);
+    const errorCode = exception.getResponse()["errorCode"] || undefined;
+    let responseDto: ResponseDTO<any> = exception.getResponse() as ResponseDTO<any>;
+    if (!(responseDto instanceof ResponseDTO)) {
+      responseDto = ResponseDTO.fail(message, errorCode);
     }
-    response.status(status).json(snakeCaseKeys(classToPlain(meta)));
+    response.status(status).json(classToPlain(responseDto))
   }
 }

@@ -1,7 +1,7 @@
 import { ErrorCode } from "enums/errorCode.enum";
 import { PageMetaDto } from "./dtos/pageMeta.dto";
 import { ResponseDTO } from "./dtos/response.dto";
-import { MetaDTO, Status } from "./dtos/responseMeta.dto";
+import { MetaDTO } from "./dtos/responseMeta.dto";
 
 export class Result<T> {
   private _isError: boolean;
@@ -78,15 +78,12 @@ export class Result<T> {
   }
 
   public getResponseDTO(): ResponseDTO<T> {
-    let status: Status;
     if (this._isError) {
-      status = "failure";
       return {
-        meta: { status, message: this._errorMessage },
+        meta: { ok: false, message: this._errorMessage },
       };
     }
-    status = "success";
-    let meta = { status };
+    let meta = { ok: true };
     if (this._meta) {
       meta = { ...meta, ...this._meta };
     }

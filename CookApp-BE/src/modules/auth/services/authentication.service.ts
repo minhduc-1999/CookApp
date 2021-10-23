@@ -9,11 +9,12 @@ import { JwtService } from "@nestjs/jwt";
 import { UserDTO } from "../dtos/user.dto";
 import { RegisterDTO } from "../dtos/register.dto";
 import _ = require("lodash");
+import { LoginResponseDto } from "../dtos/login.dto";
 
 export interface IAuthentication {
   register(registerDto: RegisterDTO): Promise<UserDTO>;
   getAuthUser(usernameOrEmail: string, password: string): Promise<UserDTO>;
-  login(user: UserDTO): Promise<any>;
+  login(user: UserDTO): Promise<LoginResponseDto>;
 }
 @Injectable()
 class AuthenticationService implements IAuthentication {
@@ -21,7 +22,7 @@ class AuthenticationService implements IAuthentication {
     @Inject("IUserRepository") private _userRepo: IUserRepository,
     private jwtService: JwtService
   ) {}
-  async login(user: UserDTO): Promise<any> {
+  async login(user: UserDTO): Promise<LoginResponseDto> {
     const payload = { username: user.username, sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),

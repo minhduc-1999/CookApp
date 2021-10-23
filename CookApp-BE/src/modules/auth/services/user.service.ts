@@ -1,5 +1,5 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
-import { ResponseMetaDTO } from "base/dtos/responseMeta.dto";
+import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { IUserRepository } from "../adapters/out/repositories/user.repository";
 import { ProfileDTO, UpdateProfileDTO } from "../dtos/profile.dto";
@@ -22,7 +22,7 @@ class UserService implements IUserService {
     const user = await this._userRepo.getUserById(userId);
     if (!user)
       throw new BadRequestException(
-        ResponseMetaDTO.fail("User not found", ErrorCode.USER_NOT_FOUND)
+        ResponseDTO.fail("User not found", ErrorCode.USER_NOT_FOUND)
       );
     const updatedUser = await this._userRepo.updateUserProfile(
       userId,
