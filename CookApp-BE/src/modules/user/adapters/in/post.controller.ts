@@ -2,6 +2,12 @@ import { Body, Controller, Post, Req, UseInterceptors } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
+import {
+  ApiBadReqResponseCustom,
+  ApiCreatedResponseCustom,
+  ApiFailResponseCustom,
+  ApiOKResponseCustom,
+} from "decorators/ApiSuccessResponse.decorator";
 import { CreatePostDTO, PostDTO } from "modules/user/dtos/post.dto";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
 
@@ -12,6 +18,9 @@ export class PostController {
   constructor(private _commandBus: CommandBus) {}
 
   @Post()
+  @ApiFailResponseCustom()
+  @ApiBadReqResponseCustom()
+  @ApiCreatedResponseCustom(PostDTO, "Create post successfully")
   async createPost(
     @Body() post: CreatePostDTO,
     @Req() req

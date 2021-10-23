@@ -1,7 +1,9 @@
+import { ApiProperty } from "@nestjs/swagger";
 import { Exclude } from "class-transformer";
 import _ = require("lodash");
 
 export class AuditDTO {
+  @ApiProperty({type: String, readOnly: true})
   id: string;
 
   @Exclude()

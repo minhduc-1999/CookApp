@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { UserDTO } from "modules/auth/dtos/user.dto";
+import { UserDTO } from "modules/user/dtos/user.dto";
 import { Post, PostDocument } from "modules/user/domains/schemas/post.schema";
 import { CreatePostDTO, PostDTO } from "modules/user/dtos/post.dto";
 import { Model } from "mongoose";
