@@ -16,12 +16,13 @@ export class ErrorsInterceptor implements NestInterceptor {
       catchError((err) => {
         console.error(err);
         if (err instanceof InternalServerErrorException) return throwError(() => err);
-        if (err instanceof HttpException) {
-          const message = err.getResponse()["message"];
-          if (message instanceof Array) {
-            err.getResponse()["message"] = message.join(", ");
-          }
-        }
+        // if (err instanceof HttpException) {
+          // const message = err.getResponse()["message"];
+          // console.log(message)
+          // if (message instanceof String) {
+          //   err.getResponse()["message"] = [message]
+          // }
+        // }
         return throwError(() => err);
       })
     );
