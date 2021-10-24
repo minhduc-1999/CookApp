@@ -33,7 +33,7 @@ export class PostDTO extends AuditDTO {
     this.content = post?.content;
     this.images = post?.images;
     this.videos = post?.videos;
-    this.author = new UserDTO(post.author);
+    this.author = new UserDTO(post?.author);
   }
 }
 

@@ -37,7 +37,7 @@ export class AuthController {
     const user = (await this._commandBus.execute(registerCommand)) as UserDTO;
     return Result.ok(
       { id: user.id, username: user.username },
-      { message: "Register successfully" }
+      { messages: ["Register successfully"] }
     );
   }
 
@@ -54,6 +54,6 @@ export class AuthController {
   async login(@Req() req): Promise<Result<LoginResponseDto>> {
     const loginCommand = new LoginCommand(req.user);
     const result = await this._commandBus.execute(loginCommand);
-    return Result.ok(result, { message: "Login successfully" });
+    return Result.ok(result, { messages: ["Login successfully"] });
   }
 }

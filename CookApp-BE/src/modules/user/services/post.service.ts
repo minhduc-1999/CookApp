@@ -32,7 +32,6 @@ export class PostService implements IPostService {
     const existedPost = await this._postRepo.getPostById(updatingPost.id);
     if (!existedPost)
       throw new NotFoundException(ResponseDTO.fail('Post Not Found'))
-      console.log(existedPost, " vs " , editor.id)
     if (existedPost.author.id !== editor.id)
       throw new ForbiddenException(ResponseDTO.fail('You have no permission to edit post', ErrorCode.INVALID_OWNER))
     return this._postRepo.updatePost(updatingPost);

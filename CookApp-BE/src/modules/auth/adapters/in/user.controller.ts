@@ -27,7 +27,7 @@ export class UserController {
   async getProfile(@Req() req): Promise<Result<UserDTO>> {
     const query = new GetProfileQuery(req.user);
     const result = await this._queryBus.execute(query);
-    return Result.ok(result, { message: "Getting profile successfully" });
+    return Result.ok(result, { messages: ["Getting profile successfully"] });
   }
 
   @Patch("profile")
@@ -40,6 +40,6 @@ export class UserController {
   ): Promise<Result<UserDTO>> {
     const command = new UpdateProfileCommand(req.user, body);
     const result = await this._commandBus.execute(command);
-    return Result.ok(result, { message: "Updating profile successfully" });
+    return Result.ok(result, { messages: ["Updating profile successfully"] });
   }
 }

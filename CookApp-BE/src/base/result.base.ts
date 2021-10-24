@@ -7,7 +7,7 @@ export class Result<T> {
   private _isError: boolean;
   private _errorMessage: string;
   private _data: any | T;
-  private _meta: any;
+  private _meta: MetaDTO;
   private _errorCode: ErrorCode;
 
   constructor(
@@ -77,16 +77,15 @@ export class Result<T> {
     return new Result<U>(true, errorMessage, null, null, errorCode);
   }
 
-  public getResponseDTO(): ResponseDTO<T> {
+  public getResponseDTO(): ResponseDTO<any> {
     if (this._isError) {
-      return {
-        meta: { ok: false, message: this._errorMessage },
-      };
+      return ResponseDTO.fail(this._errorMessage, this._errorCode)
     }
     let meta = { ok: true };
     if (this._meta) {
       meta = { ...meta, ...this._meta };
     }
+    console.log(this)
     return {
       meta,
       data: this._data.toDto ? this._data.toDto() : this._data,

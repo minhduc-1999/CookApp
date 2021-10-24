@@ -1,17 +1,13 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { PageOptionsDto } from '../pageOptions.base';
+import { MetaDTO } from './responseMeta.dto';
 
 interface IPageMetaDtoParameters {
     pageOptionsDto: PageOptionsDto;
     total: number;
 }
 
-export class PageMetaDto {
-    @ApiProperty()
-    readonly ok?: Boolean;
-
-    @ApiProperty()
-    readonly message?: string;
+export class PageMetaDto  extends MetaDTO{
 
     @ApiProperty()
     readonly offset: number;
@@ -23,6 +19,7 @@ export class PageMetaDto {
     readonly total: number;
 
     constructor({ pageOptionsDto, total }: IPageMetaDtoParameters) {
+        super()
         this.offset = pageOptionsDto?.offset;
         this.limit = pageOptionsDto?.limit;
         this.total = total;

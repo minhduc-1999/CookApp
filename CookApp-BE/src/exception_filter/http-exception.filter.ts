@@ -20,7 +20,6 @@ export class HttpExceptionFilter implements ExceptionFilter {
         : exception.getResponse()["message"];
     const errorCode = exception.getResponse()["errorCode"] || undefined;
     let responseDto: ResponseDTO<any> = exception.getResponse() as ResponseDTO<any>;
-        console.log(responseDto);
 
     if (!(responseDto instanceof ResponseDTO)) {
       responseDto = ResponseDTO.fail(message, errorCode);

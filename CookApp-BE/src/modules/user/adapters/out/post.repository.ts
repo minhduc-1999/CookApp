@@ -34,7 +34,6 @@ export class PostRepository implements IPostRepository {
         { $set: updatingPost },
         { new: true }
       );
-      console.log(updateResult);
       return true;
     } catch (err) {
       this.logger.error(err)
@@ -43,7 +42,7 @@ export class PostRepository implements IPostRepository {
   }
   async getPostById(postId: string): Promise<PostDTO> {
     try {
-      const postDoc = await await this._postModel.findById(postId).populate('author');
+      const postDoc = await this._postModel.findById(postId).populate('author');
       if (!postDoc) return null;
       return new PostDTO(postDoc);
     } catch (err) {

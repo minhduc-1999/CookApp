@@ -45,7 +45,7 @@ export class PostController {
   ): Promise<Result<PostDTO>> {
     const createPostCommand = new CreatePostCommand(req.user, post);
     const createdPost = await this._commandBus.execute(createPostCommand);
-    return Result.ok(createdPost, { message: "Create post successfully" });
+    return Result.ok(createdPost, { messages: ["Create post successfully"] });
   }
 
   @Get(":postId")
@@ -59,7 +59,7 @@ export class PostController {
   ): Promise<Result<PostDTO>> {
     const query = new GetPostDetailQuery(req.user, postId);
     const post = await this._queryBus.execute(query);
-    return Result.ok(post, { message: "Get post successfully" });
+    return Result.ok(post, { messages: ["Get post successfully"] });
   }
 
   @Patch(":postId")
@@ -74,6 +74,6 @@ export class PostController {
     post.id = postId;
     const editPostCommand = new EditPostCommand(req.user, post);
     await this._commandBus.execute(editPostCommand);
-    return Result.ok({}, { message: "Edit post successfully" });
+    return Result.ok({}, { messages: ["Edit post successfully"] });
   }
 }
