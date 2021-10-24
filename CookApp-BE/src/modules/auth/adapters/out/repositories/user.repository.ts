@@ -21,7 +21,7 @@ export interface IUserRepository {
   getUserById(id: string): Promise<UserDTO>;
   updateUserProfile(
     userId: string,
-    profile: UpdateProfileDTO
+    profile: UpdateProfileDTO,
   ): Promise<UserDTO>;
 }
 
@@ -35,7 +35,7 @@ export class UserRepository implements IUserRepository {
     userId: string,
     profile: UpdateProfileDTO
   ): Promise<UserDTO> {
-    const updatingProfile = createUpdatingNestedObject<UpdateProfileDTO>('profile', profile)
+    const updatingProfile = createUpdatingNestedObject<UpdateProfileDTO>('profile', profile, userId)
     const userDoc = await this._userModel.findByIdAndUpdate(
       userId,
       { $set: updatingProfile },

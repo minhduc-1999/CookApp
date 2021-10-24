@@ -17,7 +17,7 @@ import { createUpdatingObject } from "utils";
 export interface IPostRepository {
   createPost(post: CreatePostDTO, author: UserDTO): Promise<PostDTO>;
   getPostById(postId: string): Promise<PostDTO>;
-  updatePost(post: UpdatePostDTO): Promise<boolean>;
+  updatePost(post: UpdatePostDTO, editor: UserDTO): Promise<boolean>;
 }
 
 @Injectable()
@@ -26,9 +26,9 @@ export class PostRepository implements IPostRepository {
   constructor(
     @InjectModel(Post.name) private _postModel: Model<PostDocument>
   ) {}
-  async updatePost(post: UpdatePostDTO): Promise<boolean> {
+  async updatePost(post: UpdatePostDTO, editor: UserDTO): Promise<boolean> {
     try {
-      const updatingPost = createUpdatingObject(post);
+      const updatingPost = createUpdatingObject(post, editor.id);
       const updateResult = await this._postModel.updateOne(
         { _id: post.id },
         { $set: updatingPost },

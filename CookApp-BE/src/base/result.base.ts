@@ -85,7 +85,6 @@ export class Result<T> {
     if (this._meta) {
       meta = { ...meta, ...this._meta };
     }
-    console.log(this)
     return {
       meta,
       data: this._data.toDto ? this._data.toDto() : this._data,

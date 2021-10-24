@@ -4,7 +4,7 @@ export { default as time } from "./time";
 
 export function createUpdatingNestedObject<T>(
   childName: string,
-  updateObj: T
+  updateObj: T, updateBy: string
 ): Partial<T> {
   const keys = Object.keys(updateObj).filter(
     (key) => updateObj[key] !== null && updateObj[key] !== undefined
@@ -15,11 +15,13 @@ export function createUpdatingNestedObject<T>(
   });
 
   updatingObj["updatedAt"] = _.now();
+  updatingObj["updatedBy"] = updateBy;
+
 
   return updatingObj;
 }
 
-export function createUpdatingObject<T>(updateObj: T): Partial<T> {
+export function createUpdatingObject<T>(updateObj: T, updateBy: string): Partial<T> {
   const keys = Object.keys(updateObj).filter(
     (key) => updateObj[key] !== null && updateObj[key] !== undefined
   );
@@ -28,6 +30,7 @@ export function createUpdatingObject<T>(updateObj: T): Partial<T> {
     updatingObj[key] = updateObj[key];
   });
   updatingObj["updatedAt"] = _.now();
+  updatingObj["updatedBy"] = updateBy;
 
   return updatingObj;
 }

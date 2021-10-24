@@ -9,7 +9,7 @@ export interface IUserService {
   getProfile(id: string): Promise<UserDTO>;
   updateProfile(
     userId: string,
-    profileDto: UpdateProfileDTO
+    profileDto: UpdateProfileDTO,
   ): Promise<UserDTO>;
 }
 @Injectable()

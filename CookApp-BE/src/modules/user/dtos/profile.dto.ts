@@ -10,7 +10,7 @@ import {
 import { IsMeaningfullString } from "decorators/IsMeaningfullString.decorator";
 import { Sex } from "enums/sex.enum";
 
-export class ProfileDTO extends AuditDTO {
+export class ProfileDTO {
   @IsPositive()
   @IsOptional()
   @ApiPropertyOptional({ type: Number, default: 170 })
@@ -49,7 +49,6 @@ export class ProfileDTO extends AuditDTO {
   fullName?: string;
 
   constructor(profile?: Partial<ProfileDTO>) {
-    super(profile);
     this.birthDate = profile?.birthDate;
     this.height = profile?.height;
     this.weight = profile?.weight;

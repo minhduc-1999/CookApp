@@ -1,7 +1,7 @@
 import { ForbiddenException, Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
-import { UserDTO } from "modules/auth/dtos/user.dto";
+import { UserDTO } from "modules/user/dtos/user.dto";
 import { IPostRepository } from "../adapters/out/post.repository";
 import { CreatePostDTO, PostDTO, UpdatePostDTO } from "../dtos/post.dto";
 
@@ -34,6 +34,6 @@ export class PostService implements IPostService {
       throw new NotFoundException(ResponseDTO.fail('Post Not Found'))
     if (existedPost.author.id !== editor.id)
       throw new ForbiddenException(ResponseDTO.fail('You have no permission to edit post', ErrorCode.INVALID_OWNER))
-    return this._postRepo.updatePost(updatingPost);
+    return this._postRepo.updatePost(updatingPost, editor);
   }
 }
