@@ -9,9 +9,10 @@ import { PostModel } from "./domains/schemas/post.schema";
 import { UserModel } from "./domains/schemas/user.schema";
 import { PostService } from "./services/post.service";
 import { CreatePostCommandHandler } from "./useCases/createPost";
+import { EditPostCommandHandler } from "./useCases/editPost";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 
-const commandHandlers = [CreatePostCommandHandler];
+const commandHandlers = [CreatePostCommandHandler, EditPostCommandHandler];
 const queryHandlers = [GetPostDetailQueryHandler]
 const services = [
   {

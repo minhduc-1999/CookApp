@@ -18,7 +18,7 @@ export class ResponseDTO<T> {
     return new ResponseDTO(new MetaDTO(true, message), data);
   }
 
-  public static fail(message: string, errorCode: ErrorCode) {
+  public static fail(message: string, errorCode?: ErrorCode) {
     return new ResponseDTO(new MetaDTO(false, message, errorCode))
   }
 }
