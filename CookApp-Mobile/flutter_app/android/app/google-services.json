@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "290846649369",
+    "project_id": "cookapp-3ae24",
+    "storage_bucket": "cookapp-3ae24.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:290846649369:android:82a0a471e23090994ace88",
+        "android_client_info": {
+          "package_name": "com.example.sharefood"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "290846649369-rhe37nt6vm233fitokhupcebsgarj6gd.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.sharefood",
+            "certificate_hash": "ca492e14595f3d66295b8a39d1d96682460598c8"
+          }
+        },
+        {
+          "client_id": "290846649369-f3hhd4vgdrt6iv17r1sj6h59f9mivbtq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBEIFneIa8gl9CZTCBLjCXIfbtTRoUsQA4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "290846649369-f3hhd4vgdrt6iv17r1sj6h59f9mivbtq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

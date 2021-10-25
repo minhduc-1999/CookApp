@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/HomeScreen/HomeActivity.dart';
 import 'package:flutter_app/LoginScreen/LoginActivity.dart';
 
 void main() {
@@ -23,7 +24,8 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: LoginActivity(),
+      home: HomeActivity(),
+      //home: MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
 }
