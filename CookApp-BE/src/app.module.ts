@@ -4,7 +4,9 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
+import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { AuthModule } from "modules/auth/auth.module";
+import { StorageModule } from "modules/storage/storage.module";
 import { UserModule } from "modules/user/user.module";
 import { RavenModule } from "nest-raven";
 import { ConfigModule, ConfigService } from "nestjs-config";
@@ -43,7 +45,8 @@ import { contextMiddleware } from "./middleware/context.middelware";
       },
     }),
     AuthModule,
-    UserModule
+    UserModule,
+    StorageModule.register({provider: ThirdPartyProviders.FIREBASE})
   ],
   controllers: [AppController],
   providers: [
