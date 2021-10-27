@@ -11,21 +11,20 @@ export interface IStorageProvider {
 
 @Injectable()
 export class FirebaseStorageProvider implements IStorageProvider {
-    constructor(private _configService: ConfigService) {}
-    async getBucket(): Promise<Bucket> {
-        const firebaseCredentialPath = this._configService.get(
-          "storage.credentialPath"
-        );
-        console.log(firebaseCredentialPath);
-        console.log(this._configService.get("storage.storageBucket"));
+    constructor(private _configService: ConfigService) {
+      const firebaseCredentialPath = this._configService.get(
+        "storage.credentialPath"
+      );
 
-        initializeApp({
-          credential: firebaseCredentialPath
-            ? cert(firebaseCredentialPath)
-            : applicationDefault(),
-          storageBucket: this._configService.get("storage.storageBucket"),
-        });
-    return getStorage().bucket();
+      initializeApp({
+        credential: firebaseCredentialPath
+          ? cert(firebaseCredentialPath)
+          : applicationDefault(),
+        storageBucket: this._configService.get("storage.storageBucket"),
+      });
+    }
+    async getBucket(): Promise<Bucket> {
+      return getStorage().bucket();
     }
 
 }

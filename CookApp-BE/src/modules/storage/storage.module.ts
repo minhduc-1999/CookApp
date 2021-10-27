@@ -20,6 +20,7 @@ export type StorageOptions = {
       useClass: StorageService,
     },
   ],
+  exports: ["IStorageService"],
 })
 export class StorageModule {
   static register(options: StorageOptions): DynamicModule {

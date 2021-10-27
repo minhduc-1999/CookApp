@@ -34,3 +34,7 @@ export function createUpdatingObject<T>(updateObj: T, updateBy: string): Partial
 
   return updatingObj;
 }
+
+export function addFilePrefix(fileName: string, userId: string): string {
+  return `${userId}_${_.now()}_${fileName}`;
+}
