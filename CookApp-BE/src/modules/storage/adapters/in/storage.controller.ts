@@ -31,5 +31,6 @@ export class StorageController {
     return Result.okList(result, {
       messages: ["Get presigned links successfully"],
     });
+    // return Result.okList(body.fileNames.map(file => getFileExtension(file)))
   }
 }

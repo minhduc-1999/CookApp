@@ -38,3 +38,8 @@ export function createUpdatingObject<T>(updateObj: T, updateBy: string): Partial
 export function addFilePrefix(fileName: string, userId: string): string {
   return `${userId}_${_.now()}_${fileName}`;
 }
+
+export function getFileExtension(fileName: string): string {
+  const regex = /\.\w+$/i
+  return fileName.match(regex)[0].slice(1)
+}

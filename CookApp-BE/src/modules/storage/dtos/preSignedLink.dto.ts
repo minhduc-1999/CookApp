@@ -1,17 +1,26 @@
 import { ApiProperty, ApiResponseProperty } from "@nestjs/swagger";
-import { IsArray, IsString } from "class-validator";
+import {
+  IsArray,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+} from "class-validator";
+import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 
 export class PreSignedLinkResponse {
   @ApiResponseProperty({ type: String })
   objectName: string;
-  
+
   @ApiResponseProperty({ type: String })
   signedLink: string;
 }
 
 export class PreSignedLinkRequest {
-  @ApiProperty({type: [String]})
+  @ApiProperty({ type: [String] })
   @IsArray()
-  @IsString({each: true})
-  fileNames: string[]
+  @IsNotEmpty({ each: true })
+  @MinLength(6, { each: true })
+  @IsString({ each: true })
+  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml"], { each: true })
+  fileNames: string[];
 }

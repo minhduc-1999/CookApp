@@ -4,35 +4,34 @@ import {
   ValidationArguments,
   ValidatorConstraint,
   ValidatorConstraintInterface,
-} from 'class-validator';
+} from "class-validator";
 
-@ValidatorConstraint({ name: 'meaningfulString', async: false })
+@ValidatorConstraint({ name: "fileExtension", async: false })
 export class IsMeaningfullStringConstrain
   implements ValidatorConstraintInterface {
-  private minWords: number;
   validate(text: string, args: ValidationArguments) {
-    this.minWords = Math.max(args.constraints[0] || 1, 1);
-    const words = text.trim().split(' ');
-    return words[0] ? words.length >= this.minWords : false;
+    const extensions: string[] = args.constraints[0];
+    const regexSring = `^\\S.*\\S\\.(${extensions.join('|')})$`;
+    const regex = new RegExp(regexSring);
+    return regex.test(text)
   }
 
   defaultMessage(args: ValidationArguments) {
-    return `${args.property} must have at least ${this.minWords} ${
-      this.minWords === 1 ? 'word' : 'words'
-    }!`;
+    const extensions: string[] = args.constraints[0];
+    return `each value in ${args.property} must have one of following extensions ${extensions.join(', ')}`;
   }
 }
 
-export function IsMeaningfullString(
-  minWords?: number,
-  validationOptions?: ValidationOptions,
+export function IsFileExtensions(
+  extentsion: string[],
+  validationOptions?: ValidationOptions
 ) {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [minWords],
+      constraints: [extentsion],
       validator: IsMeaningfullStringConstrain,
     });
   };
