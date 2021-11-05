@@ -19,7 +19,7 @@ export class StorageController {
     @Inject("IStorageService") private _storageService: IStorageService
   ) {}
 
-  @Post()
+  @Post('uploadSignedUrl')
   @ApiFailResponseCustom()
   @ApiOKListResponseCustom(
     PreSignedLinkResponse,
@@ -27,10 +27,9 @@ export class StorageController {
     "Get presigned links successfully"
   )
   async getPresignedLinks(@Body() body: PreSignedLinkRequest,@Req() req) : Promise<Result<PreSignedLinkResponse[]>>{
-    const result = await this._storageService.getSignedLinks(body.fileNames, req.user.id)
+    const result = await this._storageService.getUploadSignedLinks(body.fileNames, req.user.id)
     return Result.okList(result, {
       messages: ["Get presigned links successfully"],
     });
-    // return Result.okList(body.fileNames.map(file => getFileExtension(file)))
   }
 }

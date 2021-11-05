@@ -6,12 +6,12 @@ import { addFilePrefix, getFileExtension } from "utils";
 import { IStorageProvider } from "./provider.service";
 
 export interface IStorageService {
-  getSignedLink(
+  getUploadSignedLink(
     fileName: string,
     userId: string
   ): Promise<PreSignedLinkResponse>;
   setMetadata(objectName: string, meta: ObjectMetadata): Promise<any>;
-  getSignedLinks(
+  getUploadSignedLinks(
     fileNames: string[],
     userId: string
   ): Promise<PreSignedLinkResponse[]>;
@@ -33,17 +33,20 @@ export class StorageService implements IStorageService {
     const response = bucket.file(objectName).setMetadata(meta);
     return response;
   }
-  async getSignedLink(
+  async getUploadSignedLink(
     fileName: string,
     userId: string
   ): Promise<PreSignedLinkResponse> {
     const objectName = addFilePrefix(fileName, userId);
     const mimeType = `image/${getFileExtension(fileName)}`;
     const bucket = await this._provider.getBucket();
+    const expiredIn: number = this._configService.get(
+      "storage.presignedLinkExpiration"
+    );
     const signedLink = await bucket.file(objectName).getSignedUrl({
+      version: "v4",
       action: "write",
-      expires:
-        _.now() + this._configService.get("storage.presignedLinkExpiration"),
+      expires: Date.now() + expiredIn * 60 * 1000,
       contentType: mimeType,
     });
     return {
@@ -52,12 +55,25 @@ export class StorageService implements IStorageService {
     };
   }
 
-  async getSignedLinks(
+  async getUploadSignedLinks(
     fileNames: string[],
     userId: string
   ): Promise<PreSignedLinkResponse[]> {
     const tasks: Promise<PreSignedLinkResponse>[] = [];
-    fileNames.forEach((file) => tasks.push(this.getSignedLink(file, userId)));
+    fileNames.forEach((file) =>
+      tasks.push(this.getUploadSignedLink(file, userId))
+    );
     return Promise.all(tasks);
+  }
+
+  async getDownLoadSignedLink(objectName: string): Promise<string> {
+    const bucket = await this._provider.getBucket();
+    const signedLink = await bucket.file(objectName).getSignedUrl({
+      action: "read",
+      expires:
+        _.now() +
+        this._configService.get("storage.presignedLinkExpiration") * 1000,
+    });
+    return signedLink[0];
   }
 }
