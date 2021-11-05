@@ -1,15 +1,4 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Put,
-  Req,
-  UseInterceptors,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post, Req } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
@@ -17,16 +6,16 @@ import {
   ApiBadReqResponseCustom,
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
-  ApiOKResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
-import {
-  CreatePostDTO,
-  PostDTO,
-  UpdatePostDTO,
-} from "modules/user/dtos/post.dto";
+import { PostDTO } from "modules/user/dtos/post.dto";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
+import { CreatePostRequest } from "modules/user/useCases/createPost/createPostRequest";
+import { CreatePostResponse } from "modules/user/useCases/createPost/createPostResponse";
 import { EditPostCommand } from "modules/user/useCases/editPost";
+import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
+import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
 import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
+import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
 import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
 
 @Controller("/users/posts")
@@ -38,9 +27,9 @@ export class PostController {
   @Post()
   @ApiFailResponseCustom()
   @ApiBadReqResponseCustom()
-  @ApiCreatedResponseCustom(PostDTO, "Create post successfully")
+  @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
   async createPost(
-    @Body() post: CreatePostDTO,
+    @Body() post: CreatePostRequest,
     @Req() req
   ): Promise<Result<PostDTO>> {
     const createPostCommand = new CreatePostCommand(req.user, post);
@@ -51,12 +40,12 @@ export class PostController {
   @Get(":postId")
   @ApiFailResponseCustom()
   @ApiBadReqResponseCustom()
-  @ApiCreatedResponseCustom(PostDTO, "Get post successfully")
+  @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
   async getPostById(
     @Param("postId", ParseObjectIdPipe) postId: string,
     @Req() req
-  ): Promise<Result<PostDTO>> {
+  ): Promise<Result<GetPostResponse>> {
     const query = new GetPostDetailQuery(req.user, postId);
     const post = await this._queryBus.execute(query);
     return Result.ok(post, { messages: ["Get post successfully"] });
@@ -65,15 +54,15 @@ export class PostController {
   @Patch(":postId")
   @ApiFailResponseCustom()
   @ApiBadReqResponseCustom()
-  @ApiCreatedResponseCustom(Object, "Edit post successfully")
+  @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
   async editPost(
-    @Body() post: UpdatePostDTO,
+    @Body() post: EditPostRequest,
     @Req() req,
     @Param("postId", ParseObjectIdPipe) postId: string
-  ): Promise<Result<any>> {
+  ): Promise<Result<EditPostResponse>> {
     post.id = postId;
     const editPostCommand = new EditPostCommand(req.user, post);
-    await this._commandBus.execute(editPostCommand);
-    return Result.ok({}, { messages: ["Edit post successfully"] });
+    const updatedPost = await this._commandBus.execute(editPostCommand);
+    return Result.ok(updatedPost, { messages: ["Edit post successfully"] });
   }
 }

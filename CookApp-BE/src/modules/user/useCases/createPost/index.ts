@@ -1,13 +1,15 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
-import { CreatePostDTO, PostDTO } from "modules/user/dtos/post.dto";
+import { IPostRepository } from "modules/user/adapters/out/post.repository";
+import { PostDTO } from "modules/user/dtos/post.dto";
 import { UserDTO } from "modules/user/dtos/user.dto";
-import { IPostService } from "modules/user/services/post.service";
+import { CreatePostRequest } from "./createPostRequest";
+import { CreatePostResponse } from "./createPostResponse";
 
 export class CreatePostCommand implements ICommand {
   author: UserDTO;
-  postDto: CreatePostDTO;
-  constructor(author: UserDTO, post: CreatePostDTO) {
+  postDto: CreatePostRequest;
+  constructor(author: UserDTO, post: CreatePostRequest) {
     this.author = author;
     this.postDto = post;
   }
@@ -17,10 +19,12 @@ export class CreatePostCommand implements ICommand {
 export class CreatePostCommandHandler
   implements ICommandHandler<CreatePostCommand> {
   constructor(
-    @Inject("IPostService")
-    private _postService: IPostService
+    @Inject('IPostRepository')
+    private _postRepo: IPostRepository
   ) {}
-  async execute(command: CreatePostCommand): Promise<PostDTO> {
-    return this._postService.createPost(command.postDto, command.author);
+  async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
+    const creatingPost = new PostDTO({...command.postDto, author: command.author})
+    const result = await this._postRepo.createPost(creatingPost);
+    return new CreatePostResponse(result);
   }
 }

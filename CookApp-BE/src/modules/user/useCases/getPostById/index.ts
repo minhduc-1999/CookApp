@@ -3,6 +3,7 @@ import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
 import { PostDTO } from "modules/user/dtos/post.dto";
 import { UserDTO } from "modules/user/dtos/user.dto";
 import { IPostService } from "modules/user/services/post.service";
+import { GetPostResponse } from "./getPostResponse";
 
 export class GetPostDetailQuery implements IQuery {
   user: UserDTO;
@@ -19,7 +20,7 @@ export class GetPostDetailQueryHandler implements ICommandHandler<GetPostDetailQ
     @Inject("IPostService")
     private _postService: IPostService
   ) {}
-  async execute(query: GetPostDetailQuery): Promise<PostDTO> {
+  async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
     return this._postService.getPostDetail(query.postId);
   }
 }

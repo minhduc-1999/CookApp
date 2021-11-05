@@ -1,5 +1,5 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { AuditDTO } from "base/dtos/audix.dto";
+import { AuditDTO } from "base/dtos/audit.dto";
 import { Exclude, Type } from "class-transformer";
 import {
   IsEmail,

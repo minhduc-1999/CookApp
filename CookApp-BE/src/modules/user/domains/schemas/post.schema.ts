@@ -31,12 +31,12 @@ export class Post extends AbstractSchema {
   })
   videos: string[];
 
-  constructor(post: Partial<PostDTO>, author: Partial<UserDTO>) {
+  constructor(post: Partial<PostDTO>) {
     super(post);
     this.content = post?.content;
     this.images = post?.images;
     this.videos = post?.videos;
-    this.author = new User(author);
+    this.author = new User(post.author);
   }
 }
 

@@ -7,7 +7,7 @@ import {
 } from 'class-validator';
 
 @ValidatorConstraint({ name: 'meaningfulString', async: false })
-export class IsMeaningfullStringConstrain
+export class IsMeaningfulStringConstrain
   implements ValidatorConstraintInterface {
   private minWords: number;
   validate(text: string, args: ValidationArguments) {
@@ -23,7 +23,7 @@ export class IsMeaningfullStringConstrain
   }
 }
 
-export function IsMeaningfullString(
+export function IsMeaningfulString(
   minWords?: number,
   validationOptions?: ValidationOptions,
 ) {
@@ -33,7 +33,7 @@ export function IsMeaningfullString(
       propertyName: propertyName,
       options: validationOptions,
       constraints: [minWords],
-      validator: IsMeaningfullStringConstrain,
+      validator: IsMeaningfulStringConstrain,
     });
   };
 }

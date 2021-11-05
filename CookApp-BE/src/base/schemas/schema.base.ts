@@ -1,5 +1,5 @@
 import { Prop } from "@nestjs/mongoose";
-import { AuditDTO } from "base/dtos/audix.dto";
+import { AuditDTO } from "base/dtos/audit.dto";
 import _ = require("lodash");
 
 export abstract class AbstractSchema {
