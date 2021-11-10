@@ -1,5 +1,4 @@
 import { ApiPropertyOptional, PartialType } from "@nestjs/swagger";
-import { AuditDTO } from "base/dtos/audix.dto";
 import {
   IsString,
   IsNotEmpty,
@@ -7,7 +6,7 @@ import {
   IsPositive,
   IsEnum,
 } from "class-validator";
-import { IsMeaningfullString } from "decorators/IsMeaningfullString.decorator";
+import { IsMeaningfulString } from "decorators/IsMeaningfulString.decorator";
 import { Sex } from "enums/sex.enum";
 
 export class ProfileDTO {
@@ -29,14 +28,14 @@ export class ProfileDTO {
   @ApiPropertyOptional({ type: String })
   @IsString()
   @IsNotEmpty()
-  @IsMeaningfullString()
+  @IsMeaningfulString()
   firstName?: string;
 
   @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
   @IsNotEmpty()
-  @IsMeaningfullString()
+  @IsMeaningfulString()
   lastName?: string;
 
   @IsOptional()

@@ -9,19 +9,21 @@ import {
 import { CommandBus } from "@nestjs/cqrs";
 import { ApiBody, ApiTags } from "@nestjs/swagger";
 import { Public } from "decorators/public.decorator";
-import { LoginDTO, LoginResponseDto } from "modules/auth/dtos/login.dto";
 import { RegisterCommand } from "modules/auth/useCases/register";
 import { Result } from "base/result.base";
 import { BasicAuthGuard } from "guards/basic_auth.guard";
 import { LoginCommand } from "modules/auth/useCases/login";
 import { UserDTO } from "modules/auth/dtos/user.dto";
-import { RegisterDTO } from "modules/auth/dtos/register.dto";
 import {
   ApiFailResponseCustom,
   ApiCreatedResponseCustom,
   ApiOKResponseCustom,
   ApiBadReqResponseCustom,
 } from "../../../../decorators/ApiSuccessResponse.decorator";
+import { LoginRequest } from "modules/auth/useCases/login/loginRequest";
+import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
+import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
+import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
 
 @Controller()
 @ApiTags("Authentication")
@@ -31,8 +33,8 @@ export class AuthController {
   @Post("register")
   @Public()
   @ApiFailResponseCustom()
-  @ApiCreatedResponseCustom(UserDTO, "Register successfully")
-  async register(@Body() body: RegisterDTO): Promise<Result<UserDTO>> {
+  @ApiCreatedResponseCustom(RegisterResponse, "Register successfully")
+  async register(@Body() body: RegisterRequest): Promise<Result<RegisterResponse>> {
     const registerCommand = new RegisterCommand(body);
     const user = (await this._commandBus.execute(registerCommand)) as UserDTO;
     return Result.ok(
@@ -44,14 +46,14 @@ export class AuthController {
   @HttpCode(200)
   @UseGuards(BasicAuthGuard)
   @ApiBody({
-    type: LoginDTO,
+    type: LoginRequest,
   })
   @Post("login")
   @ApiFailResponseCustom()
   @ApiBadReqResponseCustom("Username or password is not correct")
-  @ApiOKResponseCustom(LoginResponseDto, "Login successfully")
+  @ApiOKResponseCustom(LoginResponse, "Login successfully")
   @Public()
-  async login(@Req() req): Promise<Result<LoginResponseDto>> {
+  async login(@Req() req): Promise<Result<LoginResponse>> {
     const loginCommand = new LoginCommand(req.user);
     const result = await this._commandBus.execute(loginCommand);
     return Result.ok(result, { messages: ["Login successfully"] });

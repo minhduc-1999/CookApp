@@ -1,8 +1,8 @@
 import { Inject } from "@nestjs/common";
 import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
-import { ProfileDTO } from "modules/auth/dtos/profile.dto";
 import { UserDTO } from "modules/auth/dtos/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
+import { GetProfileResponse } from "./getProfileResponse";
 
 export class GetProfileQuery implements IQuery {
   user: UserDTO;
@@ -18,7 +18,7 @@ export class GetProfileQueryHandler
     @Inject("IUserService")
     private _userService: IUserService
   ) {}
-  async execute(command: GetProfileQuery): Promise<UserDTO> {
-    return this._userService.getProfile(command.user.id);
+  async execute(command: GetProfileQuery): Promise<GetProfileResponse> {
+    return this._userService.getUserById(command.user.id);
   }
 }

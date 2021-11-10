@@ -53,7 +53,7 @@ export const ApiCreatedResponseCustom = <TModel extends Type<any>>(
 
 export const ApiOKResponseCustom = <TModel extends Type<any>>(
   model: TModel,
-  description: string
+  description?: string
 ) => {
   return applyDecorators(
     ApiOkResponse({

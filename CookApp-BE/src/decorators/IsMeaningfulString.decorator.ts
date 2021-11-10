@@ -7,12 +7,12 @@ import {
 } from 'class-validator';
 
 @ValidatorConstraint({ name: 'meaningfulString', async: false })
-export class IsMeaningfullStringConstrain
+export class IsMeaningfulStringConstrain
   implements ValidatorConstraintInterface {
   private minWords: number;
   validate(text: string, args: ValidationArguments) {
-    const words = text.trim().split(' ');
     this.minWords = Math.max(args.constraints[0] || 1, 1);
+    const words = text.trim().split(' ');
     return words[0] ? words.length >= this.minWords : false;
   }
 
@@ -23,7 +23,7 @@ export class IsMeaningfullStringConstrain
   }
 }
 
-export function IsMeaningfullString(
+export function IsMeaningfulString(
   minWords?: number,
   validationOptions?: ValidationOptions,
 ) {
@@ -33,7 +33,7 @@ export function IsMeaningfullString(
       propertyName: propertyName,
       options: validationOptions,
       constraints: [minWords],
-      validator: IsMeaningfullStringConstrain,
+      validator: IsMeaningfulStringConstrain,
     });
   };
 }

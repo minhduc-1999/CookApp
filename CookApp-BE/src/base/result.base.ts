@@ -73,13 +73,17 @@ export class Result<T> {
     return new Result<U>(false, "", data, meta, null);
   }
 
+  public static okList<U>(data?, meta?: Partial<MetaDTO & PageMetaDto>) {
+    return new Result<U>(false, "", { items: data }, meta, null);
+  }
+
   public static fail<U>(errorMessage: string, errorCode: ErrorCode) {
     return new Result<U>(true, errorMessage, null, null, errorCode);
   }
 
   public getResponseDTO(): ResponseDTO<any> {
     if (this._isError) {
-      return ResponseDTO.fail(this._errorMessage, this._errorCode)
+      return ResponseDTO.fail(this._errorMessage, this._errorCode);
     }
     let meta = { ok: true };
     if (this._meta) {

@@ -1,15 +1,15 @@
 import { ApiProperty, ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
-import { AuditDTO } from "base/dtos/audix.dto";
+import { AuditDTO } from "base/dtos/audit.dto";
 import { Exclude, Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
-import { IsMeaningfullString } from "decorators/IsMeaningfullString.decorator";
+import { IsMeaningfulString } from "decorators/IsMeaningfulString.decorator";
 import { UserDTO } from "./user.dto";
 
 export class PostDTO extends AuditDTO {
   @IsNotEmpty()
   @ApiProperty({ type: String })
   @IsString()
-  @IsMeaningfullString(2)
+  @IsMeaningfulString(2)
   content: string;
 
   @IsArray()
@@ -36,13 +36,3 @@ export class PostDTO extends AuditDTO {
     this.author = new UserDTO(post?.author);
   }
 }
-
-export class CreatePostDTO extends PostDTO {}
-
-export class UpdatePostDTO extends PartialType(PickType(PostDTO, [
-  "content",
-  "images",
-  "videos",
-  "updatedAt",
-  "id"
-])) {}

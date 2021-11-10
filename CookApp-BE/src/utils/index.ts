@@ -2,14 +2,14 @@ import _ = require("lodash");
 
 export { default as time } from "./time";
 
-export function createUpdatingNestedObject<T>(
+export function createUpdatingNestedObject<T, R>(
   childName: string,
   updateObj: T, updateBy: string
-): Partial<T> {
+): Partial<R> {
   const keys = Object.keys(updateObj).filter(
     (key) => updateObj[key] !== null && updateObj[key] !== undefined
   );
-  const updatingObj: Partial<T> = {};
+  const updatingObj: Partial<R> = {};
   keys.forEach((key) => {
     updatingObj[`${childName}.${key}`] = updateObj[key];
   });
@@ -33,4 +33,13 @@ export function createUpdatingObject<T>(updateObj: T, updateBy: string): Partial
   updatingObj["updatedBy"] = updateBy;
 
   return updatingObj;
+}
+
+export function addFilePrefix(fileName: string, userId: string): string {
+  return `${userId}_${_.now()}_${fileName}`;
+}
+
+export function getFileExtension(fileName: string): string {
+  const regex = /\.\w+$/i
+  return fileName.match(regex)[0].slice(1)
 }
