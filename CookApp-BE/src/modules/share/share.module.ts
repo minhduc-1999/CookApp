@@ -1,35 +1,46 @@
 import { DynamicModule, Module } from "@nestjs/common";
+import { CqrsModule } from "@nestjs/cqrs";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { StorageController } from "./adapters/in/storage.controller";
 import { FirebaseStorageProvider } from "./adapters/out/services/provider.service";
 import { StorageService } from "./adapters/out/services/storage.service";
+import { GetUploadPresignedLinkQueryHandler } from "./useCases/getUploadPresignedLink";
 
 export type StorageOptions = {
   provider: ThirdPartyProviders;
 };
 
+const handler = [GetUploadPresignedLinkQueryHandler];
+
 @Module({
+  imports: [CqrsModule],
   controllers: [StorageController],
   providers: [
-    {
-      provide: "IStorageProvider",
-      useClass: FirebaseStorageProvider,
-    },
     {
       provide: "IStorageService",
       useClass: StorageService,
     },
+    ...handler
   ],
   exports: ["IStorageService"],
 })
-export class StorageModule {
-  static register(options: StorageOptions): DynamicModule {
+export class ShareModule {
+  static register(options: {storage: StorageOptions}): DynamicModule {
+    let storageClass;
+    switch (options.storage.provider) {
+      case ThirdPartyProviders.FIREBASE:
+        storageClass = FirebaseStorageProvider;
+        break;
+      default:
+        storageClass = FirebaseStorageProvider;
+        break;
+    }
     return {
-      module: StorageModule,
+      module: ShareModule,
       providers: [
         {
-          provide: "STORAGE_PROVIDER",
-          useValue: options.provider,
+          provide: "IStorageProvider",
+          useClass: storageClass,
         },
       ],
     };

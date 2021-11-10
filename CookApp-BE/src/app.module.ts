@@ -6,7 +6,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { AuthModule } from "modules/auth/auth.module";
-import { StorageModule } from "modules/storage/storage.module";
+import { ShareModule } from "modules/share/share.module";
 import { UserModule } from "modules/user/user.module";
 import { RavenModule } from "nest-raven";
 import { ConfigModule, ConfigService } from "nestjs-config";
@@ -15,7 +15,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import "./boilerplate.polyfill";
 import { TraceIdInterceptor } from "./interceptors/trace-id-interceptor.service";
-import { contextMiddleware } from "./middleware/context.middelware";
+import { contextMiddleware } from "./middleware/context.middleware";
 
 @Module({
   imports: [
@@ -46,7 +46,9 @@ import { contextMiddleware } from "./middleware/context.middelware";
     }),
     AuthModule,
     UserModule,
-    StorageModule.register({provider: ThirdPartyProviders.FIREBASE})
+    ShareModule.register({
+      storage: { provider: ThirdPartyProviders.FIREBASE },
+    }),
   ],
   controllers: [AppController],
   providers: [

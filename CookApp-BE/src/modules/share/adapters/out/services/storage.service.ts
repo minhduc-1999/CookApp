@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import _ = require("lodash");
-import { PreSignedLinkResponse } from "modules/storage/dtos/preSignedLink.dto";
+import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
 import { ConfigService } from "nestjs-config";
 import { addFilePrefix, getFileExtension } from "utils";
 import { IStorageProvider } from "./provider.service";

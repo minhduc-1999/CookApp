@@ -1,19 +1,11 @@
-import { ApiProperty, ApiResponseProperty } from "@nestjs/swagger";
+import { ApiProperty } from "@nestjs/swagger";
 import {
-  IsArray,
-  IsNotEmpty,
   IsString,
+  IsNotEmpty,
   MinLength,
+  IsArray,
 } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-
-export class PreSignedLinkResponse {
-  @ApiResponseProperty({ type: String })
-  objectName: string;
-
-  @ApiResponseProperty({ type: String })
-  signedLink: string;
-}
 
 export class PreSignedLinkRequest {
   @ApiProperty({ type: [String] })
