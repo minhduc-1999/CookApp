@@ -24,7 +24,6 @@ export class GetUploadPresignedLinkQueryHandler
   ): Promise<PreSignedLinkResponse[]> {
     return this._storageService.getUploadSignedLinks(
       command.presignedLinkReq.fileNames,
-      MediaType.POST_IMAGES,
       command.userId
     );
   }

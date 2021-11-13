@@ -13,7 +13,6 @@ export interface IStorageService {
   setMetadata(objectName: string, meta: ObjectMetadata): Promise<any>;
   getUploadSignedLinks(
     fileNames: string[],
-    type: MediaType,
     userId: string
   ): Promise<PreSignedLinkResponse[]>;
   makePublic(objectNames: string[], mediaType: MediaType): Promise<string[]>;
@@ -47,7 +46,8 @@ export class FireBaseService implements IStorageService {
     const tasks: Promise<string>[] = [];
     for (const name of objectNames) {
       const file = bucket.file(name);
-      if (await file.exists()) {
+      const fileExited = (await file.exists())[0];
+      if (fileExited) {
         switch (mediaType) {
           case MediaType.POST_IMAGES:
             tasks.push(
@@ -105,7 +105,6 @@ export class FireBaseService implements IStorageService {
 
   async getUploadSignedLinks(
     fileNames: string[],
-    type: MediaType,
     userId: string
   ): Promise<PreSignedLinkResponse[]> {
     const tasks: Promise<PreSignedLinkResponse>[] = [];
