@@ -3,7 +3,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { StorageController } from "./adapters/in/storage.controller";
 import { FirebaseStorageProvider } from "./adapters/out/services/provider.service";
-import { StorageService } from "./adapters/out/services/storage.service";
+import { FireBaseService } from "./adapters/out/services/storage.service";
 import { GetUploadPresignedLinkQueryHandler } from "./useCases/getUploadPresignedLink";
 
 export type StorageOptions = {
@@ -18,7 +18,7 @@ const handler = [GetUploadPresignedLinkQueryHandler];
   providers: [
     {
       provide: "IStorageService",
-      useClass: StorageService,
+      useClass: FireBaseService,
     },
     ...handler
   ],

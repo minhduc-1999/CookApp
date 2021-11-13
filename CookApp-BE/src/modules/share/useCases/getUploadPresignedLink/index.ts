@@ -1,9 +1,6 @@
 import { Inject } from "@nestjs/common";
-import {
-  ICommandHandler,
-  IQuery,
-  QueryHandler,
-} from "@nestjs/cqrs";
+import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
+import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { PreSignedLinkRequest } from "./presignedLinkRequest";
 import { PreSignedLinkResponse } from "./presignedLinkResponse";
@@ -27,6 +24,7 @@ export class GetUploadPresignedLinkQueryHandler
   ): Promise<PreSignedLinkResponse[]> {
     return this._storageService.getUploadSignedLinks(
       command.presignedLinkReq.fileNames,
+      MediaType.POST_IMAGES,
       command.userId
     );
   }

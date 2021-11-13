@@ -2,6 +2,7 @@ import { ApiProperty, ApiPropertyOptional, PartialType, PickType } from "@nestjs
 import { AuditDTO } from "base/dtos/audit.dto";
 import { Exclude, Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/IsMeaningfulString.decorator";
 import { UserDTO } from "./user.dto";
 
@@ -12,15 +13,17 @@ export class PostDTO extends AuditDTO {
   @IsMeaningfulString(2)
   content: string;
 
+  @ApiPropertyOptional({ type: [String] })
   @IsArray()
   @IsString({ each: true })
-  @ApiPropertyOptional({ type: [String] })
-  images: string[];
+  @IsNotEmpty({ each: true })
+  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml"], { each: true })
+  images?: string[];
 
   @IsString({ each: true })
   @IsArray()
   @ApiPropertyOptional({ type: [String] })
-  videos: string[];
+  videos?: string[];
 
   @Type(() => UserDTO)
   @IsOptional()

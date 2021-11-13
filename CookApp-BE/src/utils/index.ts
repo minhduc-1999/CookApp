@@ -43,3 +43,12 @@ export function getFileExtension(fileName: string): string {
   const regex = /\.\w+$/i
   return fileName.match(regex)[0].slice(1)
 }
+
+export function getMimeType(fileName: string): string {
+  const extension = getFileExtension(fileName)
+  return `image/${extension}`;
+}
+
+export function getNameFromPath(filePath: string): string {
+  return filePath.slice(filePath.lastIndexOf("/") + 1);
+}

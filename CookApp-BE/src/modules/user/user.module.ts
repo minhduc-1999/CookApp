@@ -2,6 +2,8 @@ import { HttpModule, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
+import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
+import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
 import { PostController } from "./adapters/in/post.controller";
 import { PostRepository } from "./adapters/out/post.repository";
@@ -13,7 +15,7 @@ import { EditPostCommandHandler } from "./useCases/editPost";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 
 const commandHandlers = [CreatePostCommandHandler, EditPostCommandHandler];
-const queryHandlers = [GetPostDetailQueryHandler]
+const queryHandlers = [GetPostDetailQueryHandler];
 const services = [
   {
     provide: "IPostService",
@@ -33,8 +35,16 @@ const repositories = [
     HttpModule,
     MongooseModule.forFeature([UserModel, PostModel]),
     CqrsModule,
+    ShareModule.register({
+      storage: { provider: ThirdPartyProviders.FIREBASE },
+    }),
   ],
   controllers: [PostController],
-  providers: [...commandHandlers, ...services, ...repositories, ...queryHandlers],
+  providers: [
+    ...commandHandlers,
+    ...services,
+    ...repositories,
+    ...queryHandlers,
+  ],
 })
 export class UserModule {}
