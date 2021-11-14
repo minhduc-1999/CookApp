@@ -26,15 +26,15 @@ export class UserDTO extends AuditDTO {
 
   @ApiPropertyOptional({ type: String })
   @IsPhoneNumber("VN")
-  phone: string;
+  phone?: string;
 
   @ApiPropertyOptional({ type: String })
   @IsString()
-  avatar: string;
+  avatar?: string;
 
   @ApiPropertyOptional({ type: ProfileDTO })
   @Type(() => ProfileDTO)
-  profile: ProfileDTO;
+  profile?: ProfileDTO;
 
   @IsMongoId()
   @ApiProperty({ type: String })

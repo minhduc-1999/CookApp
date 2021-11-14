@@ -1,14 +1,11 @@
-import {
-  Injectable,
-  Logger,
-} from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { Post, PostDocument } from "domains/schemas/post.schema";
 import { PostDTO } from "dtos/post.dto";
-import { Model } from "mongoose";
+import { ClientSession, Model } from "mongoose";
 
 export interface IPostRepository {
-  createPost(post: PostDTO): Promise<PostDTO>;
+  createPost(post: PostDTO, session: ClientSession): Promise<PostDTO>;
   getPostById(postId: string): Promise<PostDTO>;
   updatePost(post: Partial<PostDTO>): Promise<PostDTO>;
 }
@@ -34,9 +31,12 @@ export class PostRepository implements IPostRepository {
     return new PostDTO(postDoc);
   }
 
-  async createPost(post: PostDTO): Promise<PostDTO> {
+  async createPost(
+    post: PostDTO,
+    session: ClientSession = null
+  ): Promise<PostDTO> {
     const creatingPost = new this._postModel(new Post(post));
-    const postDoc = await creatingPost.save();
+    const postDoc = await creatingPost.save({ session: session });
     if (!postDoc) return null;
     const createdPost = new PostDTO(postDoc);
     return createdPost;

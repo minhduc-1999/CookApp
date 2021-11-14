@@ -24,6 +24,9 @@ import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
 import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
 import { UserDTO } from "dtos/user.dto";
+import { Transaction } from "decorators/transaction.decorator";
+import { MongooseSession } from "decorators/mongooseSession.decorator";
+import { ClientSession } from "mongoose";
 
 @Controller()
 @ApiTags("Authentication")
@@ -34,8 +37,12 @@ export class AuthController {
   @Public()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(RegisterResponse, "Register successfully")
-  async register(@Body() body: RegisterRequest): Promise<Result<RegisterResponse>> {
-    const registerCommand = new RegisterCommand(body);
+  @Transaction()
+  async register(
+    @Body() body: RegisterRequest,
+    @MongooseSession() session: ClientSession
+  ): Promise<Result<RegisterResponse>> {
+    const registerCommand = new RegisterCommand(body, session);
     const user = (await this._commandBus.execute(registerCommand)) as UserDTO;
     return Result.ok(
       { id: user.id, username: user.username },

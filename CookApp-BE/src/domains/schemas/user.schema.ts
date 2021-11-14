@@ -22,20 +22,20 @@ export class User extends AbstractSchema {
   email: string;
 
   @Prop()
-  phone: string;
+  phone?: string;
 
   @Prop()
-  avatar: string;
+  avatar?: string;
 
   @Prop({ schemaName: "display_name" })
-  displayName: string;
+  displayName?: string;
 
   @Prop({
     type: UserProfileSchema,
     get: (profile: UserProfile) => new ProfileDTO(profile),
   })
   @Type(() => UserProfile)
-  profile: UserProfile;
+  profile?: UserProfile;
 
   constructor(userDto: Partial<UserDTO>) {
     super(userDto);

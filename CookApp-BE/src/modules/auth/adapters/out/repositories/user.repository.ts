@@ -4,7 +4,7 @@ import {
   InternalServerErrorException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Model } from "mongoose";
+import { ClientSession, Model } from "mongoose";
 import { ErrorCode } from "enums/errorCode.enum";
 import { MongoErrorCode } from "enums/mongoErrorCode.enum";
 import { ResponseDTO } from "base/dtos/response.dto";
@@ -13,7 +13,10 @@ import { UserDTO } from "dtos/user.dto";
 import { User, UserDocument } from "domains/schemas/user.schema";
 
 export interface IUserRepository {
-  createUser(userData: RegisterRequest): Promise<UserDTO>;
+  createUser(
+    userData: UserDTO,
+    session: ClientSession
+  ): Promise<UserDTO>;
   getUserByEmail(email: string): Promise<UserDTO>;
   getUserByUsername(username: string): Promise<UserDTO>;
   getUserById(id: string): Promise<UserDTO>;
@@ -66,10 +69,13 @@ export class UserRepository implements IUserRepository {
     return userDto;
   }
 
-  async createUser(userData: RegisterRequest): Promise<UserDTO> {
+  async createUser(
+    userData: UserDTO,
+    session: ClientSession = null
+  ): Promise<UserDTO> {
     const createdUser = new this._userModel(new User(userData));
     try {
-      const userDoc = await createdUser.save();
+      const userDoc = await createdUser.save({ session: session });
       if (!userDoc) return null;
       const userDto = new UserDTO(userDoc);
       return userDto;

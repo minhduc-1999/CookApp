@@ -14,7 +14,6 @@ import { TracerService } from '../providers/tracer.service';
 export class TraceIdInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     TracerService.setTraceId(uuidv4());
-
     return next.handle();
   }
 }

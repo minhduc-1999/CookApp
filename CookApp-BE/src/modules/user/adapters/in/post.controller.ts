@@ -7,7 +7,11 @@ import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
+import { MongooseSession } from "decorators/mongooseSession.decorator";
+import { Transaction } from "decorators/transaction.decorator";
+import { User } from "decorators/user.decorator";
 import { PostDTO } from "dtos/post.dto";
+import { UserDTO } from "dtos/user.dto";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
 import { CreatePostRequest } from "modules/user/useCases/createPost/createPostRequest";
 import { CreatePostResponse } from "modules/user/useCases/createPost/createPostResponse";
@@ -16,6 +20,7 @@ import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest"
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
 import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
 import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
+import { ClientSession } from "mongoose";
 import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
 
 @Controller("/users/posts")
@@ -28,11 +33,13 @@ export class PostController {
   @ApiFailResponseCustom()
   @ApiBadReqResponseCustom()
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
+  @Transaction()
   async createPost(
     @Body() post: CreatePostRequest,
-    @Req() req
+    @User() user: UserDTO,
+    @MongooseSession() session: ClientSession
   ): Promise<Result<PostDTO>> {
-    const createPostCommand = new CreatePostCommand(req.user, post);
+    const createPostCommand = new CreatePostCommand(user, post);
     const createdPost = await this._commandBus.execute(createPostCommand);
     return Result.ok(createdPost, { messages: ["Create post successfully"] });
   }
