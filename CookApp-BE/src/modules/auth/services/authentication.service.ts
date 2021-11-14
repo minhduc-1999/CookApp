@@ -6,10 +6,10 @@ import { AuditDTO } from "base/dtos/audit.dto";
 import { isEmail } from "class-validator";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { JwtService } from "@nestjs/jwt";
-import { UserDTO } from "../dtos/user.dto";
 import _ = require("lodash");
 import { LoginResponse } from "../useCases/login/loginResponse";
 import { RegisterRequest } from "../useCases/register/registerRequest";
+import { UserDTO } from "dtos/user.dto";
 
 export interface IAuthentication {
   register(registerDto: RegisterRequest): Promise<UserDTO>;

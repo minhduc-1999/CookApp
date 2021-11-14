@@ -7,7 +7,7 @@ import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
-import { PostDTO } from "modules/user/dtos/post.dto";
+import { PostDTO } from "dtos/post.dto";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
 import { CreatePostRequest } from "modules/user/useCases/createPost/createPostRequest";
 import { CreatePostResponse } from "modules/user/useCases/createPost/createPostResponse";

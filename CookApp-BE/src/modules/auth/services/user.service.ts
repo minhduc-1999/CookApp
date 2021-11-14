@@ -1,8 +1,8 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { UserDTO } from "dtos/user.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { IUserRepository } from "../adapters/out/repositories/user.repository";
-import { UserDTO } from "../dtos/user.dto";
 
 export interface IUserService {
   getUserById(userId: string): Promise<UserDTO>;

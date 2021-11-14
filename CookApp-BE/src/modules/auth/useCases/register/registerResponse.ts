@@ -1,4 +1,4 @@
-import { UserDTO } from "modules/auth/dtos/user.dto";
+import { UserDTO } from "dtos/user.dto";
 
 export class RegisterResponse extends UserDTO {
   constructor(option: Partial<UserDTO>) {

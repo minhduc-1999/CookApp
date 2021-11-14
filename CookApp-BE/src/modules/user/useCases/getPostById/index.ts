@@ -1,6 +1,6 @@
 import { Inject } from "@nestjs/common";
 import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
-import { UserDTO } from "modules/user/dtos/user.dto";
+import { UserDTO } from "dtos/user.dto";
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
 

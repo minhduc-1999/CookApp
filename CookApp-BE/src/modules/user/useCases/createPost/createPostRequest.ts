@@ -1,3 +1,3 @@
-import { PostDTO } from "modules/user/dtos/post.dto";
+import { PostDTO } from "dtos/post.dto";
 
 export class CreatePostRequest extends PostDTO {}

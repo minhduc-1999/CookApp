@@ -1,3 +1,3 @@
-import { UserDTO } from "modules/auth/dtos/user.dto";
+import { UserDTO } from "dtos/user.dto";
 
 export class UpdateProfileResponse extends UserDTO {}

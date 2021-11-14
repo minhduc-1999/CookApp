@@ -4,8 +4,8 @@ import storage from "config/storage";
 import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostRepository } from "modules/user/adapters/out/post.repository";
-import { PostDTO } from "modules/user/dtos/post.dto";
-import { UserDTO } from "modules/user/dtos/user.dto";
+import { PostDTO } from "dtos/post.dto";
+import { UserDTO } from "dtos/user.dto";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 

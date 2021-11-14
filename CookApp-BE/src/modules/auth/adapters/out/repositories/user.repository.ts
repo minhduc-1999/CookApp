@@ -4,15 +4,13 @@ import {
   InternalServerErrorException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { User, UserDocument } from "modules/auth/domains/schemas/user.schema";
-import { UserDTO } from "modules/auth/dtos/user.dto";
 import { Model } from "mongoose";
 import { ErrorCode } from "enums/errorCode.enum";
 import { MongoErrorCode } from "enums/mongoErrorCode.enum";
-import { createUpdatingNestedObject } from "utils";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
-import { UpdateProfileRequest } from "modules/auth/useCases/updateProfile/updateProfileRequest";
+import { UserDTO } from "dtos/user.dto";
+import { User, UserDocument } from "domains/schemas/user.schema";
 
 export interface IUserRepository {
   createUser(userData: RegisterRequest): Promise<UserDTO>;

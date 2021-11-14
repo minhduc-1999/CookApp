@@ -4,7 +4,7 @@ import { ErrorCode } from "enums/errorCode.enum";
 import { ConfigService } from "nestjs-config";
 import path = require("path");
 import { IPostRepository } from "../adapters/out/post.repository";
-import { PostDTO } from "../dtos/post.dto";
+import { PostDTO } from "../../../dtos/post.dto";
 
 export interface IPostService {
   getPostDetail(postId: string): Promise<PostDTO>;

@@ -1,8 +1,7 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
 import { Type } from "class-transformer";
-import { PostDTO } from "modules/user/dtos/post.dto";
-import { UserDTO } from "modules/user/dtos/user.dto";
+import { PostDTO } from "dtos/post.dto";
 import * as mongoose from "mongoose";
 import { Document } from "mongoose";
 import { User } from "./user.schema";

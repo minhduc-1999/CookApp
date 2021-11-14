@@ -1,8 +1,8 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
 import { Type } from "class-transformer";
-import { ProfileDTO } from "modules/auth/dtos/profile.dto";
-import { UserDTO } from "modules/auth/dtos/user.dto";
+import { ProfileDTO } from "dtos/profile.dto";
+import { UserDTO } from "dtos/user.dto";
 import { Document } from "mongoose";
 import { UserProfile, UserProfileSchema } from "./user_profile.schema";
 
@@ -10,6 +10,8 @@ export type UserDocument = User & Document;
 
 @Schema()
 export class User extends AbstractSchema {
+  _id: string;
+
   @Prop({ uniques: true })
   username: string;
 
@@ -41,8 +43,9 @@ export class User extends AbstractSchema {
     this.email = userDto?.email;
     this.phone = userDto?.phone;
     this.avatar = userDto?.avatar;
-    this.profile = userDto?.profile && new UserProfile(userDto?.profile)
+    this.profile = userDto?.profile && new UserProfile(userDto?.profile);
     this.password = userDto?.password;
+    this._id = userDto?.id
   }
 }
 

@@ -1,7 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
+import { UserDTO } from "dtos/user.dto";
 import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
-import { UserDTO } from "modules/auth/dtos/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
 import { createUpdatingNestedObject } from "utils";
 import { UpdateProfileRequest } from "./updateProfileRequest";

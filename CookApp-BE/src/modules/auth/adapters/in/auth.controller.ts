@@ -13,7 +13,6 @@ import { RegisterCommand } from "modules/auth/useCases/register";
 import { Result } from "base/result.base";
 import { BasicAuthGuard } from "guards/basic_auth.guard";
 import { LoginCommand } from "modules/auth/useCases/login";
-import { UserDTO } from "modules/auth/dtos/user.dto";
 import {
   ApiFailResponseCustom,
   ApiCreatedResponseCustom,
@@ -24,6 +23,7 @@ import { LoginRequest } from "modules/auth/useCases/login/loginRequest";
 import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
 import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
+import { UserDTO } from "dtos/user.dto";
 
 @Controller()
 @ApiTags("Authentication")
