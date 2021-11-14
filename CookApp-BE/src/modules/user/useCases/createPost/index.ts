@@ -39,6 +39,8 @@ export class CreatePostCommandHandler
     const creatingPost = new PostDTO({
       ...postDto,
       author: command.author,
+      createdBy: command.author.id,
+      updatedBy: command.author.id,
     });
     const result = await this._postRepo.createPost(creatingPost);
     return new CreatePostResponse(result);

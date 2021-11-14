@@ -1,6 +1,5 @@
 import { Prop } from "@nestjs/mongoose";
 import { AuditDTO } from "base/dtos/audit.dto";
-import _ = require("lodash");
 
 export abstract class AbstractSchema {
   id: string;
@@ -10,6 +9,9 @@ export abstract class AbstractSchema {
 
   @Prop({ schemaName: "updated_at", required: true })
   updatedAt: number;
+
+  @Prop({ schemaName: "created_at", required: true })
+  createdAt: number;
 
   @Prop({ schemaName: "updated_by", required: true })
   updatedBy: string;
@@ -21,9 +23,10 @@ export abstract class AbstractSchema {
   deletedBy: string;
 
   constructor(audit: Partial<AuditDTO>) {
-    this.createdBy = audit?.createdBy ? audit.createdBy : "system";
-    this.updatedAt = audit?.updatedAt ? audit.updatedAt : _.now();
-    this.updatedBy = audit?.updatedBy ? audit.createdBy : "system";
+    this.createdBy = audit?.createdBy;
+    this.updatedAt = audit?.updatedAt;
+    this.createdAt = audit?.createdAt;
+    this.updatedBy = audit?.updatedBy;
     this.deletedAt = audit?.deletedAt;
     this.deletedBy = audit?.deletedBy;
   }

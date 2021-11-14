@@ -3,11 +3,14 @@ import { Exclude } from "class-transformer";
 import _ = require("lodash");
 
 export class AuditDTO {
-  @ApiProperty({type: String, readOnly: true})
+  @ApiProperty({ type: String, readOnly: true })
   id: string;
 
   @Exclude()
   createdBy: string;
+
+  @Exclude()
+  createdAt: number;
 
   updatedAt: number;
 
@@ -22,7 +25,8 @@ export class AuditDTO {
 
   constructor(audit: Partial<AuditDTO>) {
     this.createdBy = audit?.createdBy;
-    this.updatedAt = audit?.updatedAt;
+    this.updatedAt = audit?.updatedAt ? audit?.updatedAt : _.now();
+    this.createdAt = audit?.createdAt ? audit?.createdAt : _.now();
     this.updatedBy = audit?.updatedBy;
     this.deletedAt = audit?.deletedAt;
     this.deletedBy = audit?.deletedBy;
