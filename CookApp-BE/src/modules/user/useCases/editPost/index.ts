@@ -2,7 +2,7 @@ import { ForbiddenException, Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
-import { IPostRepository } from "modules/user/adapters/out/post.repository";
+import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
 import {} from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
 import { IPostService } from "modules/user/services/post.service";

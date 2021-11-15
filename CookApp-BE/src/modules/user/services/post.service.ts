@@ -3,7 +3,7 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { ConfigService } from "nestjs-config";
 import path = require("path");
-import { IPostRepository } from "../adapters/out/post.repository";
+import { IPostRepository } from "../adapters/out/repositories/post.repository";
 import { PostDTO } from "../../../dtos/post.dto";
 
 export interface IPostService {

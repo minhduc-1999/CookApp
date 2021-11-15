@@ -3,11 +3,9 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Wall, WallDocument } from "domains/schemas/wall.schema";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
-import { WallDTO } from "dtos/wall.dto";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
 
 export interface IWallRepository {
-  createWall(wall: WallDTO, session: ClientSession): Promise<WallDTO>;
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
 }
 
@@ -24,14 +22,9 @@ export class WallRepository implements IWallRepository {
       },
       {
         $push: { posts: post },
+        $inc: { numberOfPost: 1 },
       }
     );
   }
-  async createWall(wall: WallDTO, session: ClientSession): Promise<WallDTO> {
-    const creatingWall = new this._wallModel(new Wall(wall));
-    const wallDoc = await creatingWall.save({ session: session });
-    if (!wallDoc) return null;
-    const createdWall = new WallDTO(wallDoc);
-    return createdWall;
-  }
+  
 }
