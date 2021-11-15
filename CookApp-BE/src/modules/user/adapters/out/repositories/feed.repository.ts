@@ -3,11 +3,15 @@ import { InjectModel } from "@nestjs/mongoose";
 import { Feed, FeedDocument } from "domains/schemas/feed.schema";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
-import { FeedDTO } from "dtos/feed.dto";
 import { ClientSession, Model } from "mongoose";
 
 export interface IFeedRepository {
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
+  updatePostInFeed(
+    post: PostDTO,
+    user: UserDTO,
+    session?: ClientSession
+  ): Promise<void>;
 }
 
 @Injectable()
@@ -24,6 +28,23 @@ export class FeedRepository implements IFeedRepository {
       {
         $push: { posts: post },
       }
+    );
+  }
+
+  async updatePostInFeed(
+    post: PostDTO,
+    user: UserDTO,
+    session: ClientSession = null
+  ): Promise<void> {
+    await this._feedModel.updateOne(
+      {
+        user: { id: user.id },
+        "posts.id": post.id,
+      },
+      {
+        $set: { "posts.$": post },
+      },
+      { session }
     );
   }
 }

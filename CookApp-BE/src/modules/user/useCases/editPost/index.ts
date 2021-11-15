@@ -11,10 +11,12 @@ import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
+import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
+import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 export class EditPostCommand extends BaseCommand {
   postDto: EditPostRequest;
   constructor(session: ClientSession, user: UserDTO, post: EditPostRequest) {
-    super(session, user)
+    super(session, user);
     this.postDto = post;
   }
 }
@@ -26,21 +28,30 @@ export class EditPostCommandHandler
     @Inject("IPostService")
     private _postService: IPostService,
     @Inject("IPostRepository")
-    private _postRepo: IPostRepository
+    private _postRepo: IPostRepository,
+    @Inject("IWallRepository")
+    private _wallRepo: IWallRepository,
+    @Inject("IFeedRepository")
+    private _feedRepo: IFeedRepository
   ) {}
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
-    const existedPost = await this._postService.getPostDetail(
-      command.postDto.id
-    );
+    const { user, postDto } = command;
+    const existedPost = await this._postService.getPostDetail(postDto.id);
 
-    if (existedPost.author.id !== command.user.id)
+    if (existedPost.author.id !== user.id)
       throw new ForbiddenException(
         ResponseDTO.fail(
           "You have no permission to edit post",
           ErrorCode.INVALID_OWNER
         )
       );
-    const updatedPost = createUpdatingObject(command.postDto, command.user.id);
-    return this._postRepo.updatePost(updatedPost);
+    const updatePost = createUpdatingObject(postDto, user.id);
+    const updatedResult = await this._postRepo.updatePost(updatePost);
+    delete updatedResult.author;
+    await Promise.all([
+      this._wallRepo.updatePostInWall(updatedResult, user),
+      this._feedRepo.updatePostInFeed(updatedResult, user),
+    ]);
+    return updatedResult;
   }
 }
