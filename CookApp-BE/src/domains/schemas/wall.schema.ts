@@ -12,19 +12,19 @@ export class Wall extends AbstractSchema {
   @Prop({ type: Object })
   user: Pick<User, "avatar" | "id">;
 
-  @Prop()
+  @Prop({ default: 0 })
   numberOfPost: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   numberOfFollower: number;
 
-  @Prop()
+  @Prop({ default: 0 })
   numberOfFollowing: number;
 
   @Prop({
     type: [Object],
   })
-  posts: Post[];
+  posts: Omit<Post, "author">[];
 
   constructor(wall: Partial<WallDTO>) {
     super(wall);

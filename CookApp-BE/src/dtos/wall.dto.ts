@@ -9,7 +9,7 @@ export class WallDTO extends AuditDTO {
   user: Pick<UserDTO, 'id' | 'avatar'>;
 
   @Type(() => PostDTO)
-  posts: PostDTO[];
+  posts: Omit<PostDTO, 'author'>[];
 
   numberOfFollower: number 
 

@@ -18,15 +18,15 @@ export class PostDTO extends AuditDTO {
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
   @IsFileExtensions(["jpeg", "png", "gif", "svg+xml"], { each: true })
+  @IsOptional()
   images?: string[];
 
   @IsString({ each: true })
   @IsArray()
   @ApiPropertyOptional({ type: [String] })
+  @IsOptional()
   videos?: string[];
 
-  @Type(() => UserDTO)
-  @IsOptional()
   @Exclude()
   author?: UserDTO;
 

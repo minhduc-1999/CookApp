@@ -9,6 +9,8 @@ import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
+import { WallDTO } from "dtos/wall.dto";
+import { IWallRepository } from "modules/user/adapters/out/wall.repository";
 
 export class CreatePostCommand extends BaseCommand{
   postDto: CreatePostRequest;
@@ -25,10 +27,12 @@ export class CreatePostCommandHandler
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
     @Inject("IStorageService")
-    private _storageService: IStorageService
+    private _storageService: IStorageService,
+    @Inject('IWallRepository')
+    private _wallRepo: IWallRepository
   ) {}
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
-    const { postDto } = command;
+    const { postDto, user } = command;
     
     if (postDto.images?.length > 0) {
       postDto.images = await this._storageService.makePublic(
@@ -38,11 +42,13 @@ export class CreatePostCommandHandler
     }
     const creatingPost = new PostDTO({
       ...postDto,
-      author: command.user,
-      createdBy: command.user.id,
-      updatedBy: command.user.id,
+      author: user,
+      createdBy: user.id,
+      updatedBy: user.id,
     });
     const result = await this._postRepo.createPost(creatingPost, command.session);
+    delete result['author']
+    await this._wallRepo.pushNewPost(result, user)
     return new CreatePostResponse(result);
   }
 }
