@@ -1,5 +1,5 @@
 import { ForbiddenException, Inject } from "@nestjs/common";
-import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { IPostRepository } from "modules/user/adapters/out/post.repository";
@@ -9,11 +9,12 @@ import { IPostService } from "modules/user/services/post.service";
 import { createUpdatingObject } from "utils";
 import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
-export class EditPostCommand implements ICommand {
-  author: UserDTO;
+import { BaseCommand } from "base/cqrs/command.base";
+import { ClientSession } from "mongoose";
+export class EditPostCommand extends BaseCommand {
   postDto: EditPostRequest;
-  constructor(author: UserDTO, post: EditPostRequest) {
-    this.author = author;
+  constructor(session: ClientSession, user: UserDTO, post: EditPostRequest) {
+    super(session, user)
     this.postDto = post;
   }
 }
@@ -32,14 +33,14 @@ export class EditPostCommandHandler
       command.postDto.id
     );
 
-    if (existedPost.author.id !== command.author.id)
+    if (existedPost.author.id !== command.user.id)
       throw new ForbiddenException(
         ResponseDTO.fail(
           "You have no permission to edit post",
           ErrorCode.INVALID_OWNER
         )
       );
-    const updatedPost = createUpdatingObject(command.postDto, command.author.id);
+    const updatedPost = createUpdatingObject(command.postDto, command.user.id);
     return this._postRepo.updatePost(updatedPost);
   }
 }

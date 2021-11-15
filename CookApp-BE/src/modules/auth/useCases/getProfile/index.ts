@@ -1,13 +1,13 @@
 import { Inject } from "@nestjs/common";
 import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
+import { BaseQuery } from "base/cqrs/query.base";
 import { UserDTO } from "dtos/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
 import { GetProfileResponse } from "./getProfileResponse";
 
-export class GetProfileQuery implements IQuery {
-  user: UserDTO;
+export class GetProfileQuery extends BaseQuery {
   constructor(user: UserDTO) {
-    this.user = user;
+    super(user)
   }
 }
 

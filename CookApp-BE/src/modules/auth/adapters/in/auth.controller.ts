@@ -3,7 +3,6 @@ import {
   Controller,
   HttpCode,
   Post,
-  Req,
   UseGuards,
 } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
@@ -27,6 +26,7 @@ import { UserDTO } from "dtos/user.dto";
 import { Transaction } from "decorators/transaction.decorator";
 import { MongooseSession } from "decorators/mongooseSession.decorator";
 import { ClientSession } from "mongoose";
+import { User } from "decorators/user.decorator";
 
 @Controller()
 @ApiTags("Authentication")
@@ -60,8 +60,8 @@ export class AuthController {
   @ApiBadReqResponseCustom("Username or password is not correct")
   @ApiOKResponseCustom(LoginResponse, "Login successfully")
   @Public()
-  async login(@Req() req): Promise<Result<LoginResponse>> {
-    const loginCommand = new LoginCommand(req.user);
+  async login(@User() user: UserDTO): Promise<Result<LoginResponse>> {
+    const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
     return Result.ok(result, { messages: ["Login successfully"] });
   }

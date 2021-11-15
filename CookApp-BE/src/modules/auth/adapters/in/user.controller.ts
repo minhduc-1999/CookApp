@@ -9,6 +9,8 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
 import { ApiBadReqResponseCustom, ApiFailResponseCustom, ApiOKResponseCustom } from "decorators/ApiSuccessResponse.decorator";
+import { User } from "decorators/user.decorator";
+import { UserDTO } from "dtos/user.dto";
 import { GetProfileQuery } from "modules/auth/useCases/getProfile";
 import { GetProfileResponse } from "modules/auth/useCases/getProfile/getProfileResponse";
 import { UpdateProfileCommand } from "modules/auth/useCases/updateProfile";
@@ -25,8 +27,8 @@ export class UserController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetProfileResponse, "Getting profile successfully")
   @ApiBadReqResponseCustom()
-  async getProfile(@Req() req): Promise<Result<GetProfileResponse>> {
-    const query = new GetProfileQuery(req.user);
+  async getProfile(@User() user: UserDTO): Promise<Result<GetProfileResponse>> {
+    const query = new GetProfileQuery(user);
     const result = await this._queryBus.execute(query);
     return Result.ok(result, { messages: ["Getting profile successfully"] });
   }
@@ -36,10 +38,10 @@ export class UserController {
   @ApiOKResponseCustom(UpdateProfileResponse, "Getting profile successfully")
   @ApiBadReqResponseCustom("Parameter type is not correct")
   async updateProfile(
-    @Req() req,
+    @User() user: UserDTO,
     @Body() body: UpdateProfileRequest
   ): Promise<Result<UpdateProfileResponse>> {
-    const command = new UpdateProfileCommand(req.user, body);
+    const command = new UpdateProfileCommand(null, user, body);
     const result = await this._commandBus.execute(command);
     return Result.ok(result, { messages: ["Updating profile successfully"] });
   }

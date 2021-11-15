@@ -6,6 +6,8 @@ import {
   ApiFailResponseCustom,
   ApiOKListResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
+import { User } from "decorators/user.decorator";
+import { UserDTO } from "dtos/user.dto";
 import { GetUploadPresignedLinkQuery } from "modules/share/useCases/getUploadPresignedLink";
 import { PreSignedLinkRequest } from "modules/share/useCases/getUploadPresignedLink/presignedLinkRequest";
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
@@ -25,9 +27,9 @@ export class StorageController {
   )
   async getPresignedLinks(
     @Body() body: PreSignedLinkRequest,
-    @Req() req
+    @User() user: UserDTO
   ): Promise<Result<PreSignedLinkResponse[]>> {
-    const query = new GetUploadPresignedLinkQuery(body, req.user.id);
+    const query = new GetUploadPresignedLinkQuery(body, user.id);
     const result = await this._queryBus.execute(query);
     return Result.okList(result, {
       messages: ["Get presigned links successfully"],

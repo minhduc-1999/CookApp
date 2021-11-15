@@ -39,7 +39,7 @@ export class PostController {
     @User() user: UserDTO,
     @MongooseSession() session: ClientSession
   ): Promise<Result<PostDTO>> {
-    const createPostCommand = new CreatePostCommand(user, post);
+    const createPostCommand = new CreatePostCommand(user, post, session);
     const createdPost = await this._commandBus.execute(createPostCommand);
     return Result.ok(createdPost, { messages: ["Create post successfully"] });
   }
@@ -51,9 +51,9 @@ export class PostController {
   @ApiNotFoundResponse({ description: "Post not found" })
   async getPostById(
     @Param("postId", ParseObjectIdPipe) postId: string,
-    @Req() req
+    @User() user: UserDTO
   ): Promise<Result<GetPostResponse>> {
-    const query = new GetPostDetailQuery(req.user, postId);
+    const query = new GetPostDetailQuery(user, postId);
     const post = await this._queryBus.execute(query);
     return Result.ok(post, { messages: ["Get post successfully"] });
   }
@@ -64,11 +64,11 @@ export class PostController {
   @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
   async editPost(
     @Body() post: EditPostRequest,
-    @Req() req,
+    @User() user: UserDTO,
     @Param("postId", ParseObjectIdPipe) postId: string
   ): Promise<Result<EditPostResponse>> {
     post.id = postId;
-    const editPostCommand = new EditPostCommand(req.user, post);
+    const editPostCommand = new EditPostCommand(null, user, post);
     const updatedPost = await this._commandBus.execute(editPostCommand);
     return Result.ok(updatedPost, { messages: ["Edit post successfully"] });
   }

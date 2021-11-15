@@ -1,17 +1,18 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
+import { BaseCommand } from "base/cqrs/command.base";
 import { UserDTO } from "dtos/user.dto";
 import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { IUserService } from "modules/auth/services/user.service";
+import { ClientSession } from "mongoose";
 import { createUpdatingNestedObject } from "utils";
 import { UpdateProfileRequest } from "./updateProfileRequest";
 import { UpdateProfileResponse } from "./updateProfileResponse";
 
-export class UpdateProfileCommand implements ICommand {
-  user: UserDTO;
+export class UpdateProfileCommand extends BaseCommand {
   updateProfileReq: UpdateProfileRequest
-  constructor(user: UserDTO, profile: UpdateProfileRequest) {
-    this.user = user;
+  constructor(session: ClientSession,user: UserDTO, profile: UpdateProfileRequest) {
+    super(session, user)
     this.updateProfileReq = profile;
   }
 }

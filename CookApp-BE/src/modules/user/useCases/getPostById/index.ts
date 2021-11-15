@@ -1,20 +1,21 @@
 import { Inject } from "@nestjs/common";
-import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
+import { ICommandHandler, QueryHandler } from "@nestjs/cqrs";
+import { BaseQuery } from "base/cqrs/query.base";
 import { UserDTO } from "dtos/user.dto";
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
 
-export class GetPostDetailQuery implements IQuery {
-  user: UserDTO;
+export class GetPostDetailQuery extends BaseQuery {
   postId: string;
-  constructor(author: UserDTO, postId: string) {
-    this.user = author;
+  constructor(user: UserDTO, postId: string) {
+    super(user);
     this.postId = postId;
   }
 }
 
 @QueryHandler(GetPostDetailQuery)
-export class GetPostDetailQueryHandler implements ICommandHandler<GetPostDetailQuery> {
+export class GetPostDetailQueryHandler
+  implements ICommandHandler<GetPostDetailQuery> {
   constructor(
     @Inject("IPostService")
     private _postService: IPostService
