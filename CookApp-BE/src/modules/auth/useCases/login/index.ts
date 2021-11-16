@@ -1,13 +1,14 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
-import { LoginResponseDto } from "modules/auth/dtos/login.dto";
-import { UserDTO } from "modules/auth/dtos/user.dto";
+import { BaseCommand } from "base/cqrs/command.base";
+import { UserDTO } from "dtos/user.dto";
 import { IAuthentication } from "modules/auth/services/authentication.service";
+import { ClientSession } from "mongoose";
+import { LoginResponse } from "./loginResponse";
 
-export class LoginCommand implements ICommand {
-  user: UserDTO;
-  constructor(user: UserDTO) {
-    this.user = user;
+export class LoginCommand extends BaseCommand {
+  constructor(session: ClientSession, user: UserDTO) {
+    super(session, user)
   }
 }
 
@@ -17,7 +18,7 @@ export class LoginCommandHandler implements ICommandHandler<LoginCommand> {
     @Inject("IAuthentication")
     private _authService: IAuthentication
   ) {}
-  async execute(command: LoginCommand): Promise<LoginResponseDto> {
+  async execute(command: LoginCommand): Promise<LoginResponse> {
     return this._authService.login(command.user);
   }
 }

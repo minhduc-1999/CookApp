@@ -2,13 +2,17 @@
 import { Controller, Get, UseInterceptors } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RavenInterceptor } from 'nest-raven';
+import { Public } from 'decorators/public.decorator';
+import { ApiTags } from '@nestjs/swagger';
 
 @UseInterceptors(new RavenInterceptor())
 @Controller()
+@ApiTags('Welcome to Tastify')
 export class AppController {
   constructor(private readonly _appService: AppService) { }
 
   @Get()
+  @Public()
   getHello(): string {
     return this._appService.getHello();
   }

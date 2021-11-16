@@ -4,6 +4,7 @@ import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
+import { TransactionInterceptor } from "interceptors/transaction.interceptor";
 import { AuthModule } from "modules/auth/auth.module";
 import { UserModule } from "modules/user/user.module";
 import { RavenModule } from "nest-raven";
@@ -13,7 +14,7 @@ import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import "./boilerplate.polyfill";
 import { TraceIdInterceptor } from "./interceptors/trace-id-interceptor.service";
-import { contextMiddleware } from "./middleware/context.middelware";
+import { contextMiddleware } from "./middleware/context.middleware";
 
 @Module({
   imports: [
@@ -43,7 +44,7 @@ import { contextMiddleware } from "./middleware/context.middelware";
       },
     }),
     AuthModule,
-    UserModule
+    UserModule,
   ],
   controllers: [AppController],
   providers: [
@@ -52,6 +53,10 @@ import { contextMiddleware } from "./middleware/context.middelware";
       provide: APP_INTERCEPTOR,
       useClass: TraceIdInterceptor,
     },
+    // {
+    //   provide: APP_INTERCEPTOR,
+    //   useClass: TransactionInterceptor,
+    // },
   ],
 })
 export class AppModule implements NestModule {

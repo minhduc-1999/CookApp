@@ -7,7 +7,7 @@ export class AppService {
 
   constructor(private _configService: ConfigService) {}
   getHello(): string {
-    return 'Hello we are foodgod!';
+    return 'Hello we are Tastify!';
   }
 
 }

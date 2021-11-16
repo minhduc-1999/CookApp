@@ -3,77 +3,99 @@ import {
   Controller,
   Get,
   Param,
-  ParseIntPipe,
   Patch,
   Post,
-  Put,
-  Req,
-  UseInterceptors,
+  Query,
 } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
+import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
-  ApiBadReqResponseCustom,
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
-import {
-  CreatePostDTO,
-  PostDTO,
-  UpdatePostDTO,
-} from "modules/user/dtos/post.dto";
+import { MongooseSession } from "decorators/mongooseSession.decorator";
+import { Transaction } from "decorators/transaction.decorator";
+import { User } from "decorators/user.decorator";
+import { PostDTO } from "dtos/post.dto";
+import { UserDTO } from "dtos/user.dto";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
+import { CreatePostRequest } from "modules/user/useCases/createPost/createPostRequest";
+import { CreatePostResponse } from "modules/user/useCases/createPost/createPostResponse";
 import { EditPostCommand } from "modules/user/useCases/editPost";
+import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
+import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
 import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
+import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
+import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";
+import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWallPostsResponse";
+import { ClientSession } from "mongoose";
 import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
+import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
 
-@Controller("/users/posts")
-@ApiTags("User")
+@Controller("users")
+@ApiTags("User/Post")
 @ApiBearerAuth()
 export class PostController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
-  @Post()
+  @Post('posts')
   @ApiFailResponseCustom()
-  @ApiBadReqResponseCustom()
-  @ApiCreatedResponseCustom(PostDTO, "Create post successfully")
+  @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
+  @Transaction()
   async createPost(
-    @Body() post: CreatePostDTO,
-    @Req() req
+    @Body() post: CreatePostRequest,
+    @User() user: UserDTO,
+    @MongooseSession() session: ClientSession
   ): Promise<Result<PostDTO>> {
-    const createPostCommand = new CreatePostCommand(req.user, post);
+    const createPostCommand = new CreatePostCommand(user, post, session);
     const createdPost = await this._commandBus.execute(createPostCommand);
     return Result.ok(createdPost, { messages: ["Create post successfully"] });
   }
 
-  @Get(":postId")
+  @Get("posts/:postId")
   @ApiFailResponseCustom()
-  @ApiBadReqResponseCustom()
-  @ApiCreatedResponseCustom(PostDTO, "Get post successfully")
+  @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
   async getPostById(
     @Param("postId", ParseObjectIdPipe) postId: string,
-    @Req() req
-  ): Promise<Result<PostDTO>> {
-    const query = new GetPostDetailQuery(req.user, postId);
+    @User() user: UserDTO
+  ): Promise<Result<GetPostResponse>> {
+    const query = new GetPostDetailQuery(user, postId);
     const post = await this._queryBus.execute(query);
     return Result.ok(post, { messages: ["Get post successfully"] });
   }
 
-  @Patch(":postId")
+  @Patch("posts/:postId")
   @ApiFailResponseCustom()
-  @ApiBadReqResponseCustom()
-  @ApiCreatedResponseCustom(Object, "Edit post successfully")
+  @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
   async editPost(
-    @Body() post: UpdatePostDTO,
-    @Req() req,
+    @Body() post: EditPostRequest,
+    @User() user: UserDTO,
     @Param("postId", ParseObjectIdPipe) postId: string
-  ): Promise<Result<any>> {
+  ): Promise<Result<EditPostResponse>> {
     post.id = postId;
-    const editPostCommand = new EditPostCommand(req.user, post);
-    await this._commandBus.execute(editPostCommand);
-    return Result.ok({}, { messages: ["Edit post successfully"] });
+    const editPostCommand = new EditPostCommand(null, user, post);
+    const updatedPost = await this._commandBus.execute(editPostCommand);
+    return Result.ok(updatedPost, { messages: ["Edit post successfully"] });
+  }
+
+  @Get('wall/posts')
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(
+    GetWallPostsResponse,
+    "Get wall's posts successfully"
+  )
+  async getWallPosts(
+    @Query(ParsePaginationPipe) query: PageOptionsDto,
+    @User() user: UserDTO
+  ): Promise<Result<GetWallPostsResponse>> {
+    const postsQuery = new GetWallPostsQuery(user, query);
+    const result = await this._queryBus.execute(postsQuery);
+    return Result.ok(result, {
+      messages: ["Get wall's posts successfully"],
+    });
   }
 }

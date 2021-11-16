@@ -4,24 +4,25 @@ import {
   InternalServerErrorException,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { User, UserDocument } from "modules/auth/domains/schemas/user.schema";
-import { RegisterDTO } from "modules/auth/dtos/register.dto";
-import { UpdateProfileDTO } from "modules/auth/dtos/profile.dto";
-import { UserDTO } from "modules/auth/dtos/user.dto";
-import { Model } from "mongoose";
+import { ClientSession, Model } from "mongoose";
 import { ErrorCode } from "enums/errorCode.enum";
 import { MongoErrorCode } from "enums/mongoErrorCode.enum";
-import { createUpdatingNestedObject } from "utils";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
+import { UserDTO } from "dtos/user.dto";
+import { User, UserDocument } from "domains/schemas/user.schema";
 
 export interface IUserRepository {
-  createUser(userData: RegisterDTO): Promise<UserDTO>;
+  createUser(
+    userData: UserDTO,
+    session: ClientSession
+  ): Promise<UserDTO>;
   getUserByEmail(email: string): Promise<UserDTO>;
   getUserByUsername(username: string): Promise<UserDTO>;
   getUserById(id: string): Promise<UserDTO>;
   updateUserProfile(
     userId: string,
-    profile: UpdateProfileDTO,
+    profile: Partial<UserDTO>
   ): Promise<UserDTO>;
 }
 
@@ -33,19 +34,16 @@ export class UserRepository implements IUserRepository {
 
   async updateUserProfile(
     userId: string,
-    profile: UpdateProfileDTO
+    profile: Partial<UserDTO>
   ): Promise<UserDTO> {
-    const updatingProfile = createUpdatingNestedObject<UpdateProfileDTO>('profile', profile, userId)
     const userDoc = await this._userModel.findByIdAndUpdate(
       userId,
-      { $set: updatingProfile },
+      { $set: profile },
       {
         new: true,
       }
     );
-    if (!userDoc) return null;
-    const user = new UserDTO(userDoc);
-    return user;
+    return new UserDTO(userDoc);
   }
 
   async getUserById(id: string): Promise<UserDTO> {
@@ -71,15 +69,18 @@ export class UserRepository implements IUserRepository {
     return userDto;
   }
 
-  async createUser(userData: RegisterDTO): Promise<UserDTO> {
+  async createUser(
+    userData: UserDTO,
+    session: ClientSession = null
+  ): Promise<UserDTO> {
     const createdUser = new this._userModel(new User(userData));
     try {
-      const userDoc = await createdUser.save();
+      const userDoc = await createdUser.save({ session: session });
       if (!userDoc) return null;
       const userDto = new UserDTO(userDoc);
       return userDto;
     } catch (error) {
-      console.error(error)
+      console.error(error);
       if (error.code === MongoErrorCode.DUPLICATE_KEY)
         throw new BadRequestException(
           ResponseDTO.fail(
@@ -88,6 +89,6 @@ export class UserRepository implements IUserRepository {
           )
         );
       throw new InternalServerErrorException();
-    }    
+    }
   }
 }

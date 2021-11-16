@@ -8,11 +8,14 @@ import {
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
-import { ApiBadReqResponseCustom, ApiFailResponseCustom, ApiOKResponseCustom } from "decorators/ApiSuccessResponse.decorator";
-import { ProfileDTO, UpdateProfileDTO } from "modules/auth/dtos/profile.dto";
-import { UserDTO } from "modules/auth/dtos/user.dto";
+import { ApiFailResponseCustom, ApiOKResponseCustom } from "decorators/ApiSuccessResponse.decorator";
+import { User } from "decorators/user.decorator";
+import { UserDTO } from "dtos/user.dto";
 import { GetProfileQuery } from "modules/auth/useCases/getProfile";
+import { GetProfileResponse } from "modules/auth/useCases/getProfile/getProfileResponse";
 import { UpdateProfileCommand } from "modules/auth/useCases/updateProfile";
+import { UpdateProfileRequest } from "modules/auth/useCases/updateProfile/updateProfileRequest";
+import { UpdateProfileResponse } from "modules/auth/useCases/updateProfile/updateProfileResponse";
 
 @Controller("users")
 @ApiTags("Authentication")
@@ -22,23 +25,21 @@ export class UserController {
 
   @Get("profile")
   @ApiFailResponseCustom()
-  @ApiOKResponseCustom(UserDTO, "Getting profile successfully")
-  @ApiBadReqResponseCustom()
-  async getProfile(@Req() req): Promise<Result<UserDTO>> {
-    const query = new GetProfileQuery(req.user);
+  @ApiOKResponseCustom(GetProfileResponse, "Getting profile successfully")
+  async getProfile(@User() user: UserDTO): Promise<Result<GetProfileResponse>> {
+    const query = new GetProfileQuery(user);
     const result = await this._queryBus.execute(query);
     return Result.ok(result, { messages: ["Getting profile successfully"] });
   }
 
   @Patch("profile")
   @ApiFailResponseCustom()
-  @ApiOKResponseCustom(UserDTO, "Getting profile successfully")
-  @ApiBadReqResponseCustom('Parameter type is not correct')
+  @ApiOKResponseCustom(UpdateProfileResponse, "Getting profile successfully")
   async updateProfile(
-    @Req() req,
-    @Body() body: UpdateProfileDTO
-  ): Promise<Result<UserDTO>> {
-    const command = new UpdateProfileCommand(req.user, body);
+    @User() user: UserDTO,
+    @Body() body: UpdateProfileRequest
+  ): Promise<Result<UpdateProfileResponse>> {
+    const command = new UpdateProfileCommand(null, user, body);
     const result = await this._commandBus.execute(command);
     return Result.ok(result, { messages: ["Updating profile successfully"] });
   }

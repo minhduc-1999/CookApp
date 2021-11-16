@@ -1,15 +1,19 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommand, ICommandHandler } from "@nestjs/cqrs";
-import { UpdateProfileDTO } from "modules/auth/dtos/profile.dto";
-import { UserDTO } from "modules/auth/dtos/user.dto";
+import { BaseCommand } from "base/cqrs/command.base";
+import { UserDTO } from "dtos/user.dto";
+import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { IUserService } from "modules/auth/services/user.service";
+import { ClientSession } from "mongoose";
+import { createUpdatingNestedObject } from "utils";
+import { UpdateProfileRequest } from "./updateProfileRequest";
+import { UpdateProfileResponse } from "./updateProfileResponse";
 
-export class UpdateProfileCommand implements ICommand {
-  user: UserDTO;
-  updateProfileDto: UpdateProfileDTO
-  constructor(user: UserDTO, profile: UpdateProfileDTO) {
-    this.user = user;
-    this.updateProfileDto = profile;
+export class UpdateProfileCommand extends BaseCommand {
+  updateProfileReq: UpdateProfileRequest
+  constructor(session: ClientSession,user: UserDTO, profile: UpdateProfileRequest) {
+    super(session, user)
+    this.updateProfileReq = profile;
   }
 }
 
@@ -18,9 +22,17 @@ export class UpdateProfileCommandHandler
   implements ICommandHandler<UpdateProfileCommand> {
   constructor(
     @Inject("IUserService")
-    private _userService: IUserService
+    private _userService: IUserService,
+    @Inject("IUserRepository")
+    private _userRepo: IUserRepository
   ) {}
-  async execute(command: UpdateProfileCommand): Promise<UserDTO> {
-    return this._userService.updateProfile(command.user.id, command.updateProfileDto);
+  async execute(command: UpdateProfileCommand): Promise<UpdateProfileResponse> {
+    const user = await this._userService.getUserById(command.user.id);
+    const profile = createUpdatingNestedObject<UpdateProfileRequest, UserDTO>(
+      "profile",
+      command.updateProfileReq,
+      user.id
+    );
+    return this._userRepo.updateUserProfile(user.id, profile);
   }
 }

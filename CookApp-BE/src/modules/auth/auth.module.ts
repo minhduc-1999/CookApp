@@ -3,13 +3,17 @@ import { APP_GUARD } from "@nestjs/core";
 import { CqrsModule } from "@nestjs/cqrs";
 import { JwtModule } from "@nestjs/jwt";
 import { MongooseModule } from "@nestjs/mongoose";
+import { FeedModel } from "domains/schemas/feed.schema";
+import { UserModel } from "domains/schemas/user.schema";
+import { WallModel } from "domains/schemas/wall.schema";
 import "dotenv/config";
 import { JwtAuthGuard } from "guards/jwt_auth.guard";
 import { ConfigModule } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
 import { UserController } from "./adapters/in/user.controller";
+import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
-import { UserModel } from "./domains/schemas/user.schema";
+import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
@@ -18,12 +22,11 @@ import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
-
 @Module({
   imports: [
     ConfigModule,
     HttpModule,
-    MongooseModule.forFeature([UserModel]),
+    MongooseModule.forFeature([UserModel, WallModel, FeedModel]),
     JwtModule.register({
       secret: process.env.JWT_PRIVATE_KEY,
       signOptions: {
@@ -48,14 +51,22 @@ import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
     },
     {
       provide: APP_GUARD,
-      useClass: JwtAuthGuard
+      useClass: JwtAuthGuard,
+    },
+    {
+      provide: "IWallRepository",
+      useClass: WallRepository,
+    },
+    {
+      provide: "IFeedRepository",
+      useClass: FeedRepository,
     },
     RegisterCommandHandler,
     LoginCommandHandler,
     UpdateProfileCommandHandler,
     GetProfileQueryHandler,
     BasicAuthStrategy,
-    JwtStrategy
+    JwtStrategy,
   ],
 })
 export class AuthModule {}

@@ -2,19 +2,16 @@ import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { IUserRepository } from "../adapters/out/repositories/user.repository";
 import { ErrorCode } from "enums/errorCode.enum";
-import { AuditDTO } from "base/dtos/audix.dto";
 import { isEmail } from "class-validator";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { JwtService } from "@nestjs/jwt";
-import { UserDTO } from "../dtos/user.dto";
-import { RegisterDTO } from "../dtos/register.dto";
 import _ = require("lodash");
-import { LoginResponseDto } from "../dtos/login.dto";
+import { LoginResponse } from "../useCases/login/loginResponse";
+import { UserDTO } from "dtos/user.dto";
 
 export interface IAuthentication {
-  register(registerDto: RegisterDTO): Promise<UserDTO>;
   getAuthUser(usernameOrEmail: string, password: string): Promise<UserDTO>;
-  login(user: UserDTO): Promise<LoginResponseDto>;
+  login(user: UserDTO): Promise<LoginResponse>;
 }
 @Injectable()
 class AuthenticationService implements IAuthentication {
@@ -22,7 +19,7 @@ class AuthenticationService implements IAuthentication {
     @Inject("IUserRepository") private _userRepo: IUserRepository,
     private jwtService: JwtService
   ) {}
-  async login(user: UserDTO): Promise<LoginResponseDto> {
+  async login(user: UserDTO): Promise<LoginResponse> {
     const payload = { username: user.username, sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
@@ -65,19 +62,6 @@ class AuthenticationService implements IAuthentication {
       );
     await this.verifyPassword(password, user.password);
     return new UserDTO(user);
-  }
-
-  async register(registerDto: RegisterDTO): Promise<UserDTO> {
-    const hashedPassword = await bcrypt.hashSync(registerDto.password, 10);
-    const audit = new AuditDTO({
-      updatedAt: _.now(),
-    });
-    const createdUser = await this._userRepo.createUser({
-      ...registerDto,
-      ...audit,
-      password: hashedPassword,
-    });
-    return createdUser;
   }
 }
 

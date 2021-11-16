@@ -1,5 +1,4 @@
 import { ErrorCode } from "enums/errorCode.enum";
-import { PageMetaDto } from "./dtos/pageMeta.dto";
 import { ResponseDTO } from "./dtos/response.dto";
 import { MetaDTO } from "./dtos/responseMeta.dto";
 
@@ -69,8 +68,12 @@ export class Result<T> {
     this._errorCode = errorCode;
   }
 
-  public static ok<U>(data?, meta?: Partial<MetaDTO & PageMetaDto>) {
+  public static ok<U>(data?, meta?: Partial<MetaDTO>) {
     return new Result<U>(false, "", data, meta, null);
+  }
+
+  public static okList<U>(data?, meta?: Partial<MetaDTO>) {
+    return new Result<U>(false, "", { items: data }, meta, null);
   }
 
   public static fail<U>(errorMessage: string, errorCode: ErrorCode) {
@@ -79,7 +82,7 @@ export class Result<T> {
 
   public getResponseDTO(): ResponseDTO<any> {
     if (this._isError) {
-      return ResponseDTO.fail(this._errorMessage, this._errorCode)
+      return ResponseDTO.fail(this._errorMessage, this._errorCode);
     }
     let meta = { ok: true };
     if (this._meta) {
