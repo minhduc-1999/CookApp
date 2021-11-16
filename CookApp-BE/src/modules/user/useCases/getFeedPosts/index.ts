@@ -4,9 +4,9 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { UserDTO } from "dtos/user.dto";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-import { GetWallPostsResponse } from "./getWallPostsResponse";
-export class GetWallPostsQuery extends BaseQuery {
+import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
+import { GetFeedPostsResponse } from "./getFeedPostsResponse";
+export class GetFeedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
   constructor(user: UserDTO, queryOptions?: PageOptionsDto) {
     super(user);
@@ -14,18 +14,18 @@ export class GetWallPostsQuery extends BaseQuery {
   }
 }
 
-@QueryHandler(GetWallPostsQuery)
-export class GetWallPostsQueryHandler
-  implements IQueryHandler<GetWallPostsQuery> {
+@QueryHandler(GetFeedPostsQuery)
+export class GetFeedPostsQueryHandler
+  implements IQueryHandler<GetFeedPostsQuery> {
   constructor(
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository
+    @Inject("IFeedRepository")
+    private _feedRepo: IFeedRepository
   ) {}
-  async execute(query: GetWallPostsQuery): Promise<GetWallPostsResponse> {
+  async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
-    const posts = await this._wallRepo.getPosts(user, queryOptions);
-    const totalCount = await this._wallRepo.getTotalPosts(user);
-    let meta: PageMetadata;
+    const posts = await this._feedRepo.getPosts(user, queryOptions);
+    const totalCount = await this._feedRepo.getTotalPosts(user);
+    let meta: PageMetadata
     if (posts.length > 0) {
       meta = new PageMetadata(
         queryOptions.offset,
@@ -33,6 +33,6 @@ export class GetWallPostsQueryHandler
         totalCount
       );
     }
-    return new GetWallPostsResponse(posts, meta);
+    return new GetFeedPostsResponse(posts, meta);
   }
 }

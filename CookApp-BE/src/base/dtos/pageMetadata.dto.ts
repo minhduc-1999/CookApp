@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
-import { PATH_METADATA } from "@nestjs/common/constants";
+import { round } from "lodash";
 
 export class PageMetadata {
   @ApiResponseProperty({ type: Number })
@@ -11,10 +11,10 @@ export class PageMetadata {
   @ApiResponseProperty({ type: Number })
   totalCount: number;
 
-  constructor(options: Required<PageMetadata>) {
-    this.page = options.page;
-    this.pageSize = options.pageSize;
-    this.totalPage = options.totalPage;
-    this.totalCount = options.totalCount;
+  constructor(offset: number, limit: number, total: number) {
+    this.page = offset + 1;
+    this.pageSize = limit;
+    this.totalPage = round(total / limit);
+    this.totalCount = total;
   }
 }

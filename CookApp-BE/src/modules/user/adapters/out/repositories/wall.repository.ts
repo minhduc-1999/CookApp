@@ -24,11 +24,10 @@ export class WallRepository implements IWallRepository {
     @InjectModel(Wall.name) private _wallModel: Model<WallDocument>
   ) {}
   async getTotalPosts(user: UserDTO): Promise<number> {
-    const wallDocs = 
-      await this._wallModel
-        .findOne({ user: { id: user.id } }, "numberOfPost")
-        .exec()
-    return wallDocs.numberOfPost
+    const wallDocs = await this._wallModel
+      .findOne({ user: { id: user.id } }, "numberOfPost")
+      .exec();
+    return wallDocs.numberOfPost;
   }
   async getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]> {
     const postDocs = await this._wallModel.aggregate([
@@ -39,6 +38,7 @@ export class WallRepository implements IWallRepository {
       { $limit: query.limit },
       { $group: { _id: "$_id", posts: { $push: "$posts" } } },
     ]);
+    if (postDocs.length < 1) return [];
     return postDocs[0].posts;
   }
   async updatePostInWall(

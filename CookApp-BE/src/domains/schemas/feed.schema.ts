@@ -17,10 +17,14 @@ export class Feed extends AbstractSchema {
   })
   posts: Omit<Post, "author">[];
 
+  @Prop({ default: 0 })
+  numberOfPost: number;
+
   constructor(feed: Partial<FeedDTO>) {
     super(feed);
     this.user = feed?.user;
     this.posts = feed?.posts?.map((post) => new Post(post));
+    this.numberOfPost = feed?.numberOfPost
   }
 }
 

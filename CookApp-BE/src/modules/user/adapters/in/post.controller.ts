@@ -36,7 +36,7 @@ import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
 import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
 
 @Controller("users")
-@ApiTags("User")
+@ApiTags("User/Post")
 @ApiBearerAuth()
 export class PostController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}

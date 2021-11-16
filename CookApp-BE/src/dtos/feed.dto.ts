@@ -10,10 +10,13 @@ export class FeedDTO extends AuditDTO {
   @Type(() => PostDTO)
   posts: PostDTO[];
 
+  numberOfPost: number;
+
   constructor(feed: Partial<FeedDTO>) {
     super(feed);
     this.id = feed?.id;
     this.posts = feed?.posts;
     this.user = feed?.user;
+    this.numberOfPost = feed?.numberOfPost
   }
 }

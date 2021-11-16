@@ -9,18 +9,21 @@ import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
+import { FeedController } from "./adapters/in/feed.controller";
 import { PostController } from "./adapters/in/post.controller";
+import { WallController } from "./adapters/in/wall.controller";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { PostService } from "./services/post.service";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
+import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
 
 const commandHandlers = [CreatePostCommandHandler, EditPostCommandHandler];
-const queryHandlers = [GetPostDetailQueryHandler, GetWallPostsQueryHandler];
+const queryHandlers = [GetPostDetailQueryHandler, GetWallPostsQueryHandler, GetFeedPostsQueryHandler];
 const services = [
   {
     provide: "IPostService",
@@ -52,7 +55,7 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
   ],
-  controllers: [PostController],
+  controllers: [PostController, WallController, FeedController],
   providers: [
     ...commandHandlers,
     ...services,
