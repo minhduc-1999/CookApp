@@ -16,7 +16,6 @@ import {
   ApiFailResponseCustom,
   ApiCreatedResponseCustom,
   ApiOKResponseCustom,
-  ApiBadReqResponseCustom,
 } from "../../../../decorators/ApiSuccessResponse.decorator";
 import { LoginRequest } from "modules/auth/useCases/login/loginRequest";
 import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
@@ -57,7 +56,6 @@ export class AuthController {
   })
   @Post("login")
   @ApiFailResponseCustom()
-  @ApiBadReqResponseCustom("Username or password is not correct")
   @ApiOKResponseCustom(LoginResponse, "Login successfully")
   @Public()
   async login(@User() user: UserDTO): Promise<Result<LoginResponse>> {

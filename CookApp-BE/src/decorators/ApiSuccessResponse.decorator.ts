@@ -13,7 +13,8 @@ import { MetaDTO } from "base/dtos/responseMeta.dto";
 export const ApiFailResponseCustom = <TModel extends Type<any>>() => {
   return applyDecorators(
     ApiUnauthorizedResponse({ description: "Unauthorized" }),
-    ApiInternalServerErrorResponse({ description: "Server Error" })
+    ApiInternalServerErrorResponse({ description: "Server Error" }),
+    ApiBadRequestResponse({description: 'Bad Request - Check messages in response'})
   );
 };
 

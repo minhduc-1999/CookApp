@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { ICommandHandler, QueryHandler } from "@nestjs/cqrs";
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { UserDTO } from "dtos/user.dto";
 import { IPostService } from "modules/user/services/post.service";
@@ -15,7 +15,7 @@ export class GetPostDetailQuery extends BaseQuery {
 
 @QueryHandler(GetPostDetailQuery)
 export class GetPostDetailQueryHandler
-  implements ICommandHandler<GetPostDetailQuery> {
+  implements IQueryHandler<GetPostDetailQuery> {
   constructor(
     @Inject("IPostService")
     private _postService: IPostService

@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
+import { IQuery, IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { PreSignedLinkRequest } from "./presignedLinkRequest";
 import { PreSignedLinkResponse } from "./presignedLinkResponse";
@@ -13,7 +13,7 @@ export class GetUploadPresignedLinkQuery implements IQuery {
 }
 @QueryHandler(GetUploadPresignedLinkQuery)
 export class GetUploadPresignedLinkQueryHandler
-  implements ICommandHandler<GetUploadPresignedLinkQuery> {
+  implements IQueryHandler<GetUploadPresignedLinkQuery> {
   constructor(
     @Inject("IStorageService")
     private _storageService: IStorageService

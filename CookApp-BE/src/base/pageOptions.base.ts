@@ -1,30 +1,31 @@
-import { ApiPropertyOptional } from '@nestjs/swagger';
-import { Type } from 'class-transformer';
-import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from 'class-validator';
+import { ApiPropertyOptional } from "@nestjs/swagger";
+import { Transform, Type } from "class-transformer";
+import { IsEnum, IsInt, IsOptional, IsString, Max, Min } from "class-validator";
 
 enum Order {
-  ASC = 'ASC',
-  DESC = 'DESC'
+  ASC = "ASC",
+  DESC = "DESC",
 }
 
 export class PageOptionsDto {
-  @ApiPropertyOptional({
-    enum: Order,
-    default: Order.ASC,
-  })
-  @IsEnum(Order)
-  @IsOptional()
-  readonly order: Order = Order.ASC;
+  // @ApiPropertyOptional({
+  //   enum: Order,
+  //   default: Order.ASC,
+  // })
+  // @IsEnum(Order)
+  // @IsOptional()
+  // readonly order: Order = Order.ASC;
 
   @ApiPropertyOptional({
     minimum: 0,
     default: 0,
   })
   @Type(() => Number)
+  @Transform(({ value }) => Number(value))
   @IsInt()
   @Min(0)
   @IsOptional()
-  readonly offset: number = 0;
+  offset: number = 0;
 
   @ApiPropertyOptional({
     minimum: 1,
@@ -32,14 +33,15 @@ export class PageOptionsDto {
     default: 10,
   })
   @Type(() => Number)
+  @Transform(({ value }) => Number(value))
   @IsInt()
-  @Min(10, { message: 'take have min values = 10 & max = 50' })
-  @Max(50, { message: 'take have min values = 10 & max = 50' })
+  @Min(1, { message: "Page size have min values = 1" })
+  @Max(50, { message: "Page size have max values = 50" })
   @IsOptional()
-  readonly limit: number = 10;
+  limit: number = 10;
 
-  @ApiPropertyOptional()
-  @IsString()
-  @IsOptional()
-  readonly q?: string = '';
+  // @ApiPropertyOptional()
+  // @IsString()
+  // @IsOptional()
+  // readonly q?: string = '';
 }

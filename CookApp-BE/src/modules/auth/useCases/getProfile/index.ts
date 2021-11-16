@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { ICommandHandler, IQuery, QueryHandler } from "@nestjs/cqrs";
+import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { UserDTO } from "dtos/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
@@ -13,7 +13,7 @@ export class GetProfileQuery extends BaseQuery {
 
 @QueryHandler(GetProfileQuery)
 export class GetProfileQueryHandler
-  implements ICommandHandler<GetProfileQuery> {
+  implements IQueryHandler<GetProfileQuery> {
   constructor(
     @Inject("IUserService")
     private _userService: IUserService

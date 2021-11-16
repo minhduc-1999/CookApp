@@ -17,9 +17,10 @@ import { PostService } from "./services/post.service";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
+import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
 
 const commandHandlers = [CreatePostCommandHandler, EditPostCommandHandler];
-const queryHandlers = [GetPostDetailQueryHandler];
+const queryHandlers = [GetPostDetailQueryHandler, GetWallPostsQueryHandler];
 const services = [
   {
     provide: "IPostService",
