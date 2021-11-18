@@ -9,7 +9,6 @@ export class AuditDTO {
   @Exclude()
   createdBy: string;
 
-  @Exclude()
   createdAt: number;
 
   updatedAt: number;
