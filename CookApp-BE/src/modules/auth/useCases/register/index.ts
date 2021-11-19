@@ -41,13 +41,13 @@ export class RegisterCommandHandler
     const wallDto = new WallDTO({
       createdBy: createdUser.id,
       updatedBy: createdUser.id,
-      user: { id: createdUser.id },
+      user: createdUser,
     });
     await this._wallRepo.createWall(wallDto, session);
     const feedDto = new FeedDTO({
       createdBy: createdUser.id,
       updatedBy: createdUser.id,
-      user: { id: createdUser.id },
+      user:createdUser,
     });
     await this._feedRepo.createFeed(feedDto, session);
     return createdUser;

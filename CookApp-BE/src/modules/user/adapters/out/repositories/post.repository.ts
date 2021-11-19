@@ -26,7 +26,7 @@ export class PostRepository implements IPostRepository {
     return new PostDTO(updatedPost);
   }
   async getPostById(postId: string): Promise<PostDTO> {
-    const postDoc = await this._postModel.findById(postId).populate("author");
+    const postDoc = await this._postModel.findById(postId);
     if (!postDoc) return null;
     return new PostDTO(postDoc);
   }

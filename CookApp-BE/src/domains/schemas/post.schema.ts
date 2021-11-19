@@ -1,8 +1,6 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
-import { Type } from "class-transformer";
 import { PostDTO } from "dtos/post.dto";
-import * as mongoose from "mongoose";
 import { Document } from "mongoose";
 import { User } from "./user.schema";
 
@@ -13,12 +11,8 @@ export class Post extends AbstractSchema {
   @Prop()
   content: string;
 
-  @Prop({
-    type: mongoose.Schema.Types.ObjectId,
-    ref: User.name,
-  })
-  @Type(() => User)
-  author: User;
+  @Prop({ type: Object })
+  author: Pick<User, "id" | "avatar" | "displayName">;
 
   @Prop({
     type: [String],
@@ -35,7 +29,8 @@ export class Post extends AbstractSchema {
     this.content = post?.content;
     this.images = post?.images;
     this.videos = post?.videos;
-    this.author = new User(post.author);
+    const { id, avatar, displayName } = post?.author;
+    this.author = { id, avatar, displayName };
   }
 }
 

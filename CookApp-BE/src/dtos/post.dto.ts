@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
-import { Exclude, Type } from "class-transformer";
+import { Exclude } from "class-transformer";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/IsMeaningfulString.decorator";
@@ -28,7 +28,7 @@ export class PostDTO extends AuditDTO {
   videos?: string[];
 
   @Exclude()
-  author?: UserDTO;
+  author: Pick<UserDTO, "id" | "avatar" | "displayName">;
 
   constructor(post: Partial<PostDTO>) {
     super(post);
@@ -36,6 +36,7 @@ export class PostDTO extends AuditDTO {
     this.content = post?.content;
     this.images = post?.images;
     this.videos = post?.videos;
-    this.author = new UserDTO(post?.author);
+    const { id, avatar, displayName } = post?.author;
+    this.author = { id, avatar, displayName };
   }
 }

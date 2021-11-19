@@ -5,10 +5,10 @@ import { UserDTO } from "./user.dto";
 
 export class FeedDTO extends AuditDTO {
   @Exclude()
-  user: Pick<UserDTO, "id" | "avatar">;
+  user: Partial<UserDTO>;
 
   @Type(() => PostDTO)
-  posts: PostDTO[];
+  posts: Partial<PostDTO>[];
 
   numberOfPost: number;
 
@@ -17,6 +17,6 @@ export class FeedDTO extends AuditDTO {
     this.id = feed?.id;
     this.posts = feed?.posts;
     this.user = feed?.user;
-    this.numberOfPost = feed?.numberOfPost
+    this.numberOfPost = feed?.numberOfPost;
   }
 }
