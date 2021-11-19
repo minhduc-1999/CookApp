@@ -1,6 +1,6 @@
 import { ApiResponseProperty, PickType } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
-import { classToClass, Exclude, plainToClass, Type } from "class-transformer";
+import { Exclude, Expose, Type } from "class-transformer";
 import { UserDTO } from "./user.dto";
 
 export class CommentDTO extends AuditDTO {
@@ -8,14 +8,18 @@ export class CommentDTO extends AuditDTO {
   @ApiResponseProperty({
     type: PickType(UserDTO, ["id", "displayName", "avatar"]),
   })
-  user: Pick<UserDTO, "id" | "displayName" | "avatar">;
+  @Expose()
+  user: UserDTO;
 
+  @Expose()
   @ApiResponseProperty({ type: String })
   postId: string;
 
+  @Expose()
   @ApiResponseProperty({ type: String })
   content: string;
 
+  @Expose()
   @Type(() => CommentDTO)
   @ApiResponseProperty({ type: [CommentDTO] })
   replies?: CommentDTO[];
@@ -23,17 +27,16 @@ export class CommentDTO extends AuditDTO {
   @Exclude()
   path: string;
 
-  constructor(comment: Partial<CommentDTO>) {
-    super(comment);
-    this.id = comment?.id;
-    this.user = {
-      id: comment?.user.id,
-      avatar: comment?.user.avatar,
-      displayName: comment?.user.displayName,
-    };
-    this.postId = comment?.postId;
-    this.content = comment?.content;
-    this.path = comment?.path;
+  static create(
+    comment: Pick<CommentDTO, "user" | "postId" | "content" | "replies">
+  ): CommentDTO {
+    const createdComment = new CommentDTO();
+    createdComment.create(comment?.user.id);
+    createdComment.content = comment?.content;
+    createdComment.postId = comment?.postId;
+    createdComment.replies = comment?.replies;
+    createdComment.user = comment?.user;
+    return createdComment;
   }
 
   setParent(parentComment: CommentDTO): CommentDTO {

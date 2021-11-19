@@ -1,5 +1,6 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+import { plainToClass } from "class-transformer";
 import { Wall, WallDocument } from "domains/schemas/wall.schema";
 import { WallDTO } from "dtos/wall.dto";
 import { ClientSession, Model } from "mongoose";
@@ -18,7 +19,6 @@ export class WallRepository implements IWallRepository {
     const creatingWall = new this._wallModel(new Wall(wall));
     const wallDoc = await creatingWall.save({ session: session });
     if (!wallDoc) return null;
-    const createdWall = new WallDTO(wallDoc);
-    return createdWall;
+    return plainToClass(WallDTO, wallDoc, { excludeExtraneousValues: true });
   }
 }

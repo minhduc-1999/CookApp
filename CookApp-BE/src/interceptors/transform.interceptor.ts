@@ -7,6 +7,7 @@ import {
 import { classToPlain } from "class-transformer";
 import { Observable } from "rxjs";
 import { map } from "rxjs/operators";
+import { clean } from "utils";
 import { Result } from "../base/result.base";
 
 @Injectable()
@@ -18,6 +19,10 @@ export class TransformResponse implements NestInterceptor {
           return classToPlain(data.getResponseDTO());
         }
         return classToPlain(data);
+        // if (data instanceof Result) {
+        //   return clean(classToPlain(data.getResponseDTO()));
+        // }
+        // return clean(classToPlain(data));
       })
     );
   }

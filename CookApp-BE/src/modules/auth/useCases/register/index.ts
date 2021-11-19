@@ -31,23 +31,17 @@ export class RegisterCommandHandler
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
     const { registerDto, session } = command;
     const hashedPassword = await bcrypt.hashSync(registerDto.password, 10);
-    const newUserDto = new UserDTO({
+    const newUserDto = UserDTO.create({
       ...registerDto,
-      updatedBy: "system",
-      createdBy: "system",
       password: hashedPassword,
     });
     const createdUser = await this._userRepo.createUser(newUserDto, session);
-    const wallDto = new WallDTO({
-      createdBy: createdUser.id,
-      updatedBy: createdUser.id,
+    const wallDto = WallDTO.create({
       user: createdUser,
     });
     await this._wallRepo.createWall(wallDto, session);
-    const feedDto = new FeedDTO({
-      createdBy: createdUser.id,
-      updatedBy: createdUser.id,
-      user:createdUser,
+    const feedDto = FeedDTO.create({
+      user: createdUser,
     });
     await this._feedRepo.createFeed(feedDto, session);
     return createdUser;

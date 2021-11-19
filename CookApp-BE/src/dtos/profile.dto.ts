@@ -1,4 +1,5 @@
 import { ApiPropertyOptional, PartialType } from "@nestjs/swagger";
+import { Expose } from "class-transformer";
 import {
   IsString,
   IsNotEmpty,
@@ -13,17 +14,21 @@ export class ProfileDTO {
   @IsPositive()
   @IsOptional()
   @ApiPropertyOptional({ type: Number, default: 170 })
+  @Expose()
   height?: number;
 
   @ApiPropertyOptional({ type: Number, default: 40 })
   @IsOptional()
-  @IsPositive()
+  @IsPositive()  
+  @Expose()
   weight?: number;
 
+  @Expose()
   @ApiPropertyOptional({ type: Number, example: new Date().getTime() })
   @IsPositive()
   birthDate?: number;
 
+  @Expose()
   @IsOptional()
   @ApiPropertyOptional({ type: String })
   @IsString()
@@ -31,6 +36,7 @@ export class ProfileDTO {
   @IsMeaningfulString()
   firstName?: string;
 
+  @Expose()
   @ApiPropertyOptional({ type: String })
   @IsOptional()
   @IsString()
@@ -38,11 +44,13 @@ export class ProfileDTO {
   @IsMeaningfulString()
   lastName?: string;
 
+  @Expose()
   @IsOptional()
   @ApiPropertyOptional({ enum: Sex })
   @IsEnum(Sex)
   sex?: Sex;
 
+  @Expose()
   @IsOptional()
   @IsString()
   fullName?: string;

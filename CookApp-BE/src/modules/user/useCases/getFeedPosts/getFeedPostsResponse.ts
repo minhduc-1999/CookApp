@@ -4,7 +4,7 @@ import { Type } from "class-transformer";
 import { PostDTO } from "dtos/post.dto";
 
 export class GetFeedPostsResponse {
-  @ApiResponseProperty({ type: [PostDTO] })
+  @ApiResponseProperty({ type: () => [PostDTO] })
   @Type(() => PostDTO)
   posts: PostDTO[];
 

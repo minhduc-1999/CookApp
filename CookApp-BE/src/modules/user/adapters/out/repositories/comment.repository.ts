@@ -4,6 +4,7 @@ import { Comment, CommentDocument } from "domains/schemas/comment.schema";
 import { ClientSession, Model } from "mongoose";
 import { CommentDTO } from "dtos/comment.dto";
 import { BaseRepository } from "base/repository.base";
+import { plainToClass } from "class-transformer";
 
 export interface ICommentRepository {
   createComment(comment: CommentDTO): Promise<CommentDTO>;
@@ -25,13 +26,16 @@ export class CommentRepository
     if (!commentDoc) {
       return null;
     }
-    return new CommentDTO(commentDoc);
+    return plainToClass(CommentDTO, commentDoc, {
+      excludeExtraneousValues: true,
+    });
   }
   async createComment(comment: CommentDTO): Promise<CommentDTO> {
     const creatingComment = new this._commentModel(new Comment(comment));
     const commentDoc = await creatingComment.save({ session: this.session });
     if (!commentDoc) return null;
-    const createdComment = new CommentDTO(commentDoc);
-    return createdComment;
+    return plainToClass(CommentDTO, commentDoc, {
+      excludeExtraneousValues: true,
+    });
   }
 }

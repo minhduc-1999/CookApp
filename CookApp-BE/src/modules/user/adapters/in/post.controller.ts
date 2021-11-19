@@ -11,6 +11,7 @@ import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
+import { classToPlain, plainToClass } from "class-transformer";
 import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
@@ -34,6 +35,7 @@ import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWall
 import { ClientSession } from "mongoose";
 import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
 import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
+import { clean } from "utils";
 
 @Controller("users")
 @ApiTags("User/Post")
@@ -41,7 +43,7 @@ import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
 export class PostController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
-  @Post('posts')
+  @Post("posts")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
   @Transaction()
@@ -64,7 +66,7 @@ export class PostController {
     @User() user: UserDTO
   ): Promise<Result<GetPostResponse>> {
     const query = new GetPostDetailQuery(user, postId);
-    const post = await this._queryBus.execute(query);
+    const post = await this._queryBus.execute(query);    
     return Result.ok(post, { messages: ["Get post successfully"] });
   }
 
@@ -80,22 +82,5 @@ export class PostController {
     const editPostCommand = new EditPostCommand(null, user, post);
     const updatedPost = await this._commandBus.execute(editPostCommand);
     return Result.ok(updatedPost, { messages: ["Edit post successfully"] });
-  }
-
-  @Get('wall/posts')
-  @ApiFailResponseCustom()
-  @ApiOKResponseCustom(
-    GetWallPostsResponse,
-    "Get wall's posts successfully"
-  )
-  async getWallPosts(
-    @Query(ParsePaginationPipe) query: PageOptionsDto,
-    @User() user: UserDTO
-  ): Promise<Result<GetWallPostsResponse>> {
-    const postsQuery = new GetWallPostsQuery(user, query);
-    const result = await this._queryBus.execute(postsQuery);
-    return Result.ok(result, {
-      messages: ["Get wall's posts successfully"],
-    });
   }
 }

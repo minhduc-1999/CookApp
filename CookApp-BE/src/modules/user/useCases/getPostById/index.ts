@@ -21,8 +21,6 @@ export class GetPostDetailQueryHandler
     private _postService: IPostService
   ) {}
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
-    return new GetPostResponse(
-      await this._postService.getPostDetail(query.postId)
-    );
+    return this._postService.getPostDetail(query.postId);
   }
 }

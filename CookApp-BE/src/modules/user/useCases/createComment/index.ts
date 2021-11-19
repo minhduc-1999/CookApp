@@ -35,15 +35,13 @@ export class CreateCommentCommandHandler
     const parentComment = commentDto.parentId
       ? await this._commentService.getComment(commentDto.parentId)
       : null;
-    const comment = new CommentDTO({
+    const comment = CommentDTO.create({
       ...commentDto,
-      createdBy: user.id,
-      updatedBy: user.id,
-      user
+      user,
     }).setParent(parentComment);
     const createdComment = await this._commentRepo
       .setSession(session)
       .createComment(comment);
-    return new CreateCommentResponse(createdComment);
+    return createdComment;
   }
 }

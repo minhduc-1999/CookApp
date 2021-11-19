@@ -1,15 +1,18 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
+import { plainToClass } from "class-transformer";
 import { Feed, FeedDocument } from "domains/schemas/feed.schema";
+import { FeedDTO } from "dtos/feed.dto";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
 import { ClientSession, Model } from "mongoose";
+import { clean } from "utils";
 
 export interface IFeedRepository {
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
   updatePostInFeed(
-    post: PostDTO,
+    post: Partial<PostDTO>,
     user: UserDTO,
     session?: ClientSession
   ): Promise<void>;
@@ -41,7 +44,11 @@ export class FeedRepository implements IFeedRepository {
       { $group: { _id: "$_id", posts: { $push: "$posts" } } },
     ]);
     if (postDocs.length < 1) return [];
-    return postDocs[0].posts;
+    return postDocs[0].posts.map((post) =>
+      plainToClass(PostDTO, post, {
+        excludeExtraneousValues: true,
+      })
+    );
   }
 
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
@@ -50,14 +57,14 @@ export class FeedRepository implements IFeedRepository {
         user: { id: user.id },
       },
       {
-        $push: { posts: post },
+        $push: { posts: clean(post) },
         $inc: { numberOfPost: 1 },
       }
     );
   }
 
   async updatePostInFeed(
-    post: PostDTO,
+    post: Partial<PostDTO>,
     user: UserDTO,
     session: ClientSession = null
   ): Promise<void> {
@@ -67,7 +74,7 @@ export class FeedRepository implements IFeedRepository {
         "posts.id": post.id,
       },
       {
-        $set: { "posts.$": post },
+        $set: { "posts.$": clean(post) },
       },
       { session }
     );
