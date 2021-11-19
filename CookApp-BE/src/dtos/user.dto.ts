@@ -40,6 +40,10 @@ export class UserDTO extends AuditDTO {
   @ApiProperty({ type: String })
   id: string;
 
+  @ApiPropertyOptional({ type: String })
+  @IsString()
+  displayName?: string;
+
   constructor(user: Partial<UserDTO>) {
     super(user);
     this.id = user?.id;
@@ -49,5 +53,6 @@ export class UserDTO extends AuditDTO {
     this.avatar = user?.avatar;
     this.profile = user?.profile;
     this.password = user?.password;
+    this.displayName = user?.displayName;
   }
 }

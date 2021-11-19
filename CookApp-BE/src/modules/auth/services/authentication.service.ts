@@ -61,7 +61,7 @@ class AuthenticationService implements IAuthentication {
         )
       );
     await this.verifyPassword(password, user.password);
-    return new UserDTO(user);
+    return user;
   }
 }
 

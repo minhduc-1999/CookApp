@@ -1,0 +1,37 @@
+import { Injectable } from "@nestjs/common";
+import { InjectModel } from "@nestjs/mongoose";
+import { Comment, CommentDocument } from "domains/schemas/comment.schema";
+import { ClientSession, Model } from "mongoose";
+import { CommentDTO } from "dtos/comment.dto";
+import { BaseRepository } from "base/repository.base";
+
+export interface ICommentRepository {
+  createComment(comment: CommentDTO): Promise<CommentDTO>;
+  setSession(session: ClientSession): ICommentRepository;
+  getCommentById(id: string): Promise<CommentDTO>;
+}
+
+@Injectable()
+export class CommentRepository
+  extends BaseRepository
+  implements ICommentRepository {
+  constructor(
+    @InjectModel(Comment.name) private _commentModel: Model<CommentDocument>
+  ) {
+    super();
+  }
+  async getCommentById(id: string): Promise<CommentDTO> {
+    const commentDoc = await this._commentModel.findById(id).exec();
+    if (!commentDoc) {
+      return null;
+    }
+    return new CommentDTO(commentDoc);
+  }
+  async createComment(comment: CommentDTO): Promise<CommentDTO> {
+    const creatingComment = new this._commentModel(new Comment(comment));
+    const commentDoc = await creatingComment.save({ session: this.session });
+    if (!commentDoc) return null;
+    const createdComment = new CommentDTO(commentDoc);
+    return createdComment;
+  }
+}
