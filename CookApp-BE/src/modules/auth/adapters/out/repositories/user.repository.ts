@@ -45,7 +45,7 @@ export class UserRepository implements IUserRepository {
   }
 
   async getUserById(id: string): Promise<UserDTO> {
-    const userDoc = await this._userModel.findOne({ id: id }).exec();
+    const userDoc = await this._userModel.findById(id).exec();
     if (!userDoc) return null;
     return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
   }

@@ -7,18 +7,17 @@ import { GetProfileResponse } from "./getProfileResponse";
 
 export class GetProfileQuery extends BaseQuery {
   constructor(user: UserDTO) {
-    super(user)
+    super(user);
   }
 }
 
 @QueryHandler(GetProfileQuery)
-export class GetProfileQueryHandler
-  implements IQueryHandler<GetProfileQuery> {
+export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
   constructor(
     @Inject("IUserService")
     private _userService: IUserService
   ) {}
-  async execute(command: GetProfileQuery): Promise<GetProfileResponse> {
-    return this._userService.getUserById(command.user.id);
+  async execute(query: GetProfileQuery): Promise<GetProfileResponse> {
+    return this._userService.getUserById(query.user.id);
   }
 }
