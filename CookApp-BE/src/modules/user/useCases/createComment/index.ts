@@ -34,7 +34,7 @@ export class CreateCommentCommandHandler
     const { commentDto, user, session } = command;
     const parentComment = commentDto.parentId
       ? await this._commentService.getComment(commentDto.parentId)
-      : null;
+      : commentDto.postId;
     const comment = CommentDTO.create({
       ...commentDto,
       user,

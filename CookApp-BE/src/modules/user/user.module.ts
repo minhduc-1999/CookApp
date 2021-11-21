@@ -25,10 +25,11 @@ import { CreatePostCommandHandler } from "./useCases/createPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
+import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
 
 const commandHandlers = [CreatePostCommandHandler, EditPostCommandHandler, CreateCommentCommandHandler];
-const queryHandlers = [GetPostDetailQueryHandler, GetWallPostsQueryHandler, GetFeedPostsQueryHandler];
+const queryHandlers = [GetPostDetailQueryHandler, GetWallPostsQueryHandler, GetFeedPostsQueryHandler, GetPostCommentsQueryHandler];
 const services = [
   {
     provide: "IPostService",

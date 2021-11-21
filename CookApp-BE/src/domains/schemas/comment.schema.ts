@@ -11,13 +11,13 @@ export class Comment extends AbstractSchema {
   @Prop()
   content: string;
 
-  @Prop()
+  @Prop({ index: true })
   path: string;
 
   @Prop({ type: Object })
   user: Pick<User, "id" | "avatar" | "displayName">;
 
-  @Prop()
+  @Prop({ index: true })
   postId: string;
 
   constructor(commentDto: Partial<CommentDTO>) {
@@ -27,8 +27,8 @@ export class Comment extends AbstractSchema {
     this.user = {
       id: commentDto?.user.id,
       avatar: commentDto?.user.avatar,
-      displayName: commentDto?.user.displayName
-    }
+      displayName: commentDto?.user.displayName,
+    };
     this.postId = commentDto?.postId;
   }
 }

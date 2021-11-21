@@ -5,11 +5,16 @@ import { ClientSession, Model } from "mongoose";
 import { CommentDTO } from "dtos/comment.dto";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
+import { CommentPageOption } from "modules/user/useCases/getPostComments";
 
 export interface ICommentRepository {
   createComment(comment: CommentDTO): Promise<CommentDTO>;
   setSession(session: ClientSession): ICommentRepository;
   getCommentById(id: string): Promise<CommentDTO>;
+  getPostComments(
+    postId: string,
+    query: CommentPageOption
+  ): Promise<CommentDTO[]>;
 }
 
 @Injectable()
@@ -21,6 +26,24 @@ export class CommentRepository
   ) {
     super();
   }
+  async getPostComments(
+    postId: string,
+    query: CommentPageOption
+  ): Promise<CommentDTO[]> {
+    const commentDocs = await this._commentModel
+      .find({
+        postId: postId,
+        path: new RegExp(`,${query.parent},$`),
+      })
+      .sort({ createdAt: 1 })
+      .skip(query.offset * query.limit)
+      .limit(query.limit)
+      .exec();
+    return plainToClass(CommentDTO, commentDocs, {
+      excludeExtraneousValues: true,
+    });
+  }
+
   async getCommentById(id: string): Promise<CommentDTO> {
     const commentDoc = await this._commentModel.findById(id).exec();
     if (!commentDoc) {

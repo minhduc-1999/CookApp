@@ -24,7 +24,8 @@ export class CommentDTO extends AuditDTO {
   @ApiResponseProperty({ type: [CommentDTO] })
   replies?: CommentDTO[];
 
-  @Exclude()
+  @Exclude({ toPlainOnly: true })
+  @Expose({ toClassOnly: true })
   path: string;
 
   static create(
@@ -39,11 +40,16 @@ export class CommentDTO extends AuditDTO {
     return createdComment;
   }
 
-  setParent(parentComment: CommentDTO): CommentDTO {
+  setParent(parentComment: CommentDTO | string): CommentDTO {
+    console.log(parentComment);
     if (parentComment) {
-      this.path = parentComment.path
-        ? `${parentComment.path}${parentComment.id},`
-        : `,${parentComment.id},`;
+      if (typeof parentComment === "string") {
+        this.path = `,${parentComment},`;
+      } else {
+        this.path = parentComment.path
+          ? `${parentComment.path}${parentComment.id},`
+          : `,${parentComment.id},`;
+      }
     }
     return this;
   }

@@ -11,7 +11,7 @@ export interface ICommentService {
 @Injectable()
 export class CommentService implements ICommentService {
   constructor(
-    @Inject("ICommentRepository") private _commentRepo: ICommentRepository,
+    @Inject("ICommentRepository") private _commentRepo: ICommentRepository
   ) {}
 
   async getComment(commentId: string): Promise<CommentDTO> {
