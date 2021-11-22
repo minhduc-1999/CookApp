@@ -41,7 +41,6 @@ export class CommentDTO extends AuditDTO {
   }
 
   setParent(parentComment: CommentDTO | string): CommentDTO {
-    console.log(parentComment);
     if (parentComment) {
       if (typeof parentComment === "string") {
         this.path = `,${parentComment},`;

@@ -109,10 +109,8 @@ export class FireBaseService implements IStorageService {
   ): Promise<PreSignedLinkResponse[]> {
     const tasks: Promise<PreSignedLinkResponse>[] = [];
     fileNames.forEach((file) => {
-      const objectName = join(
-        this.storageTree.temp,
-        addFilePrefix(file, userId)
-      );
+      const objectName =
+        this.storageTree.temp + "/" + addFilePrefix(file, userId);
       tasks.push(this.getUploadSignedLink(objectName));
     });
 

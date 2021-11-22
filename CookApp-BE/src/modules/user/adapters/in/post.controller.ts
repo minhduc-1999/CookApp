@@ -1,21 +1,10 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Param,
-  Patch,
-  Post,
-  Query,
-} from "@nestjs/common";
+import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
-import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
-import { classToPlain, plainToClass } from "class-transformer";
 import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
-  ApiOKResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
 import { MongooseSession } from "decorators/mongooseSession.decorator";
 import { Transaction } from "decorators/transaction.decorator";
@@ -30,20 +19,18 @@ import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest"
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
 import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
 import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
-import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";
-import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWallPostsResponse";
+import { ReactPostCommand } from "modules/user/useCases/reactPost";
+import { ReactPostRequest } from "modules/user/useCases/reactPost/reactPostRequest";
 import { ClientSession } from "mongoose";
 import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
-import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
-import { clean } from "utils";
 
-@Controller("users")
+@Controller("users/posts")
 @ApiTags("User/Post")
 @ApiBearerAuth()
 export class PostController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
-  @Post("posts")
+  @Post()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
   @Transaction()
@@ -57,7 +44,7 @@ export class PostController {
     return Result.ok(createdPost, { messages: ["Create post successfully"] });
   }
 
-  @Get("posts/:postId")
+  @Get(":postId")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
@@ -66,11 +53,11 @@ export class PostController {
     @User() user: UserDTO
   ): Promise<Result<GetPostResponse>> {
     const query = new GetPostDetailQuery(user, postId);
-    const post = await this._queryBus.execute(query);    
+    const post = await this._queryBus.execute(query);
     return Result.ok(post, { messages: ["Get post successfully"] });
   }
 
-  @Patch("posts/:postId")
+  @Patch(":postId")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
   async editPost(
@@ -82,5 +69,19 @@ export class PostController {
     const editPostCommand = new EditPostCommand(null, user, post);
     const updatedPost = await this._commandBus.execute(editPostCommand);
     return Result.ok(updatedPost, { messages: ["Edit post successfully"] });
+  }
+
+  @Post(":postId/react")
+  async reactPost(
+    @User() user: UserDTO,
+    @Body() body: ReactPostRequest,
+    @Param("postId", ParseObjectIdPipe) postId: string
+  ) {
+    body.postId = postId;
+    const reactCommand = new ReactPostCommand(null, user, body);
+    const result = await this._commandBus.execute(reactCommand);
+    return Result.ok(result, {
+      messages: ["Update react status successfully"],
+    });
   }
 }

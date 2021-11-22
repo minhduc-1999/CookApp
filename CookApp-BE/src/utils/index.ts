@@ -48,7 +48,8 @@ export function getFileExtension(fileName: string): string {
 }
 
 export function getMimeType(fileName: string): string {
-  const extension = getFileExtension(fileName);
+  let extension = getFileExtension(fileName);
+  if (extension === "jpg") extension = "jpeg";
   return `image/${extension}`;
 }
 
