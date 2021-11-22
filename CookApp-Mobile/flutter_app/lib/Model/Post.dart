@@ -1,3 +1,4 @@
+/*
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
@@ -172,7 +173,8 @@ class _Post extends State<Post> {
     }
 
     return Container();
-   /*   FutureBuilder(
+   */
+/*   FutureBuilder(
         future:
         FirebaseFirestore.instance.collection('users').doc(ownerId).get(),
         builder: (context, snapshot) {
@@ -197,7 +199,8 @@ class _Post extends State<Post> {
 
           // snapshot data is null here
           return Container();
-        });*/
+        });*//*
+
   }
 
   Container loadingPlaceHolder = Container(
@@ -262,7 +265,8 @@ class _Post extends State<Post> {
   }
 
   void _likePost(String postId2) {
-    /*var userId = currentUserModel.id;
+    */
+/*var userId = currentUserModel.id;
     bool _liked = likes[userId] == true;
 
     if (_liked) {
@@ -298,11 +302,13 @@ class _Post extends State<Post> {
           showHeart = false;
         });
       });
-    }*/
+    }*//*
+
   }
 
   void addActivityFeedItem() {
-   /* FirebaseFirestore.instance
+   */
+/* FirebaseFirestore.instance
         .collection("feed")
         .doc(ownerId)
         .collection("items")
@@ -315,16 +321,19 @@ class _Post extends State<Post> {
       "username": currentUserModel.displayName,
       "timestamp": DateTime.now(),
       "postId": postId,
-    });*/
+    });*//*
+
   }
 
   void removeActivityFeedItem() {
-    /*FirebaseFirestore.instance
+    */
+/*FirebaseFirestore.instance
         .collection("feed")
         .doc(ownerId)
         .collection("items")
         .doc(postId)
-        .delete();*/
+        .delete();*//*
+
   }
 }
 
@@ -334,9 +343,11 @@ class ImagePostFromId extends StatelessWidget {
   const ImagePostFromId({this.id});
 
   getImagePost() async {
-    /*var document =
+    */
+/*var document =
     await FirebaseFirestore.instance.collection('posts').doc(id).get();
-    return ImagePost.fromDocument(document);*/
+    return ImagePost.fromDocument(document);*//*
+
   }
 
   @override
@@ -356,18 +367,21 @@ class ImagePostFromId extends StatelessWidget {
 
 void goToComments(
     {BuildContext context, String postId, String ownerId, String mediaUrl}) {
- /* Navigator.of(context)
+ */
+/* Navigator.of(context)
       .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
     return CommentPage(
       postId: postId,
       postOwner: ownerId,
       postMediaUrl: mediaUrl,
     );
-  }));*/
+  }));*//*
+
 }
 
 void openImagePost(BuildContext context, Post post) {
-  /*Navigator.of(context)
+  */
+/*Navigator.of(context)
       .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
     return Center(
       child: Scaffold(
@@ -393,5 +407,7 @@ void openImagePost(BuildContext context, Post post) {
             ],
           )),
     );
-  }));*/
+  }));*//*
+
 }
+*/

@@ -31,7 +31,11 @@ dependencies:
   cached_network_image: ^3.1.0
   font_awesome_flutter: ^9.1.0
   flare_flutter: ^3.0.1
-
+  api_cache_manager: ^1.0.2
+  image_picker: ^0.8.4+4
+  snippet_coder_utils: ^1.0.9
+  photo_manager: ^0.6.0
+  uuid: ^3.0.5
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -41,7 +45,11 @@ dev_dependencies:
 
 # The following section is specific to Flutter.
 flutter:
-
+  fonts:
+    - family: Billabong
+      fonts:
+        - asset: assets/fonts/Billabong.ttf
+          style: normal
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -53,6 +61,7 @@ flutter:
   #   - images/a_dot_ham.jpeg
   assets:
     - assets/flare/Like.flr
+    - assets/images/AppLogo.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 
@@ -76,5 +85,6 @@ flutter:
   #       - asset: fonts/TrajanPro_Bold.ttf
   #         weight: 700
   #
+
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

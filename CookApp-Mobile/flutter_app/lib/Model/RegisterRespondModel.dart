@@ -1,12 +1,16 @@
-class LoginRespondModel {
-  LoginRespondModel({
+import 'dart:convert';
+RegisterRespondModel registerRespondModel(String str) =>
+    RegisterRespondModel.fromJson(json.decode(str));
+
+class RegisterRespondModel {
+  RegisterRespondModel({
     this.meta,
     this.data,
   });
   Meta meta;
   Data data;
 
-  LoginRespondModel.fromJson(Map<String, dynamic> json){
+  RegisterRespondModel.fromJson(Map<String, dynamic> json){
     meta = Meta.fromJson(json['meta']);
     data = Data.fromJson(json['data']);
   }
