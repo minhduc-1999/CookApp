@@ -8,6 +8,6 @@ export class PreSignedLinkRequest {
   @IsNotEmpty({ each: true })
   @MinLength(6, { each: true })
   @IsString({ each: true })
-  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml"], { each: true })
+  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"], { each: true })
   fileNames: string[];
 }
