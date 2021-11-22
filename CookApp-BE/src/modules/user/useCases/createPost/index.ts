@@ -42,21 +42,18 @@ export class CreatePostCommandHandler
         MediaType.POST_IMAGES
       );
     }
-    const creatingPost = new PostDTO({
+    const creatingPost = PostDTO.create({
       ...postDto,
       author: user,
-      createdBy: user.id,
-      updatedBy: user.id,
     });
     const result = await this._postRepo.createPost(
       creatingPost,
       command.session
     );
-    delete result["author"];
     await Promise.all([
-      this._wallRepo.pushNewPost(result, user),
       this._feedRepo.pushNewPost(result, user),
+      this._wallRepo.pushNewPost(result, user),
     ]);
-    return new CreatePostResponse(result);
+    return result;
   }
 }

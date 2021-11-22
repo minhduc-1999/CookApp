@@ -1,7 +1,6 @@
+import { PickType } from "@nestjs/swagger";
 import { UserDTO } from "dtos/user.dto";
 
-export class RegisterResponse extends UserDTO {
-  constructor(option: Partial<UserDTO>) {
-    super(option);
-  }
+export class RegisterResponse extends PickType(UserDTO, ['id']) {
+  
 }

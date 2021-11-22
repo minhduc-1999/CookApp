@@ -1,34 +1,48 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Exclude } from "class-transformer";
+import { ApiProperty, ApiResponseProperty } from "@nestjs/swagger";
+import { Exclude, Expose } from "class-transformer";
+import { IsMongoId } from "class-validator";
 import _ = require("lodash");
 
 export class AuditDTO {
-  @ApiProperty({ type: String, readOnly: true })
+  @IsMongoId()
+  @ApiProperty({ type: String })
+  @Expose()
   id: string;
 
   @Exclude()
   createdBy: string;
 
-  @Exclude()
+  @Expose()
+  @ApiResponseProperty({ type: Number })
   createdAt: number;
 
+  @Expose()
+  @ApiResponseProperty({ type: Number })
   updatedAt: number;
 
   @Exclude()
   updatedBy: string;
 
   @Exclude()
-  deletedAt: number;
+  deletedAt?: number;
 
   @Exclude()
-  deletedBy: string;
+  deletedBy?: string;
 
-  constructor(audit: Partial<AuditDTO>) {
-    this.createdBy = audit?.createdBy;
-    this.updatedAt = audit?.updatedAt ? audit?.updatedAt : _.now();
-    this.createdAt = audit?.createdAt ? audit?.createdAt : _.now();
-    this.updatedBy = audit?.updatedBy;
-    this.deletedAt = audit?.deletedAt;
-    this.deletedBy = audit?.deletedBy;
+  create(userId: string) {
+    this.updatedAt = _.now();
+    this.createdAt = _.now();
+    this.createdBy = userId;
+    this.updatedBy = userId;
+  }
+
+  update(userId: string) {
+    this.updatedBy = userId;
+    this.updatedAt = _.now();
+  }
+
+  delete(userId: string) {
+    this.deletedAt = _.now();
+    this.deletedBy = userId;
   }
 }

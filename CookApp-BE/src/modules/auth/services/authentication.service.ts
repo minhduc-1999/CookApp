@@ -20,7 +20,7 @@ class AuthenticationService implements IAuthentication {
     private jwtService: JwtService
   ) {}
   async login(user: UserDTO): Promise<LoginResponse> {
-    const payload = { username: user.username, sub: user.id };
+    const payload = { sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
     };
@@ -61,7 +61,7 @@ class AuthenticationService implements IAuthentication {
         )
       );
     await this.verifyPassword(password, user.password);
-    return new UserDTO(user);
+    return user;
   }
 }
 

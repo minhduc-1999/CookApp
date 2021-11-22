@@ -1,13 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
-import { Exclude, Type } from "class-transformer";
-import {
-  IsEmail,
-  IsMongoId,
-  IsNotEmpty,
-  IsPhoneNumber,
-  IsString,
-} from "class-validator";
+import { Exclude, Expose, Type } from "class-transformer";
+import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString } from "class-validator";
 import { ProfileDTO } from "./profile.dto";
 
 export class UserDTO extends AuditDTO {
@@ -17,6 +11,7 @@ export class UserDTO extends AuditDTO {
   @ApiProperty({ type: String })
   username: string;
 
+  @Expose({ toClassOnly: true })
   @Exclude({ toPlainOnly: true })
   password: string;
 
@@ -30,24 +25,40 @@ export class UserDTO extends AuditDTO {
 
   @ApiPropertyOptional({ type: String })
   @IsString()
+  @Expose()
   avatar?: string;
 
   @ApiPropertyOptional({ type: ProfileDTO })
   @Type(() => ProfileDTO)
+  @Expose()
   profile?: ProfileDTO;
 
-  @IsMongoId()
-  @ApiProperty({ type: String })
-  id: string;
+  @ApiPropertyOptional({ type: String })
+  @IsString()
+  @Expose()
+  displayName?: string;
 
-  constructor(user: Partial<UserDTO>) {
-    super(user);
-    this.id = user?.id;
-    this.username = user?.username;
-    this.email = user?.email;
-    this.phone = user?.phone;
-    this.avatar = user?.avatar;
-    this.profile = user?.profile;
-    this.password = user?.password;
+  static create(
+    user: Pick<
+      UserDTO,
+      | "username"
+      | "password"
+      | "email"
+      | "phone"
+      | "avatar"
+      | "profile"
+      | "displayName"
+    >
+  ): UserDTO {
+    const newUser = new UserDTO();
+    newUser.create("system");
+    newUser.username = user?.username;
+    newUser.email = user?.email;
+    newUser.phone = user?.phone;
+    newUser.avatar = user?.avatar;
+    newUser.profile = user?.profile;
+    newUser.password = user?.password;
+    newUser.displayName = user?.displayName;
+    return newUser;
   }
 }

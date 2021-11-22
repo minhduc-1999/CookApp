@@ -1,6 +1,6 @@
-import { ApiProperty, ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
+import { ApiProperty, ApiPropertyOptional, ApiResponseProperty, PickType } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
-import { Exclude, Type } from "class-transformer";
+import { Expose, Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/IsMeaningfulString.decorator";
@@ -11,6 +11,7 @@ export class PostDTO extends AuditDTO {
   @ApiProperty({ type: String })
   @IsString()
   @IsMeaningfulString(2)
+  @Expose()
   content: string;
 
   @ApiPropertyOptional({ type: [String] })
@@ -19,23 +20,30 @@ export class PostDTO extends AuditDTO {
   @IsNotEmpty({ each: true })
   @IsFileExtensions(["jpeg", "png", "gif", "svg+xml"], { each: true })
   @IsOptional()
+  @Expose()
   images?: string[];
 
   @IsString({ each: true })
   @IsArray()
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
+  @Expose()
   videos?: string[];
 
-  @Exclude()
-  author?: UserDTO;
+  @Expose()
+  @Type(() => UserDTO)
+  @ApiResponseProperty({type: () => PickType(UserDTO, ['id', 'avatar', 'displayName'])})
+  author: UserDTO;
 
-  constructor(post: Partial<PostDTO>) {
-    super(post);
-    this.id = post?.id;
-    this.content = post?.content;
-    this.images = post?.images;
-    this.videos = post?.videos;
-    this.author = new UserDTO(post?.author);
+  static create(
+    post: Pick<PostDTO, "content" | "images" | "videos" | "author">
+  ): PostDTO {
+    const createdPost = new PostDTO();
+    createdPost.create(post?.author.id);
+    createdPost.content = post?.content;
+    createdPost.images = post?.images;
+    createdPost.videos = post?.videos;
+    createdPost.author = post?.author;
+    return createdPost;
   }
 }

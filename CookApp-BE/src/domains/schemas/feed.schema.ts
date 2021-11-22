@@ -10,7 +10,7 @@ export type FeedDocument = Feed & Document;
 @Schema()
 export class Feed extends AbstractSchema {
   @Prop({ type: Object })
-  user: Pick<User, "avatar" | "id">;
+  user: Pick<User, "id">;
 
   @Prop({
     type: [Object],
@@ -22,9 +22,13 @@ export class Feed extends AbstractSchema {
 
   constructor(feed: Partial<FeedDTO>) {
     super(feed);
-    this.user = feed?.user;
-    this.posts = feed?.posts?.map((post) => new Post(post));
-    this.numberOfPost = feed?.numberOfPost
+    const { id } = feed?.user;
+    this.user = { id };
+    this.posts = feed?.posts?.map((post) => {
+      delete post.author;
+      return new Post(post);
+    });
+    this.numberOfPost = feed?.numberOfPost;
   }
 }
 

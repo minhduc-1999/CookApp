@@ -45,7 +45,8 @@ export class User extends AbstractSchema {
     this.avatar = userDto?.avatar;
     this.profile = userDto?.profile && new UserProfile(userDto?.profile);
     this.password = userDto?.password;
-    this._id = userDto?.id
+    this._id = userDto?.id;
+    this.displayName = userDto?.displayName;
   }
 }
 

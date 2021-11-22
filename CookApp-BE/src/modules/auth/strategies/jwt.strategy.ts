@@ -1,11 +1,13 @@
-import { ExtractJwt, Strategy } from 'passport-jwt';
-import { PassportStrategy } from '@nestjs/passport';
-import { Injectable } from '@nestjs/common';
-import AuthConfig from '../../../config/auth';
+import { ExtractJwt, Strategy } from "passport-jwt";
+import { PassportStrategy } from "@nestjs/passport";
+import { Inject, Injectable } from "@nestjs/common";
+import AuthConfig from "../../../config/auth";
+import { IUserRepository } from "../adapters/out/repositories/user.repository";
+import { UserDTO } from "dtos/user.dto";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
-  constructor() {
+  constructor(@Inject("IUserRepository") private _userRepo: IUserRepository) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
@@ -13,7 +15,8 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     });
   }
 
-  async validate(payload: any) {
-    return { id: payload.sub, username: payload.username };
+  async validate(payload: any): Promise<UserDTO> {
+    const user = await this._userRepo.getUserById(payload.sub);
+    return user;
   }
 }

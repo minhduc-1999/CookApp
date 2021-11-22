@@ -1,26 +1,29 @@
 import { AuditDTO } from "base/dtos/audit.dto";
-import { Exclude, Type } from "class-transformer";
+import { Exclude, Expose, Type } from "class-transformer";
 import { PostDTO } from "./post.dto";
 import { UserDTO } from "./user.dto";
 
 export class WallDTO extends AuditDTO {
-  
   @Exclude()
-  user: Pick<UserDTO, 'id' | 'avatar'>;
+  user: UserDTO;
 
   @Type(() => PostDTO)
-  posts: Omit<PostDTO, 'author'>[];
+  @Expose()
+  posts: PostDTO[];
 
-  numberOfFollower: number 
+  @Expose()
+  numberOfFollower: number;
 
-  numberOfFollowing: number
+  @Expose()
+  numberOfFollowing: number;
 
-  numberOfPost: number
+  @Expose()
+  numberOfPost: number;
 
-  constructor(wall: Partial<WallDTO>) {
-    super(wall);
-    this.id = wall?.id;
-    this.posts = wall?.posts;
-    this.user = wall?.user
+  static create(wall: Pick<WallDTO, "user">): WallDTO {
+    const newWall = new WallDTO();
+    newWall.create(wall.user.id);
+    newWall.user = wall?.user;
+    return newWall;
   }
 }

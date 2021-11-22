@@ -6,11 +6,12 @@ import { Wall, WallDocument } from "domains/schemas/wall.schema";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
 import { ClientSession, Model } from "mongoose";
+import { clean } from "utils";
 
 export interface IWallRepository {
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
   updatePostInWall(
-    post: PostDTO,
+    post: Partial<PostDTO>,
     user: UserDTO,
     session?: ClientSession
   ): Promise<void>;
@@ -42,17 +43,17 @@ export class WallRepository implements IWallRepository {
     return postDocs[0].posts;
   }
   async updatePostInWall(
-    post: PostDTO,
+    post: Partial<PostDTO>,
     user: UserDTO,
     session: ClientSession = null
   ): Promise<void> {
-    await this._wallModel.updateOne(
+  await this._wallModel.updateOne(
       {
         user: { id: user.id },
         "posts.id": post.id,
       },
       {
-        $set: { "posts.$": post },
+        $set: { "posts.$": clean(post) },
       },
       {
         session: session,
@@ -60,12 +61,13 @@ export class WallRepository implements IWallRepository {
     );
   }
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
+    const { author, ...updatingPost } = post;
     await this._wallModel.updateOne(
       {
         user: { id: user.id },
       },
       {
-        $push: { posts: post },
+        $push: { posts: clean(updatingPost) },
         $inc: { numberOfPost: 1 },
       }
     );

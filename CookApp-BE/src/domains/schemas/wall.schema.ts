@@ -10,7 +10,7 @@ export type WallDocument = Wall & Document;
 @Schema()
 export class Wall extends AbstractSchema {
   @Prop({ type: Object })
-  user: Pick<User, "avatar" | "id">;
+  user: Pick<User, "avatar" | "id" | "displayName">;
 
   @Prop({ default: 0 })
   numberOfPost: number;
@@ -28,11 +28,15 @@ export class Wall extends AbstractSchema {
 
   constructor(wall: Partial<WallDTO>) {
     super(wall);
-    this.user = wall?.user;
+    const { id, avatar, displayName } = wall?.user;
+    this.user = { id, avatar, displayName };
     this.numberOfFollower = wall?.numberOfFollower;
     this.numberOfFollowing = wall?.numberOfFollowing;
     this.numberOfPost = wall?.numberOfPost;
-    this.posts = wall?.posts?.map((post) => new Post(post));
+    this.posts = wall?.posts?.map((post) => {
+      delete post.author;
+      return new Post(post);
+    });
   }
 }
 

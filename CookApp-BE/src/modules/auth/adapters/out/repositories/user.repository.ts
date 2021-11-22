@@ -11,12 +11,10 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
 import { UserDTO } from "dtos/user.dto";
 import { User, UserDocument } from "domains/schemas/user.schema";
+import { plainToClass } from "class-transformer";
 
 export interface IUserRepository {
-  createUser(
-    userData: UserDTO,
-    session: ClientSession
-  ): Promise<UserDTO>;
+  createUser(userData: UserDTO, session: ClientSession): Promise<UserDTO>;
   getUserByEmail(email: string): Promise<UserDTO>;
   getUserByUsername(username: string): Promise<UserDTO>;
   getUserById(id: string): Promise<UserDTO>;
@@ -43,21 +41,19 @@ export class UserRepository implements IUserRepository {
         new: true,
       }
     );
-    return new UserDTO(userDoc);
+    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
   }
 
   async getUserById(id: string): Promise<UserDTO> {
-    const userDoc = await this._userModel.findOne({ id: id }).exec();
+    const userDoc = await this._userModel.findById(id).exec();
     if (!userDoc) return null;
-    const userDto = new UserDTO(userDoc);
-    return userDto;
+    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
   }
 
   async getUserByEmail(email: string): Promise<UserDTO> {
     const userDoc = await this._userModel.findOne({ email: email }).exec();
     if (!userDoc) return null;
-    const userDto = new UserDTO(userDoc);
-    return userDto;
+    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
   }
 
   async getUserByUsername(username: string): Promise<UserDTO> {
@@ -65,8 +61,7 @@ export class UserRepository implements IUserRepository {
       .findOne({ username: username })
       .exec();
     if (!userDoc) return null;
-    const userDto = new UserDTO(userDoc);
-    return userDto;
+    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
   }
 
   async createUser(
@@ -77,8 +72,7 @@ export class UserRepository implements IUserRepository {
     try {
       const userDoc = await createdUser.save({ session: session });
       if (!userDoc) return null;
-      const userDto = new UserDTO(userDoc);
-      return userDto;
+      return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
     } catch (error) {
       console.error(error);
       if (error.code === MongoErrorCode.DUPLICATE_KEY)

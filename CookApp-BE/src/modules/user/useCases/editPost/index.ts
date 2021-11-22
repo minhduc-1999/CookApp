@@ -3,7 +3,6 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import {} from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
 import { IPostService } from "modules/user/services/post.service";
 import { createUpdatingObject } from "utils";
@@ -47,7 +46,6 @@ export class EditPostCommandHandler
       );
     const updatePost = createUpdatingObject(postDto, user.id);
     const updatedResult = await this._postRepo.updatePost(updatePost);
-    delete updatedResult.author;
     await Promise.all([
       this._wallRepo.updatePostInWall(updatedResult, user),
       this._feedRepo.updatePostInFeed(updatedResult, user),

@@ -1,22 +1,23 @@
 import { AuditDTO } from "base/dtos/audit.dto";
-import { Exclude, Type } from "class-transformer";
+import { Exclude, Expose, Type } from "class-transformer";
 import { PostDTO } from "./post.dto";
 import { UserDTO } from "./user.dto";
 
 export class FeedDTO extends AuditDTO {
   @Exclude()
-  user: Pick<UserDTO, "id" | "avatar">;
+  user: UserDTO;
 
+  @Expose()
   @Type(() => PostDTO)
   posts: PostDTO[];
 
+  @Expose()
   numberOfPost: number;
 
-  constructor(feed: Partial<FeedDTO>) {
-    super(feed);
-    this.id = feed?.id;
-    this.posts = feed?.posts;
-    this.user = feed?.user;
-    this.numberOfPost = feed?.numberOfPost
+  static create(feed: Pick<FeedDTO, "user">): FeedDTO {
+    const createdFeed = new FeedDTO();
+    createdFeed.create(feed?.user.id);
+    createdFeed.user = feed?.user;
+    return createdFeed;
   }
 }
