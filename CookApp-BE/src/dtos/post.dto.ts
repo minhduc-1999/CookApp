@@ -1,9 +1,16 @@
-import { ApiProperty, ApiPropertyOptional, ApiResponseProperty, PickType } from "@nestjs/swagger";
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  ApiResponseProperty,
+  PickType,
+} from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
-import { Expose, Type } from "class-transformer";
+import { Exclude, Expose, Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/IsMeaningfulString.decorator";
+import { ReactionType } from "enums/reaction.enum";
+import { ReactionDTO } from "./reaction.dto";
 import { UserDTO } from "./user.dto";
 
 export class PostDTO extends AuditDTO {
@@ -32,8 +39,15 @@ export class PostDTO extends AuditDTO {
 
   @Expose()
   @Type(() => UserDTO)
-  @ApiResponseProperty({type: () => PickType(UserDTO, ['id', 'avatar', 'displayName'])})
+  @ApiResponseProperty({
+    type: () => PickType(UserDTO, ["id", "avatar", "displayName"]),
+  })
   author: UserDTO;
+
+  @Expose({ toClassOnly: true })
+  @Exclude({ toPlainOnly: true })
+  @Type(() => ReactionDTO)
+  reactions: ReactionDTO[]
 
   static create(
     post: Pick<PostDTO, "content" | "images" | "videos" | "author">

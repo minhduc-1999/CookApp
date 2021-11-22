@@ -1,14 +1,21 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
+import { throws } from "assert";
 import { plainToClass } from "class-transformer";
 import { Post, PostDocument } from "domains/schemas/post.schema";
 import { PostDTO } from "dtos/post.dto";
+import { ReactionDTO } from "dtos/reaction.dto";
+import { update } from "lodash";
+import { ReactPostRequest } from "modules/user/useCases/reactPost/reactPostRequest";
 import { ClientSession, Model } from "mongoose";
 
 export interface IPostRepository {
   createPost(post: PostDTO, session: ClientSession): Promise<PostDTO>;
   getPostById(postId: string): Promise<PostDTO>;
   updatePost(post: Partial<PostDTO>): Promise<PostDTO>;
+  reactPost(react: ReactionDTO, userId: string): Promise<boolean>;
+  deleteReact(userId: string, postId: string): Promise<boolean>;
+  getReactionByUserId(userId: string, postId: string): Promise<ReactionDTO>;
 }
 
 @Injectable()
@@ -31,7 +38,10 @@ export class PostRepository implements IPostRepository {
   async getPostById(postId: string): Promise<PostDTO> {
     const postDoc = await this._postModel.findById(postId);
     if (!postDoc) return null;
-    return plainToClass(PostDTO, postDoc, { excludeExtraneousValues: true, groups: ['post'] });
+    return plainToClass(PostDTO, postDoc, {
+      excludeExtraneousValues: true,
+      groups: ["post"],
+    });
   }
 
   async createPost(
@@ -42,5 +52,49 @@ export class PostRepository implements IPostRepository {
     const postDoc = await creatingPost.save({ session: session });
     if (!postDoc) return null;
     return plainToClass(PostDTO, postDoc, { excludeExtraneousValues: true });
+  }
+
+  async reactPost(react: ReactionDTO, postId: string): Promise<boolean> {
+    const result = await this._postModel.updateOne(
+      {
+        _id: postId,
+      },
+      {
+        $push: { reactions: react },
+      }
+    );
+    return result.modifiedCount === 1;
+  }
+
+  async deleteReact(userId: string, postId: any): Promise<boolean> {
+    const result = await this._postModel.updateOne(
+      {
+        _id: postId,
+        "reactions.userId": userId,
+      },
+      {
+        $pull: { reactions: { userId: userId } },
+      }
+    );
+    return result.modifiedCount !== 0;
+  }
+
+  async getReactionByUserId(
+    userId: string,
+    postId: string
+  ): Promise<ReactionDTO> {
+    const result = await this._postModel
+      .findOne(
+        {
+          _id: postId,
+          "reactions.userId": userId,
+        },
+        { "reactions.$": 1 }
+      )
+      .exec();
+    if (!result) return null;
+    return plainToClass(ReactionDTO, result.reactions[0], {
+      excludeExtraneousValues: true,
+    });
   }
 }

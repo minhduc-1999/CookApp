@@ -1,3 +1,3 @@
-export enum Reaction {
+export enum ReactionType {
     LOVE = 'LOVE'
 }

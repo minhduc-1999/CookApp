@@ -27,9 +27,20 @@ import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
+import { ReactPostCommandHandler } from "./useCases/reactPost";
 
-const commandHandlers = [CreatePostCommandHandler, EditPostCommandHandler, CreateCommentCommandHandler];
-const queryHandlers = [GetPostDetailQueryHandler, GetWallPostsQueryHandler, GetFeedPostsQueryHandler, GetPostCommentsQueryHandler];
+const commandHandlers = [
+  CreatePostCommandHandler,
+  EditPostCommandHandler,
+  CreateCommentCommandHandler,
+  ReactPostCommandHandler
+];
+const queryHandlers = [
+  GetPostDetailQueryHandler,
+  GetWallPostsQueryHandler,
+  GetFeedPostsQueryHandler,
+  GetPostCommentsQueryHandler,
+];
 const services = [
   {
     provide: "IPostService",
@@ -63,13 +74,24 @@ const repositories = [
   imports: [
     ConfigModule,
     HttpModule,
-    MongooseModule.forFeature([UserModel, PostModel, WallModel, FeedModel, CommentModel]),
+    MongooseModule.forFeature([
+      UserModel,
+      PostModel,
+      WallModel,
+      FeedModel,
+      CommentModel,
+    ]),
     CqrsModule,
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
   ],
-  controllers: [PostController, WallController, FeedController, CommentController],
+  controllers: [
+    PostController,
+    WallController,
+    FeedController,
+    CommentController,
+  ],
   providers: [
     ...commandHandlers,
     ...services,
