@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Model/PostRequestModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRequestModel.dart';
 import 'package:flutter_app/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
@@ -8,13 +9,14 @@ import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';
 
 import '../constants.dart';
+
 class UploadActivity extends StatefulWidget {
   @override
   _UploadActivityState createState() => _UploadActivityState();
 }
 
 class _UploadActivityState extends State<UploadActivity> {
-  List <File> files = [];
+  List<File> files = [];
 
   ImagePicker imagePicker = ImagePicker();
 
@@ -27,6 +29,7 @@ class _UploadActivityState extends State<UploadActivity> {
   int currentPage = 0;
   int lastPage;
   int maxSelection = 1;
+
   _handleScrollEvent(ScrollNotification scroll) {
     if (scroll.metrics.pixels / scroll.metrics.maxScrollExtent > 0.33) {
       if (currentPage != lastPage) {
@@ -34,6 +37,7 @@ class _UploadActivityState extends State<UploadActivity> {
       }
     }
   }
+
   _fetchPhotos() async {
     lastPage = currentPage;
     var result = await PhotoManager.requestPermission();
@@ -49,8 +53,7 @@ class _UploadActivityState extends State<UploadActivity> {
           PhotoPickerItem(
               asset: asset,
               onSelect: (AssetEntity asset) {
-
-                _getFile(asset) ;
+                _getFile(asset);
               }),
         );
       }
@@ -63,6 +66,7 @@ class _UploadActivityState extends State<UploadActivity> {
       /// if result is fail, you can call `PhotoManager.openSetting();`  to open android/ios applicaton's setting to get permission
     }
   }
+
   @override
   initState() {
     //variables with location assigned as 0.0
@@ -70,9 +74,6 @@ class _UploadActivityState extends State<UploadActivity> {
     super.initState();
     _fetchPhotos();
   }
-
-
-
 
   @override
   Widget build(BuildContext context) {
@@ -105,11 +106,11 @@ class _UploadActivityState extends State<UploadActivity> {
           actions: [
             IconButton(
               icon: Icon(Icons.add_to_photos_rounded),
-              onPressed: () async{
+              onPressed: () async {
                 List<XFile> imageFiles = await imagePicker.pickMultiImage();
-                if (imageFiles.isNotEmpty){
-                  List <File> temp = [];
-                  for (var image in imageFiles){
+                if (imageFiles.isNotEmpty) {
+                  List<File> temp = [];
+                  for (var image in imageFiles) {
                     temp.add(File(image.path));
                   }
                   setState(() {
@@ -121,7 +122,6 @@ class _UploadActivityState extends State<UploadActivity> {
             IconButton(
               icon: Icon(Icons.add_a_photo),
               onPressed: () async {
-
                 PickedFile imageFile = await imagePicker.getImage(
                     source: ImageSource.camera,
                     maxWidth: 1920,
@@ -136,7 +136,7 @@ class _UploadActivityState extends State<UploadActivity> {
             )
           ],
         ),
-        body:  NotificationListener<ScrollNotification>(
+        body: NotificationListener<ScrollNotification>(
           onNotification: (ScrollNotification scroll) {
             _handleScrollEvent(scroll);
             return;
@@ -144,7 +144,9 @@ class _UploadActivityState extends State<UploadActivity> {
           child: GridView.builder(
               itemCount: _photoList.length,
               gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3, crossAxisSpacing: 2, mainAxisSpacing: 2),
+                  crossAxisCount: 3,
+                  crossAxisSpacing: 2,
+                  mainAxisSpacing: 2),
               itemBuilder: (BuildContext context, int index) {
                 return _photoList[index];
               }),
@@ -159,7 +161,6 @@ class _UploadActivityState extends State<UploadActivity> {
               setState(() {
                 files.clear();
               });
-
             },
           ),
           title: const Text(
@@ -168,19 +169,24 @@ class _UploadActivityState extends State<UploadActivity> {
           ),
           actions: <Widget>[
             FlatButton(
-                onPressed: () {
+                onPressed: () async {
                   List<String> names = [];
-                  for (var i in files){
-                    var uuid = Uuid().v4();
-                    names.add(uuid + ".png");
+                  for (var i in files) {
+                    //names.add(i.path.substring(i.path.lastIndexOf("/")+1));
+                    names.add(i.path.substring(i.path.lastIndexOf("/") + 1));
                   }
-                  APIService.getPresignedLink(PresignedLinkedRequestModel(fileNames: names))
-                      .then((response) => {
-                        for (var i in response.data.items){
-                          print("signedLink" + i.signedLink)
-                        }
+                  List<String> objectName = [];
+                  List<String> video = [];
+                  var response = await APIService.getPresignedLink(
+                      PresignedLinkedRequestModel(fileNames: names));
 
-                  });
+                  for (int i = 0; i < response.data.items.length; i++){
+                    APIService.uploadImage(files[i], response.data.items[i].signedLink);
+                    objectName.add(response.data.items[i].objectName);
+                  }
+
+                  APIService.uploadPost(PostRequestModel(
+                  content: descriptionController.text, images:objectName, videos: video));
                   Navigator.of(context).pop();
                 },
                 child: IconButton(
@@ -204,17 +210,18 @@ class _UploadActivityState extends State<UploadActivity> {
             loading: uploading,
           ),
           Divider(),
-
         ],
       ),
     );
   }
+
   _getFile(AssetEntity asset) async {
     File temp = await asset.file;
     setState(() {
       files.add(temp);
     });
   }
+
   buildLocationButton(String locationName) {
     if (locationName != null ?? locationName.isNotEmpty) {
       return InkWell(
@@ -245,8 +252,8 @@ class _UploadActivityState extends State<UploadActivity> {
     }
   }
 }
-class PhotoPickerItem extends StatefulWidget {
 
+class PhotoPickerItem extends StatefulWidget {
   final AssetEntity asset;
   final bool Function(AssetEntity asset) onSelect;
 
@@ -288,17 +295,17 @@ class _PhotoPickerItemState extends State<PhotoPickerItem> {
     );
   }
 }
+
 class PostForm extends StatelessWidget {
   final imageFile;
   final TextEditingController descriptionController;
   final TextEditingController locationController;
   final bool loading;
 
-  PostForm(
-      {this.imageFile,
-        this.descriptionController,
-        this.loading,
-        this.locationController});
+  PostForm({this.imageFile,
+    this.descriptionController,
+    this.loading,
+    this.locationController});
 
   Widget build(BuildContext context) {
     return Column(
@@ -333,7 +340,6 @@ class PostForm extends StatelessWidget {
                     hintText: "Write a caption...", border: InputBorder.none),
               ),
             ),
-
           ],
         ),
         Divider(),

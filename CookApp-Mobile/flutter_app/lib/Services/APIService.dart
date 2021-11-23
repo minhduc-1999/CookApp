@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter_app/Model/LoginRequestModel.dart';
 import 'package:flutter_app/Model/LoginRespondModel.dart';
+import 'package:flutter_app/Model/PostRequestModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRequestModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRespondModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRespondModel.dart';
@@ -62,24 +63,30 @@ class APIService {
         body: jsonEncode(model.toJson()));
     return presignedLinkedRespondModel(respone.body);
   }
+
+
+
   static Future<bool> uploadImage(
-      File file) async {
-    var loginDetails = await SharedService.loginDetails();
-    var url = Uri.parse(Config.apiURL + Config.registerAPI);
+      File file, String link) async {
+    var url = Uri.parse(link);
     var respone = await client.put(url,
         headers: <String, String>{
           'Content-Type': 'image/png',
+        },
+        body: await file.readAsBytes());
+    return true;
+    //return registerRespondModel(respone.body);
+  }
+
+  static Future<bool> uploadPost(PostRequestModel model) async {
+    var url = Uri.parse(Config.apiURL + Config.uploadPostAPI);
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
           'Authorization': 'Bearer ${loginDetails.data.accessToken}',
         },
-        body: file);
-
-    var request = http.MultipartRequest('POST', url);
-    request.files.add(
-        await http.MultipartFile.fromPath(
-            'pdf',
-            file.path
-        )
-    );
-    //return registerRespondModel(respone.body);
+        body: jsonEncode(model.toJson()));
+    return true;
   }
 }
