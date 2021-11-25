@@ -1,32 +1,31 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
+import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
 import { Feed, FeedDocument } from "domains/schemas/feed.schema";
-import { Post } from "domains/schemas/post.schema";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
 import { ClientSession, Model } from "mongoose";
-import { clean } from "utils";
 
 export interface IFeedRepository {
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
   updatePostInFeed(
     post: Partial<PostDTO>,
-    user: UserDTO,
-    session?: ClientSession
+    user: UserDTO
   ): Promise<void>;
   getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]>;
   getTotalPosts(userId: UserDTO): Promise<number>;
   updateNumReaction(postId: string, delta: number): Promise<void>;
+  setSession(session: ClientSession): IFeedRepository;
 }
 
 @Injectable()
-export class FeedRepository implements IFeedRepository {
+export class FeedRepository extends BaseRepository implements IFeedRepository {
   private logger: Logger = new Logger(FeedRepository.name);
-  constructor(
-    @InjectModel(Feed.name) private _feedModel: Model<FeedDocument>
-  ) {}
+  constructor(@InjectModel(Feed.name) private _feedModel: Model<FeedDocument>) {
+    super();
+  }
   async updateNumReaction(postId: string, delta: number): Promise<void> {
     await this._feedModel.updateMany(
       {
@@ -34,6 +33,9 @@ export class FeedRepository implements IFeedRepository {
       },
       {
         $inc: { "posts.$.numOfReaction": delta },
+      },
+      {
+        session: this.session,
       }
     );
   }
@@ -72,15 +74,14 @@ export class FeedRepository implements IFeedRepository {
       {
         $push: { posts: Feed.generatePostItem(post) },
         $inc: { numberOfPost: 1 },
+      },
+      {
+        session: this.session,
       }
     );
   }
 
-  async updatePostInFeed(
-    post: PostDTO,
-    user: UserDTO,
-    session: ClientSession = null
-  ): Promise<void> {
+  async updatePostInFeed(post: PostDTO, user: UserDTO): Promise<void> {
     await this._feedModel.updateOne(
       {
         user: { id: user.id },
@@ -89,7 +90,7 @@ export class FeedRepository implements IFeedRepository {
       {
         $set: { "posts.$": Feed.generatePostItem(post) },
       },
-      { session }
+      { session: this.session }
     );
   }
 }
