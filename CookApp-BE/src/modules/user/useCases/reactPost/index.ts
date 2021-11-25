@@ -6,7 +6,6 @@ import { IPostService } from "modules/user/services/post.service";
 import { ReactPostRequest } from "./reactPostRequest";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { ReactPostResponse } from "./reactPostResponse";
 import { ReactionDTO } from "dtos/reaction.dto";
@@ -30,8 +29,6 @@ export class ReactPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository,
     @Inject("IFeedRepository")
     private _feedRepo: IFeedRepository
   ) {}
@@ -43,17 +40,26 @@ export class ReactPostCommandHandler
       type: reactReq.react,
       userId: user.id,
     });
+    const tasks = [];
     let reacted: boolean;
     const react = await this._postRepo.getReactionByUserId(
       user.id,
       reactReq.postId
     );
-    if (react) {
-      reacted = !(await this._postRepo.deleteReact(user.id, reactReq.postId));
+    if (react && react.type === reactReq.react) {
+      tasks.push(
+        this._postRepo.deleteReact(user.id, reactReq.postId),
+        this._feedRepo.updateNumReaction(reactReq.postId, -1)
+      );
+      reacted = false;
     } else {
-      reacted = await this._postRepo.reactPost(reactDto, reactReq.postId);
+      tasks.push(
+        this._postRepo.reactPost(reactDto, reactReq.postId),
+        this._feedRepo.updateNumReaction(reactReq.postId, 1)
+      );
+      reacted = true;
     }
 
-    return new ReactPostResponse(reacted);
+    return await Promise.all(tasks).then(() => new ReactPostResponse(reacted));
   }
 }

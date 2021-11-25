@@ -10,9 +10,13 @@ import { UpdateProfileRequest } from "./updateProfileRequest";
 import { UpdateProfileResponse } from "./updateProfileResponse";
 
 export class UpdateProfileCommand extends BaseCommand {
-  updateProfileReq: UpdateProfileRequest
-  constructor(session: ClientSession,user: UserDTO, profile: UpdateProfileRequest) {
-    super(session, user)
+  updateProfileReq: UpdateProfileRequest;
+  constructor(
+    session: ClientSession,
+    user: UserDTO,
+    profile: UpdateProfileRequest
+  ) {
+    super(session, user);
     this.updateProfileReq = profile;
   }
 }
@@ -33,6 +37,8 @@ export class UpdateProfileCommandHandler
       command.updateProfileReq,
       user.id
     );
-    return this._userRepo.updateUserProfile(user.id, profile);
+    return this._userRepo
+      .setSession(command.session)
+      .updateUserProfile(user.id, profile);
   }
 }

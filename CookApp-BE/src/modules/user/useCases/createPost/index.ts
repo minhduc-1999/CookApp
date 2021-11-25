@@ -46,10 +46,7 @@ export class CreatePostCommandHandler
       ...postDto,
       author: user,
     });
-    const result = await this._postRepo.createPost(
-      creatingPost,
-      command.session
-    );
+    const result = await this._postRepo.createPost(creatingPost);
     await Promise.all([
       this._feedRepo.pushNewPost(result, user),
       this._wallRepo.pushNewPost(result, user),

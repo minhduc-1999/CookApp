@@ -35,15 +35,17 @@ export class RegisterCommandHandler
       ...registerDto,
       password: hashedPassword,
     });
-    const createdUser = await this._userRepo.createUser(newUserDto, session);
+    const createdUser = await this._userRepo
+      .setSession(session)
+      .createUser(newUserDto);
     const wallDto = WallDTO.create({
       user: createdUser,
     });
-    await this._wallRepo.createWall(wallDto, session);
+    await this._wallRepo.setSession(session).createWall(wallDto);
     const feedDto = FeedDTO.create({
       user: createdUser,
     });
-    await this._feedRepo.createFeed(feedDto, session);
+    await this._feedRepo.setSession(session).createFeed(feedDto);
     return createdUser;
   }
 }

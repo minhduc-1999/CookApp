@@ -1,29 +1,28 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
-import { User } from "domains/schemas/user.schema";
+import { BaseRepository } from "base/repository.base";
 import { Wall, WallDocument } from "domains/schemas/wall.schema";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
 import { ClientSession, Model } from "mongoose";
-import { clean } from "utils";
 
 export interface IWallRepository {
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
   updatePostInWall(
     post: Partial<PostDTO>,
-    user: UserDTO,
-    session?: ClientSession
+    user: UserDTO
   ): Promise<void>;
   getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]>;
   getTotalPosts(userId: UserDTO): Promise<number>;
+  setSession(session: ClientSession): IWallRepository;
 }
 
 @Injectable()
-export class WallRepository implements IWallRepository {
-  constructor(
-    @InjectModel(Wall.name) private _wallModel: Model<WallDocument>
-  ) {}
+export class WallRepository extends BaseRepository implements IWallRepository {
+  constructor(@InjectModel(Wall.name) private _wallModel: Model<WallDocument>) {
+    super();
+  }
   async getTotalPosts(user: UserDTO): Promise<number> {
     const wallDocs = await this._wallModel
       .findOne({ user: { id: user.id } }, "numberOfPost")
@@ -42,21 +41,17 @@ export class WallRepository implements IWallRepository {
     if (postDocs.length < 1) return [];
     return postDocs[0].posts;
   }
-  async updatePostInWall(
-    post: Partial<PostDTO>,
-    user: UserDTO,
-    session: ClientSession = null
-  ): Promise<void> {
-  await this._wallModel.updateOne(
+  async updatePostInWall(post: PostDTO, user: UserDTO): Promise<void> {
+    await this._wallModel.updateOne(
       {
         user: { id: user.id },
         "posts.id": post.id,
       },
       {
-        $set: { "posts.$": clean(post) },
+        $set: { "posts.$": Wall.generatePostItem(post) },
       },
       {
-        session: session,
+        session: this.session,
       }
     );
   }
@@ -67,8 +62,11 @@ export class WallRepository implements IWallRepository {
         user: { id: user.id },
       },
       {
-        $push: { posts: clean(updatingPost) },
+        $push: { posts: Wall.generatePostItem(post) },
         $inc: { numberOfPost: 1 },
+      },
+      {
+        session: this.session,
       }
     );
   }

@@ -1,7 +1,9 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
 import { FeedDTO } from "dtos/feed.dto";
+import { PostDTO } from "dtos/post.dto";
 import { Document } from "mongoose";
+import { clean } from "utils";
 import { Post } from "./post.schema";
 import { User } from "./user.schema";
 
@@ -15,20 +17,26 @@ export class Feed extends AbstractSchema {
   @Prop({
     type: [Object],
   })
-  posts: Omit<Post, "author">[];
+  posts: Omit<Post, "author" | "reactions">[];
 
   @Prop({ default: 0 })
   numberOfPost: number;
+
+  @Prop({ default: 0 })
+  numOfComment: number;
 
   constructor(feed: Partial<FeedDTO>) {
     super(feed);
     const { id } = feed?.user;
     this.user = { id };
-    this.posts = feed?.posts?.map((post) => {
-      delete post.author;
-      return new Post(post);
+  }
+
+  static generatePostItem(post: PostDTO): Omit<Post, "author" | "reactions"> {
+    delete post.author;
+    delete post.reactions;
+    return clean({
+      ...post,
     });
-    this.numberOfPost = feed?.numberOfPost;
   }
 }
 

@@ -12,9 +12,10 @@ import { RegisterRequest } from "modules/auth/useCases/register/registerRequest"
 import { UserDTO } from "dtos/user.dto";
 import { User, UserDocument } from "domains/schemas/user.schema";
 import { plainToClass } from "class-transformer";
+import { BaseRepository } from "base/repository.base";
 
 export interface IUserRepository {
-  createUser(userData: UserDTO, session: ClientSession): Promise<UserDTO>;
+  createUser(userData: UserDTO): Promise<UserDTO>;
   getUserByEmail(email: string): Promise<UserDTO>;
   getUserByUsername(username: string): Promise<UserDTO>;
   getUserById(id: string): Promise<UserDTO>;
@@ -22,13 +23,14 @@ export interface IUserRepository {
     userId: string,
     profile: Partial<UserDTO>
   ): Promise<UserDTO>;
+  setSession(session: ClientSession): IUserRepository;
 }
 
 @Injectable()
-export class UserRepository implements IUserRepository {
-  constructor(
-    @InjectModel(User.name) private _userModel: Model<UserDocument>
-  ) {}
+export class UserRepository extends BaseRepository implements IUserRepository {
+  constructor(@InjectModel(User.name) private _userModel: Model<UserDocument>) {
+    super();
+  }
 
   async updateUserProfile(
     userId: string,
@@ -39,6 +41,7 @@ export class UserRepository implements IUserRepository {
       { $set: profile },
       {
         new: true,
+        session: this.session,
       }
     );
     return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
@@ -64,13 +67,10 @@ export class UserRepository implements IUserRepository {
     return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
   }
 
-  async createUser(
-    userData: UserDTO,
-    session: ClientSession = null
-  ): Promise<UserDTO> {
+  async createUser(userData: UserDTO): Promise<UserDTO> {
     const createdUser = new this._userModel(new User(userData));
     try {
-      const userDoc = await createdUser.save({ session: session });
+      const userDoc = await createdUser.save({ session: this.session });
       if (!userDoc) return null;
       return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
     } catch (error) {

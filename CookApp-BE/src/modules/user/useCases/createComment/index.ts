@@ -8,6 +8,8 @@ import { CreateCommentRequest } from "./createCommentRequest";
 import { CreateCommentResponse } from "./createCommentResponse";
 import { CommentDTO } from "dtos/comment.dto";
 import { ICommentService } from "modules/user/services/comment.service";
+import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
+import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 
 export class CreateCommentCommand extends BaseCommand {
   commentDto: CreateCommentRequest;
@@ -28,7 +30,11 @@ export class CreateCommentCommandHandler
     @Inject("ICommentRepository")
     private _commentRepo: ICommentRepository,
     @Inject("ICommentService")
-    private _commentService: ICommentService
+    private _commentService: ICommentService,
+    @Inject("IPostRepository")
+    private _postRepo: IPostRepository,
+    @Inject("IFeedRepository")
+    private _feedRepo: IFeedRepository
   ) {}
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
     const { commentDto, user, session } = command;
@@ -42,6 +48,9 @@ export class CreateCommentCommandHandler
     const createdComment = await this._commentRepo
       .setSession(session)
       .createComment(comment);
-    return createdComment;
+    return await Promise.all([
+      this._feedRepo.updateNumComment(commentDto.postId, 1),
+      this._postRepo.updateNumComment(commentDto.postId, 1),
+    ]).then(() => createdComment);
   }
 }

@@ -9,7 +9,6 @@ import { Exclude, Expose, Type } from "class-transformer";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/IsMeaningfulString.decorator";
-import { ReactionType } from "enums/reaction.enum";
 import { ReactionDTO } from "./reaction.dto";
 import { UserDTO } from "./user.dto";
 
@@ -48,6 +47,12 @@ export class PostDTO extends AuditDTO {
   @Exclude({ toPlainOnly: true })
   @Type(() => ReactionDTO)
   reactions: ReactionDTO[]
+
+  @Expose()
+  numOfReaction: number
+
+  @Expose()
+  numOfComment: number
 
   static create(
     post: Pick<PostDTO, "content" | "images" | "videos" | "author">

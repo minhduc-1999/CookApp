@@ -14,6 +14,9 @@ export class FeedDTO extends AuditDTO {
   @Expose()
   numberOfPost: number;
 
+  @Expose()
+  numOfComment: number
+
   static create(feed: Pick<FeedDTO, "user">): FeedDTO {
     const createdFeed = new FeedDTO();
     createdFeed.create(feed?.user.id);
