@@ -63,21 +63,21 @@ export class FeedRepository implements IFeedRepository {
   }
 
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
-    delete post.author
-    delete post.reactions
+    delete post.author;
+    delete post.reactions;
     await this._feedModel.updateOne(
       {
         user: { id: user.id },
       },
       {
-        $push: { posts: clean(post) },
+        $push: { posts: Feed.generatePostItem(post) },
         $inc: { numberOfPost: 1 },
       }
     );
   }
 
   async updatePostInFeed(
-    post: Partial<PostDTO>,
+    post: PostDTO,
     user: UserDTO,
     session: ClientSession = null
   ): Promise<void> {
@@ -87,7 +87,7 @@ export class FeedRepository implements IFeedRepository {
         "posts.id": post.id,
       },
       {
-        $set: { "posts.$": clean(new Post(post)) },
+        $set: { "posts.$": Feed.generatePostItem(post) },
       },
       { session }
     );
