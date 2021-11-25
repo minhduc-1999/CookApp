@@ -31,6 +31,9 @@ export class Post extends AbstractSchema {
   @Prop({ type: Number })
   numOfReaction: number;
 
+  @Prop({ type: Number })
+  numOfComment: number;
+
   constructor(post: Partial<PostDTO>) {
     super(post);
     this.content = post?.content;
@@ -42,6 +45,8 @@ export class Post extends AbstractSchema {
     }
     this.reactions = post?.reactions || [];
     this.numOfReaction = post?.numOfReaction || 0;
+    this.numOfComment = post?.numOfComment || 0;
+
   }
 }
 

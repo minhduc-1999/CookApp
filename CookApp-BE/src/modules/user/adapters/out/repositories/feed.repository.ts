@@ -17,6 +17,7 @@ export interface IFeedRepository {
   getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]>;
   getTotalPosts(userId: UserDTO): Promise<number>;
   updateNumReaction(postId: string, delta: number): Promise<void>;
+  updateNumComment(postId: string, delta: number): Promise<void>;
   setSession(session: ClientSession): IFeedRepository;
 }
 
@@ -25,6 +26,19 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
   private logger: Logger = new Logger(FeedRepository.name);
   constructor(@InjectModel(Feed.name) private _feedModel: Model<FeedDocument>) {
     super();
+  }
+  async updateNumComment(postId: string, delta: number): Promise<void> {
+    await this._feedModel.updateMany(
+      {
+        "posts.id": postId,
+      },
+      {
+        $inc: { "posts.$.numOfComment": delta },
+      },
+      {
+        session: this.session,
+      }
+    );
   }
   async updateNumReaction(postId: string, delta: number): Promise<void> {
     await this._feedModel.updateMany(

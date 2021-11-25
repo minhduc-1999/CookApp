@@ -15,6 +15,7 @@ export interface IPostRepository {
   deleteReact(userId: string, postId: string): Promise<boolean>;
   getReactionByUserId(userId: string, postId: string): Promise<ReactionDTO>;
   setSession(session: ClientSession): IPostRepository;
+  updateNumComment(postId: string, delta: number): Promise<void>;
 }
 
 @Injectable()
@@ -22,6 +23,19 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   private logger: Logger = new Logger(PostRepository.name);
   constructor(@InjectModel(Post.name) private _postModel: Model<PostDocument>) {
     super();
+  }
+  async updateNumComment(postId: string, delta: number): Promise<void> {
+    await this._postModel.updateOne(
+      {
+        id: postId,
+      },
+      {
+        $inc: { numOfComment: delta },
+      },
+      {
+        session: this.session,
+      }
+    );
   }
 
   async updatePost(post: Partial<PostDTO>): Promise<PostDTO> {

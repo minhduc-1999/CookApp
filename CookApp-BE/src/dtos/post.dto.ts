@@ -48,9 +48,11 @@ export class PostDTO extends AuditDTO {
   @Type(() => ReactionDTO)
   reactions: ReactionDTO[]
 
-  @Expose({ toClassOnly: true })
-  @Exclude({ toPlainOnly: true })
+  @Expose()
   numOfReaction: number
+
+  @Expose()
+  numOfComment: number
 
   static create(
     post: Pick<PostDTO, "content" | "images" | "videos" | "author">
