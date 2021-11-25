@@ -3,7 +3,7 @@ import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { plainToClass } from "class-transformer";
 import { Feed, FeedDocument } from "domains/schemas/feed.schema";
-import { FeedDTO } from "dtos/feed.dto";
+import { Post } from "domains/schemas/post.schema";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
 import { ClientSession, Model } from "mongoose";
@@ -18,6 +18,7 @@ export interface IFeedRepository {
   ): Promise<void>;
   getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]>;
   getTotalPosts(userId: UserDTO): Promise<number>;
+  updateNumReaction(postId: string, delta: number): Promise<void>;
 }
 
 @Injectable()
@@ -26,6 +27,16 @@ export class FeedRepository implements IFeedRepository {
   constructor(
     @InjectModel(Feed.name) private _feedModel: Model<FeedDocument>
   ) {}
+  async updateNumReaction(postId: string, delta: number): Promise<void> {
+    await this._feedModel.updateMany(
+      {
+        "posts.id": postId,
+      },
+      {
+        $inc: { "posts.$.numOfReaction": delta },
+      }
+    );
+  }
 
   async getTotalPosts(user: UserDTO): Promise<number> {
     const feedDocs = await this._feedModel
@@ -52,6 +63,8 @@ export class FeedRepository implements IFeedRepository {
   }
 
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
+    delete post.author
+    delete post.reactions
     await this._feedModel.updateOne(
       {
         user: { id: user.id },
@@ -74,7 +87,7 @@ export class FeedRepository implements IFeedRepository {
         "posts.id": post.id,
       },
       {
-        $set: { "posts.$": clean(post) },
+        $set: { "posts.$": clean(new Post(post)) },
       },
       { session }
     );

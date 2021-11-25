@@ -2,7 +2,6 @@ import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
 import { PostDTO } from "dtos/post.dto";
 import { ReactionDTO } from "dtos/reaction.dto";
-import { ReactionType } from "enums/reaction.enum";
 import { Document } from "mongoose";
 import { User } from "./user.schema";
 
@@ -27,16 +26,22 @@ export class Post extends AbstractSchema {
   videos: string[];
 
   @Prop({ type: [Object] })
-  reactions: ReactionDTO[]
+  reactions: ReactionDTO[];
+
+  @Prop({ type: Number })
+  numOfReaction: number;
 
   constructor(post: Partial<PostDTO>) {
     super(post);
     this.content = post?.content;
     this.images = post?.images;
     this.videos = post?.videos;
-    const { id, avatar, displayName } = post?.author;
-    this.author = { id, avatar, displayName };
-    this.reactions = post?.reactions;
+    if (post?.author) {
+      const { id, avatar, displayName } = post?.author;
+      this.author = { id, avatar, displayName };
+    }
+    this.reactions = post?.reactions || [];
+    this.numOfReaction = post?.numOfReaction || 0;
   }
 }
 

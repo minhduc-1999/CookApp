@@ -15,7 +15,7 @@ export class Feed extends AbstractSchema {
   @Prop({
     type: [Object],
   })
-  posts: Omit<Post, "author">[];
+  posts: Omit<Post, "author" | "reactions">[];
 
   @Prop({ default: 0 })
   numberOfPost: number;
@@ -26,9 +26,10 @@ export class Feed extends AbstractSchema {
     this.user = { id };
     this.posts = feed?.posts?.map((post) => {
       delete post.author;
+      delete post.reactions;
       return new Post(post);
     });
-    this.numberOfPost = feed?.numberOfPost;
+    this.numberOfPost = feed?.numberOfPost || 0;
   }
 }
 

@@ -1,7 +1,10 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
+import { PostDTO } from "dtos/post.dto";
+import { UserDTO } from "dtos/user.dto";
 import { WallDTO } from "dtos/wall.dto";
 import { Document } from "mongoose";
+import { clean } from "utils";
 import { Post } from "./post.schema";
 import { User } from "./user.schema";
 
@@ -24,18 +27,27 @@ export class Wall extends AbstractSchema {
   @Prop({
     type: [Object],
   })
-  posts: Omit<Post, "author">[];
+  posts: Pick<Post, "id" | "videos" | "images">[];
 
   constructor(wall: Partial<WallDTO>) {
     super(wall);
     const { id, avatar, displayName } = wall?.user;
     this.user = { id, avatar, displayName };
-    this.numberOfFollower = wall?.numberOfFollower;
-    this.numberOfFollowing = wall?.numberOfFollowing;
-    this.numberOfPost = wall?.numberOfPost;
-    this.posts = wall?.posts?.map((post) => {
-      delete post.author;
-      return new Post(post);
+  }
+
+  static generatePostItem(post: PostDTO): Pick<Post, "id" | "videos" | "images"> {
+    return clean({
+      id: post?.id,
+      videos: post?.videos,
+      images: post?.images,
+    });
+  }
+
+  static generateUserItem(user: UserDTO): Pick<User, "avatar" | "id" | "displayName"> {
+    return clean({
+      avatar: user?.avatar,
+      id: user?.id,
+      displayName: user?.displayName,
     });
   }
 }

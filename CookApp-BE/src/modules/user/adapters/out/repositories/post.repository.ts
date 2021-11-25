@@ -61,6 +61,7 @@ export class PostRepository implements IPostRepository {
       },
       {
         $push: { reactions: react },
+        $inc: { numOfReaction: 1 },
       }
     );
     return result.modifiedCount === 1;
@@ -74,6 +75,7 @@ export class PostRepository implements IPostRepository {
       },
       {
         $pull: { reactions: { userId: userId } },
+        $inc: { numOfReaction: -1 },
       }
     );
     return result.modifiedCount !== 0;

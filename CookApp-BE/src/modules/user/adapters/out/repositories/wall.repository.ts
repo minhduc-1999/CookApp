@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
-import { User } from "domains/schemas/user.schema";
+import { Post } from "domains/schemas/post.schema";
 import { Wall, WallDocument } from "domains/schemas/wall.schema";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
@@ -43,7 +43,7 @@ export class WallRepository implements IWallRepository {
     return postDocs[0].posts;
   }
   async updatePostInWall(
-    post: Partial<PostDTO>,
+    post: PostDTO,
     user: UserDTO,
     session: ClientSession = null
   ): Promise<void> {
@@ -53,7 +53,7 @@ export class WallRepository implements IWallRepository {
         "posts.id": post.id,
       },
       {
-        $set: { "posts.$": clean(post) },
+        $set: { "posts.$": Wall.generatePostItem(post) },
       },
       {
         session: session,
@@ -67,7 +67,7 @@ export class WallRepository implements IWallRepository {
         user: { id: user.id },
       },
       {
-        $push: { posts: clean(updatingPost) },
+        $push: { posts: Wall.generatePostItem(post) },
         $inc: { numberOfPost: 1 },
       }
     );
