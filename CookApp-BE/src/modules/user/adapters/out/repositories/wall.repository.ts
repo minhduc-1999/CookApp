@@ -56,7 +56,6 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     );
   }
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
-    const { author, ...updatingPost } = post;
     await this._wallModel.updateOne(
       {
         user: { id: user.id },

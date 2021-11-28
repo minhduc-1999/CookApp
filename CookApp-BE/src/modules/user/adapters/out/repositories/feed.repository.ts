@@ -79,8 +79,6 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
   }
 
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
-    delete post.author;
-    delete post.reactions;
     await this._feedModel.updateOne(
       {
         user: { id: user.id },

@@ -7,7 +7,9 @@ import { FeedModel } from "domains/schemas/feed.schema";
 import { UserModel } from "domains/schemas/user.schema";
 import { WallModel } from "domains/schemas/wall.schema";
 import "dotenv/config";
+import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { JwtAuthGuard } from "guards/jwt_auth.guard";
+import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
 import { UserController } from "./adapters/in/user.controller";
@@ -34,6 +36,9 @@ import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
       },
     }),
     CqrsModule,
+    ShareModule.register({
+      storage: { provider: ThirdPartyProviders.FIREBASE },
+    }),
   ],
   controllers: [AuthController, UserController],
   providers: [

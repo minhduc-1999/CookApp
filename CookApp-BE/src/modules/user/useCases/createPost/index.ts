@@ -32,8 +32,7 @@ export class CreatePostCommandHandler
     @Inject("IWallRepository")
     private _wallRepo: IWallRepository,
     @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
-    private _configService: ConfigService
+    private _feedRepo: IFeedRepository
   ) {}
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { postDto, user } = command;
@@ -53,9 +52,7 @@ export class CreatePostCommandHandler
       this._feedRepo.pushNewPost(result, user),
       this._wallRepo.pushNewPost(result, user),
     ]);
-    result.images = result.images?.map(
-      (image) => this._configService.get("storage.publicUrl") + image
-    );
+    result.images = await this._storageService.getDownloadUrls(result.images);
 
     return result;
   }

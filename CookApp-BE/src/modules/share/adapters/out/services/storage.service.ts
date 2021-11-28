@@ -14,6 +14,7 @@ export interface IStorageService {
     userId: string
   ): Promise<PreSignedLinkResponse[]>;
   makePublic(objectNames: string[], mediaType: MediaType): Promise<string[]>;
+  getDownloadUrls(objectNames: string[]): Promise<string[]>;
 }
 
 export type ObjectMetadata = {
@@ -26,15 +27,21 @@ export class FireBaseService implements IStorageService {
   private logger: Logger = new Logger(FireBaseService.name);
 
   private readonly storageTree = {
-    postImages: "images/posts",
-    avatar: "images/avatar",
-    temp: "temp",
+    postImages: "images/posts/",
+    avatar: "images/avatar/",
+    temp: "temp/",
   };
 
   constructor(
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
   ) {}
+  
+  async getDownloadUrls(objectNames: string[]): Promise<string[]> {
+    return objectNames.map(
+      (objName) => this._configService.get("storage.publicUrl") + objName
+    );
+  }
 
   async makePublic(
     objectNames: string[],
@@ -46,25 +53,29 @@ export class FireBaseService implements IStorageService {
       const file = bucket.file(name);
       const fileExited = (await file.exists())[0];
       if (fileExited) {
+        let basePath = "";
         switch (mediaType) {
           case MediaType.POST_IMAGES:
-            tasks.push(
-              file
-                .move(this.storageTree.postImages + "/" + getNameFromPath(name))
-                .then((movedFile) => {
-                  movedFile[0]
-                    .makePublic()
-                    .catch((err) => this.logger.error(err));
-                  return movedFile[0].name;
-                })
-                .catch((err) => {
-                  this.logger.error(err);
-                  return "";
-                })
-            );
+            basePath = this.storageTree.postImages;
+            break;
+          case MediaType.AVATAR:
+            basePath = this.storageTree.avatar;
+            break;
           default:
             break;
         }
+        tasks.push(
+          file
+            .move(basePath + getNameFromPath(name))
+            .then((movedFile) => {
+              movedFile[0].makePublic().catch((err) => this.logger.error(err));
+              return movedFile[0].name;
+            })
+            .catch((err) => {
+              this.logger.error(err);
+              return "";
+            })
+        );
       }
     }
     return Promise.all(tasks).then((objectNames) =>
@@ -105,8 +116,7 @@ export class FireBaseService implements IStorageService {
   ): Promise<PreSignedLinkResponse[]> {
     const tasks: Promise<PreSignedLinkResponse>[] = [];
     fileNames.forEach((file) => {
-      const objectName =
-        this.storageTree.temp + "/" + addFilePrefix(file, userId);
+      const objectName = this.storageTree.temp + addFilePrefix(file, userId);
       tasks.push(this.getUploadSignedLink(objectName));
     });
 

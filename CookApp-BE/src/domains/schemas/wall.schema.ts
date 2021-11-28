@@ -27,7 +27,7 @@ export class Wall extends AbstractSchema {
   @Prop({
     type: [Object],
   })
-  posts: Pick<Post, "id" | "videos" | "images">[];
+  posts: Pick<Post, "id" | "videos" | "images" | "createdAt" | "updatedAt">[];
 
   constructor(wall: Partial<WallDTO>) {
     super(wall);
@@ -35,15 +35,21 @@ export class Wall extends AbstractSchema {
     this.user = { id, avatar, displayName };
   }
 
-  static generatePostItem(post: PostDTO): Pick<Post, "id" | "videos" | "images"> {
+  static generatePostItem(
+    post: PostDTO
+  ): Pick<Post, "id" | "videos" | "images"> {
     return clean({
       id: post?.id,
       videos: post?.videos,
       images: post?.images,
+      createdAt: post?.createdAt,
+      updatedAt: post?.updatedAt,
     });
   }
 
-  static generateUserItem(user: UserDTO): Pick<User, "avatar" | "id" | "displayName"> {
+  static generateUserItem(
+    user: UserDTO
+  ): Pick<User, "avatar" | "id" | "displayName"> {
     return clean({
       avatar: user?.avatar,
       id: user?.id,

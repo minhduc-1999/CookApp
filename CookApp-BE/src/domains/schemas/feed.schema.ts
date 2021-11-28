@@ -17,7 +17,7 @@ export class Feed extends AbstractSchema {
   @Prop({
     type: [Object],
   })
-  posts: Omit<Post, "author" | "reactions">[];
+  posts: Omit<Post, "reactions">[];
 
   @Prop({ default: 0 })
   numberOfPost: number;
@@ -32,7 +32,6 @@ export class Feed extends AbstractSchema {
   }
 
   static generatePostItem(post: PostDTO): Omit<Post, "author" | "reactions"> {
-    delete post.author;
     delete post.reactions;
     return clean({
       ...post,

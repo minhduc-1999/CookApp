@@ -1,10 +1,9 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
-import { ConfigService } from "nestjs-config";
-import path = require("path");
 import { IPostRepository } from "../adapters/out/repositories/post.repository";
 import { PostDTO } from "../../../dtos/post.dto";
+import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 
 export interface IPostService {
   getPostDetail(postId: string): Promise<PostDTO>;
@@ -14,7 +13,7 @@ export interface IPostService {
 export class PostService implements IPostService {
   constructor(
     @Inject("IPostRepository") private _postRepo: IPostRepository,
-    private _configService: ConfigService
+    @Inject("IStorageService") private _storageService: IStorageService
   ) {}
 
   async getPostDetail(postId: string): Promise<PostDTO> {
@@ -24,9 +23,7 @@ export class PostService implements IPostService {
         ResponseDTO.fail("Post not found", ErrorCode.INVALID_ID)
       );
 
-    post.images = post.images.map(
-      (imageUrl) => this._configService.get("storage.publicUrl") + imageUrl
-    );
+    post.images = await this._storageService.getDownloadUrls(post.images);
 
     return post;
   }
