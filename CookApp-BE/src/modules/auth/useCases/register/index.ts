@@ -12,6 +12,7 @@ import { UserDTO } from "dtos/user.dto";
 import { FeedDTO } from "dtos/feed.dto";
 import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.repository";
 import { IFeedRepository } from "modules/auth/adapters/out/repositories/feed.repository";
+import { generateDisplayName } from "utils";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
@@ -34,6 +35,7 @@ export class RegisterCommandHandler
     const newUserDto = UserDTO.create({
       ...registerDto,
       password: hashedPassword,
+      displayName: generateDisplayName(),
     });
     const createdUser = await this._userRepo
       .setSession(session)
@@ -41,6 +43,7 @@ export class RegisterCommandHandler
     const wallDto = WallDTO.create({
       user: createdUser,
     });
+
     await this._wallRepo.setSession(session).createWall(wallDto);
     const feedDto = FeedDTO.create({
       user: createdUser,

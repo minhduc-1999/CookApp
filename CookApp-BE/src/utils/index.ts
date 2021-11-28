@@ -1,4 +1,5 @@
 import _ = require("lodash");
+const randomWords = require("random-words");
 
 export { default as time } from "./time";
 
@@ -68,4 +69,12 @@ export function clean(obj) {
     }
   }
   return obj;
+}
+
+export function generateDisplayName() {
+  const result =
+    randomWords({ exactly: 1, wordsPerString: 2, separator: "_" }) +
+    "." +
+    Math.round(Math.random() * 10000);
+  return result;
 }
