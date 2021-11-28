@@ -24,7 +24,7 @@ export class PostDTO extends AuditDTO {
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
-  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml"], { each: true })
+  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"], { each: true })
   @IsOptional()
   @Expose()
   images?: string[];

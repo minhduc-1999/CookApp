@@ -11,6 +11,7 @@ import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
+import { ConfigService } from "nestjs-config";
 
 export class CreatePostCommand extends BaseCommand {
   postDto: CreatePostRequest;
@@ -31,7 +32,8 @@ export class CreatePostCommandHandler
     @Inject("IWallRepository")
     private _wallRepo: IWallRepository,
     @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository
+    private _feedRepo: IFeedRepository,
+    private _configService: ConfigService
   ) {}
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { postDto, user } = command;
@@ -51,6 +53,10 @@ export class CreatePostCommandHandler
       this._feedRepo.pushNewPost(result, user),
       this._wallRepo.pushNewPost(result, user),
     ]);
+    result.images = result.images?.map(
+      (image) => this._configService.get("storage.publicUrl") + image
+    );
+
     return result;
   }
 }

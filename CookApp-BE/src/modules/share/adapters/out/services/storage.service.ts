@@ -3,8 +3,6 @@ import { MediaType } from "enums/mediaType.enum";
 import _ = require("lodash");
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
 import { ConfigService } from "nestjs-config";
-import { join } from "path";
-import path = require("path");
 import { addFilePrefix, getMimeType, getNameFromPath } from "utils";
 import { IStorageProvider } from "./provider.service";
 
@@ -52,9 +50,7 @@ export class FireBaseService implements IStorageService {
           case MediaType.POST_IMAGES:
             tasks.push(
               file
-                .move(
-                  path.join(this.storageTree.postImages, getNameFromPath(name))
-                )
+                .move(this.storageTree.postImages + "/" + getNameFromPath(name))
                 .then((movedFile) => {
                   movedFile[0]
                     .makePublic()
