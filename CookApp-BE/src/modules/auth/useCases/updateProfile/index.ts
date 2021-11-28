@@ -5,7 +5,7 @@ import { UserDTO } from "dtos/user.dto";
 import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { IUserService } from "modules/auth/services/user.service";
 import { ClientSession } from "mongoose";
-import { createUpdatingNestedObject } from "utils";
+import { clean, createUpdatingNestedObject, createUpdatingObject } from "utils";
 import { UpdateProfileRequest } from "./updateProfileRequest";
 import { UpdateProfileResponse } from "./updateProfileResponse";
 
@@ -32,9 +32,8 @@ export class UpdateProfileCommandHandler
   ) {}
   async execute(command: UpdateProfileCommand): Promise<UpdateProfileResponse> {
     const user = await this._userService.getUserById(command.user.id);
-    const profile = createUpdatingNestedObject<UpdateProfileRequest, UserDTO>(
-      "profile",
-      command.updateProfileReq,
+    const profile = createUpdatingObject(
+      clean(command.updateProfileReq),
       user.id
     );
     return this._userRepo

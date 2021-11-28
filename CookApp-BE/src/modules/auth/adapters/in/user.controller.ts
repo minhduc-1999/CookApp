@@ -1,14 +1,11 @@
-import {
-  Body,
-  Controller,
-  Get,
-  Patch,
-  Req,
-} from "@nestjs/common";
+import { Body, Controller, Get, Patch, Req } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
-import { ApiFailResponseCustom, ApiOKResponseCustom } from "decorators/ApiSuccessResponse.decorator";
+import {
+  ApiFailResponseCustom,
+  ApiOKResponseCustom,
+} from "decorators/ApiSuccessResponse.decorator";
 import { User } from "decorators/user.decorator";
 import { UserDTO } from "dtos/user.dto";
 import { GetProfileQuery } from "modules/auth/useCases/getProfile";
