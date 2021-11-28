@@ -15,6 +15,11 @@ export interface IStorageService {
   ): Promise<PreSignedLinkResponse[]>;
   makePublic(objectNames: string[], mediaType: MediaType): Promise<string[]>;
   getDownloadUrls(objectNames: string[]): Promise<string[]>;
+  replaceFiles(
+    oldObjects: string[],
+    newObjects: string[],
+    mediaType: MediaType
+  ): Promise<string[]>;
 }
 
 export type ObjectMetadata = {
@@ -36,7 +41,55 @@ export class FireBaseService implements IStorageService {
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
   ) {}
-  
+
+  async replaceFiles(
+    oldObjects: string[],
+    newObjects: string[],
+    mediaType: MediaType
+  ): Promise<string[]> {
+    const bucket = await this._provider.getBucket();
+    let basePath;
+    switch (mediaType) {
+      case MediaType.POST_IMAGES:
+        basePath = this.storageTree.postImages;
+        break;
+      case MediaType.AVATAR:
+        basePath = this.storageTree.avatar;
+        break;
+      default:
+        break;
+    }
+    const moveTasks: Promise<string>[] = [];
+    oldObjects.forEach(async (oldObj) => {
+      const oldFile = bucket.file(oldObj);
+      oldFile
+        .delete({ ignoreNotFound: true })
+        .catch((err) => this.logger.error(err));
+    });
+    for (let newObj of newObjects) {
+      const newFile = bucket.file(newObj);
+      if ((await newFile.exists())[0]) {
+        moveTasks.push(
+          newFile
+            .move(basePath + getNameFromPath(newObj))
+            .then((movedFile) => {
+              movedFile[0].makePublic().catch((err) => this.logger.error(err));
+              return movedFile[0].name;
+            })
+            .catch((err) => {
+              this.logger.error(err);
+              return "";
+            })
+        );
+      }
+    }
+    return Promise.all(moveTasks).then((objectNames) => {
+      return objectNames.filter((objName) => {
+        return objName !== "";
+      });
+    });
+  }
+
   async getDownloadUrls(objectNames: string[]): Promise<string[]> {
     return objectNames.map(
       (objName) => this._configService.get("storage.publicUrl") + objName

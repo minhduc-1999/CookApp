@@ -11,10 +11,7 @@ export interface IPostService {
 
 @Injectable()
 export class PostService implements IPostService {
-  constructor(
-    @Inject("IPostRepository") private _postRepo: IPostRepository,
-    @Inject("IStorageService") private _storageService: IStorageService
-  ) {}
+  constructor(@Inject("IPostRepository") private _postRepo: IPostRepository) {}
 
   async getPostDetail(postId: string): Promise<PostDTO> {
     const post = await this._postRepo.getPostById(postId);
@@ -22,8 +19,6 @@ export class PostService implements IPostService {
       throw new NotFoundException(
         ResponseDTO.fail("Post not found", ErrorCode.INVALID_ID)
       );
-
-    post.images = await this._storageService.getDownloadUrls(post.images);
 
     return post;
   }

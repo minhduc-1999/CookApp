@@ -28,6 +28,11 @@ export class GetFeedPostsQueryHandler
     const posts = await this._feedRepo.getPosts(user, queryOptions);
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
+      if (post.author?.avatar?.length > 0) {
+        post.author.avatar = (
+          await this._storageService.getDownloadUrls([post.author.avatar])
+        )[0];
+      }
     }
     const totalCount = await this._feedRepo.getTotalPosts(user);
     let meta: PageMetadata;
