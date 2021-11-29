@@ -16,6 +16,8 @@ export interface IPostRepository {
   getReactionByUserId(userId: string, postId: string): Promise<ReactionDTO>;
   setSession(session: ClientSession): IPostRepository;
   updateNumComment(postId: string, delta: number): Promise<void>;
+  deleteImages(postId: string, changedImages: string[]): Promise<PostDTO>;
+  pushImages(postId: string, changedImages: string[]): Promise<PostDTO>;
 }
 
 @Injectable()
@@ -23,6 +25,29 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   private logger: Logger = new Logger(PostRepository.name);
   constructor(@InjectModel(Post.name) private _postModel: Model<PostDocument>) {
     super();
+  }
+  async pushImages(postId: string, changedImages: string[]): Promise<PostDTO> {
+    const updatedPost = await this._postModel.findOneAndUpdate(
+      { _id: postId },
+      { $push: { images: changedImages } },
+      { new: true, session: this.session }
+    );
+    return plainToClass(PostDTO, updatedPost, {
+      excludeExtraneousValues: true,
+    });
+  }
+  async deleteImages(
+    postId: string,
+    changedImages: string[]
+  ): Promise<PostDTO> {
+    const updatedPost = await this._postModel.findOneAndUpdate(
+      { _id: postId },
+      { $pullAll: { images: changedImages } },
+      { new: true, session: this.session }
+    );
+    return plainToClass(PostDTO, updatedPost, {
+      excludeExtraneousValues: true,
+    });
   }
   async updateNumComment(postId: string, delta: number): Promise<void> {
     await this._postModel.updateOne(

@@ -31,7 +31,7 @@ export class Feed extends AbstractSchema {
     this.user = { id };
   }
 
-  static generatePostItem(post: PostDTO): Omit<Post, "author" | "reactions"> {
+  static generatePostItem(post: PostDTO): Omit<Post, "reactions"> {
     delete post.reactions;
     return clean({
       ...post,
