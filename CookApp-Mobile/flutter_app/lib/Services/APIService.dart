@@ -5,13 +5,18 @@ import 'dart:io';
 
 import 'package:flutter_app/Model/LoginRequestModel.dart';
 import 'package:flutter_app/Model/LoginRespondModel.dart';
+import 'package:flutter_app/Model/NewFeedRespondModel.dart';
+import 'package:flutter_app/Model/PostDetailsRespondModel.dart';
 import 'package:flutter_app/Model/PostRequestModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRequestModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRespondModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRespondModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRespondModel.dart';
+import 'package:flutter_app/Model/ReactRequestModel.dart';
 import 'package:flutter_app/Model/RegisterRequestModel.dart';
 import 'package:flutter_app/Model/RegisterRespondModel.dart';
+import 'package:flutter_app/Model/UserRespondModel.dart';
+import 'package:flutter_app/Model/WallPostRespondModel.dart';
 
 import 'package:flutter_app/config.dart';
 import 'package:http/http.dart' as http;
@@ -37,7 +42,7 @@ class APIService {
     }
   }
 
-  static Future<bool> register(
+  static Future<RegisterRespondModel> register(
       RegisterRequestModel model) async {
     Map<String, String> requestHeader = {'Content-Type': 'application/json'};
     var url = Uri.parse(Config.apiURL + Config.registerAPI);
@@ -46,11 +51,7 @@ class APIService {
           'Content-Type': 'application/json',
         },
         body: jsonEncode(model.toJson()));
-    if(respone.body != null){
-      return true;
-    }
-    return false;
-    //return registerRespondModel(respone.body);
+    return registerRespondModel(respone.body);
   }
   static Future<PresignedLinkedRespondModel> getPresignedLink(PresignedLinkedRequestModel model) async{
     var url = Uri.parse(Config.apiURL + Config.presignedLinkAPI);
@@ -69,10 +70,15 @@ class APIService {
   static Future<bool> uploadImage(
       File file, String link) async {
     var url = Uri.parse(link);
+    var ex = file.path.split(".");
+    Map<String, String> requestHeader = {'Content-Type': 'image/jpeg'};
+    if (ex.last == "png"){
+      requestHeader = {'Content-Type': 'image/png'};
+    } else if (ex.last == "jpg" || ex.last == 'jpeg'){
+      requestHeader = {'Content-Type': 'image/jpeg'};
+    }
     var respone = await client.put(url,
-        headers: <String, String>{
-          'Content-Type': 'image/png',
-        },
+        headers: requestHeader,
         body: await file.readAsBytes());
     return true;
     //return registerRespondModel(respone.body);
@@ -88,5 +94,81 @@ class APIService {
         },
         body: jsonEncode(model.toJson()));
     return true;
+  }
+
+  static Future<UserRespondModel> getUser() async{
+    var url = Uri.parse(Config.apiURL + Config.userProfileAPI);
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url,
+        headers: <String, String>{
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        }
+    );
+    return userRespondModel(respone.body);
+  }
+
+  static Future<WallPostRespondModel> getUserWallPosts() async {
+    var url = Uri.parse(Config.apiURL + Config.userWallAPI).replace(
+      queryParameters: <String, String>{
+        'offset' : '0',
+        'limit' : '10'
+      }
+    );
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        }
+    );
+    return wallPostRespondModel(respone.body);
+  }
+  static Future<PostDetailsRespondModel> getDetailsPost(String postID) async{
+    var url = Uri.parse(Config.apiURL + Config.postDetails + postID);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        }
+    );
+    return postDetailsRespondModel(respone.body);
+  }
+
+  static Future<NewFeedRespondModel> getNewFeed() async {
+    var url = Uri.parse(Config.apiURL + Config.userFeedAPI).replace(
+        queryParameters: <String, String>{
+          'offset' : '0',
+          'limit' : '10'
+        }
+    );
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        }
+    );
+    return newFeedRespondModel(respone.body);
+  }
+  static Future<bool> react(String postID, ReactRequestModel model) async {
+    var url = Uri.parse(Config.apiURL + Config.postDetails + postID + "/react");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+      body: jsonEncode(model.toJson())
+    );
+    if(respone.statusCode == 200){
+      return true;
+    } else {
+      return false;
+    }
   }
 }

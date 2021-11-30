@@ -1,44 +1,33 @@
-/*
+import 'dart:async';
+
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Model/ReactRequestModel.dart';
+import 'package:flutter_app/Services/APIService.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+
 class Post extends StatefulWidget {
   const Post(
-      {this.mediaUrl,
-        this.location,
-        this.description, // content
-        this.likes,
-        this.postId,
-        this.ownerId,
-        this.displayName,
-        //this.timestamp
-      }
-        );
-
+      {this.id,
+      this.location,
+      this.content,
+      this.images,
+      this.avatar,
+      this.displayName,
+      this.numOfReaction,
+      this.numOfComment});
 
   factory Post.fromJSON(Map data) {
     return Post(
       location: data['location'],
-      mediaUrl: data['mediaUrl'],
-      likes: data['likes'],
-      description: data['description'],
-      ownerId: data['ownerId'],
-      postId: data['postId'],
+      id: data['id'],
+      content: data['content'],
+      images: data['images'],
+      avatar: data['avatar'],
       displayName: data['displayName'],
-      //timestamp: data['timestamp'],
-    );
-  }
-
-  factory Post.fromMap(Map<String, dynamic> data) {
-    return Post(
-      location: data['location'],
-      mediaUrl: data['mediaUrl'],
-      likes: data['likes'],
-      description: data['description'],
-      ownerId: data['ownerId'],
-      postId: data['postId'],
-      displayName: data['displayName'],
+      numOfReaction: data['numOfReaction'],
+      numOfComment: data['numOfComment'],
       //timestamp: data['timestamp'],
     );
   }
@@ -47,7 +36,6 @@ class Post extends StatefulWidget {
     if (likes == null) {
       return 0;
     }
-// issue is below
     var vals = likes.values;
     int count = 0;
     for (var val in vals) {
@@ -55,47 +43,39 @@ class Post extends StatefulWidget {
         count = count + 1;
       }
     }
-
     return count;
   }
 
-  final String mediaUrl;
-  //final Timestamp timestamp;
-
-  //final String username;
+  final String id;
+  final String content;
   final String location;
-  final String description;
-  final likes;
-  final String postId;
-  final String ownerId;
   final String displayName;
+  final String avatar;
+  final List<String> images;
+  final int numOfReaction;
+  final int numOfComment;
 
   _Post createState() => _Post(
-    mediaUrl: this.mediaUrl,
-    location: this.location,
-    description: this.description,
-    likes: this.likes,
-    likeCount: getLikeCount(this.likes),
-    ownerId: this.ownerId,
-    postId: this.postId,
-    //timestamp: this.timestamp,
-    displayName: this.displayName,
-  );
+      id: this.id,
+      location: this.location,
+      content: this.content,
+      images: this.images,
+      displayName: this.displayName,
+      avatar: this.avatar,
+      numOfReaction: this.numOfReaction,
+      numOfComment: this.numOfComment);
 }
 
 class _Post extends State<Post> {
-  final String mediaUrl;
-  //final Timestamp timestamp;
-
-  //final String username;
+  final String id;
+  final String content;
   final String location;
-  final String description;
-  Map likes;
-  int likeCount;
-  final String postId;
-  bool liked;
-  final String ownerId;
+  final List<String> images;
   final String displayName;
+  final String avatar;
+  int numOfReaction;
+  int numOfComment;
+  bool liked = false;
   bool showHeart = false;
 
   TextStyle boldStyle = TextStyle(
@@ -104,15 +84,14 @@ class _Post extends State<Post> {
   );
 
   _Post(
-      {this.mediaUrl,
-        //this.timestamp,
-        this.location,
-        this.description,
-        this.likes,
-        this.postId,
-        this.likeCount,
-        this.ownerId,
-        this.displayName});
+      {this.id,
+      this.location,
+      this.content,
+      this.images,
+      this.displayName,
+      this.avatar,
+      this.numOfReaction,
+      this.numOfComment});
 
   GestureDetector buildLikeIcon() {
     Color color;
@@ -132,75 +111,70 @@ class _Post extends State<Post> {
           color: color,
         ),
         onTap: () {
-          _likePost(postId);
+          _likePost(id);
         });
   }
 
   GestureDetector buildLikeableImage() {
     return GestureDetector(
-      onDoubleTap: () => _likePost(postId),
+      onDoubleTap: () => _likePost(id),
       child: Stack(
         alignment: Alignment.center,
         children: <Widget>[
           CachedNetworkImage(
-            imageUrl: mediaUrl,
+            imageUrl: images[0],
             fit: BoxFit.fitWidth,
             placeholder: (context, url) => loadingPlaceHolder,
             errorWidget: (context, url, error) => Icon(Icons.error),
           ),
           showHeart
               ? Positioned(
-            child: Container(
-              width: 100,
-              height: 100,
-              child: Opacity(
-                  opacity: 0.85,
-                  child: FlareActor(
-                    "assets/flare/Like.flr",
-                    animation: "Like",
-                  )),
-            ),
-          )
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    child: Opacity(
+                        opacity: 0.85,
+                        child: FlareActor(
+                          "assets/flare/Like.flr",
+                          animation: "Like",
+                        )),
+                  ),
+                )
               : Container()
         ],
       ),
     );
   }
 
-  buildPostHeader({String ownerId}) {
+  Widget buildPostHeader({String ownerId}) {
     if (ownerId == null) {
       return Text("owner error");
     }
 
-    return Container();
-   */
-/*   FutureBuilder(
-        future:
-        FirebaseFirestore.instance.collection('users').doc(ownerId).get(),
-        builder: (context, snapshot) {
-          if (snapshot.data != null) {
-            return ListTile(
-              leading: CircleAvatar(
-                backgroundImage: CachedNetworkImageProvider(
-                    snapshot.data.data()['photoUrl']),
-                backgroundColor: Colors.grey,
-              ),
-              title: GestureDetector(
-                child:
-                Text(snapshot.data.data()['displayName'], style: boldStyle),
-                onTap: () {
-                  //openProfile(context, ownerId);
-                },
-              ),
-              subtitle: Text(this.location),
-              trailing: const Icon(Icons.more_vert),
-            );
-          }
-
-          // snapshot data is null here
-          return Container();
-        });*//*
-
+    return ListTile(
+      leading: (avatar != null)
+          ? CircleAvatar(
+              backgroundColor: Colors.grey,
+              backgroundImage: NetworkImage(avatar),
+            )
+          : CircleAvatar(
+              /*child: Image.asset("assets/images/default_avatar.png",
+                                    width: size.width * 0.20,
+                                    height: size.width * 0.20,
+                                    fit: BoxFit.fill),*/
+              backgroundColor: Colors.grey,
+              backgroundImage: AssetImage('assets/images/default_avatar.png')),
+      title: GestureDetector(
+        child: displayName != null
+            ? Text(displayName, style: boldStyle)
+            : Text("user", style: boldStyle),
+        onTap: () {
+          //openProfile(context, ownerId);
+        },
+      ),
+      subtitle: Text(this.location),
+      trailing: const Icon(Icons.more_vert),
+    );
   }
 
   Container loadingPlaceHolder = Container(
@@ -215,7 +189,7 @@ class _Post extends State<Post> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        buildPostHeader(ownerId: ownerId),
+        buildPostHeader(ownerId: "abc"),
         buildLikeableImage(),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -229,11 +203,11 @@ class _Post extends State<Post> {
                   size: 25.0,
                 ),
                 onTap: () {
-                  goToComments(
+                  /*goToComments(
                       context: context,
                       postId: postId,
                       ownerId: ownerId,
-                      mediaUrl: mediaUrl);
+                      mediaUrl: mediaUrl);*/
                 }),
           ],
         ),
@@ -241,10 +215,15 @@ class _Post extends State<Post> {
           children: <Widget>[
             Container(
               margin: const EdgeInsets.only(left: 20.0),
-              child: Text(
-                "$likeCount likes",
-                style: boldStyle,
-              ),
+              child: numOfReaction != null
+                  ? Text(
+                      "${numOfReaction} likes",
+                      style: boldStyle,
+                    )
+                  : Text(
+                      "0 like",
+                      style: boldStyle,
+                    ),
             )
           ],
         ),
@@ -253,101 +232,59 @@ class _Post extends State<Post> {
           children: <Widget>[
             Container(
                 margin: const EdgeInsets.only(left: 20.0),
-                child: Text(
-                  "$displayName ",
-                  style: boldStyle,
-                )),
-            Expanded(child: Text(description)),
+                child: displayName != null
+                    ? Text(
+                        displayName,
+                        style: boldStyle,
+                      )
+                    : Text(
+                        "user",
+                        style: boldStyle,
+                      )),
+            SizedBox(
+              width: 5,
+            ),
+            Expanded(child: Text(content)),
           ],
         )
       ],
     );
   }
 
-  void _likePost(String postId2) {
-    */
-/*var userId = currentUserModel.id;
-    bool _liked = likes[userId] == true;
-
+  void _likePost(String postId2) async{
+    await APIService.react(id, ReactRequestModel(react: 'LOVE'));
+    bool _liked = liked;
     if (_liked) {
-      print('removing like');
-      reference.doc(postId).update({
-        'likes.$userId': false
-        //firestore plugin doesnt support deleting, so it must be nulled / falsed
-      });
-
       setState(() {
-        likeCount = likeCount - 1;
         liked = false;
-        likes[userId] = false;
+        numOfReaction--;
       });
-
-      removeActivityFeedItem();
     }
 
     if (!_liked) {
-      print('liking');
-      reference.doc(postId).update({'likes.$userId': true});
-
-      addActivityFeedItem();
-
       setState(() {
-        likeCount = likeCount + 1;
         liked = true;
-        likes[userId] = true;
         showHeart = true;
+        numOfReaction++;
       });
       Timer(const Duration(milliseconds: 2000), () {
         setState(() {
           showHeart = false;
         });
       });
-    }*//*
-
-  }
-
-  void addActivityFeedItem() {
-   */
-/* FirebaseFirestore.instance
-        .collection("feed")
-        .doc(ownerId)
-        .collection("items")
-        .doc(postId)
-        .set({
-      "userId": currentUserModel.id,
-      "type": "like",
-      "userProfileImg": currentUserModel.photoUrl,
-      "mediaUrl": mediaUrl,
-      "username": currentUserModel.displayName,
-      "timestamp": DateTime.now(),
-      "postId": postId,
-    });*//*
-
-  }
-
-  void removeActivityFeedItem() {
-    */
-/*FirebaseFirestore.instance
-        .collection("feed")
-        .doc(ownerId)
-        .collection("items")
-        .doc(postId)
-        .delete();*//*
-
+    }
   }
 }
 
-class ImagePostFromId extends StatelessWidget {
+/*class ImagePostFromId extends StatelessWidget {
   final String id;
 
   const ImagePostFromId({this.id});
 
   getImagePost() async {
-    */
-/*var document =
-    await FirebaseFirestore.instance.collection('posts').doc(id).get();
-    return ImagePost.fromDocument(document);*//*
-
+    var document =
+        await FirebaseFirestore.instance.collection('posts').doc(id).get();
+    return ImagePost.fromDocument(document);
   }
 
   @override
@@ -363,25 +300,22 @@ class ImagePostFromId extends StatelessWidget {
           return snapshot.data;
         });
   }
-}
+}*/
 
-void goToComments(
+/*void goToComments(
     {BuildContext context, String postId, String ownerId, String mediaUrl}) {
- */
-/* Navigator.of(context)
+  Navigator.of(context)
       .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
     return CommentPage(
       postId: postId,
       postOwner: ownerId,
       postMediaUrl: mediaUrl,
     );
-  }));*//*
+  }));
+}*/
 
-}
-
-void openImagePost(BuildContext context, Post post) {
-  */
-/*Navigator.of(context)
+/*void openImagePost(BuildContext context, Post post) {
+  Navigator.of(context)
       .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
     return Center(
       child: Scaffold(
@@ -407,7 +341,5 @@ void openImagePost(BuildContext context, Post post) {
             ],
           )),
     );
-  }));*//*
-
-}
-*/
+  }));
+}*/

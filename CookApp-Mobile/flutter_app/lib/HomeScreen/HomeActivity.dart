@@ -80,7 +80,6 @@ class HomeActivityState extends State<HomeActivity> {
     if (currentBackPressTime == null ||
         now.difference(currentBackPressTime) > Duration(seconds: 2)) {
       currentBackPressTime = now;
-      //Fluttertoast.showToast(msg: "Press again to exit app");
       return Future.value(false);
     } else {
       return Future.value(true);

@@ -172,7 +172,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                       setState(() {
                         isAPIcallProcess = false;
                       }),
-                      if (response)
+                      if (response.data != null)
                         {
                           showDialog(
                             context: context,
@@ -205,7 +205,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                             builder: (_) => new AlertDialog(
                               title: new Text(Config.appName),
                               //content: new Text(response.meta.messages.toString()),
-                              content: new Text("There's an error!!"),
+                              content: new Text(response.meta.errorCode),
                               actions: <Widget>[
                                 FlatButton(
                                   child: Text(

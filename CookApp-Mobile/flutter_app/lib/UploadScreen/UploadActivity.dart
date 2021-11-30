@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Model/PostRequestModel.dart';
 import 'package:flutter_app/Model/PresignedLinkedRequestModel.dart';
+import 'package:flutter_app/Model/PresignedLinkedRespondModel.dart';
 import 'package:flutter_app/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -179,12 +180,12 @@ class _UploadActivityState extends State<UploadActivity> {
                   List<String> video = [];
                   var response = await APIService.getPresignedLink(
                       PresignedLinkedRequestModel(fileNames: names));
-
+                  uploadImage(response,objectName);
                   for (int i = 0; i < response.data.items.length; i++){
-                    APIService.uploadImage(files[i], response.data.items[i].signedLink);
+                    await APIService.uploadImage(files[i], response.data.items[i].signedLink);
                     objectName.add(response.data.items[i].objectName);
                   }
-
+                  print("object name " + objectName.length.toString());
                   APIService.uploadPost(PostRequestModel(
                   content: descriptionController.text, images:objectName, videos: video));
                   Navigator.of(context).pop();
@@ -251,6 +252,8 @@ class _UploadActivityState extends State<UploadActivity> {
       return Container();
     }
   }
+
+  void uploadImage(PresignedLinkedRespondModel response, List<String> objectName) {}
 }
 
 class PhotoPickerItem extends StatefulWidget {
