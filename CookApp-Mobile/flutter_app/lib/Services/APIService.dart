@@ -3,6 +3,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:flutter_app/Model/CommentRequestModel.dart';
+import 'package:flutter_app/Model/CommentRespondModel.dart';
 import 'package:flutter_app/Model/LoginRequestModel.dart';
 import 'package:flutter_app/Model/LoginRespondModel.dart';
 import 'package:flutter_app/Model/NewFeedRespondModel.dart';
@@ -171,4 +173,53 @@ class APIService {
       return false;
     }
   }
+
+  static Future<bool> comment(String postID, CommentRequestModel model) async{
+    var url = Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson())
+    );
+    if(respone.statusCode == 200){
+      return true;
+    } else {
+      return false;
+    }
+  }
+  static Future<CommentRespondModel> getComment(String postID, String parentID) async{
+    var url = Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
+    if(parentID != ""){
+      url = url.replace(
+          queryParameters: <String, String>{
+            'offset' : '0',
+            'limit' : '10',
+            'parent': parentID
+          });
+    } else if (parentID == "" || parentID == null){
+      url = url.replace(
+          queryParameters: <String, String>{
+            'offset' : '0',
+            'limit' : '10'
+          });
+    }
+
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        }
+    );
+    print("code: " + respone.body);
+    var respondModel = commentRespondModel(respone.body);
+    print("respond: " + respondModel.data.comments.length.toString());
+    return commentRespondModel(respone.body);
+  }
+
 }

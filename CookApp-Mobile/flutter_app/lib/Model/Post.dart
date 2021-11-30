@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/CommentScreen/CommentActivity.dart';
 import 'package:flutter_app/Model/ReactRequestModel.dart';
 import 'package:flutter_app/Services/APIService.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -203,11 +204,10 @@ class _Post extends State<Post> {
                   size: 25.0,
                 ),
                 onTap: () {
-                  /*goToComments(
+                  goToComments(
                       context: context,
-                      postId: postId,
-                      ownerId: ownerId,
-                      mediaUrl: mediaUrl);*/
+                      postId: id,
+                      );
                 }),
           ],
         ),
@@ -250,7 +250,15 @@ class _Post extends State<Post> {
       ],
     );
   }
-
+  void goToComments(
+      {BuildContext context, String postId}) {
+    Navigator.of(context)
+        .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
+      return CommentActivity(
+        postId: postId
+      );
+    }));
+  }
   void _likePost(String postId2) async{
     await APIService.react(id, ReactRequestModel(react: 'LOVE'));
     bool _liked = liked;
