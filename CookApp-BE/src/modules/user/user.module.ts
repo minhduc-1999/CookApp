@@ -23,17 +23,21 @@ import { PostService } from "./services/post.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
+import { FollowCommandHandler } from "./useCases/follow";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
 import { ReactPostCommandHandler } from "./useCases/reactPost";
+import { UnfolllowCommandHandler } from "./useCases/unfollow";
 
 const commandHandlers = [
   CreatePostCommandHandler,
   EditPostCommandHandler,
   CreateCommentCommandHandler,
-  ReactPostCommandHandler
+  ReactPostCommandHandler,
+  FollowCommandHandler,
+  UnfolllowCommandHandler,
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,

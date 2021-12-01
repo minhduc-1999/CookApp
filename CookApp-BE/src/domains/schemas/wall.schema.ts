@@ -29,6 +29,12 @@ export class Wall extends AbstractSchema {
   })
   posts: Pick<Post, "id" | "videos" | "images" | "createdAt" | "updatedAt">[];
 
+  @Prop({ type: [String] })
+  followers: string[];
+
+  @Prop({ type: [String] })
+  following: string[];
+
   constructor(wall: Partial<WallDTO>) {
     super(wall);
     const { id, avatar, displayName } = wall?.user;
