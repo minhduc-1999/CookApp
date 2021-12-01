@@ -3,7 +3,12 @@ import { MediaType } from "enums/mediaType.enum";
 import _ = require("lodash");
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
 import { ConfigService } from "nestjs-config";
-import { addFilePrefix, getMimeType, getNameFromPath } from "utils";
+import {
+  addFilePrefix,
+  getMimeType,
+  getNameFromPath,
+  retrieveObjectNameFromUrl,
+} from "utils";
 import { IStorageProvider } from "./provider.service";
 
 export interface IStorageService {
@@ -20,6 +25,7 @@ export interface IStorageService {
     newObjects: string[],
     mediaType: MediaType
   ): Promise<string[]>;
+  deleteFiles(urls: string[]): Promise<string[]>;
 }
 
 export type ObjectMetadata = {
@@ -41,6 +47,38 @@ export class FireBaseService implements IStorageService {
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
   ) {}
+  async deleteFiles(urls: string[]): Promise<string[]> {
+    const deleteTasks: Promise<string>[] = [];
+    const bucket = await this._provider.getBucket();
+    // const objectNameList = urls.map((url) =>
+    //   retrieveObjectNameFromUrl(
+    //     url,
+    //     this._configService.get("storage.publicUrl")
+    //   )
+    // );
+    const objectNameList = urls;
+    console.log("[1]", objectNameList);
+    for (let i = 0; i < objectNameList.length; i++) {
+      const file = bucket.file(objectNameList[i]);
+      deleteTasks.push(
+        file
+          .delete({ ignoreNotFound: true })
+          .then((res) => {
+            if (res[0].statusCode === 204) return objectNameList[i];
+            else return "";
+          })
+          .catch((err) => {
+            this.logger.error(err);
+            return "";
+          })
+      );
+    }
+    return Promise.all(deleteTasks).then((objs) => {
+      return objs.filter((objName) => {
+        return objName !== "";
+      });
+    });
+  }
 
   async replaceFiles(
     oldObjects: string[],

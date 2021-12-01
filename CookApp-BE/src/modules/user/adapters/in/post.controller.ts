@@ -23,6 +23,7 @@ import { ReactPostCommand } from "modules/user/useCases/reactPost";
 import { ReactPostRequest } from "modules/user/useCases/reactPost/reactPostRequest";
 import { ClientSession } from "mongoose";
 import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
+import { retrieveObjectNameFromUrl } from "utils";
 
 @Controller("users/posts")
 @ApiTags("User/Post")
@@ -66,6 +67,7 @@ export class PostController {
     @Param("postId", ParseObjectIdPipe) postId: string
   ): Promise<Result<EditPostResponse>> {
     post.id = postId;
+    console.log('validate', post)
     const editPostCommand = new EditPostCommand(null, user, post);
     const updatedPost = await this._commandBus.execute(editPostCommand);
     return Result.ok(updatedPost, { messages: ["Edit post successfully"] });

@@ -72,9 +72,17 @@ export function clean(obj) {
 }
 
 export function generateDisplayName() {
-  const result =
+  return (
     randomWords({ exactly: 1, wordsPerString: 2, separator: "_" }) +
     "." +
-    Math.round(Math.random() * 10000);
-  return result;
+    Math.round(Math.random() * 10000)
+  );
+}
+
+export function retrieveObjectNameFromUrl(
+  url: string,
+  eliminatedSeed: string
+): string {
+  const a = url.slice(url.indexOf(eliminatedSeed) + eliminatedSeed.length);
+  return a;
 }
