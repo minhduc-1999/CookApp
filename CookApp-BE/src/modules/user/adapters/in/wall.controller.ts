@@ -28,9 +28,10 @@ export class WallController {
   @ApiOKResponseCustom(GetWallPostsResponse, "Get wall's posts successfully")
   async getWallPosts(
     @Query(ParsePaginationPipe) query: PageOptionsDto,
-    @User() user: UserDTO
+    @User() user: UserDTO,
+    @Param("id", ParseObjectIdPipe) targetId: string
   ): Promise<Result<GetWallPostsResponse>> {
-    const postsQuery = new GetWallPostsQuery(user, query);
+    const postsQuery = new GetWallPostsQuery(user, targetId, query);
     const result = await this._queryBus.execute(postsQuery);
     return Result.ok(result, {
       messages: ["Get wall's posts successfully"],

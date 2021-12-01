@@ -1,6 +1,5 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { throws } from "assert";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { Wall, WallDocument } from "domains/schemas/wall.schema";
@@ -12,8 +11,8 @@ import { ClientSession, Model } from "mongoose";
 export interface IWallRepository {
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
   updatePostInWall(post: Partial<PostDTO>, user: UserDTO): Promise<void>;
-  getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]>;
-  getTotalPosts(userId: UserDTO): Promise<number>;
+  getPosts(userId: string, query: PageOptionsDto): Promise<PostDTO[]>;
+  getTotalPosts(userId: string): Promise<number>;
   setSession(session: ClientSession): IWallRepository;
   updateFollowers(
     userId: string,
@@ -33,15 +32,15 @@ export class WallRepository extends BaseRepository implements IWallRepository {
   constructor(@InjectModel(Wall.name) private _wallModel: Model<WallDocument>) {
     super();
   }
-  async getTotalPosts(user: UserDTO): Promise<number> {
+  async getTotalPosts(userId: string): Promise<number> {
     const wallDocs = await this._wallModel
-      .findOne({ user: { id: user.id } }, "numberOfPost")
+      .findOne({ "user.id": userId }, "numberOfPost")
       .exec();
     return wallDocs.numberOfPost;
   }
-  async getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]> {
+  async getPosts(userId: string, query: PageOptionsDto): Promise<PostDTO[]> {
     const postDocs = await this._wallModel.aggregate([
-      { $match: { user: { id: user.id } } },
+      { $match: { "user.id": userId } },
       { $unwind: "$posts" },
       { $sort: { "posts.createdAt": -1 } },
       { $skip: query.offset * query.limit },
@@ -54,7 +53,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
   async updatePostInWall(post: PostDTO, user: UserDTO): Promise<void> {
     await this._wallModel.updateOne(
       {
-        user: { id: user.id },
+        "user.id": user.id,
         "posts.id": post.id,
       },
       {
@@ -68,7 +67,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
     await this._wallModel.updateOne(
       {
-        user: { id: user.id },
+        "user.id": user.id,
       },
       {
         $push: { posts: Wall.generatePostItem(post) },

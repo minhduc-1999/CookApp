@@ -9,9 +9,11 @@ import { IWallRepository } from "modules/user/adapters/out/repositories/wall.rep
 import { GetWallPostsResponse } from "./getWallPostsResponse";
 export class GetWallPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
-  constructor(user: UserDTO, queryOptions?: PageOptionsDto) {
+  targetId: string;
+  constructor(user: UserDTO, targetId: string, queryOptions?: PageOptionsDto) {
     super(user);
     this.queryOptions = queryOptions;
+    this.targetId = targetId
   }
 }
 
@@ -24,12 +26,12 @@ export class GetWallPostsQueryHandler
     @Inject("IStorageService") private _storageService: IStorageService
   ) {}
   async execute(query: GetWallPostsQuery): Promise<GetWallPostsResponse> {
-    const { queryOptions, user } = query;
-    const posts = await this._wallRepo.getPosts(user, queryOptions);
+    const { queryOptions, user, targetId } = query;
+    const posts = await this._wallRepo.getPosts(targetId, queryOptions);
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
     }
-    const totalCount = await this._wallRepo.getTotalPosts(user);
+    const totalCount = await this._wallRepo.getTotalPosts(targetId);
     let meta: PageMetadata;
     if (posts.length > 0) {
       meta = new PageMetadata(

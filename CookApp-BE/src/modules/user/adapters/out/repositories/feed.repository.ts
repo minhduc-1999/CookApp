@@ -10,10 +10,7 @@ import { ClientSession, Model } from "mongoose";
 
 export interface IFeedRepository {
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
-  updatePostInFeed(
-    post: Partial<PostDTO>,
-    user: UserDTO
-  ): Promise<void>;
+  updatePostInFeed(post: Partial<PostDTO>, user: UserDTO): Promise<void>;
   getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]>;
   getTotalPosts(userId: UserDTO): Promise<number>;
   updateNumReaction(postId: string, delta: number): Promise<void>;
@@ -56,14 +53,14 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
 
   async getTotalPosts(user: UserDTO): Promise<number> {
     const feedDocs = await this._feedModel
-      .findOne({ user: { id: user.id } }, "numberOfPost")
+      .findOne({ "user.id": user.id }, "numberOfPost")
       .exec();
     return feedDocs.numberOfPost;
   }
 
   async getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]> {
     const postDocs = await this._feedModel.aggregate([
-      { $match: { user: { id: user.id } } },
+      { $match: { "user.id": user.id } },
       { $unwind: "$posts" },
       { $sort: { "posts.createdAt": -1 } },
       { $skip: query.offset * query.limit },
@@ -81,7 +78,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
     await this._feedModel.updateOne(
       {
-        user: { id: user.id },
+        "user.id": user.id,
       },
       {
         $push: { posts: Feed.generatePostItem(post) },
@@ -96,7 +93,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
   async updatePostInFeed(post: PostDTO, user: UserDTO): Promise<void> {
     await this._feedModel.updateOne(
       {
-        user: { id: user.id },
+        "user.id": user.id,
         "posts.id": post.id,
       },
       {
