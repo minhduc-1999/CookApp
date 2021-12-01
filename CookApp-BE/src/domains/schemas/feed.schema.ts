@@ -22,9 +22,6 @@ export class Feed extends AbstractSchema {
   @Prop({ default: 0 })
   numberOfPost: number;
 
-  @Prop({ default: 0 })
-  numOfComment: number;
-
   constructor(feed: Partial<FeedDTO>) {
     super(feed);
     const { id } = feed?.user;

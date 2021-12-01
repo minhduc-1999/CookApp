@@ -22,7 +22,7 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
   ) {}
   async execute(query: GetProfileQuery): Promise<GetProfileResponse> {
     const user = await this._userService.getUserById(query.user.id);
-    if (user.avatar.length > 0) {
+    if (user.avatar?.length > 0) {
       user.avatar = (
         await this._storageService.getDownloadUrls([user.avatar])
       )[0];

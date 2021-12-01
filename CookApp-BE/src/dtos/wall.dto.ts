@@ -20,6 +20,10 @@ export class WallDTO extends AuditDTO {
   @Expose()
   numberOfPost: number;
 
+  followers: string[];
+
+  following: string[];
+
   static create(wall: Pick<WallDTO, "user">): WallDTO {
     const newWall = new WallDTO();
     newWall.create(wall.user.id);
