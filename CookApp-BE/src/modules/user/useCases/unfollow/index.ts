@@ -26,6 +26,11 @@ export class UnfolllowCommandHandler
   ) {}
   async execute(command: UnfolllowCommand): Promise<UnfollowResponse> {
     const { targetId, user } = command;
+    if (user.id === targetId) {
+      throw new BadRequestException(
+        ResponseDTO.fail("Cannot unfollow yourself")
+      );
+    }
     const isFollowed = await this._wallRepo.isFollowed(user.id, targetId);
     if (!isFollowed)
       throw new BadRequestException(ResponseDTO.fail("Not follow yet"));

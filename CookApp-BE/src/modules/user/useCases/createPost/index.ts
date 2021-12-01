@@ -23,7 +23,8 @@ export class CreatePostCommand extends BaseCommand {
 
 @CommandHandler(CreatePostCommand)
 export class CreatePostCommandHandler
-  implements ICommandHandler<CreatePostCommand> {
+  implements ICommandHandler<CreatePostCommand>
+{
   constructor(
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
@@ -43,15 +44,27 @@ export class CreatePostCommandHandler
         MediaType.POST_IMAGES
       );
     }
+    const tasks = [];
     const creatingPost = PostDTO.create({
       ...postDto,
       author: user,
     });
     const result = await this._postRepo.createPost(creatingPost);
-    await Promise.all([
-      this._feedRepo.pushNewPost(result, user),
-      this._wallRepo.pushNewPost(result, user),
-    ]);
+
+    tasks.push(
+      this._feedRepo.pushNewPost(result, user.id),
+      this._wallRepo.pushNewPost(result, user)
+    );
+
+    // push posts to followers
+    const followers = await this._wallRepo.getFollowers(user.id);
+    followers.forEach(async (follower) => {
+      tasks.push(this._feedRepo.pushNewPost(result, follower));
+    });
+
+    // waiting for all tasks
+    await Promise.all(tasks);
+
     result.images = await this._storageService.getDownloadUrls(result.images);
 
     return result;

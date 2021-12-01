@@ -9,7 +9,7 @@ import { UserDTO } from "dtos/user.dto";
 import { ClientSession, Model } from "mongoose";
 
 export interface IFeedRepository {
-  pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
+  pushNewPost(post: PostDTO, userId: string): Promise<void>;
   updatePostInFeed(post: Partial<PostDTO>, user: UserDTO): Promise<void>;
   getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]>;
   getTotalPosts(userId: UserDTO): Promise<number>;
@@ -75,10 +75,10 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
     );
   }
 
-  async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
+  async pushNewPost(post: PostDTO, userId: string): Promise<void> {
     await this._feedModel.updateOne(
       {
-        "user.id": user.id,
+        "user.id": userId,
       },
       {
         $push: { posts: Feed.generatePostItem(post) },

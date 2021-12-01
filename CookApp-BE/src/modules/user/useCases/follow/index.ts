@@ -24,6 +24,9 @@ export class FollowCommandHandler implements ICommandHandler<FollowCommand> {
   ) {}
   async execute(command: FollowCommand): Promise<FollowResponse> {
     const { targetId, user } = command;
+    if (user.id === targetId) {
+      throw new BadRequestException(ResponseDTO.fail("Cannot follow yourself"))
+    }
     const isFollowed = await this._wallRepo.isFollowed(user.id, targetId);
     if (isFollowed)
       throw new BadRequestException(ResponseDTO.fail("Already follow"));

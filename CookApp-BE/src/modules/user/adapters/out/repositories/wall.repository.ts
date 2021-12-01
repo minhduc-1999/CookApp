@@ -25,6 +25,8 @@ export interface IWallRepository {
     type: FollowType
   ): Promise<void>;
   isFollowed(sourceId: string, targetId: string): Promise<boolean>;
+  getFollowers(userId: string): Promise<string[]>;
+  getFollowing(userId: string): Promise<string[]>;
 }
 
 @Injectable()
@@ -164,5 +166,24 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       return true;
     }
     return false;
+  }
+
+  async getFollowers(userId: string): Promise<string[]> {
+    const wallDocs = await this._wallModel
+      .findOne({ "user.id": userId }, "followers")
+      .exec();
+    return wallDocs.followers;
+  }
+
+  async getFollowing(userId: string): Promise<string[]> {
+    const wallDoc = await this._wallModel
+      .findOne(
+        {
+          "user.id": userId,
+        },
+        "following"
+      )
+      .exec();
+    return wallDoc.following;
   }
 }
