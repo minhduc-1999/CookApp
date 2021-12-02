@@ -4,7 +4,8 @@ import { PostDTO } from "./post.dto";
 import { UserDTO } from "./user.dto";
 
 export class WallDTO extends AuditDTO {
-  @Exclude()
+  @Expose()
+  @Type(() => UserDTO)
   user: UserDTO;
 
   @Type(() => PostDTO)

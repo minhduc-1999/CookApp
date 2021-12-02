@@ -2,9 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
+import { plainToClass } from "class-transformer";
 import { Wall, WallDocument } from "domains/schemas/wall.schema";
 import { PostDTO } from "dtos/post.dto";
 import { UserDTO } from "dtos/user.dto";
+import { WallDTO } from "dtos/wall.dto";
 import { FollowType } from "enums/follow.enum";
 import { ClientSession, Model } from "mongoose";
 
@@ -27,12 +29,26 @@ export interface IWallRepository {
   isFollowed(sourceId: string, targetId: string): Promise<boolean>;
   getFollowers(userId: string): Promise<string[]>;
   getFollowing(userId: string): Promise<string[]>;
+  getWall(userId: string): Promise<WallDTO>;
 }
 
 @Injectable()
 export class WallRepository extends BaseRepository implements IWallRepository {
   constructor(@InjectModel(Wall.name) private _wallModel: Model<WallDocument>) {
     super();
+  }
+  async getWall(userId: string): Promise<WallDTO> {
+    const wallDoc = await this._wallModel
+      .findOne(
+        {
+          "user.id": userId,
+        },
+      )
+      .exec();
+    console.log(wallDoc);
+    return plainToClass(WallDTO, wallDoc, {
+      excludeExtraneousValues: true,
+    });
   }
   async getTotalPosts(userId: string): Promise<number> {
     const wallDocs = await this._wallModel

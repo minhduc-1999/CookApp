@@ -27,6 +27,7 @@ import { FollowCommandHandler } from "./useCases/follow";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
+import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
 import { ReactPostCommandHandler } from "./useCases/reactPost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
@@ -44,6 +45,7 @@ const queryHandlers = [
   GetWallPostsQueryHandler,
   GetFeedPostsQueryHandler,
   GetPostCommentsQueryHandler,
+  GetWallQueryHandler
 ];
 const services = [
   {

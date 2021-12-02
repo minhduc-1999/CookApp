@@ -1,4 +1,12 @@
-import { Controller, Delete, Get, Param, Post, Query } from "@nestjs/common";
+import {
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { PageOptionsDto } from "base/pageOptions.base";
@@ -11,6 +19,8 @@ import { User } from "decorators/user.decorator";
 import { UserDTO } from "dtos/user.dto";
 import { FollowCommand } from "modules/user/useCases/follow";
 import { FollowResponse } from "modules/user/useCases/follow/followResponse";
+import { GetWallQuery } from "modules/user/useCases/getWall";
+import { GetWallResponse } from "modules/user/useCases/getWall/getWallResponse";
 import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";
 import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWallPostsResponse";
 import { UnfolllowCommand } from "modules/user/useCases/unfollow";
@@ -63,6 +73,20 @@ export class WallController {
     const result = await this._commandBus.execute(command);
     return Result.ok(result, {
       messages: ["Unfollow successfully"],
+    });
+  }
+
+  @Get()
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(GetWallResponse, "Get wall information successfully")
+  async getWall(
+    @Param("id", ParseObjectIdPipe) targetId: string,
+    @User() user: UserDTO
+  ) {
+    const query = new GetWallQuery(user, targetId);
+    const result = await this._queryBus.execute(query);
+    return Result.ok(result, {
+      messages: ["Get wall information successfully"],
     });
   }
 }
