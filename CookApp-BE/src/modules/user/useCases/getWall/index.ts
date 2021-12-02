@@ -26,6 +26,11 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
       query.user.id,
       query.targetId
     );
+    if (wall.user.avatar?.length > 0) {
+      wall.user.avatar = (
+        await this._storageService.getDownloadUrls([wall.user.avatar])
+      )[0];
+    }
     return new GetWallResponse(wall, isFollowed);
   }
 }
