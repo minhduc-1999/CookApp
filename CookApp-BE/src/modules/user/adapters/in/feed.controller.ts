@@ -12,7 +12,7 @@ import {
   ApiOKResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
 import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { GetFeedPostsQuery } from "modules/user/useCases/getFeedPosts";
 import { GetFeedPostsResponse } from "modules/user/useCases/getFeedPosts/getFeedPostsResponse";
 import { ParsePaginationPipe } from "pipes/parsePagination.pipe";

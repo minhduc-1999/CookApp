@@ -5,7 +5,7 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { IsMongoId, IsOptional } from "class-validator";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { ICommentRepository } from "modules/user/adapters/out/repositories/comment.repository";
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostCommentsResponse } from "./getPostCommentsResponse";

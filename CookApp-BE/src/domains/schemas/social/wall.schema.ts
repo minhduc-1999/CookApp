@@ -1,8 +1,8 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
-import { PostDTO } from "dtos/post.dto";
-import { UserDTO } from "dtos/user.dto";
-import { WallDTO } from "dtos/wall.dto";
+import { PostDTO } from "dtos/social/post.dto";
+import { UserDTO } from "dtos/social/user.dto";
+import { WallDTO } from "dtos/social/wall.dto";
 import { Document } from "mongoose";
 import { clean } from "utils";
 import { Post } from "./post.schema";

@@ -1,11 +1,11 @@
 import { HttpModule, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { MongooseModule } from "@nestjs/mongoose";
-import { CommentModel } from "domains/schemas/comment.schema";
-import { FeedModel } from "domains/schemas/feed.schema";
-import { PostModel } from "domains/schemas/post.schema";
-import { UserModel } from "domains/schemas/user.schema";
-import { WallModel } from "domains/schemas/wall.schema";
+import { CommentModel } from "domains/schemas/social/comment.schema";
+import { FeedModel } from "domains/schemas/social/feed.schema";
+import { PostModel } from "domains/schemas/social/post.schema";
+import { UserModel } from "domains/schemas/social/user.schema";
+import { WallModel } from "domains/schemas/social/wall.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";

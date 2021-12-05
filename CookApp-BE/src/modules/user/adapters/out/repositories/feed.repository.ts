@@ -3,9 +3,9 @@ import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
-import { Feed, FeedDocument } from "domains/schemas/feed.schema";
-import { PostDTO } from "dtos/post.dto";
-import { UserDTO } from "dtos/user.dto";
+import { Feed, FeedDocument } from "domains/schemas/social/feed.schema";
+import { PostDTO } from "dtos/social/post.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { ClientSession, Model } from "mongoose";
 
 export interface IFeedRepository {

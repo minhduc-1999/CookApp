@@ -3,10 +3,10 @@ import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
-import { Wall, WallDocument } from "domains/schemas/wall.schema";
-import { PostDTO } from "dtos/post.dto";
-import { UserDTO } from "dtos/user.dto";
-import { WallDTO } from "dtos/wall.dto";
+import { Wall, WallDocument } from "domains/schemas/social/wall.schema";
+import { PostDTO } from "dtos/social/post.dto";
+import { UserDTO } from "dtos/social/user.dto";
+import { WallDTO } from "dtos/social/wall.dto";
 import { FollowType } from "enums/follow.enum";
 import { ClientSession, Model } from "mongoose";
 

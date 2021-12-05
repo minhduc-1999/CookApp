@@ -1,8 +1,8 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Comment, CommentDocument } from "domains/schemas/comment.schema";
+import { Comment, CommentDocument } from "domains/schemas/social/comment.schema";
 import { ClientSession, Model } from "mongoose";
-import { CommentDTO } from "dtos/comment.dto";
+import { CommentDTO } from "dtos/social/comment.dto";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
 import { CommentPageOption } from "modules/user/useCases/getPostComments";

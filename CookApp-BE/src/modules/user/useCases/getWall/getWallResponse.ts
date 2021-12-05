@@ -1,6 +1,6 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { WallDTO } from "dtos/wall.dto";
+import { WallDTO } from "dtos/social/wall.dto";
 
 class User {
   @ApiResponseProperty({ type: String })

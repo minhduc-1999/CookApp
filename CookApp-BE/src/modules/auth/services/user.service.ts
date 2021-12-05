@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { IUserRepository } from "../adapters/out/repositories/user.repository";
 

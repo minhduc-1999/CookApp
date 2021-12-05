@@ -3,7 +3,7 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { GetWallPostsResponse } from "./getWallPostsResponse";

@@ -1,6 +1,6 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { Sex, SexEnum } from "enums/sex.enum";
-import { ProfileDTO } from "dtos/profile.dto";
+import { ProfileDTO } from "dtos/social/profile.dto";
 import { Document } from "mongoose";
 
 export type UserProfileDocument = UserProfile & Document;

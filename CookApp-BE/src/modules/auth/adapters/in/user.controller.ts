@@ -7,7 +7,7 @@ import {
   ApiOKResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
 import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { GetProfileQuery } from "modules/auth/useCases/getProfile";
 import { GetProfileResponse } from "modules/auth/useCases/getProfile/getProfileResponse";
 import { UpdateProfileCommand } from "modules/auth/useCases/updateProfile";

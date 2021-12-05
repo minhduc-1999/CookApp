@@ -2,7 +2,7 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { ICommentRepository } from "../adapters/out/repositories/comment.repository";
-import { CommentDTO } from "../../../dtos/comment.dto";
+import { CommentDTO } from "../../../dtos/social/comment.dto";
 
 export interface ICommentService {
   getComment(commentId: string): Promise<CommentDTO>;

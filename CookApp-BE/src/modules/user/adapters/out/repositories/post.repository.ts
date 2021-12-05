@@ -2,9 +2,9 @@ import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
-import { Post, PostDocument } from "domains/schemas/post.schema";
-import { PostDTO } from "dtos/post.dto";
-import { ReactionDTO } from "dtos/reaction.dto";
+import { Post, PostDocument } from "domains/schemas/social/post.schema";
+import { PostDTO } from "dtos/social/post.dto";
+import { ReactionDTO } from "dtos/social/reaction.dto";
 import { ClientSession, Model } from "mongoose";
 
 export interface IPostRepository {
