@@ -23,6 +23,7 @@ class AuthenticationService implements IAuthentication {
     const payload = { sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
+      userId: user.id,
     };
   }
 
