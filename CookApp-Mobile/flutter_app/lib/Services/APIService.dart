@@ -18,6 +18,7 @@ import 'package:flutter_app/Model/ReactRequestModel.dart';
 import 'package:flutter_app/Model/RegisterRequestModel.dart';
 import 'package:flutter_app/Model/RegisterRespondModel.dart';
 import 'package:flutter_app/Model/UserRespondModel.dart';
+import 'package:flutter_app/Model/UserWallRespondModel.dart';
 import 'package:flutter_app/Model/WallPostRespondModel.dart';
 
 import 'package:flutter_app/config.dart';
@@ -98,6 +99,17 @@ class APIService {
     return true;
   }
 
+  static Future<UserWallRespondModel> getUserWall(String userId) async{
+    var url = Uri.parse(Config.apiURL + Config.preUserWallAPI + userId + "/walls");
+    var loginDetails = await SharedService.loginDetails();
+    print("url: " + url.toString());
+    var respone = await client.get(url,
+        headers: <String, String>{
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        }
+    );
+    return userWallRespondModel(respone.body);
+  }
   static Future<UserRespondModel> getUser() async{
     var url = Uri.parse(Config.apiURL + Config.userProfileAPI);
     var loginDetails = await SharedService.loginDetails();
@@ -109,8 +121,8 @@ class APIService {
     return userRespondModel(respone.body);
   }
 
-  static Future<WallPostRespondModel> getUserWallPosts() async {
-    var url = Uri.parse(Config.apiURL + Config.userWallAPI).replace(
+  static Future<WallPostRespondModel> getUserWallPosts(String userId) async {
+    var url = Uri.parse(Config.apiURL + Config.preUserWallAPI + userId + Config.endUserWallPostAPI).replace(
       queryParameters: <String, String>{
         'offset' : '0',
         'limit' : '10'

@@ -3,7 +3,9 @@ import 'package:flutter_app/MessageScreen/MessageActivity.dart';
 import 'package:flutter_app/NewFeedScreen/NewFeedActivity.dart';
 import 'package:flutter_app/NotificationScreen/NotificationActivity.dart';
 import 'package:flutter_app/ProfileScreen/ProfileActivity.dart';
+import 'package:flutter_app/Services/SharedService.dart';
 import 'package:flutter_app/SettingScreen/SettingActivity.dart';
+import 'package:flutter_app/main.dart';
 
 import '../constants.dart';
 
@@ -49,7 +51,7 @@ class HomeActivityState extends State<HomeActivity> {
               SettingActivity(),
               MessageActivity(),
               NotificationActivity(),
-              ProfileActivity()
+              ProfileActivity(userId: currentUserId,)
             ],
           ),
           bottomNavigationBar: BottomNavigationBar(

@@ -11,6 +11,7 @@ import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 class Post extends StatefulWidget {
   const Post(
       {this.id,
+      this.userId,
       this.location,
       this.content,
       this.images,
@@ -48,6 +49,7 @@ class Post extends StatefulWidget {
   }
 
   final String id;
+  final String userId;
   final String content;
   final String location;
   final String displayName;
@@ -205,9 +207,9 @@ class _Post extends State<Post> {
                 ),
                 onTap: () {
                   goToComments(
-                      context: context,
-                      postId: id,
-                      );
+                    context: context,
+                    postId: id,
+                  );
                 }),
           ],
         ),
@@ -250,16 +252,15 @@ class _Post extends State<Post> {
       ],
     );
   }
-  void goToComments(
-      {BuildContext context, String postId}) {
+
+  void goToComments({BuildContext context, String postId}) {
     Navigator.of(context)
         .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-      return CommentActivity(
-        postId: postId
-      );
+      return CommentActivity(postId: postId);
     }));
   }
-  void _likePost(String postId2) async{
+
+  void _likePost(String postId2) async {
     await APIService.react(id, ReactRequestModel(react: 'LOVE'));
     bool _liked = liked;
     if (_liked) {

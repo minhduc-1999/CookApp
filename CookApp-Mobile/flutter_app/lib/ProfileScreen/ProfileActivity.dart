@@ -4,26 +4,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/Model/Post.dart';
 import 'package:flutter_app/Model/PostDetailsRespondModel.dart';
 import 'package:flutter_app/Model/UserRespondModel.dart';
+import 'package:flutter_app/Model/UserWallRespondModel.dart';
 import 'package:flutter_app/Model/WallPostRespondModel.dart';
 import 'package:flutter_app/Services/APIService.dart';
 
 import '../constants.dart';
+import '../main.dart';
 import 'EditProfileActivity.dart';
 
 class ProfileActivity extends StatefulWidget {
+  final String userId;
+
+  const ProfileActivity({Key key, this.userId}) : super(key: key);
   @override
-  _ProfileActivityState createState() => _ProfileActivityState();
+  _ProfileActivityState createState() => _ProfileActivityState(this.userId);
 }
 
 class _ProfileActivityState extends State<ProfileActivity> {
-  UserRespondModel user;
+  final String profileId;
+  UserWallRespondModel user;
   WallPostRespondModel posts;
   bool isFollowing = false;
   String view = "grid";
   int postCount = 0;
-  bool followButtonClicked = false;
+
   bool circular = true;
   EditProfileActivity editProfile = new EditProfileActivity();
+
+  _ProfileActivityState(this.profileId);
 
   openEditProfilePage() async {
     Navigator.push(context, MaterialPageRoute(
@@ -42,8 +50,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
   }
 
   void fetchData() async {
-    var response = await APIService.getUser();
-    var listPosts = await APIService.getUserWallPosts();
+    var response = await APIService.getUserWall(profileId);
+    var listPosts = await APIService.getUserWallPosts(profileId);
 
     setState(() {
       user = response;
@@ -105,13 +113,44 @@ class _ProfileActivityState extends State<ProfileActivity> {
     }
 
     Container buildProfileFollowButton(BuildContext _context) {
+      if (currentUserId == profileId) {
+        print("Build edit button");
+        return buildFollowButton(
+          text: "Edit Profile",
+          backgroundcolor: Colors.white,
+          textColor: Colors.black,
+          borderColor: Colors.grey,
+          function: openEditProfilePage,
+        );
+      }
+
+      // already following user - should show unfollow button
+      if (isFollowing) {
+        return buildFollowButton(
+          text: "Unfollow",
+          backgroundcolor: Colors.white,
+          textColor: Colors.black,
+          borderColor: Colors.grey,
+          function: unfollowUser,
+        );
+      }
+
+      // does not follow user - should show follow button
+      if (!isFollowing) {
+        return buildFollowButton(
+          text: "Follow",
+          backgroundcolor: Colors.blue,
+          textColor: Colors.white,
+          borderColor: Colors.blue,
+          function: followUser,
+        );
+      }
+
       return buildFollowButton(
-        text: "Edit Profile",
-        backgroundcolor: Colors.white,
-        textColor: Colors.black,
-        borderColor: Colors.grey,
-        function: openEditProfilePage,
-      );
+          text: "loading...",
+          backgroundcolor: Colors.white,
+          textColor: Colors.black,
+          borderColor: Colors.grey);
     }
 
     Row buildImageViewButtonBar() {
@@ -193,12 +232,12 @@ class _ProfileActivityState extends State<ProfileActivity> {
                     children: <Widget>[
                       Row(
                         children: <Widget>[
-                          (user.data.avatar != null)
+                          (user.data.user.avatar != null)
                               ? CircleAvatar(
                                   radius: size.width * 0.11,
                                   backgroundColor: Colors.grey,
                                   backgroundImage:
-                                      NetworkImage(user.data.avatar),
+                                      NetworkImage(user.data.user.avatar),
                                 )
                               : CircleAvatar(
                                   /*child: Image.asset("assets/images/default_avatar.png",
@@ -219,8 +258,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: <Widget>[
                                     buildStatColumn("posts", postCount),
-                                    buildStatColumn("followers", 5),
-                                    buildStatColumn("following", 5),
+                                    buildStatColumn("followers", user.data.numberOfFollower),
+                                    buildStatColumn("following", user.data.numberOfFollowing),
                                   ],
                                 ),
                                 Row(
@@ -257,14 +296,12 @@ class _ProfileActivityState extends State<ProfileActivity> {
     print('following user');
     setState(() {
       this.isFollowing = true;
-      followButtonClicked = true;
     });
   }
 
   unfollowUser() {
     setState(() {
       isFollowing = false;
-      followButtonClicked = true;
     });
   }
 
@@ -284,6 +321,7 @@ class ImageTile extends StatelessWidget {
     PostDetailsRespondModel res = await APIService.getDetailsPost(posts.id);
     Post post = Post(
       id: res.data.id,
+      userId: res.data.author.id,
       location: "Quang Binh",
       content: res.data.content,
       images: res.data.images,

@@ -3,60 +3,62 @@ LoginRespondModel loginRespondJson(String str) =>
     LoginRespondModel.fromJson(json.decode(str));
 
 class LoginRespondModel {
-  LoginRespondModel({
-    this.meta,
-    this.data,
-  });
   Meta meta;
   Data data;
 
-  LoginRespondModel.fromJson(Map<String, dynamic> json){
-    meta = Meta.fromJson(json['meta']);
-    data = Data.fromJson(json['data']);
+  LoginRespondModel({this.meta, this.data});
+
+  LoginRespondModel.fromJson(Map<String, dynamic> json) {
+    meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
+    data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['meta'] = meta.toJson();
-    _data['data'] = data.toJson();
-    return _data;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.meta != null) {
+      data['meta'] = this.meta.toJson();
+    }
+    if (this.data != null) {
+      data['data'] = this.data.toJson();
+    }
+    return data;
   }
 }
 
 class Meta {
-  Meta({
-    this.messages,
-    this.ok,
-  });
-  List<String> messages;
   bool ok;
+  List<String> messages;
 
-  Meta.fromJson(Map<String, dynamic> json){
-    messages = List.castFrom<dynamic, String>(json['messages']);
+  Meta({this.ok, this.messages});
+
+  Meta.fromJson(Map<String, dynamic> json) {
     ok = json['ok'];
+    messages = json['messages'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['messages'] = messages;
-    _data['ok'] = ok;
-    return _data;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['ok'] = this.ok;
+    data['messages'] = this.messages;
+    return data;
   }
 }
 
 class Data {
-  Data({
-    this.accessToken,
-  });
   String accessToken;
+  String userId;
 
-  Data.fromJson(Map<String, dynamic> json){
+  Data({this.accessToken, this.userId});
+
+  Data.fromJson(Map<String, dynamic> json) {
     accessToken = json['accessToken'];
+    userId = json['userId'];
   }
 
   Map<String, dynamic> toJson() {
-    final _data = <String, dynamic>{};
-    _data['accessToken'] = accessToken;
-    return _data;
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['accessToken'] = this.accessToken;
+    data['userId'] = this.userId;
+    return data;
   }
 }

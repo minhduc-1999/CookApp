@@ -4,6 +4,7 @@ import 'package:api_cache_manager/api_cache_manager.dart';
 import 'package:api_cache_manager/models/cache_db_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_app/Model/LoginRespondModel.dart';
+import 'package:flutter_app/main.dart';
 
 class SharedService {
   static Future<bool> isLoggedIn() async {
@@ -20,8 +21,15 @@ class SharedService {
 
   static Future<void> setLoginDetails(LoginRespondModel model) async {
     APICacheDBModel cacheDBModel =  APICacheDBModel(key: "login", syncData: jsonEncode(model.toJson()));
+    currentUserId = model.data.userId;
     await APICacheManager().addCacheData(cacheDBModel);
   }
+
+  static Future<String> getCurrentUserId() async{
+    var data = await APICacheManager().getCacheData("userId");
+    return data.syncData;
+  }
+
 
   static Future<void> logout(BuildContext context) async {
     await APICacheManager().deleteCache("login");
