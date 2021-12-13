@@ -1,11 +1,40 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
+import { Type } from "class-transformer";
+@Schema()
+class Unit {
+  @Prop()
+  unit: string;
+  @Prop()
+  value: number;
+}
+const UnitSchema = SchemaFactory.createForClass(Unit);
 
-export type FoodDocument = Food & Document;
+@Schema()
+class Ingredient {
+  @Prop({ type: UnitSchema })
+  unit: Unit;
+  @Prop()
+  name: string;
+  @Prop()
+  quantity: number;
+}
+
+const IngredientSchema = SchemaFactory.createForClass(Ingredient);
+
+@Schema()
+class Step {
+  @Prop()
+  content: string;
+  @Prop()
+  photos: string[];
+}
+
+const StepSchema = SchemaFactory.createForClass(Step);
 
 @Schema()
 export class Food extends AbstractSchema {
-  @Prop({default: 0})
+  @Prop({ default: 0 })
   servings: number;
 
   @Prop()
@@ -26,42 +55,23 @@ export class Food extends AbstractSchema {
   @Prop()
   group: string;
 
-  @Prop({type: [Object]})
+  @Prop({ type: [StepSchema] })
+  @Type(() => Step)
   steps: Step[];
 
-  @Prop({type: Object})
-  ingredients: Ingredient;
+  @Prop({ type: [IngredientSchema] })
+  @Type(() => Ingredient)
+  ingredients: Ingredient[];
 
   @Prop()
-  origin: string
+  origin: string;
 }
 
-class Unit {
-  @Prop()
-  unit: string;
-  @Prop()
-  value: number;
-}
-
-class Ingredient {
-  @Prop({type: Object})
-  unit: Unit;
-  @Prop()
-  name: string;
-  @Prop()
-  quantity: number;
-}
-
-class Step {
-  @Prop()
-  content: string;
-  @Prop()
-  photo: string[];
-}
+export type FoodDocument = Food & Document;
 
 export const FoodSchema = SchemaFactory.createForClass(Food);
 
-export const FeedModel: ModelDefinition = {
+export const FoodModel: ModelDefinition = {
   name: Food.name,
   schema: FoodSchema,
   collection: "foods",
