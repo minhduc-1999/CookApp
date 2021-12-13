@@ -16,8 +16,7 @@ export class GetFoodsQuery extends BaseQuery {
 }
 
 @QueryHandler(GetFoodsQuery)
-export class GetFoodsQueryHandler
-  implements IQueryHandler<GetFoodsQuery> {
+export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
   constructor(
     @Inject("IFoodRepository")
     private _foodRepo: IFoodRepository,
@@ -26,14 +25,21 @@ export class GetFoodsQueryHandler
   async execute(query: GetFoodsQuery): Promise<GetFoodsResponse> {
     const { queryOptions } = query;
     const foods = await this._foodRepo.getFoods(queryOptions);
-    // for (let food of foods) {
-    //   // console.log(food.photos)
-    //   const photos = food.photos;
-    //   const a = await this._storageService.getDownloadUrls(photos);
-    //   console.log(a)
-    // }
+    for (let food of foods) {
+      food.photos = await this._storageService.getDownloadUrls(food.photos);
+      if (food.steps.length > 0) {
+        food.steps = await Promise.all(
+          food.steps.map(async (step) => {
+            return {
+              ...step,
+              photos: await this._storageService.getDownloadUrls(step.photos),
+            };
+          })
+        );
+      }
+    }
     const totalCount = await this._foodRepo.getTotalFoods();
-    console.log(totalCount)
+    console.log(totalCount);
     let meta: PageMetadata;
     if (foods.length > 0) {
       meta = new PageMetadata(
