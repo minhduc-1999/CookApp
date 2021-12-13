@@ -2,8 +2,8 @@ import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
-import { Feed, FeedDocument } from "domains/schemas/feed.schema";
-import { FeedDTO } from "dtos/feed.dto";
+import { Feed, FeedDocument } from "domains/schemas/social/feed.schema";
+import { FeedDTO } from "dtos/social/feed.dto";
 import { ClientSession, Model } from "mongoose";
 
 export interface IFeedRepository {

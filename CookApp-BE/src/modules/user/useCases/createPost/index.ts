@@ -3,15 +3,14 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { PostDTO } from "dtos/post.dto";
-import { UserDTO } from "dtos/user.dto";
+import { PostDTO } from "dtos/social/post.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
-import { ConfigService } from "nestjs-config";
 
 export class CreatePostCommand extends BaseCommand {
   postDto: CreatePostRequest;

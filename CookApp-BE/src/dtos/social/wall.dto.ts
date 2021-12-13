@@ -1,5 +1,5 @@
 import { AuditDTO } from "base/dtos/audit.dto";
-import { Exclude, Expose, Type } from "class-transformer";
+import { Expose, Type } from "class-transformer";
 import { PostDTO } from "./post.dto";
 import { UserDTO } from "./user.dto";
 

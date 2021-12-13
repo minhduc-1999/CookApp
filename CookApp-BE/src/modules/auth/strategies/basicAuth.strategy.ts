@@ -3,7 +3,7 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { Strategy } from "passport-local";
 import { IAuthentication } from "../services/authentication.service";
 

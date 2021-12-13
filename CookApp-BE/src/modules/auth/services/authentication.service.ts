@@ -7,7 +7,7 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { JwtService } from "@nestjs/jwt";
 import _ = require("lodash");
 import { LoginResponse } from "../useCases/login/loginResponse";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 
 export interface IAuthentication {
   getAuthUser(usernameOrEmail: string, password: string): Promise<UserDTO>;

@@ -1,7 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { GetProfileResponse } from "./getProfileResponse";

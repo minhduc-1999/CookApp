@@ -1,3 +1,3 @@
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 
 export class UpdateProfileResponse extends UserDTO {}

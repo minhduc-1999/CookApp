@@ -7,7 +7,7 @@ import {
   ApiOKListResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
 import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { GetUploadPresignedLinkQuery } from "modules/share/useCases/getUploadPresignedLink";
 import { PreSignedLinkRequest } from "modules/share/useCases/getUploadPresignedLink/presignedLinkRequest";
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";

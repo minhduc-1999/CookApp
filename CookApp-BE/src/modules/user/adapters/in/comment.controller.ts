@@ -9,7 +9,7 @@ import {
 } from "decorators/ApiSuccessResponse.decorator";
 import { Transaction } from "decorators/transaction.decorator";
 import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { CreateCommentCommand } from "modules/user/useCases/createComment";
 import { CreateCommentRequest } from "modules/user/useCases/createComment/createCommentRequest";
 import { CreateCommentResponse } from "modules/user/useCases/createComment/createCommentResponse";

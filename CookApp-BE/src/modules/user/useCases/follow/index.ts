@@ -1,6 +1,6 @@
 import { BadRequestException, Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { FollowResponse } from "./followResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";

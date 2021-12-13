@@ -3,7 +3,7 @@ import { Type } from "class-transformer";
 import { IsNotEmpty, IsOptional, IsString, Length } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsValidDisplayName } from "decorators/isValidDisplayName.decorator";
-import { ProfileDTO } from "dtos/profile.dto";
+import { ProfileDTO } from "dtos/social/profile.dto";
 
 export class UpdateProfileRequest {
   @IsString()

@@ -1,7 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { MediaType } from "enums/mediaType.enum";
 import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { IUserService } from "modules/auth/services/user.service";

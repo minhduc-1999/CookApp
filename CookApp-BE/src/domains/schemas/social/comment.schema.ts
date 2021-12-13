@@ -1,6 +1,6 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
-import { CommentDTO } from "dtos/comment.dto";
+import { CommentDTO } from "dtos/social/comment.dto";
 import { Document } from "mongoose";
 import { User } from "./user.schema";
 

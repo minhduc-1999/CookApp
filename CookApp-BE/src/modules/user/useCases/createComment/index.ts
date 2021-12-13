@@ -1,12 +1,12 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
 import { ICommentRepository } from "modules/user/adapters/out/repositories/comment.repository";
 import { CreateCommentRequest } from "./createCommentRequest";
 import { CreateCommentResponse } from "./createCommentResponse";
-import { CommentDTO } from "dtos/comment.dto";
+import { CommentDTO } from "dtos/social/comment.dto";
 import { ICommentService } from "modules/user/services/comment.service";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";

@@ -1,7 +1,7 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { Type } from "class-transformer";
-import { CommentDTO } from "dtos/comment.dto";
+import { CommentDTO } from "dtos/social/comment.dto";
 
 export class GetPostCommentsResponse {
   @ApiResponseProperty({ type: [CommentDTO] })

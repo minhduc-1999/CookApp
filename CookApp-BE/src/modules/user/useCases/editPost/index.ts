@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { IPostService } from "modules/user/services/post.service";
 import { createUpdatingObject, retrieveObjectNameFromUrl } from "utils";
 import { EditPostRequest } from "./editPostRequest";

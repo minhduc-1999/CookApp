@@ -21,7 +21,7 @@ import { LoginRequest } from "modules/auth/useCases/login/loginRequest";
 import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
 import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { Transaction } from "decorators/transaction.decorator";
 import { MongooseSession } from "decorators/mongooseSession.decorator";
 import { ClientSession } from "mongoose";

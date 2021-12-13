@@ -6,6 +6,7 @@ import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
 import { TransactionInterceptor } from "interceptors/transaction.interceptor";
 import { AuthModule } from "modules/auth/auth.module";
+import { CoreModule } from "modules/core/core.module";
 import { UserModule } from "modules/user/user.module";
 import { RavenModule } from "nest-raven";
 import { ConfigModule, ConfigService } from "nestjs-config";
@@ -45,6 +46,7 @@ import { contextMiddleware } from "./middleware/context.middleware";
     }),
     AuthModule,
     UserModule,
+    CoreModule
   ],
   controllers: [AppController],
   providers: [

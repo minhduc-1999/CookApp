@@ -16,7 +16,7 @@ import {
   ApiOKResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
 import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { FollowCommand } from "modules/user/useCases/follow";
 import { FollowResponse } from "modules/user/useCases/follow/followResponse";
 import { GetWallQuery } from "modules/user/useCases/getWall";

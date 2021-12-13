@@ -8,9 +8,8 @@ import { ClientSession, Model } from "mongoose";
 import { ErrorCode } from "enums/errorCode.enum";
 import { MongoErrorCode } from "enums/mongoErrorCode.enum";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
-import { UserDTO } from "dtos/user.dto";
-import { User, UserDocument } from "domains/schemas/user.schema";
+import { UserDTO } from "dtos/social/user.dto";
+import { User, UserDocument } from "domains/schemas/social/user.schema";
 import { plainToClass } from "class-transformer";
 import { BaseRepository } from "base/repository.base";
 

@@ -1,7 +1,7 @@
 import { ModelDefinition, Prop, Schema, SchemaFactory } from "@nestjs/mongoose";
 import { AbstractSchema } from "base/schemas/schema.base";
-import { PostDTO } from "dtos/post.dto";
-import { ReactionDTO } from "dtos/reaction.dto";
+import { PostDTO } from "dtos/social/post.dto";
+import { ReactionDTO } from "dtos/social/reaction.dto";
 import { Document } from "mongoose";
 import { User } from "./user.schema";
 

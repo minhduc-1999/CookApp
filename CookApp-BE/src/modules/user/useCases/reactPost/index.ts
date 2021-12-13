@@ -1,14 +1,14 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { UserDTO } from "dtos/user.dto";
+import { UserDTO } from "dtos/social/user.dto";
 import { IPostService } from "modules/user/services/post.service";
 import { ReactPostRequest } from "./reactPostRequest";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { ReactPostResponse } from "./reactPostResponse";
-import { ReactionDTO } from "dtos/reaction.dto";
+import { ReactionDTO } from "dtos/social/reaction.dto";
 export class ReactPostCommand extends BaseCommand {
   reactReq: ReactPostRequest;
   constructor(
