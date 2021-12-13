@@ -32,15 +32,21 @@ class _ProfileActivityState extends State<ProfileActivity> {
   EditProfileActivity editProfile = new EditProfileActivity();
 
   _ProfileActivityState(this.profileId);
+  FutureOr onGoBack(dynamic value) {
+    fetchData();
+  }
 
-  openEditProfilePage() async {
+  void openEditProfilePage() {
+    Route route = MaterialPageRoute(builder: (context) => EditProfileActivity());
+    Navigator.push(context, route).then(onGoBack);
+  }
+  /*openEditProfilePage() async {
     Navigator.push(context, MaterialPageRoute(
       builder: (context) {
         return editProfile;
       },
     ));
-  }
-
+  }*/
   @override
   void initState() {
     // TODO: implement initState
@@ -277,7 +283,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
                           alignment: Alignment.centerLeft,
                           padding: const EdgeInsets.only(top: 15.0),
                           child: Text(
-                            "bio",
+                            user.data.user.displayName,
                             style: TextStyle(fontWeight: FontWeight.bold),
                           )),
                     ],

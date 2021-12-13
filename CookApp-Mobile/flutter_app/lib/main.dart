@@ -7,7 +7,7 @@ import 'package:flutter_app/LoginScreen/SignUpActivity.dart';
 import 'ProfileScreen/EditProfileActivity.dart';
 import 'Services/SharedService.dart';
 String currentUserId;
-Widget _defaultHome = EditProfileActivity();
+Widget _defaultHome = LoginActivity();
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   bool isLoggedIn = await SharedService.isLoggedIn();

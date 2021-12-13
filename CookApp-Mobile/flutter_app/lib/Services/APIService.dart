@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:flutter_app/Model/CommentRequestModel.dart';
 import 'package:flutter_app/Model/CommentRespondModel.dart';
+import 'package:flutter_app/Model/EditUserRequestModel.dart';
 import 'package:flutter_app/Model/LoginRequestModel.dart';
 import 'package:flutter_app/Model/LoginRespondModel.dart';
 import 'package:flutter_app/Model/NewFeedRespondModel.dart';
@@ -233,5 +234,21 @@ class APIService {
     print("respond: " + respondModel.data.comments.length.toString());
     return commentRespondModel(respone.body);
   }
-
+  static Future<bool> editProfile(EditUserRequestModel model) async{
+    var url = Uri.parse(Config.apiURL + Config.userProfileAPI);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.patch(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson())
+    );
+    if(respone.statusCode == 200){
+      return true;
+    } else {
+      return false;
+    }
+  }
 }

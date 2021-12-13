@@ -2,7 +2,7 @@ const { MongoClient } = require('mongodb');
 const fs = require('fs')
 
 
-const url = 'mongodb://root:example@localhost:27017'; //change this connectionString
+const url = 'mongodb://localhost:27017/?readPreference=primary&appname=MongoDB%20Compass&directConnection=true&ssl=false'; //change this connectionString
 const client = new MongoClient(url);
 
 // Config here

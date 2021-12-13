@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Model/EditUserRequestModel.dart';
+import 'package:flutter_app/Model/PresignedLinkedRequestModel.dart';
 import 'package:flutter_app/Model/UserRespondModel.dart';
 import 'package:flutter_app/Services/APIService.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
 
@@ -16,14 +21,18 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   UserRespondModel user;
   bool circular = true;
   DateTime _selectedDate;
-  String _sexual;
+  String _groupsexual;
   bool femaleSelected = false;
+  File file;
+  ImagePicker imagePicker = ImagePicker();
   List<bool> _isSelected = [false, false];
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController birthDayController = TextEditingController();
   TextEditingController heightController = TextEditingController();
   TextEditingController weightController = TextEditingController();
+  TextEditingController displayNameController = TextEditingController();
+
   @override
   void initState() {
     // TODO: implement initState
@@ -55,83 +64,115 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
             Navigator.of(context).pop();
           },
         ),
-        actions: [IconButton(onPressed: () {}, icon: Icon(Icons.check))],
+        actions: [
+          IconButton(
+              onPressed: () {
+                applyChanges().then(Navigator.pop(context));
+              },
+              icon: Icon(Icons.check))
+        ],
       ),
-      body: circular ? Center(child: CircularProgressIndicator())
+      body: circular
+          ? Center(child: CircularProgressIndicator())
           : Container(
-        padding: EdgeInsets.only(left: 15, top: 25, right: 15),
-        child: GestureDetector(
-          onTap: () {
-            FocusScope.of(context).unfocus();
-          },
-          child: ListView(
-            children: [
-              Center(
-                child: Stack(
+              padding: EdgeInsets.only(left: 15, top: 25, right: 15),
+              child: GestureDetector(
+                onTap: () {
+                  FocusScope.of(context).unfocus();
+                },
+                child: ListView(
                   children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                          border: Border.all(
-                              width: 1,
-                              color: Colors.black.withOpacity(0.2)),
-                          boxShadow: [
-                            BoxShadow(
-                                spreadRadius: 2,
-                                blurRadius: 10,
-                                color: Colors.black.withOpacity(0.1),
-                                offset: Offset(0, 10))
-                          ],
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                              fit: BoxFit.cover,
-                              image: user.data.avatar != null
-                                  ? NetworkImage(user.data.avatar)
-                                  : AssetImage(
-                                      'assets/images/default_avatar.png'))),
-                    ),
-                    Positioned(
-                        bottom: 0,
-                        right: 0,
-                        child: Container(
-                          height: 35,
-                          width: 35,
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle, color: appPrimaryColor),
-                          child: Icon(
-                            Icons.edit,
-                            color: Colors.white,
+                    Center(
+                      child: Stack(
+                        children: [
+                          Container(
+                            width: 100,
+                            height: 100,
+                            decoration: BoxDecoration(
+                                border: Border.all(
+                                    width: 1,
+                                    color: Colors.black.withOpacity(0.2)),
+                                boxShadow: [
+                                  BoxShadow(
+                                      spreadRadius: 2,
+                                      blurRadius: 10,
+                                      color: Colors.black.withOpacity(0.1),
+                                      offset: Offset(0, 10))
+                                ],
+                                shape: BoxShape.circle,
+                                image: DecorationImage(
+                                    fit: BoxFit.cover,
+                                    image: file != null
+                                        ? new FileImage(file)
+                                        : user.data.avatar != null
+                                            ? NetworkImage(user.data.avatar)
+                                            : AssetImage(
+                                                'assets/images/default_avatar.png'))),
                           ),
-                        ))
+                          Positioned(
+                              bottom: 0,
+                              right: 0,
+                              child: GestureDetector(
+                                onTap: () async {
+                                  PickedFile imageFile =
+                                      await imagePicker.getImage(
+                                          source: ImageSource.gallery,
+                                          maxWidth: 1920,
+                                          maxHeight: 1200,
+                                          imageQuality: 80);
+                                  if (imageFile != null) {
+                                    setState(() {
+                                      file = File(imageFile.path);
+                                    });
+                                  }
+                                },
+                                child: Container(
+                                  height: 35,
+                                  width: 35,
+                                  decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: appPrimaryColor),
+                                  child: Icon(
+                                    Icons.edit,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ))
+                        ],
+                      ),
+                    ),
+                    buildName("First Name", "Enter your first name",
+                        firstNameController),
+                    buildName("Last Name", "Enter your last name",
+                        lastNameController),
+                    buildName("Display Name", "Enter your display name",
+                        displayNameController),
+                    buildWeightAndHeight("Height (cm)", "cm", heightController),
+                    buildWeightAndHeight("Weight (kg)", "kg", weightController),
+                    buildSexual()
                   ],
                 ),
               ),
-              buildName("First Name", "Enter your first name", firstNameController),
-              buildName("Last Name", "Enter your last name", lastNameController),
-              buildWeightAndHeight("Height (cm)", "cm", heightController),
-              buildWeightAndHeight("Weight (kg)", "kg", weightController),
-              buildSexual()
-            ],
-          ),
-        ),
-      ),
+            ),
     );
   }
 
-  Widget buildName(String label, String hintText, TextEditingController controller) {
+  Widget buildName(
+      String label, String hintText, TextEditingController controller) {
     return TextField(
-              controller: controller,
-              decoration: InputDecoration(
-                  labelText: label,
-                  hintText: hintText,
-                  hintStyle: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey.withOpacity(0.3),
-                  )),
-            );
+      controller: controller,
+      decoration: InputDecoration(
+          labelText: label,
+          hintText: hintText,
+          hintStyle: TextStyle(
+            fontSize: 16,
+            color: Colors.grey.withOpacity(0.3),
+          )),
+    );
   }
-  Widget buildWeightAndHeight(String label, String hintText, TextEditingController controller) {
+
+  Widget buildWeightAndHeight(
+      String label, String hintText, TextEditingController controller) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
@@ -150,24 +191,42 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
     setState(() {
       user = response;
       circular = false;
-      if(user.data.profile.firstName != null){
+      if (user.data.profile.firstName != null) {
         firstNameController.text = user.data.profile.firstName;
       }
-      if(user.data.profile.lastName != null){
+      if (user.data.profile.lastName != null) {
         lastNameController.text = user.data.profile.lastName;
       }
-      if(user.data.profile.birthDate != null){
-        birthDayController.text = DateTime.fromMicrosecondsSinceEpoch(user.data.profile.birthDate).toString();
+      if (user.data.profile.birthDate != null) {
+        birthDayController.text =
+            DateTime.fromMicrosecondsSinceEpoch(user.data.profile.birthDate)
+                .toString();
+      }
+      if (user.data.displayName != null){
+        displayNameController.text = user.data.displayName;
+      }
+      if (user.data.profile.height != null) {
+        heightController.text = user.data.profile.height.toString();
+      }
+      if (user.data.profile.weight != null) {
+        weightController.text = user.data.profile.weight.toString();
+      }
+      if (user.data.profile.sex != null){
+        if(user.data.profile.sex == "male"){
+          _groupsexual = "male";
+        }else if (user.data.profile.sex == "female"){
+          _groupsexual = "female";
+        }
       }
     });
   }
+
   Widget buildTextBirthDay() {
     return TextField(
       focusNode: new AlwaysDisabledFocusNode(),
       controller: birthDayController,
       decoration: InputDecoration(
         labelText: "Birth day",
-
         hintText: "Birth day",
         hintStyle: TextStyle(
           fontSize: 16,
@@ -211,6 +270,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
             affinity: TextAffinity.upstream));
     }
   }
+
   Widget buildSexual() {
     return Padding(
         padding: EdgeInsets.fromLTRB(0, 14, 0, 0),
@@ -219,40 +279,75 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
             "Sex: ",
             style: TextStyle(
               fontSize: 16,
-              color: Colors.black,
+              color: Colors.black.withOpacity(0.6),
             ),
           ),
           Divider(),
-          ToggleButtons(
-              isSelected: _isSelected,
-              renderBorder: false,
-              selectedColor: femaleSelected
-                  ? Colors.pink[400]
-                  : Color.fromRGBO(63, 229, 235, 1),
-
-              fillColor: Theme.of(context).scaffoldBackgroundColor,
-              children: <Widget>[
-                buildMaleIconButton(),
-                buildFemaleIconButton(),
-              ],
-              onPressed: (int newIndex) {
-                if (newIndex == 0) {
-                  _isSelected[0] = true;
-                  _isSelected[1] = false;
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              SizedBox(
+                width: 20,
+              ),
+              Radio(
+                value: "male",
+                groupValue: _groupsexual,
+                onChanged: (value) {
                   setState(() {
-                    femaleSelected = false;
-                    _sexual = "Male";
+                    _groupsexual = value;
                   });
-                } else if (newIndex == 1) {
-                  _isSelected[0] = false;
-                  _isSelected[1] = true;
+                },
+              ),
+              Text(
+                "Male",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+              SizedBox(
+                width: 40,
+              ),
+              Radio(
+                value: "female",
+                groupValue: _groupsexual,
+                onChanged: (value) {
                   setState(() {
-                    femaleSelected = true;
-                    _sexual = "Female";
+                    _groupsexual = value;
                   });
-                }
-              })
+                },
+              ),
+              Text(
+                "Female",
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.black,
+                ),
+              ),
+            ],
+          ),
         ]));
+  }
+
+  Widget itemGender(String value) {
+    return Row(
+      children: [
+        Radio(
+          value: value,
+          groupValue: _groupsexual,
+          onChanged: (value) {
+            this._groupsexual = value;
+          },
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 16,
+            color: Colors.black,
+          ),
+        ),
+      ],
+    );
   }
 
   Widget buildMaleIconButton() {
@@ -286,7 +381,32 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
       ),
     );
   }
+
+  applyChanges() async {
+
+    List<String> names = [];
+    String objectName;
+    names.add(file.path.substring(file.path.lastIndexOf("/") + 1));
+    var response = await APIService.getPresignedLink(
+        PresignedLinkedRequestModel(fileNames: names));
+    await APIService.uploadImage(file, response.data.items[0].signedLink);
+    objectName = response.data.items[0].objectName;
+    EditUserRequestModel user = EditUserRequestModel(
+        displayName: displayNameController.text,
+        avatar: objectName,
+        profile: new Profile(
+          height: int.parse(heightController.text),
+          weight: int.parse(weightController.text),
+          birthDate: DateTime.now().microsecondsSinceEpoch,
+          firstName: firstNameController.text,
+          lastName: lastNameController.text,
+          sex: _groupsexual,
+        ));
+    await APIService.editProfile(user);
+
+  }
 }
+
 class AlwaysDisabledFocusNode extends FocusNode {
   @override
   bool get hasFocus => false;
