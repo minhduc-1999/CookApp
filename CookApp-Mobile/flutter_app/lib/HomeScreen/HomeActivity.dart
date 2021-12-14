@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/FoodScreen/FoodActivity.dart';
 import 'package:flutter_app/MessageScreen/MessageActivity.dart';
 import 'package:flutter_app/NewFeedScreen/NewFeedActivity.dart';
 import 'package:flutter_app/NotificationScreen/NotificationActivity.dart';
 import 'package:flutter_app/ProfileScreen/ProfileActivity.dart';
 import 'package:flutter_app/Services/SharedService.dart';
-import 'package:flutter_app/SettingScreen/SettingActivity.dart';
+
 import 'package:flutter_app/main.dart';
 
 import '../constants.dart';
@@ -17,7 +18,7 @@ class NavigationItem {
 
 const List<NavigationItem> allNavigationItems = <NavigationItem>[
   NavigationItem('Home', Icons.home),
-  NavigationItem('Setting', Icons.settings),
+  NavigationItem('Food', Icons.lunch_dining),
   NavigationItem('Message', Icons.chat_bubble),
   NavigationItem('Notification', Icons.notifications),
   NavigationItem('Profile', Icons.person)
@@ -48,7 +49,7 @@ class HomeActivityState extends State<HomeActivity> {
             },
             children: <Widget>[
               NewFeedActivity(),
-              SettingActivity(),
+              FoodActivity(),
               MessageActivity(),
               NotificationActivity(),
               ProfileActivity(userId: currentUserId,)

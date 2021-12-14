@@ -8,7 +8,7 @@ import 'package:flutter_app/Model/UserRespondModel.dart';
 import 'package:flutter_app/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-import 'package:material_design_icons_flutter/material_design_icons_flutter.dart';
+
 
 import '../constants.dart';
 
@@ -351,37 +351,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
     );
   }
 
-  Widget buildMaleIconButton() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(MdiIcons.humanMale,
-                color: femaleSelected
-                    ? Colors.black26
-                    : Color.fromRGBO(63, 229, 235, 1)),
-          ),
-          Text('Male', style: TextStyle(fontSize: 16))
-        ],
-      ),
-    );
-  }
 
-  Widget buildFemaleIconButton() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(15, 0, 15, 0),
-      child: Row(
-        children: [
-          IconButton(
-            icon: Icon(MdiIcons.humanFemale,
-                color: femaleSelected ? Colors.pink[400] : Colors.black26),
-          ),
-          Text('Female', style: TextStyle(fontSize: 16))
-        ],
-      ),
-    );
-  }
 
   applyChanges() async {
     setState(() {

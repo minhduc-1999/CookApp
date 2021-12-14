@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter_app/Model/CommentRequestModel.dart';
 import 'package:flutter_app/Model/CommentRespondModel.dart';
 import 'package:flutter_app/Model/EditUserRequestModel.dart';
+import 'package:flutter_app/Model/FoodRespondModel.dart';
 import 'package:flutter_app/Model/LoginRequestModel.dart';
 import 'package:flutter_app/Model/LoginRespondModel.dart';
 import 'package:flutter_app/Model/NewFeedRespondModel.dart';
@@ -250,5 +251,22 @@ class APIService {
     } else {
       return false;
     }
+  }
+  static Future<FoodRespondModel> getFood() async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI).replace(
+        queryParameters: <String, String>{
+          'offset' : '0',
+          'limit' : '10'
+        }
+    );
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        }
+    );
+    return foodRespondModel(respone.body);
   }
 }

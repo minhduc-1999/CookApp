@@ -1,5 +1,5 @@
 import 'dart:async';
-
+import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
@@ -84,7 +84,8 @@ class _Post extends State<Post> {
   int numOfComment;
   bool liked = false;
   bool showHeart = false;
-
+  int _current = 0;
+  final CarouselController _controller = CarouselController();
   TextStyle boldStyle = TextStyle(
     color: Colors.black,
     fontWeight: FontWeight.bold,
@@ -124,17 +125,96 @@ class _Post extends State<Post> {
   }
 
   GestureDetector buildLikeableImage() {
+    final double height = MediaQuery.of(context).size.height;
     return GestureDetector(
       onDoubleTap: () => _likePost(id),
       child: Stack(
         alignment: Alignment.center,
-        children: <Widget>[
-          CachedNetworkImage(
+        children: [
+          images.length == 1
+              ?
+              /*CachedNetworkImage(
             imageUrl: images[0],
             fit: BoxFit.fitWidth,
             placeholder: (context, url) => loadingPlaceHolder,
             errorWidget: (context, url, error) => Icon(Icons.error),
-          ),
+          ),*/
+              Center(
+                  child: Image.network(
+                  images[0],
+                  fit: BoxFit.fitWidth,
+                ))
+              : Column(
+                children: [
+                  CarouselSlider(
+                      items: images
+                          .map((item) => Container(
+                                child: Container(
+                                  margin: EdgeInsets.all(5.0),
+                                  child: ClipRRect(
+                                      borderRadius:
+                                          BorderRadius.all(Radius.circular(5.0)),
+                                      child: Stack(
+                                        children: <Widget>[
+                                          Image.network(item,
+                                              fit: BoxFit.cover, width: 1000.0),
+                                          Positioned(
+                                            bottom: 0.0,
+                                            left: 0.0,
+                                            right: 0.0,
+                                            child: Container(
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    Color.fromARGB(200, 0, 0, 0),
+                                                    Color.fromARGB(0, 0, 0, 0)
+                                                  ],
+                                                  begin: Alignment.bottomCenter,
+                                                  end: Alignment.topCenter,
+                                                ),
+                                              ),
+                                              padding: EdgeInsets.symmetric(
+                                                  vertical: 10.0, horizontal: 20.0),
+
+                                            ),
+                                          ),
+                                        ],
+                                      )),
+                                ),
+                              ))
+                          .toList(),
+                      carouselController: _controller,
+                      options: CarouselOptions(
+                        autoPlay: false,
+                          onPageChanged: (index, reason){
+                            setState(() {
+                              _current = index;
+                            });
+                          },
+                          height: height,
+                          viewportFraction: 1.0,
+                          enlargeCenterPage: false)),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: images.asMap().entries.map((entry) {
+                      return GestureDetector(
+                        onTap: () => _controller.animateToPage(entry.key),
+                        child: Container(
+                          width: 12.0,
+                          height: 12.0,
+                          margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: (Theme.of(context).brightness == Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black)
+                                  .withOpacity(_current == entry.key ? 0.9 : 0.4)),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ],
+              ),
           showHeart
               ? Positioned(
                   child: Container(
@@ -177,9 +257,7 @@ class _Post extends State<Post> {
             ? Text(displayName, style: boldStyle)
             : Text("user", style: boldStyle),
         onTap: () {
-          openProfile(
-            context, userId
-          );
+          openProfile(context, userId);
         },
       ),
       subtitle: Text(this.location),
@@ -255,6 +333,9 @@ class _Post extends State<Post> {
             ),
             Expanded(child: Text(content)),
           ],
+        ),
+        SizedBox(
+          height: 10,
         )
       ],
     );
@@ -292,7 +373,12 @@ class _Post extends State<Post> {
   }
 
   void openProfile(BuildContext context, String userId) {
-    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileActivity(userId: userId,)));
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ProfileActivity(
+                  userId: userId,
+                )));
   }
 }
 

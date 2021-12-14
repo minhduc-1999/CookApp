@@ -11,4 +11,5 @@ class Config {
   static const String endUserWallPostAPI = "/walls/posts";
   static const String postDetails = "/api/users/posts/";
   static const String userFeedAPI = "/api/users/feeds/posts";
+  static const String foodAPI = "/api/foods";
 }

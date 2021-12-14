@@ -38,7 +38,8 @@ dependencies:
   uuid: ^3.0.5
   timeago: ^3.1.0
   intl: ^0.17.0
-  material_design_icons_flutter: ^4.0.5955
+
+  carousel_slider: ^4.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
