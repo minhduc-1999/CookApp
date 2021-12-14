@@ -45,7 +45,6 @@ export class WallRepository extends BaseRepository implements IWallRepository {
         },
       )
       .exec();
-    console.log(wallDoc);
     return plainToClass(WallDTO, wallDoc, {
       excludeExtraneousValues: true,
     });

@@ -17,7 +17,7 @@ async function main(filename) {
   console.log('Connected successfully to server');
   const db = client.db(dbName);
   const collection = db.collection(collectionName);
-  const raw = fs.readFileSync(filename)
+  const raw = fs.readFileSync(fileName)
 
 
   const foods = JSON.parse(raw);

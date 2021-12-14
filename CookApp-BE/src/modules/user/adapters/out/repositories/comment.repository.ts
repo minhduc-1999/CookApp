@@ -1,6 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { Comment, CommentDocument } from "domains/schemas/social/comment.schema";
+import {
+  Comment,
+  CommentDocument,
+} from "domains/schemas/social/comment.schema";
 import { ClientSession, Model } from "mongoose";
 import { CommentDTO } from "dtos/social/comment.dto";
 import { BaseRepository } from "base/repository.base";
@@ -15,16 +18,24 @@ export interface ICommentRepository {
     postId: string,
     query: CommentPageOption
   ): Promise<CommentDTO[]>;
+  getTotalReply(parentId: string): Promise<number>;
 }
 
 @Injectable()
 export class CommentRepository
   extends BaseRepository
-  implements ICommentRepository {
+  implements ICommentRepository
+{
   constructor(
     @InjectModel(Comment.name) private _commentModel: Model<CommentDocument>
   ) {
     super();
+  }
+  async getTotalReply(parentId: string): Promise<number> {
+    const total = await this._commentModel.count({
+      path: new RegExp(`,${parentId},$`),
+    });
+    return total;
   }
   async getPostComments(
     postId: string,

@@ -57,7 +57,6 @@ export class FireBaseService implements IStorageService {
     //   )
     // );
     const objectNameList = urls;
-    console.log("[1]", objectNameList);
     for (let i = 0; i < objectNameList.length; i++) {
       const file = bucket.file(objectNameList[i]);
       deleteTasks.push(
@@ -129,7 +128,6 @@ export class FireBaseService implements IStorageService {
   }
 
   async getDownloadUrls(objectNames: string[]): Promise<string[]> {
-    console.log("]1]", objectNames)
     return objectNames.map(
       (objName) => this._configService.get("storage.publicUrl") + objName
     );
