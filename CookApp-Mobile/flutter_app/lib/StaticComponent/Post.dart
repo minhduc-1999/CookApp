@@ -139,11 +139,17 @@ class _Post extends State<Post> {
             placeholder: (context, url) => loadingPlaceHolder,
             errorWidget: (context, url, error) => Icon(Icons.error),
           ),*/
-              Center(
-                  child: Image.network(
-                  images[0],
-                  fit: BoxFit.fitWidth,
-                ))
+              Container(
+                margin: EdgeInsets.all(5.0),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    child: Image.network(
+                      images[0],
+                      fit: BoxFit.cover,
+                      width: 1000.0,
+                        height: height*0.6
+                    ),
+                  ))
               : Column(
                 children: [
                   CarouselSlider(
@@ -191,7 +197,7 @@ class _Post extends State<Post> {
                               _current = index;
                             });
                           },
-                          height: height,
+                          height: height*0.6,
                           viewportFraction: 1.0,
                           enlargeCenterPage: false)),
                   Row(

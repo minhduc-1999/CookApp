@@ -2,7 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Model/NewFeedRespondModel.dart';
-import 'package:flutter_app/Model/Post.dart';
+import '../StaticComponent/Post.dart';
 import 'package:flutter_app/Services/APIService.dart';
 import 'package:flutter_app/Services/SharedService.dart';
 import 'package:flutter_app/UploadScreen/UploadActivity.dart';

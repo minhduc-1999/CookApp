@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'dart:ffi';
 FoodRespondModel foodRespondModel(String str) =>
     FoodRespondModel.fromJson(json.decode(str));
 class FoodRespondModel {
@@ -164,8 +166,8 @@ class Ingredients {
 
   Ingredients.fromJson(Map<String, dynamic> json) {
     unit = json['unit'] != null ? new Unit.fromJson(json['unit']) : null;
-    name = json['name'];
-    quantity = json['quantity'];
+    name = json['name'] != null ? json['name'] : null;
+    quantity = json['quantity'] != null ? json['quantity'] : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -186,8 +188,8 @@ class Unit {
   Unit({this.unit, this.value});
 
   Unit.fromJson(Map<String, dynamic> json) {
-    unit = json['unit'];
-    value = json['value'];
+    unit = json['unit'] != null ? json['unit'] : null;
+    value = json['value'] != null ? json['value'] : null;
   }
 
   Map<String, dynamic> toJson() {

@@ -91,7 +91,7 @@ class _CommentActivityState extends State<CommentActivity> {
         userId: i.user.id,
         avatar: i.user.avatar != null ? i.user.avatar : null,
         comment: i.content,
-        dateTime: DateTime.fromMicrosecondsSinceEpoch(i.createdAt),
+        dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
       ));
     }
     setState(() {

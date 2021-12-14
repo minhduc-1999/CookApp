@@ -1,5 +1,6 @@
 class Config {
   static const String appName = "Tastify";
+  static const String food = "Food Instructions";
   static const String apiURL = "http://192.168.1.2:3000";
   static const String loginAPI = "/api/login";
   static const String registerAPI = "/api/register";

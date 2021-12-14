@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/Post.dart';
+import '../StaticComponent/Post.dart';
 import 'package:flutter_app/Model/PostDetailsRespondModel.dart';
 import 'package:flutter_app/Model/UserRespondModel.dart';
 import 'package:flutter_app/Model/UserWallRespondModel.dart';
