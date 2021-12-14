@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_app/Model/NewFeedRespondModel.dart';
 import 'package:flutter_app/Model/Post.dart';
@@ -49,8 +51,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
           IconButton(
             icon: Icon(Icons.add_circle_rounded),
             onPressed: () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => UploadActivity()));
+              openUploadActivity();
             },
           ),
           IconButton(
@@ -68,6 +69,14 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
       ),
     );
   }
+  FutureOr onGoBack(dynamic value) {
+    fetchData();
+  }
+
+  void openUploadActivity() {
+    Route route = MaterialPageRoute(builder: (context) => UploadActivity());
+    Navigator.push(context, route).then(onGoBack);
+  }
   Future<void> _refresh() async {
     fetchData();
     return;
@@ -78,6 +87,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
     for (var i in listPosts.data.posts) {
       tempData.add(Post(
         id: i.id,
+        userId: i.author.id,
         location: "Quang Binh",
         content: i.content,
         images: i.images,

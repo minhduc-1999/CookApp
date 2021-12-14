@@ -20,7 +20,7 @@ class _UploadActivityState extends State<UploadActivity> {
   List<File> files = [];
 
   ImagePicker imagePicker = ImagePicker();
-
+  bool circular = false;
   Map<String, double> currentLocation = Map();
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
@@ -47,7 +47,7 @@ class _UploadActivityState extends State<UploadActivity> {
       List<AssetPathEntity> albums = await PhotoManager.getAssetPathList(
           onlyAll: true, type: RequestType.image);
       List<AssetEntity> media =
-      await albums[0].getAssetListPaged(currentPage, 60);
+          await albums[0].getAssetListPaged(currentPage, 60);
       List<Widget> temp = [];
       for (var asset in media) {
         temp.add(
@@ -80,140 +80,147 @@ class _UploadActivityState extends State<UploadActivity> {
   Widget build(BuildContext context) {
     return files.length == 0
         ? Scaffold(
-        resizeToAvoidBottomInset: false,
-        appBar: AppBar(
-          brightness: Brightness.dark,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: <Color>[appPrimaryColor, appPrimaryColor],
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+              brightness: Brightness.dark,
+              flexibleSpace: Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: <Color>[appPrimaryColor, appPrimaryColor],
+                  ),
+                ),
               ),
-            ),
-          ),
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                files.clear();
-              });
-              Navigator.of(context).pop();
-            },
-          ),
-          title: const Text(
-            "Choose Image",
-          ),
-          actions: [
-            IconButton(
-              icon: Icon(Icons.add_to_photos_rounded),
-              onPressed: () async {
-                List<XFile> imageFiles = await imagePicker.pickMultiImage();
-                if (imageFiles.isNotEmpty) {
-                  List<File> temp = [];
-                  for (var image in imageFiles) {
-                    temp.add(File(image.path));
-                  }
+              leading: IconButton(
+                icon: Icon(Icons.arrow_back, color: Colors.white),
+                onPressed: () {
                   setState(() {
-                    files.addAll(temp);
+                    files.clear();
                   });
-                }
-              },
-            ),
-            IconButton(
-              icon: Icon(Icons.add_a_photo),
-              onPressed: () async {
-                PickedFile imageFile = await imagePicker.getImage(
-                    source: ImageSource.camera,
-                    maxWidth: 1920,
-                    maxHeight: 1200,
-                    imageQuality: 80);
-                if (imageFile != null) {
-                  setState(() {
-                    files.add(File(imageFile.path));
-                  });
-                }
-              },
-            )
-          ],
-        ),
-        body: NotificationListener<ScrollNotification>(
-          onNotification: (ScrollNotification scroll) {
-            _handleScrollEvent(scroll);
-            return;
-          },
-          child: GridView.builder(
-              itemCount: _photoList.length,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 3,
-                  crossAxisSpacing: 2,
-                  mainAxisSpacing: 2),
-              itemBuilder: (BuildContext context, int index) {
-                return _photoList[index];
-              }),
-        ))
-        : Scaffold(
-      resizeToAvoidBottomInset: false,
-      appBar: AppBar(
-          backgroundColor: appPrimaryColor,
-          leading: IconButton(
-            icon: Icon(Icons.arrow_back, color: Colors.white),
-            onPressed: () {
-              setState(() {
-                files.clear();
-              });
-            },
-          ),
-          title: const Text(
-            "New Post",
-            style: const TextStyle(color: Colors.white),
-          ),
-          actions: <Widget>[
-            FlatButton(
-                onPressed: () async {
-                  List<String> names = [];
-                  for (var i in files) {
-                    //names.add(i.path.substring(i.path.lastIndexOf("/")+1));
-                    names.add(i.path.substring(i.path.lastIndexOf("/") + 1));
-                  }
-                  List<String> objectName = [];
-                  List<String> video = [];
-                  var response = await APIService.getPresignedLink(
-                      PresignedLinkedRequestModel(fileNames: names));
-                  uploadImage(response,objectName);
-                  for (int i = 0; i < response.data.items.length; i++){
-                    await APIService.uploadImage(files[i], response.data.items[i].signedLink);
-                    objectName.add(response.data.items[i].objectName);
-                  }
-                  print("object name " + objectName.length.toString());
-                  APIService.uploadPost(PostRequestModel(
-                  content: descriptionController.text, images:objectName, videos: video));
                   Navigator.of(context).pop();
                 },
-                child: IconButton(
-                    icon: Icon(Icons.send,
-                        color: Colors
-                            .white)) /*Text(
-                      "Post",
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.bold,
-                          fontSize: 20.0),
-                    ),*/
-            )
-          ]),
-      body: ListView(
-        children: <Widget>[
-          PostForm(
-            imageFile: files,
-            descriptionController: descriptionController,
-            locationController: locationController,
-            loading: uploading,
-          ),
-          Divider(),
-        ],
-      ),
-    );
+              ),
+              title: const Text(
+                "Choose Image",
+              ),
+              actions: [
+                IconButton(
+                  icon: Icon(Icons.add_to_photos_rounded),
+                  onPressed: () async {
+                    List<XFile> imageFiles = await imagePicker.pickMultiImage();
+                    if (imageFiles.isNotEmpty) {
+                      List<File> temp = [];
+                      for (var image in imageFiles) {
+                        temp.add(File(image.path));
+                      }
+                      setState(() {
+                        files.addAll(temp);
+                      });
+                    }
+                  },
+                ),
+                IconButton(
+                  icon: Icon(Icons.add_a_photo),
+                  onPressed: () async {
+                    PickedFile imageFile = await imagePicker.getImage(
+                        source: ImageSource.camera,
+                        maxWidth: 1920,
+                        maxHeight: 1200,
+                        imageQuality: 80);
+                    if (imageFile != null) {
+                      setState(() {
+                        files.add(File(imageFile.path));
+                      });
+                    }
+                  },
+                )
+              ],
+            ),
+            body: NotificationListener<ScrollNotification>(
+              onNotification: (ScrollNotification scroll) {
+                _handleScrollEvent(scroll);
+                return;
+              },
+              child: GridView.builder(
+                  itemCount: _photoList.length,
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 2,
+                      mainAxisSpacing: 2),
+                  itemBuilder: (BuildContext context, int index) {
+                    return _photoList[index];
+                  }),
+            ))
+        : Scaffold(
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+                backgroundColor: appPrimaryColor,
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    setState(() {
+                      files.clear();
+                    });
+                  },
+                ),
+                title: const Text(
+                  "New Post",
+                  style: const TextStyle(color: Colors.white),
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                      onPressed: () async {
+                        if (files != null) {
+                          setState(() {
+                            circular = true;
+                          });
+                          List<String> names = [];
+                          for (var i in files) {
+                            //names.add(i.path.substring(i.path.lastIndexOf("/")+1));
+                            names.add(
+                                i.path.substring(i.path.lastIndexOf("/") + 1));
+                          }
+                          List<String> objectName = [];
+                          List<String> video = [];
+                          var response = await APIService.getPresignedLink(
+                              PresignedLinkedRequestModel(fileNames: names));
+                          uploadImage(response, objectName);
+                          for (int i = 0; i < response.data.items.length; i++) {
+                            await APIService.uploadImage(
+                                files[i], response.data.items[i].signedLink);
+                            objectName.add(response.data.items[i].objectName);
+                          }
+                          print("object name " + objectName.length.toString());
+                          await APIService.uploadPost(PostRequestModel(
+                              content: descriptionController.text,
+                              images: objectName,
+                              videos: video));
+                          setState(() {
+                            circular = false;
+                          });
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: IconButton(
+                          icon: Icon(Icons.send,
+                              color: Colors.white))
+                      )
+                ]),
+            body: circular
+                ? Center(child: CircularProgressIndicator())
+                : ListView(
+                    children: <Widget>[
+                      PostForm(
+                        imageFile: files,
+                        descriptionController: descriptionController,
+                        locationController: locationController,
+                        loading: uploading,
+                      ),
+                      Divider(),
+                    ],
+                  ),
+          );
   }
 
   _getFile(AssetEntity asset) async {
@@ -253,7 +260,8 @@ class _UploadActivityState extends State<UploadActivity> {
     }
   }
 
-  void uploadImage(PresignedLinkedRespondModel response, List<String> objectName) {}
+  void uploadImage(
+      PresignedLinkedRespondModel response, List<String> objectName) {}
 }
 
 class PhotoPickerItem extends StatefulWidget {
@@ -305,10 +313,11 @@ class PostForm extends StatelessWidget {
   final TextEditingController locationController;
   final bool loading;
 
-  PostForm({this.imageFile,
-    this.descriptionController,
-    this.loading,
-    this.locationController});
+  PostForm(
+      {this.imageFile,
+      this.descriptionController,
+      this.loading,
+      this.locationController});
 
   Widget build(BuildContext context) {
     return Column(
@@ -328,10 +337,10 @@ class PostForm extends StatelessWidget {
                 child: Container(
                   decoration: BoxDecoration(
                       image: DecorationImage(
-                        fit: BoxFit.fill,
-                        alignment: FractionalOffset.topCenter,
-                        image: FileImage(imageFile[0]),
-                      )),
+                    fit: BoxFit.fill,
+                    alignment: FractionalOffset.topCenter,
+                    image: FileImage(imageFile[0]),
+                  )),
                 ),
               ),
             ),

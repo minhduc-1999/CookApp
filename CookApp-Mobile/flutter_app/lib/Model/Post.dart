@@ -5,6 +5,8 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_app/CommentScreen/CommentActivity.dart';
 import 'package:flutter_app/Model/ReactRequestModel.dart';
+import 'package:flutter_app/Model/UserRespondModel.dart';
+import 'package:flutter_app/ProfileScreen/ProfileActivity.dart';
 import 'package:flutter_app/Services/APIService.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -60,6 +62,7 @@ class Post extends StatefulWidget {
 
   _Post createState() => _Post(
       id: this.id,
+      userId: this.userId,
       location: this.location,
       content: this.content,
       images: this.images,
@@ -71,6 +74,7 @@ class Post extends StatefulWidget {
 
 class _Post extends State<Post> {
   final String id;
+  final String userId;
   final String content;
   final String location;
   final List<String> images;
@@ -88,6 +92,7 @@ class _Post extends State<Post> {
 
   _Post(
       {this.id,
+      this.userId,
       this.location,
       this.content,
       this.images,
@@ -172,7 +177,9 @@ class _Post extends State<Post> {
             ? Text(displayName, style: boldStyle)
             : Text("user", style: boldStyle),
         onTap: () {
-          //openProfile(context, ownerId);
+          openProfile(
+            context, userId
+          );
         },
       ),
       subtitle: Text(this.location),
@@ -282,6 +289,10 @@ class _Post extends State<Post> {
         });
       });
     }
+  }
+
+  void openProfile(BuildContext context, String userId) {
+    Navigator.push(context, MaterialPageRoute(builder: (context) => ProfileActivity(userId: userId,)));
   }
 }
 
