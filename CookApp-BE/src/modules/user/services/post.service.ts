@@ -21,6 +21,12 @@ export class PostService implements IPostService {
   ) {}
 
   async getPostDetail(postId: string, option?: PostOption): Promise<PostDTO> {
+    const defaultOpt: PostOption = {
+      attachAuthor: true,
+    };
+
+    option = option ? { ...defaultOpt, ...option } : defaultOpt;
+
     const post = await this._postRepo.getPostById(postId);
 
     if (!post)
@@ -29,12 +35,7 @@ export class PostService implements IPostService {
       );
 
     if (option?.attachAuthor) {
-      const author = await this._userService.getUserById(post.author.id);
-      post.author = {
-        id: author.id,
-        avatar: author.avatar,
-        displayName: author.displayName,
-      };
+      post.author = await this._userService.getUserPublicInfo(post.author.id);
     } else {
       delete post.author;
     }

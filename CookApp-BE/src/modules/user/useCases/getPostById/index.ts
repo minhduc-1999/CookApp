@@ -16,7 +16,8 @@ export class GetPostDetailQuery extends BaseQuery {
 
 @QueryHandler(GetPostDetailQuery)
 export class GetPostDetailQueryHandler
-  implements IQueryHandler<GetPostDetailQuery> {
+  implements IQueryHandler<GetPostDetailQuery>
+{
   constructor(
     @Inject("IPostService")
     private _postService: IPostService,

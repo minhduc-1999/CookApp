@@ -14,13 +14,14 @@ export class GetWallPostsQuery extends BaseQuery {
   constructor(user: UserDTO, targetId: string, queryOptions?: PageOptionsDto) {
     super(user);
     this.queryOptions = queryOptions;
-    this.targetId = targetId
+    this.targetId = targetId;
   }
 }
 
 @QueryHandler(GetWallPostsQuery)
 export class GetWallPostsQueryHandler
-  implements IQueryHandler<GetWallPostsQuery> {
+  implements IQueryHandler<GetWallPostsQuery>
+{
   constructor(
     @Inject("IWallRepository")
     private _wallRepo: IWallRepository,
@@ -33,7 +34,9 @@ export class GetWallPostsQueryHandler
     const tempPosts = await this._wallRepo.getPosts(targetId, queryOptions);
     const posts = await Promise.all(
       tempPosts.map(async (post) => {
-        return this._postService.getPostDetail(post.id);
+        return this._postService.getPostDetail(post.id, {
+          attachAuthor: false,
+        });
       })
     );
     for (let post of posts) {

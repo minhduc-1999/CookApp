@@ -6,9 +6,11 @@ import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { IsMongoId, IsOptional } from "class-validator";
 import { UserDTO } from "dtos/social/user.dto";
+import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ICommentRepository } from "modules/user/adapters/out/repositories/comment.repository";
 import { IPostService } from "modules/user/services/post.service";
+import { takeField } from "utils";
 import { GetPostCommentsResponse } from "./getPostCommentsResponse";
 
 export class CommentPageOption extends PageOptionsDto {
@@ -37,7 +39,8 @@ export class GetPostCommentsQueryHandler
     private _commentRepo: ICommentRepository,
     @Inject("IPostService")
     private _postService: IPostService,
-    @Inject("IStorageService") private _storageService: IStorageService
+    @Inject("IStorageService") private _storageService: IStorageService,
+    @Inject("IUserService") private _userService: IUserService
   ) {}
   async execute(query: GetPostCommentsQuery): Promise<GetPostCommentsResponse> {
     const { queryOptions, user, postId } = query;
@@ -47,6 +50,7 @@ export class GetPostCommentsQueryHandler
       queryOptions
     );
     for (let comment of comments) {
+      comment.user = await this._userService.getUserPublicInfo(comment.user.id);
       comment.numberOfReply = await this._commentRepo.getTotalReply(comment.id);
       if (!comment.user.avatar) continue;
       comment.user.avatar = (
