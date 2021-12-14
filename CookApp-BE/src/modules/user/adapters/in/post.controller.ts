@@ -67,7 +67,6 @@ export class PostController {
     @Param("postId", ParseObjectIdPipe) postId: string
   ): Promise<Result<EditPostResponse>> {
     post.id = postId;
-    console.log('validate', post)
     const editPostCommand = new EditPostCommand(null, user, post);
     const updatedPost = await this._commandBus.execute(editPostCommand);
     return Result.ok(updatedPost, { messages: ["Edit post successfully"] });

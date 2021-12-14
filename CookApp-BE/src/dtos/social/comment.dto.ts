@@ -28,6 +28,8 @@ export class CommentDTO extends AuditDTO {
   @Expose({ toClassOnly: true })
   path: string;
 
+  numberOfReply: number
+
   static create(
     comment: Pick<CommentDTO, "user" | "postId" | "content" | "replies">
   ): CommentDTO {

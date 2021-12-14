@@ -29,8 +29,6 @@ export class GetWallResponse {
   isFollowed?: boolean;
 
   constructor(wall: WallDTO, isFollowed: boolean = null) {
-    console.log(wall);
-    console.log(isFollowed);
     this.user = {
       avatar: wall.user.avatar,
       id: wall.user.id,
