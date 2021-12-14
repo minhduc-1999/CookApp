@@ -10,6 +10,7 @@ import { ClientSession, Model } from "mongoose";
 export interface IPostRepository {
   createPost(post: PostDTO): Promise<PostDTO>;
   getPostById(postId: string): Promise<PostDTO>;
+  getPostByIds(postId: string[]): Promise<PostDTO[]>;
   updatePost(post: Partial<PostDTO>): Promise<PostDTO>;
   reactPost(react: ReactionDTO, userId: string): Promise<boolean>;
   deleteReact(userId: string, postId: string): Promise<boolean>;
@@ -25,6 +26,12 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   private logger: Logger = new Logger(PostRepository.name);
   constructor(@InjectModel(Post.name) private _postModel: Model<PostDocument>) {
     super();
+  }
+  async getPostByIds(postId: string[]): Promise<PostDTO[]> {
+    const posts = await this._postModel.find({
+      id: { $in: postId },
+    });
+    return plainToClass(PostDTO, posts, { excludeExtraneousValues: true });
   }
   async pushImages(postId: string, changedImages: string[]): Promise<PostDTO> {
     const updatedPost = await this._postModel.findOneAndUpdate(

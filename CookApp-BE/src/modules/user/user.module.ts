@@ -8,6 +8,7 @@ import { UserModel } from "domains/schemas/social/user.schema";
 import { WallModel } from "domains/schemas/social/wall.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
+import { AuthModule } from "modules/auth/auth.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
 import { CommentController } from "./adapters/in/comment.controller";
@@ -91,6 +92,7 @@ const repositories = [
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
+    AuthModule
   ],
   controllers: [
     PostController,

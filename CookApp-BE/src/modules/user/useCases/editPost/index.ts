@@ -51,30 +51,30 @@ export class EditPostCommandHandler
         )
       );
 
-    const deletedResult = await this._storageService.deleteFiles([
-      "images\\posts\\61a1c2f8493ba21f434f7a71_1638036969077_salad.png",
-      "temp\\619b6fc1c99dd48c2aec7ac6_1637592003945_salad.png",
-    ]);
-    const addResult = await this._storageService.makePublic(
-      command.postDto.addImages,
-      MediaType.POST_IMAGES
-    );
+    // const deletedResult = await this._storageService.deleteFiles([
+    //   "images\\posts\\61a1c2f8493ba21f434f7a71_1638036969077_salad.png",
+    //   "temp\\619b6fc1c99dd48c2aec7ac6_1637592003945_salad.png",
+    // ]);
+    // const addResult = await this._storageService.makePublic(
+    //   command.postDto.addImages,
+    //   MediaType.POST_IMAGES
+    // );
 
     // await Promise.all([
     //   this._postRepo.deleteImages(command.postDto.id, deletedResult),
     //   this._postRepo.pushImages(command.postDto.id, addResult),
     // ]);
 
-    const images = existedPost.images.filter(
-      (image) => !deletedResult.includes(image)
-    );
-    // const images = [];
-    images.push(...addResult);
+    // const images = existedPost.images.filter(
+    //   (image) => !deletedResult.includes(image)
+    // );
+    // // const images = [];
+    // images.push(...addResult);
 
     delete postDto.addImages;
     delete postDto.deleteImages;
 
-    const updatePost = createUpdatingObject({ ...postDto, images }, user.id);
+    const updatePost = createUpdatingObject({ ...postDto }, user.id);
     const updatedResult = await this._postRepo.updatePost(updatePost);
     await Promise.all([
       this._wallRepo.updatePostInWall(updatedResult, user),

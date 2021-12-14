@@ -6,6 +6,8 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { UserDTO } from "dtos/social/user.dto";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
+import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
+import { IPostService } from "modules/user/services/post.service";
 import { GetFeedPostsResponse } from "./getFeedPostsResponse";
 export class GetFeedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -17,15 +19,23 @@ export class GetFeedPostsQuery extends BaseQuery {
 
 @QueryHandler(GetFeedPostsQuery)
 export class GetFeedPostsQueryHandler
-  implements IQueryHandler<GetFeedPostsQuery> {
+  implements IQueryHandler<GetFeedPostsQuery>
+{
   constructor(
     @Inject("IFeedRepository")
     private _feedRepo: IFeedRepository,
+    @Inject("IPostService")
+    private _postService: IPostService,
     @Inject("IStorageService") private _storageService: IStorageService
   ) {}
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
-    const posts = await this._feedRepo.getPosts(user, queryOptions);
+    const tempPosts = await this._feedRepo.getPosts(user, queryOptions);
+    const posts = await Promise.all(
+      tempPosts.map(async (post) => {
+        return this._postService.getPostDetail(post.id);
+      })
+    );
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
       if (post.author?.avatar?.length > 0) {

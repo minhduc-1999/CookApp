@@ -73,5 +73,6 @@ import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
     BasicAuthStrategy,
     JwtStrategy,
   ],
+  exports: ["IUserService"]
 })
 export class AuthModule {}

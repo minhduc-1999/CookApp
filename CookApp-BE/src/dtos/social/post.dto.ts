@@ -41,18 +41,18 @@ export class PostDTO extends AuditDTO {
   @ApiResponseProperty({
     type: () => PickType(UserDTO, ["id", "avatar", "displayName"]),
   })
-  author: UserDTO;
+  author: Pick<UserDTO, "avatar" | "id" | "displayName">;
 
   @Expose({ toClassOnly: true })
   @Exclude({ toPlainOnly: true })
   @Type(() => ReactionDTO)
-  reactions: ReactionDTO[]
+  reactions: ReactionDTO[];
 
   @Expose()
-  numOfReaction: number
+  numOfReaction: number;
 
   @Expose()
-  numOfComment: number
+  numOfComment: number;
 
   static create(
     post: Pick<PostDTO, "content" | "images" | "videos" | "author">
