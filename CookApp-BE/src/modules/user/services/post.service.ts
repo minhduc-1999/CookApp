@@ -6,8 +6,12 @@ import { PostDTO } from "../../../dtos/social/post.dto";
 import { IUserService } from "modules/auth/services/user.service";
 
 export interface IPostService {
-  getPostDetail(postId: string): Promise<PostDTO>;
+  getPostDetail(postId: string, option?: PostOption): Promise<PostDTO>;
 }
+
+type PostOption = {
+  attachAuthor: boolean;
+};
 
 @Injectable()
 export class PostService implements IPostService {
@@ -16,19 +20,25 @@ export class PostService implements IPostService {
     @Inject("IUserService") private _userService: IUserService
   ) {}
 
-  async getPostDetail(postId: string): Promise<PostDTO> {
+  async getPostDetail(postId: string, option?: PostOption): Promise<PostDTO> {
     const post = await this._postRepo.getPostById(postId);
 
     if (!post)
       throw new NotFoundException(
         ResponseDTO.fail("Post not found", ErrorCode.INVALID_ID)
       );
-    const author = await this._userService.getUserById(post.author.id);
-    post.author = {
-      id: author.id,
-      avatar: author.avatar,
-      displayName: author.displayName,
-    };
+
+    if (option?.attachAuthor) {
+      const author = await this._userService.getUserById(post.author.id);
+      post.author = {
+        id: author.id,
+        avatar: author.avatar,
+        displayName: author.displayName,
+      };
+    } else {
+      delete post.author;
+    }
+
     return post;
   }
 }
