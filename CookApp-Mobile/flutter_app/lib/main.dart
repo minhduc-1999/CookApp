@@ -12,6 +12,8 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   bool isLoggedIn = await SharedService.isLoggedIn();
   if (isLoggedIn){
+    var loginDetails = await SharedService.loginDetails();
+    currentUserId = loginDetails.data.userId;
     _defaultHome = HomeActivity();
   }
   runApp(MyApp());

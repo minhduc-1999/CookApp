@@ -66,8 +66,9 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
         ),
         actions: [
           IconButton(
-              onPressed: () {
-                applyChanges().then(Navigator.pop(context));
+              onPressed: () async{
+                await applyChanges();
+                Navigator.of(context).pop();
               },
               icon: Icon(Icons.check))
         ],
@@ -383,17 +384,22 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   }
 
   applyChanges() async {
-
-    List<String> names = [];
+    setState(() {
+      circular = true;
+    });
     String objectName;
-    names.add(file.path.substring(file.path.lastIndexOf("/") + 1));
-    var response = await APIService.getPresignedLink(
-        PresignedLinkedRequestModel(fileNames: names));
-    await APIService.uploadImage(file, response.data.items[0].signedLink);
-    objectName = response.data.items[0].objectName;
-    EditUserRequestModel user = EditUserRequestModel(
+    if (file != null) {
+      List<String> names = [];
+
+      names.add(file.path.substring(file.path.lastIndexOf("/") + 1));
+      var response = await APIService.getPresignedLink(
+              PresignedLinkedRequestModel(fileNames: names));
+      await APIService.uploadImage(file, response.data.items[0].signedLink);
+      objectName = response.data.items[0].objectName;
+    }
+    EditUserRequestModel profile = EditUserRequestModel(
         displayName: displayNameController.text,
-        avatar: objectName,
+        avatar: file != null ? objectName : user.data.avatar,
         profile: new Profile(
           height: int.parse(heightController.text),
           weight: int.parse(weightController.text),
@@ -402,8 +408,10 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
           lastName: lastNameController.text,
           sex: _groupsexual,
         ));
-    await APIService.editProfile(user);
-
+    await APIService.editProfile(profile);
+    setState(() {
+      circular = false;
+    });
   }
 }
 

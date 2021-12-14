@@ -33,7 +33,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
 
   _ProfileActivityState(this.profileId);
   FutureOr onGoBack(dynamic value) {
-    fetchData();
+    reloadUser();
   }
 
   void openEditProfilePage() {
@@ -314,6 +314,13 @@ class _ProfileActivityState extends State<ProfileActivity> {
   changeView(String viewName) {
     setState(() {
       view = viewName;
+    });
+  }
+
+  void reloadUser() async {
+    var response = await APIService.getUserWall(profileId);
+    setState(() {
+      user = response;
     });
   }
 }
