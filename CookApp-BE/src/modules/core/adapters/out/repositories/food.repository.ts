@@ -9,7 +9,7 @@ import { ClientSession, Model } from "mongoose";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<FoodDTO[]>;
-  getTotalFoods(): Promise<number>;
+  getTotalFoods(query: PageOptionsDto): Promise<number>;
   setSession(session: ClientSession): IFoodRepository;
 }
 
@@ -20,14 +20,20 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     super();
   }
 
-  async getTotalFoods(): Promise<number> {
-    const numOfFood = await this._foodModel.count().exec();
+  async getTotalFoods(query: PageOptionsDto): Promise<number> {
+    let textSearch = {};
+    if (query.q == "") textSearch = {};
+    else textSearch = { $text: { $search: query.q } };
+    const numOfFood = await this._foodModel.count(textSearch).exec();
     return numOfFood;
   }
 
   async getFoods(query: PageOptionsDto): Promise<FoodDTO[]> {
+    let textSearch = {};
+    if (query.q == "") textSearch = {};
+    else textSearch = { $text: { $search: query.q } };
     const foods = await this._foodModel
-      .find()
+      .find(textSearch)
       .skip(query.limit * query.offset)
       .limit(query.limit);
     if (foods.length < 1) return [];
