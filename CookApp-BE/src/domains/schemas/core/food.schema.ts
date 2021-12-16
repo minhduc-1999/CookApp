@@ -71,6 +71,8 @@ export type FoodDocument = Food & Document;
 
 export const FoodSchema = SchemaFactory.createForClass(Food);
 
+FoodSchema.index({ name: "text", description: "text" });
+
 export const FoodModel: ModelDefinition = {
   name: Food.name,
   schema: FoodSchema,

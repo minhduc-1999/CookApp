@@ -40,8 +40,8 @@ export class PageOptionsDto {
   @IsOptional()
   limit: number = 10;
 
-  // @ApiPropertyOptional()
-  // @IsString()
-  // @IsOptional()
-  // readonly q?: string = '';
+  @ApiPropertyOptional()
+  @IsString()
+  @IsOptional()
+  q?: string = "";
 }

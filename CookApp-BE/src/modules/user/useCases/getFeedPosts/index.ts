@@ -33,7 +33,7 @@ export class GetFeedPostsQueryHandler
     const tempPosts = await this._feedRepo.getPosts(user, queryOptions);
     const posts = await Promise.all(
       tempPosts.map(async (post) => {
-        return this._postService.getPostDetail(post.id, { attachAuthor: true });
+        return this._postService.getPostDetail(post.id);
       })
     );
     for (let post of posts) {

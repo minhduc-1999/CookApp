@@ -38,7 +38,7 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
         );
       }
     }
-    const totalCount = await this._foodRepo.getTotalFoods();
+    const totalCount = await this._foodRepo.getTotalFoods(query.queryOptions);
     let meta: PageMetadata;
     if (foods.length > 0) {
       meta = new PageMetadata(

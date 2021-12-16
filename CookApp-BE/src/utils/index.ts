@@ -71,6 +71,17 @@ export function clean(obj) {
   return obj;
 }
 
+export function takeField<T>(obj: T, picks: (keyof T)[]) {
+  if (obj === null || obj === undefined) return null;
+  const pickMap = picks.map((pick) => pick.toString());
+  for (const propName of Object.keys(obj)) {
+    if (!pickMap.includes(propName)) {
+      delete obj[propName];
+    }
+  }
+  return obj;
+}
+
 export function generateDisplayName() {
   return (
     randomWords({ exactly: 1, wordsPerString: 2, separator: "_" }) +
