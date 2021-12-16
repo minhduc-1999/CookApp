@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_app/FoodScreen/FoodInstructionWidget.dart';
 import 'package:flutter_app/Model/FoodRespondModel.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
@@ -32,7 +33,7 @@ class _FoodWidgetState extends State<FoodWidget> {
       }
     }
     return GestureDetector(
-      onTap: () {},
+      onTap: () {openInstruction(context: context,model: food);},
       child: Container(
         margin: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
@@ -99,5 +100,11 @@ class _FoodWidgetState extends State<FoodWidget> {
       ),
 
     );
+  }
+  void openInstruction({BuildContext context,Foods model}) {
+    Navigator.of(context)
+        .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
+      return FoodInstructionWidget(food: model,);
+    }));
   }
 }

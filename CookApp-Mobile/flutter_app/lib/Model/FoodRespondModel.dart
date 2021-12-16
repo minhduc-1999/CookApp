@@ -167,7 +167,7 @@ class Ingredients {
   Ingredients.fromJson(Map<String, dynamic> json) {
     unit = json['unit'] != null ? new Unit.fromJson(json['unit']) : null;
     name = json['name'] != null ? json['name'] : null;
-    quantity = json['quantity'] != null ? json['quantity'] : null;
+    quantity = json['quantity'] != null ? json['quantity'].toInt() : null;
   }
 
   Map<String, dynamic> toJson() {

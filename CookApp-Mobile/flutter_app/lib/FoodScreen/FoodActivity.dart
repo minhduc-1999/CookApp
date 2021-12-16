@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_app/Model/FoodRespondModel.dart';
 import 'package:flutter_app/Services/APIService.dart';
 
-import 'package:flutter_app/StaticComponent/FoodWidget.dart';
+import 'FoodWidget.dart';
 
 import '../config.dart';
 import '../constants.dart';
@@ -81,4 +81,6 @@ class _FoodActivityState extends State<FoodActivity> {
       foodData = tempFoodData;
     });
   }
+
 }
+
