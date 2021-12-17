@@ -97,3 +97,7 @@ export function retrieveObjectNameFromUrl(
   const a = url.slice(url.indexOf(eliminatedSeed) + eliminatedSeed.length);
   return a;
 }
+
+export function escapeRegExp(text: string): string {
+  return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
+}

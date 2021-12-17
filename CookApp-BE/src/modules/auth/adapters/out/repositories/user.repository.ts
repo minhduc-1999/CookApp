@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
 } from "@nestjs/common";
@@ -63,15 +64,27 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     userId: string,
     profile: Partial<UserDTO>
   ): Promise<UserDTO> {
-    const userDoc = await this._userModel.findByIdAndUpdate(
-      userId,
-      { $set: profile },
-      {
-        new: true,
-        session: this.session,
-      }
-    );
-    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
+    try {
+      const userDoc = await this._userModel.findByIdAndUpdate(
+        userId,
+        { $set: profile },
+        {
+          new: true,
+          session: this.session,
+        }
+      );
+      return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
+    } catch (error) {
+      console.error(error);
+      if (error.code === MongoErrorCode.DUPLICATE_KEY)
+        throw new ConflictException(
+          ResponseDTO.fail(
+            "This display name is already in use",
+            ErrorCode.DISPLAY_NAME_ALREADY_IN_USE
+          )
+        );
+      throw new InternalServerErrorException();
+    }
   }
 
   async getUserById(id: string): Promise<UserDTO> {
@@ -103,7 +116,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     } catch (error) {
       console.error(error);
       if (error.code === MongoErrorCode.DUPLICATE_KEY)
-        throw new BadRequestException(
+        throw new ConflictException(
           ResponseDTO.fail(
             "This user is already existed",
             ErrorCode.ACCOUNT_ALREADY_EXISTED
