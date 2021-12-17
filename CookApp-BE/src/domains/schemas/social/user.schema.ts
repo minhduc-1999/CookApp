@@ -27,7 +27,7 @@ export class User extends AbstractSchema {
   @Prop()
   avatar?: string;
 
-  @Prop({ schemaName: "display_name" })
+  @Prop({ schemaName: "display_name", index: true, unique: true })
   displayName?: string;
 
   @Prop({
