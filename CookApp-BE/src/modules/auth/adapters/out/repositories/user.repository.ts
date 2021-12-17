@@ -12,6 +12,7 @@ import { UserDTO } from "dtos/social/user.dto";
 import { User, UserDocument } from "domains/schemas/social/user.schema";
 import { plainToClass } from "class-transformer";
 import { BaseRepository } from "base/repository.base";
+import { PageOptionsDto } from "base/pageOptions.base";
 
 export interface IUserRepository {
   createUser(userData: UserDTO): Promise<UserDTO>;
@@ -23,12 +24,39 @@ export interface IUserRepository {
     profile: Partial<UserDTO>
   ): Promise<UserDTO>;
   setSession(session: ClientSession): IUserRepository;
+  getUsers(query: PageOptionsDto): Promise<UserDTO[]>;
+  countUsers(query: PageOptionsDto): Promise<number>;
 }
 
 @Injectable()
 export class UserRepository extends BaseRepository implements IUserRepository {
   constructor(@InjectModel(User.name) private _userModel: Model<UserDocument>) {
     super();
+  }
+  async countUsers(query: PageOptionsDto): Promise<number> {
+    let textSearch = {};
+    if (query.q !== "") {
+      const regex = new RegExp(query.q, "gi");
+      textSearch = { displayName: regex };
+    }
+    return this._userModel.count(textSearch).exec();
+  }
+  async getUsers(query: PageOptionsDto): Promise<UserDTO[]> {
+    let textSearch = {};
+    if (query.q !== "") {
+      const regex = new RegExp(query.q, "gi");
+      textSearch = { displayName: regex };
+    }
+    const users = await this._userModel
+      .find(textSearch)
+      .skip(query.limit * query.offset)
+      .limit(query.limit);
+    if (users.length < 1) return [];
+    return users.map((food) =>
+      plainToClass(UserDTO, food, {
+        excludeExtraneousValues: true,
+      })
+    );
   }
 
   async updateUserProfile(
