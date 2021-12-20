@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_app/Services/SharedService.dart';
 import '../StaticComponent/Post.dart';
 import 'package:flutter_app/Model/PostDetailsRespondModel.dart';
 import 'package:flutter_app/Model/UserRespondModel.dart';
@@ -16,6 +17,7 @@ class ProfileActivity extends StatefulWidget {
   final String userId;
 
   const ProfileActivity({Key key, this.userId}) : super(key: key);
+
   @override
   _ProfileActivityState createState() => _ProfileActivityState(this.userId);
 }
@@ -32,14 +34,17 @@ class _ProfileActivityState extends State<ProfileActivity> {
   EditProfileActivity editProfile = new EditProfileActivity();
 
   _ProfileActivityState(this.profileId);
+
   FutureOr onGoBack(dynamic value) {
     reloadUser();
   }
 
   void openEditProfilePage() {
-    Route route = MaterialPageRoute(builder: (context) => EditProfileActivity());
+    Route route =
+        MaterialPageRoute(builder: (context) => EditProfileActivity());
     Navigator.push(context, route).then(onGoBack);
   }
+
   /*openEditProfilePage() async {
     Navigator.push(context, MaterialPageRoute(
       builder: (context) {
@@ -60,6 +65,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
     var listPosts = await APIService.getUserWallPosts(profileId);
 
     setState(() {
+      isFollowing = response.data.isFollowed;
       user = response;
       posts = listPosts;
       postCount = listPosts.data.posts.length;
@@ -214,20 +220,26 @@ class _ProfileActivityState extends State<ProfileActivity> {
 
     return Scaffold(
       appBar: AppBar(
-          brightness: Brightness.dark,
-          automaticallyImplyLeading: false,
-          flexibleSpace: Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-                colors: <Color>[appPrimaryColor, appPrimaryColor],
-              ),
+        brightness: Brightness.dark,
+        automaticallyImplyLeading: false,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: <Color>[appPrimaryColor, appPrimaryColor],
             ),
           ),
-          title: Container(
-            child: Text("Profile"),
-          )),
+        ),
+        title: Container(
+          child: Text("Profile",
+              style: TextStyle(
+                  fontFamily: 'Billabong',
+                  fontSize: 32,
+                  fontStyle: FontStyle.italic)),
+        ),
+
+      ),
       body: circular
           ? Center(child: CircularProgressIndicator())
           : ListView(
@@ -264,8 +276,10 @@ class _ProfileActivityState extends State<ProfileActivity> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: <Widget>[
                                     buildStatColumn("posts", postCount),
-                                    buildStatColumn("followers", user.data.numberOfFollower),
-                                    buildStatColumn("following", user.data.numberOfFollowing),
+                                    buildStatColumn("followers",
+                                        user.data.numberOfFollower),
+                                    buildStatColumn("following",
+                                        user.data.numberOfFollowing),
                                   ],
                                 ),
                                 Row(
@@ -298,14 +312,15 @@ class _ProfileActivityState extends State<ProfileActivity> {
     );
   }
 
-  followUser() {
-    print('following user');
+  followUser() async {
+    await APIService.follow(profileId);
     setState(() {
       this.isFollowing = true;
     });
   }
 
-  unfollowUser() {
+  unfollowUser() async {
+    await APIService.unfollow(profileId);
     setState(() {
       isFollowing = false;
     });

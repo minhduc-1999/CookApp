@@ -58,7 +58,9 @@ class APIService {
         body: jsonEncode(model.toJson()));
     return registerRespondModel(respone.body);
   }
-  static Future<PresignedLinkedRespondModel> getPresignedLink(PresignedLinkedRequestModel model) async{
+
+  static Future<PresignedLinkedRespondModel> getPresignedLink(
+      PresignedLinkedRequestModel model) async {
     var url = Uri.parse(Config.apiURL + Config.presignedLinkAPI);
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.post(url,
@@ -70,21 +72,17 @@ class APIService {
     return presignedLinkedRespondModel(respone.body);
   }
 
-
-
-  static Future<bool> uploadImage(
-      File file, String link) async {
+  static Future<bool> uploadImage(File file, String link) async {
     var url = Uri.parse(link);
     var ex = file.path.split(".");
     Map<String, String> requestHeader = {'Content-Type': 'image/jpeg'};
-    if (ex.last == "png"){
+    if (ex.last == "png") {
       requestHeader = {'Content-Type': 'image/png'};
-    } else if (ex.last == "jpg" || ex.last == 'jpeg'){
+    } else if (ex.last == "jpg" || ex.last == 'jpeg') {
       requestHeader = {'Content-Type': 'image/jpeg'};
     }
     var respone = await client.put(url,
-        headers: requestHeader,
-        body: await file.readAsBytes());
+        headers: requestHeader, body: await file.readAsBytes());
     return true;
     //return registerRespondModel(respone.body);
   }
@@ -101,75 +99,65 @@ class APIService {
     return true;
   }
 
-  static Future<UserWallRespondModel> getUserWall(String userId) async{
-    var url = Uri.parse(Config.apiURL + Config.preUserWallAPI + userId + "/walls");
+  static Future<UserWallRespondModel> getUserWall(String userId) async {
+    var url =
+        Uri.parse(Config.apiURL + Config.preUserWallAPI + userId + "/walls");
     var loginDetails = await SharedService.loginDetails();
     print("url: " + url.toString());
-    var respone = await client.get(url,
-        headers: <String, String>{
-          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
-        }
-    );
+    var respone = await client.get(url, headers: <String, String>{
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
     return userWallRespondModel(respone.body);
   }
-  static Future<UserRespondModel> getUser() async{
+
+  static Future<UserRespondModel> getUser() async {
     var url = Uri.parse(Config.apiURL + Config.userProfileAPI);
     var loginDetails = await SharedService.loginDetails();
-    var respone = await client.get(url,
-        headers: <String, String>{
-          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
-        }
-    );
+    var respone = await client.get(url, headers: <String, String>{
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
     return userRespondModel(respone.body);
   }
 
   static Future<WallPostRespondModel> getUserWallPosts(String userId) async {
-    var url = Uri.parse(Config.apiURL + Config.preUserWallAPI + userId + Config.endUserWallPostAPI).replace(
-      queryParameters: <String, String>{
-        'offset' : '0',
-        'limit' : '10'
-      }
-    );
+    var url = Uri.parse(Config.apiURL +
+            Config.preUserWallAPI +
+            userId +
+            Config.endUserWallPostAPI)
+        .replace(
+            queryParameters: <String, String>{'offset': '0', 'limit': '10'});
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
-    var respone = await client.get(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
-        }
-    );
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
     return wallPostRespondModel(respone.body);
   }
-  static Future<PostDetailsRespondModel> getDetailsPost(String postID) async{
+
+  static Future<PostDetailsRespondModel> getDetailsPost(String postID) async {
     var url = Uri.parse(Config.apiURL + Config.postDetails + postID);
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
-    var respone = await client.get(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
-        }
-    );
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
     return postDetailsRespondModel(respone.body);
   }
 
   static Future<NewFeedRespondModel> getNewFeed() async {
     var url = Uri.parse(Config.apiURL + Config.userFeedAPI).replace(
-        queryParameters: <String, String>{
-          'offset' : '0',
-          'limit' : '10'
-        }
-    );
+        queryParameters: <String, String>{'offset': '0', 'limit': '40'});
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
-    var respone = await client.get(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
-        }
-    );
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
     return newFeedRespondModel(respone.body);
   }
+
   static Future<bool> react(String postID, ReactRequestModel model) async {
     var url = Uri.parse(Config.apiURL + Config.postDetails + postID + "/react");
     print("url: " + url.toString());
@@ -179,17 +167,17 @@ class APIService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${loginDetails.data.accessToken}',
         },
-      body: jsonEncode(model.toJson())
-    );
-    if(respone.statusCode == 200){
+        body: jsonEncode(model.toJson()));
+    if (respone.statusCode == 200) {
       return true;
     } else {
       return false;
     }
   }
 
-  static Future<bool> comment(String postID, CommentRequestModel model) async{
-    var url = Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
+  static Future<bool> comment(String postID, CommentRequestModel model) async {
+    var url =
+        Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.post(url,
@@ -197,45 +185,80 @@ class APIService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${loginDetails.data.accessToken}',
         },
-        body: jsonEncode(model.toJson())
-    );
-    if(respone.statusCode == 200){
+        body: jsonEncode(model.toJson()));
+    if (respone.statusCode == 200) {
       return true;
     } else {
       return false;
     }
   }
-  static Future<CommentRespondModel> getComment(String postID, String parentID) async{
-    var url = Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
-    if(parentID != ""){
+
+  static Future<CommentRespondModel> getComment(
+      String postID, String parentID) async {
+    var url =
+        Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
+    if (parentID != "") {
+      url = url.replace(queryParameters: <String, String>{
+        'offset': '0',
+        'limit': '10',
+        'parent': parentID
+      });
+    } else if (parentID == "" || parentID == null) {
       url = url.replace(
-          queryParameters: <String, String>{
-            'offset' : '0',
-            'limit' : '10',
-            'parent': parentID
-          });
-    } else if (parentID == "" || parentID == null){
-      url = url.replace(
-          queryParameters: <String, String>{
-            'offset' : '0',
-            'limit' : '10'
-          });
+          queryParameters: <String, String>{'offset': '0', 'limit': '10'});
     }
 
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
-    var respone = await client.get(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
-        }
-    );
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
     print("code: " + respone.body);
     var respondModel = commentRespondModel(respone.body);
     print("respond: " + respondModel.data.comments.length.toString());
     return commentRespondModel(respone.body);
   }
-  static Future<bool> editProfile(EditUserRequestModel model) async{
+
+  static Future<bool> follow(String userId) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.preUserWallAPI + userId + Config.followerAPI);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+      },
+    );
+    if (respone.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static Future<bool> unfollow(String userId) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.preUserWallAPI + userId + Config.followerAPI);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.delete(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+      },
+    );
+    if (respone.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+
+  static Future<bool> editProfile(EditUserRequestModel model) async {
     var url = Uri.parse(Config.apiURL + Config.userProfileAPI);
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
@@ -244,29 +267,44 @@ class APIService {
           'Content-Type': 'application/json',
           'Authorization': 'Bearer ${loginDetails.data.accessToken}',
         },
-        body: jsonEncode(model.toJson())
-    );
-    if(respone.statusCode == 200){
+        body: jsonEncode(model.toJson()));
+    if (respone.statusCode == 200) {
       return true;
     } else {
       return false;
     }
   }
-  static Future<FoodRespondModel> getFood() async {
-    var url = Uri.parse(Config.apiURL + Config.foodAPI).replace(
-        queryParameters: <String, String>{
-          'offset' : '0',
-          'limit' : '10'
-        }
-    );
+
+  static Future<FoodRespondModel> getFood(int offset) async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI)
+        .replace(queryParameters: <String, String>{
+      'offset': offset.toString(),
+      'limit': '10',
+    });
+
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
-    var respone = await client.get(url,
-        headers: <String, String>{
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
-        }
-    );
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return foodRespondModel(respone.body);
+  }
+
+  static Future<FoodRespondModel> getFoodByQuery(
+      int offset, String query) async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI).replace(
+        queryParameters: <String, String>{
+          'offset': offset.toString(),
+          'limit': '10',
+          'q': query
+        });
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
     return foodRespondModel(respone.body);
   }
 }

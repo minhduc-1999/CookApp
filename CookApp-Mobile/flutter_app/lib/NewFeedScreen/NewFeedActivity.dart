@@ -53,6 +53,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
             onPressed: () {
               openUploadActivity();
             },
+
           ),
           IconButton(
             icon: Icon(Icons.logout),

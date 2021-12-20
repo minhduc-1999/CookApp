@@ -57,6 +57,7 @@ class _FoodWidgetState extends State<FoodWidget> {
             Center(
               child: Text(
                 food.name,
+                textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 20,
                   fontWeight: FontWeight.bold,

@@ -8,6 +8,7 @@ class Config {
   static const String uploadPostAPI = "/api/users/posts";
   static const String userProfileAPI = "/api/users/profile";
   static const String preUserWallAPI = "/api/users/";
+  static const String followerAPI = "/walls/followers";
   static const String endUserWallFollowAPI = "/walls/followers";
   static const String endUserWallPostAPI = "/walls/posts";
   static const String postDetails = "/api/users/posts/";
