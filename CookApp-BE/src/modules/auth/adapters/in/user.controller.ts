@@ -1,6 +1,6 @@
 import { Body, Controller, Get, Patch, Req } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConflictResponse, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
@@ -32,6 +32,7 @@ export class UserController {
   @Patch("profile")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(UpdateProfileResponse, "Getting profile successfully")
+  @ApiConflictResponse()
   async updateProfile(
     @User() user: UserDTO,
     @Body() body: UpdateProfileRequest

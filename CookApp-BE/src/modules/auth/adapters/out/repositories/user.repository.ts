@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  ConflictException,
   Injectable,
   InternalServerErrorException,
 } from "@nestjs/common";
@@ -12,6 +13,7 @@ import { UserDTO } from "dtos/social/user.dto";
 import { User, UserDocument } from "domains/schemas/social/user.schema";
 import { plainToClass } from "class-transformer";
 import { BaseRepository } from "base/repository.base";
+import { PageOptionsDto } from "base/pageOptions.base";
 
 export interface IUserRepository {
   createUser(userData: UserDTO): Promise<UserDTO>;
@@ -23,6 +25,8 @@ export interface IUserRepository {
     profile: Partial<UserDTO>
   ): Promise<UserDTO>;
   setSession(session: ClientSession): IUserRepository;
+  getUsers(query: PageOptionsDto): Promise<UserDTO[]>;
+  countUsers(query: PageOptionsDto): Promise<number>;
 }
 
 @Injectable()
@@ -30,20 +34,57 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   constructor(@InjectModel(User.name) private _userModel: Model<UserDocument>) {
     super();
   }
+  async countUsers(query: PageOptionsDto): Promise<number> {
+    let textSearch = {};
+    if (query.q !== "") {
+      const regex = new RegExp(query.q, "gi");
+      textSearch = { displayName: regex };
+    }
+    return this._userModel.count(textSearch).exec();
+  }
+  async getUsers(query: PageOptionsDto): Promise<UserDTO[]> {
+    let textSearch = {};
+    if (query.q !== "") {
+      const regex = new RegExp(query.q, "gi");
+      textSearch = { displayName: regex };
+    }
+    const users = await this._userModel
+      .find(textSearch)
+      .skip(query.limit * query.offset)
+      .limit(query.limit);
+    if (users.length < 1) return [];
+    return users.map((food) =>
+      plainToClass(UserDTO, food, {
+        excludeExtraneousValues: true,
+      })
+    );
+  }
 
   async updateUserProfile(
     userId: string,
     profile: Partial<UserDTO>
   ): Promise<UserDTO> {
-    const userDoc = await this._userModel.findByIdAndUpdate(
-      userId,
-      { $set: profile },
-      {
-        new: true,
-        session: this.session,
-      }
-    );
-    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
+    try {
+      const userDoc = await this._userModel.findByIdAndUpdate(
+        userId,
+        { $set: profile },
+        {
+          new: true,
+          session: this.session,
+        }
+      );
+      return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
+    } catch (error) {
+      console.error(error);
+      if (error.code === MongoErrorCode.DUPLICATE_KEY)
+        throw new ConflictException(
+          ResponseDTO.fail(
+            "This display name is already in use",
+            ErrorCode.DISPLAY_NAME_ALREADY_IN_USE
+          )
+        );
+      throw new InternalServerErrorException();
+    }
   }
 
   async getUserById(id: string): Promise<UserDTO> {
@@ -75,7 +116,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     } catch (error) {
       console.error(error);
       if (error.code === MongoErrorCode.DUPLICATE_KEY)
-        throw new BadRequestException(
+        throw new ConflictException(
           ResponseDTO.fail(
             "This user is already existed",
             ErrorCode.ACCOUNT_ALREADY_EXISTED

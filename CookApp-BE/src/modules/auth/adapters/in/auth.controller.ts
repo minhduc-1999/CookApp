@@ -6,7 +6,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { ApiBody, ApiTags } from "@nestjs/swagger";
+import { ApiBody, ApiConflictResponse, ApiTags } from "@nestjs/swagger";
 import { Public } from "decorators/public.decorator";
 import { RegisterCommand } from "modules/auth/useCases/register";
 import { Result } from "base/result.base";
@@ -36,6 +36,7 @@ export class AuthController {
   @Public()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(RegisterResponse, "Register successfully")
+  @ApiConflictResponse()
   @Transaction()
   async register(
     @Body() body: RegisterRequest,

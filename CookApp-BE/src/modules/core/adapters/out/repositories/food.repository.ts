@@ -24,8 +24,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     let textSearch = {};
     if (query.q == "") textSearch = {};
     else textSearch = { $text: { $search: query.q } };
-    const numOfFood = await this._foodModel.count(textSearch).exec();
-    return numOfFood;
+    return this._foodModel.count(textSearch).exec();
   }
 
   async getFoods(query: PageOptionsDto): Promise<FoodDTO[]> {
