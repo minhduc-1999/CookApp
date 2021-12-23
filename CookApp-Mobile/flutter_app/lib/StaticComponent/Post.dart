@@ -9,6 +9,7 @@ import 'package:flutter_app/Model/UserRespondModel.dart';
 import 'package:flutter_app/ProfileScreen/ProfileActivity.dart';
 import 'package:flutter_app/Services/APIService.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:timeago/timeago.dart' as timeago;
 
 class Post extends StatefulWidget {
   const Post(
@@ -20,7 +21,8 @@ class Post extends StatefulWidget {
       this.avatar,
       this.displayName,
       this.numOfReaction,
-      this.numOfComment});
+      this.numOfComment,
+      this.dateTime});
 
   factory Post.fromJSON(Map data) {
     return Post(
@@ -59,7 +61,7 @@ class Post extends StatefulWidget {
   final List<String> images;
   final int numOfReaction;
   final int numOfComment;
-
+  final DateTime dateTime;
   _Post createState() => _Post(
       id: this.id,
       userId: this.userId,
@@ -69,7 +71,8 @@ class Post extends StatefulWidget {
       displayName: this.displayName,
       avatar: this.avatar,
       numOfReaction: this.numOfReaction,
-      numOfComment: this.numOfComment);
+      numOfComment: this.numOfComment,
+  dateTime: this.dateTime);
 }
 
 class _Post extends State<Post> {
@@ -80,6 +83,7 @@ class _Post extends State<Post> {
   final List<String> images;
   final String displayName;
   final String avatar;
+  final DateTime dateTime;
   int numOfReaction;
   int numOfComment;
   bool liked = false;
@@ -100,7 +104,8 @@ class _Post extends State<Post> {
       this.displayName,
       this.avatar,
       this.numOfReaction,
-      this.numOfComment});
+      this.numOfComment,
+      this.dateTime});
 
   GestureDetector buildLikeIcon() {
     Color color;
@@ -140,87 +145,88 @@ class _Post extends State<Post> {
             errorWidget: (context, url, error) => Icon(Icons.error),
           ),*/
               Container(
-                margin: EdgeInsets.all(5.0),
+                  margin: EdgeInsets.only(bottom: 10),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                    child: Image.network(
-                      images[0],
-                      fit: BoxFit.cover,
-                      width: 1000.0,
-                        height: height*0.6
-                    ),
+                    child: Image.network(images[0],
+                        fit: BoxFit.cover, width: 1000.0, height: height * 0.6),
                   ))
               : Column(
-                children: [
-                  CarouselSlider(
-                      items: images
-                          .map((item) => Container(
-                                child: Container(
-                                  margin: EdgeInsets.all(5.0),
-                                  child: ClipRRect(
-                                      borderRadius:
-                                          BorderRadius.all(Radius.circular(5.0)),
-                                      child: Stack(
-                                        children: <Widget>[
-                                          Image.network(item,
-                                              fit: BoxFit.cover, width: 1000.0),
-                                          Positioned(
-                                            bottom: 0.0,
-                                            left: 0.0,
-                                            right: 0.0,
-                                            child: Container(
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Color.fromARGB(200, 0, 0, 0),
-                                                    Color.fromARGB(0, 0, 0, 0)
-                                                  ],
-                                                  begin: Alignment.bottomCenter,
-                                                  end: Alignment.topCenter,
+                  children: [
+                    CarouselSlider(
+                        items: images
+                            .map((item) => Container(
+                                  child: Container(
+                                    margin: EdgeInsets.all(5.0),
+                                    child: ClipRRect(
+                                        borderRadius: BorderRadius.all(
+                                            Radius.circular(5.0)),
+                                        child: Stack(
+                                          children: <Widget>[
+                                            Image.network(item,
+                                                fit: BoxFit.cover,
+                                                width: 1000.0),
+                                            Positioned(
+                                              bottom: 0.0,
+                                              left: 0.0,
+                                              right: 0.0,
+                                              child: Container(
+                                                decoration: BoxDecoration(
+                                                  gradient: LinearGradient(
+                                                    colors: [
+                                                      Color.fromARGB(
+                                                          200, 0, 0, 0),
+                                                      Color.fromARGB(0, 0, 0, 0)
+                                                    ],
+                                                    begin:
+                                                        Alignment.bottomCenter,
+                                                    end: Alignment.topCenter,
+                                                  ),
                                                 ),
+                                                padding: EdgeInsets.symmetric(
+                                                    vertical: 10.0,
+                                                    horizontal: 20.0),
                                               ),
-                                              padding: EdgeInsets.symmetric(
-                                                  vertical: 10.0, horizontal: 20.0),
-
                                             ),
-                                          ),
-                                        ],
-                                      )),
-                                ),
-                              ))
-                          .toList(),
-                      carouselController: _controller,
-                      options: CarouselOptions(
-                        autoPlay: false,
-                          onPageChanged: (index, reason){
-                            setState(() {
-                              _current = index;
-                            });
-                          },
-                          height: height*0.6,
-                          viewportFraction: 1.0,
-                          enlargeCenterPage: false)),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: images.asMap().entries.map((entry) {
-                      return GestureDetector(
-                        onTap: () => _controller.animateToPage(entry.key),
-                        child: Container(
-                          width: 12.0,
-                          height: 12.0,
-                          margin: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
-                          decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: (Theme.of(context).brightness == Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black)
-                                  .withOpacity(_current == entry.key ? 0.9 : 0.4)),
-                        ),
-                      );
-                    }).toList(),
-                  ),
-                ],
-              ),
+                                          ],
+                                        )),
+                                  ),
+                                ))
+                            .toList(),
+                        carouselController: _controller,
+                        options: CarouselOptions(
+                            autoPlay: false,
+                            onPageChanged: (index, reason) {
+                              setState(() {
+                                _current = index;
+                              });
+                            },
+                            height: height * 0.6,
+                            viewportFraction: 1.0,
+                            enlargeCenterPage: false)),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: images.asMap().entries.map((entry) {
+                        return GestureDetector(
+                          onTap: () => _controller.animateToPage(entry.key),
+                          child: Container(
+                            width: 12.0,
+                            height: 12.0,
+                            margin: EdgeInsets.symmetric(
+                                vertical: 8.0, horizontal: 4.0),
+                            decoration: BoxDecoration(
+                                shape: BoxShape.circle,
+                                color: (Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.white
+                                        : Colors.black)
+                                    .withOpacity(
+                                        _current == entry.key ? 0.9 : 0.4)),
+                          ),
+                        );
+                      }).toList(),
+                    ),
+                  ],
+                ),
           showHeart
               ? Positioned(
                   child: Container(
@@ -240,11 +246,7 @@ class _Post extends State<Post> {
     );
   }
 
-  Widget buildPostHeader({String ownerId}) {
-    if (ownerId == null) {
-      return Text("owner error");
-    }
-
+  Widget buildPostHeader() {
     return ListTile(
       leading: (avatar != null)
           ? CircleAvatar(
@@ -283,12 +285,12 @@ class _Post extends State<Post> {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: <Widget>[
-        buildPostHeader(ownerId: "abc"),
+        buildPostHeader(),
         buildLikeableImage(),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
           children: <Widget>[
-            Padding(padding: const EdgeInsets.only(left: 20.0, top: 40.0)),
+            Padding(padding: const EdgeInsets.only(left: 15.0, top: 40.0)),
             buildLikeIcon(),
             Padding(padding: const EdgeInsets.only(right: 20.0)),
             GestureDetector(
@@ -307,7 +309,7 @@ class _Post extends State<Post> {
         Row(
           children: <Widget>[
             Container(
-              margin: const EdgeInsets.only(left: 20.0),
+              margin: const EdgeInsets.only(left: 15.0),
               child: numOfReaction != null
                   ? Text(
                       "${numOfReaction} likes",
@@ -324,7 +326,7 @@ class _Post extends State<Post> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-                margin: const EdgeInsets.only(left: 20.0),
+                margin: const EdgeInsets.only(left: 15.0),
                 child: displayName != null
                     ? Text(
                         displayName,
@@ -341,7 +343,20 @@ class _Post extends State<Post> {
           ],
         ),
         SizedBox(
-          height: 10,
+          height: 5,
+        ),
+        Row(
+
+          children: <Widget>[
+            Container(
+              margin: const EdgeInsets.only(left: 15.0),
+            child: Text(
+              timeago.format(dateTime),
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(fontSize: 13, color: Colors.grey),
+            ),
+          )
+          ]
         )
       ],
     );

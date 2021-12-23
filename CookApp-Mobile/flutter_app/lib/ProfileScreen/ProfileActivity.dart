@@ -238,8 +238,16 @@ class _ProfileActivityState extends State<ProfileActivity> {
                   fontSize: 32,
                   fontStyle: FontStyle.italic)),
         ),
-
+          actions: [
+            profileId == currentUserId ? IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () {
+                SharedService.logout(context);
+              },
+            ) : Container()
+          ],
       ),
+
       body: circular
           ? Center(child: CircularProgressIndicator())
           : ListView(
@@ -355,6 +363,9 @@ class ImageTile extends StatelessWidget {
       images: res.data.images,
       avatar: res.data.author.avatar,
       displayName: res.data.author.displayName,
+      dateTime: DateTime.fromMillisecondsSinceEpoch(res.data.createdAt),
+      numOfComment: res.data.numOfComment,
+      numOfReaction: res.data.numOfReaction,
     );
     openImagePost(context, post);
   }

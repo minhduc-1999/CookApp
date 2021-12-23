@@ -9,6 +9,8 @@ import 'package:flutter_app/Model/EditUserRequestModel.dart';
 import 'package:flutter_app/Model/FoodRespondModel.dart';
 import 'package:flutter_app/Model/LoginRequestModel.dart';
 import 'package:flutter_app/Model/LoginRespondModel.dart';
+import 'package:flutter_app/Model/MessageRequestModel.dart';
+import 'package:flutter_app/Model/MessageRespondModel.dart';
 import 'package:flutter_app/Model/NewFeedRespondModel.dart';
 import 'package:flutter_app/Model/PostDetailsRespondModel.dart';
 import 'package:flutter_app/Model/PostRequestModel.dart';
@@ -22,6 +24,7 @@ import 'package:flutter_app/Model/RegisterRespondModel.dart';
 import 'package:flutter_app/Model/UserRespondModel.dart';
 import 'package:flutter_app/Model/UserWallRespondModel.dart';
 import 'package:flutter_app/Model/WallPostRespondModel.dart';
+import 'package:flutter_app/NewFeedScreen/UserDelegateModel.dart';
 
 import 'package:flutter_app/config.dart';
 import 'package:http/http.dart' as http;
@@ -125,7 +128,7 @@ class APIService {
             userId +
             Config.endUserWallPostAPI)
         .replace(
-            queryParameters: <String, String>{'offset': '0', 'limit': '10'});
+            queryParameters: <String, String>{'offset': '0', 'limit': '40'});
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{
@@ -146,9 +149,9 @@ class APIService {
     return postDetailsRespondModel(respone.body);
   }
 
-  static Future<NewFeedRespondModel> getNewFeed() async {
+  static Future<NewFeedRespondModel> getNewFeed(int offset) async {
     var url = Uri.parse(Config.apiURL + Config.userFeedAPI).replace(
-        queryParameters: <String, String>{'offset': '0', 'limit': '40'});
+        queryParameters: <String, String>{'offset': offset.toString(), 'limit': '10'});
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{
@@ -306,5 +309,33 @@ class APIService {
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
     return foodRespondModel(respone.body);
+  }
+
+  static Future<UserDelegateModel> getUserByQuery(int offset, String query) async {
+    var url = Uri.parse(Config.apiURL + Config.preUserWallAPI).replace(
+        queryParameters: <String, String>{
+          'offset': offset.toString(),
+          'limit': '10',
+          'q': query
+        });
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return userDelegateModel(respone.body);
+  }
+
+  static Future<MessageRespondModel> sendMessage(MessageRequestModel model) async {
+    var url = Uri.parse(Config.apiURLChatBot + Config.sendMessage);
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'x-access-token': Config.tokenChatbot,
+        },
+        body: jsonEncode(model.toJson()));
+    return messageRespondModel(respone.body);
   }
 }

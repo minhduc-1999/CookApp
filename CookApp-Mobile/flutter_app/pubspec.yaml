@@ -38,7 +38,7 @@ dependencies:
   uuid: ^3.0.5
   timeago: ^3.1.0
   intl: ^0.17.0
-
+  bubble: ^1.2.1
   carousel_slider: ^4.0.0
 dev_dependencies:
   flutter_test:
@@ -67,6 +67,7 @@ flutter:
     - assets/flare/Like.flr
     - assets/images/AppLogo.png
     - assets/images/default_avatar.png
+    - assets/images/robot.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

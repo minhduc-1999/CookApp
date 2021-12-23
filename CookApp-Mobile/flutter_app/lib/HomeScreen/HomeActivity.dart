@@ -19,7 +19,7 @@ class NavigationItem {
 const List<NavigationItem> allNavigationItems = <NavigationItem>[
   NavigationItem('Home', Icons.home),
   NavigationItem('Food', Icons.lunch_dining),
-  NavigationItem('Message', Icons.chat_bubble),
+  NavigationItem('Chatbot', Icons.chat_bubble),
   NavigationItem('Notification', Icons.notifications),
   NavigationItem('Profile', Icons.person)
 ];

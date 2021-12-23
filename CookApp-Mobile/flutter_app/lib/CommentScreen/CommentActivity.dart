@@ -70,6 +70,7 @@ class _CommentActivityState extends State<CommentActivity> {
         ),
       ],
     );
+
   }
 
   Widget buildComment() {
