@@ -22,6 +22,7 @@ import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { LoginCommandHandler } from "./useCases/login";
+import { GoogleSignInCommandHandler } from "./useCases/loginWithGoogle";
 import { RegisterCommandHandler } from "./useCases/register";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 @Module({
@@ -72,7 +73,8 @@ import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
     GetProfileQueryHandler,
     BasicAuthStrategy,
     JwtStrategy,
+    GoogleSignInCommandHandler,
   ],
-  exports: ["IUserService"]
+  exports: ["IUserService"],
 })
 export class AuthModule {}

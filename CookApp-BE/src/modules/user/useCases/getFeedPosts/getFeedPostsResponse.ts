@@ -1,18 +1,12 @@
-import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
-import { Type } from "class-transformer";
-import { PostDTO } from "dtos/social/post.dto";
+import { GetPostResponse } from "../getPostById/getPostResponse";
 
 export class GetFeedPostsResponse {
-  @ApiResponseProperty({ type: () => [PostDTO] })
-  @Type(() => PostDTO)
-  posts: PostDTO[];
+  posts: GetPostResponse[];
 
-  @ApiResponseProperty({ type: PageMetadata })
-  @Type(() => PageMetadata)
   metadata: PageMetadata;
 
-  constructor(posts: PostDTO[], meta: PageMetadata) {
+  constructor(posts: GetPostResponse[], meta: PageMetadata) {
     this.posts = posts;
     this.metadata = meta;
   }

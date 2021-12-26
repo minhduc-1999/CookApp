@@ -5,4 +5,5 @@ export enum ErrorCode {
   INVALID_ID = "invalid_id",
   INVALID_OWNER = "invalid_owner",
   DISPLAY_NAME_ALREADY_IN_USE = "display_name_already_in_use",
+  INVALID_GOOGLE_ID_TOKEN = "invalid_google_id_token",
 }

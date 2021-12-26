@@ -8,6 +8,7 @@ import { JwtService } from "@nestjs/jwt";
 import _ = require("lodash");
 import { LoginResponse } from "../useCases/login/loginResponse";
 import { UserDTO } from "dtos/social/user.dto";
+import { JwtAuthTokenPayload } from "base/jwtPayload";
 
 export interface IAuthentication {
   getAuthUser(usernameOrEmail: string, password: string): Promise<UserDTO>;
@@ -20,7 +21,7 @@ class AuthenticationService implements IAuthentication {
     private jwtService: JwtService
   ) {}
   async login(user: UserDTO): Promise<LoginResponse> {
-    const payload = { sub: user.id };
+    const payload: JwtAuthTokenPayload = { sub: user.id };
     return {
       accessToken: this.jwtService.sign(payload),
       userId: user.id,

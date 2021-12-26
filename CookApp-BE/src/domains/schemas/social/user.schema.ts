@@ -3,11 +3,16 @@ import { AbstractSchema } from "base/schemas/schema.base";
 import { Type } from "class-transformer";
 import { ProfileDTO } from "dtos/social/profile.dto";
 import { UserDTO } from "dtos/social/user.dto";
+import { ExternalProvider } from "enums/externalProvider.enum";
 import { Document } from "mongoose";
 import { UserProfile, UserProfileSchema } from "./user_profile.schema";
 
 export type UserDocument = User & Document;
 
+class Provider {
+  type: ExternalProvider;
+  id: string;
+}
 @Schema()
 export class User extends AbstractSchema {
   _id: string;
@@ -16,7 +21,7 @@ export class User extends AbstractSchema {
   username: string;
 
   @Prop()
-  password: string;
+  password?: string;
 
   @Prop({ unique: true })
   email: string;
@@ -36,6 +41,9 @@ export class User extends AbstractSchema {
   })
   @Type(() => UserProfile)
   profile?: UserProfile;
+
+  @Prop()
+  provider?: Provider;
 
   constructor(userDto: Partial<UserDTO>) {
     super(userDto);

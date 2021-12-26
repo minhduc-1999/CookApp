@@ -5,6 +5,7 @@ import { UserDTO } from "dtos/social/user.dto";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
+import { IPostRepository } from "../../adapters/out/repositories/post.repository";
 
 export class GetPostDetailQuery extends BaseQuery {
   postId: string;
@@ -21,7 +22,10 @@ export class GetPostDetailQueryHandler
   constructor(
     @Inject("IPostService")
     private _postService: IPostService,
-    @Inject("IStorageService") private _storageService: IStorageService
+    @Inject("IPostRepository")
+    private _postRepo: IPostRepository,
+    @Inject("IStorageService")
+    private _storageService: IStorageService
   ) {}
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
     const post = await this._postService.getPostDetail(query.postId);
@@ -31,6 +35,15 @@ export class GetPostDetailQueryHandler
         await this._storageService.getDownloadUrls([post.author.avatar])
       )[0];
     }
-    return post;
+    const result = new GetPostResponse(post);
+
+    const reaction = await this._postRepo.getReactionByUserId(
+      query.user.id,
+      post.id
+    );
+    if (reaction) {
+      result.reaction = reaction.type;
+    }
+    return result;
   }
 }

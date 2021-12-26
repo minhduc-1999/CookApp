@@ -1,10 +1,4 @@
-import {
-  Body,
-  Controller,
-  HttpCode,
-  Post,
-  UseGuards,
-} from "@nestjs/common";
+import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import { ApiBody, ApiConflictResponse, ApiTags } from "@nestjs/swagger";
 import { Public } from "decorators/public.decorator";
@@ -26,6 +20,9 @@ import { Transaction } from "decorators/transaction.decorator";
 import { MongooseSession } from "decorators/mongooseSession.decorator";
 import { ClientSession } from "mongoose";
 import { User } from "decorators/user.decorator";
+import { GoogleSignInRequest } from "modules/auth/useCases/loginWithGoogle/googleSignInRequest";
+import { GoogleSignInCommand } from "modules/auth/useCases/loginWithGoogle";
+import { GoogleSignInResponse } from "modules/auth/useCases/loginWithGoogle/googleSignInResponse";
 
 @Controller()
 @ApiTags("Authentication")
@@ -63,5 +60,17 @@ export class AuthController {
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
     return Result.ok(result, { messages: ["Login successfully"] });
+  }
+
+  @Post("google/callback")
+  @HttpCode(200)
+  @Public()
+  @ApiOKResponseCustom(GoogleSignInResponse, "Authenticate successfully")
+  async googleCallback(
+    @Body() body: GoogleSignInRequest
+  ): Promise<Result<GoogleSignInResponse>> {
+    let command = new GoogleSignInCommand(null, body);
+    const jwt = await this._commandBus.execute(command);
+    return Result.ok(jwt, { messages: ["Authenticate successfully"] });
   }
 }
