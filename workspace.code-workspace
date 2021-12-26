@@ -1,0 +1,14 @@
+{
+	"folders": [
+		{
+			"path": "./CookApp-BE"
+		},
+		{
+			"path": "./CookApp-FE"
+		},
+		{
+			"path": "./CookApp-Mobile"
+		}
+	],
+	"settings": {}
+}

@@ -8,6 +8,7 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
 import { IPostService } from "modules/user/services/post.service";
+import { GetPostResponse } from "../getPostById/getPostResponse";
 import { GetFeedPostsResponse } from "./getFeedPostsResponse";
 export class GetFeedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -26,7 +27,9 @@ export class GetFeedPostsQueryHandler
     private _feedRepo: IFeedRepository,
     @Inject("IPostService")
     private _postService: IPostService,
-    @Inject("IStorageService") private _storageService: IStorageService
+    @Inject("IStorageService") private _storageService: IStorageService,
+    @Inject("IPostRepository")
+    private _postRepo: IPostRepository
   ) {}
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
@@ -53,6 +56,19 @@ export class GetFeedPostsQueryHandler
         totalCount
       );
     }
-    return new GetFeedPostsResponse(posts, meta);
+    const postsRes = await Promise.all(
+      posts.map(async (post) => {
+        const temp = new GetPostResponse(post);
+        const reaction = await this._postRepo.getReactionByUserId(
+          user.id,
+          post.id
+        );
+        if (reaction) {
+          temp.reaction = reaction.type;
+        }
+        return temp;
+      })
+    );
+    return new GetFeedPostsResponse(postsRes, meta);
   }
 }
