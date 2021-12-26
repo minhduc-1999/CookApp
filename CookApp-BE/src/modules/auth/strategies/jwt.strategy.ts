@@ -1,9 +1,12 @@
 import { ExtractJwt, Strategy } from "passport-jwt";
 import { PassportStrategy } from "@nestjs/passport";
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import AuthConfig from "../../../config/auth";
 import { IUserRepository } from "../adapters/out/repositories/user.repository";
 import { UserDTO } from "dtos/social/user.dto";
+import { ResponseDTO } from "base/dtos/response.dto";
+import { ErrorCode } from "enums/errorCode.enum";
+import { JwtAuthTokenPayload } from "base/jwtPayload";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
@@ -15,8 +18,13 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     });
   }
 
-  async validate(payload: any): Promise<UserDTO> {
+  async validate(payload: JwtAuthTokenPayload): Promise<UserDTO> {
     const user = await this._userRepo.getUserById(payload.sub);
+    if (!user) {
+      throw new UnauthorizedException(
+        ResponseDTO.fail("Wrong credentials provided")
+      );
+    }
     return user;
   }
 }

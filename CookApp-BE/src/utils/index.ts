@@ -101,3 +101,7 @@ export function retrieveObjectNameFromUrl(
 export function escapeRegExp(text: string): string {
   return text.replace(/[-[\]{}()*+?.,\\^$|#\s]/g, "\\$&");
 }
+
+export function retrieveUsernameFromEmail(emailAddress: string): string {
+  return emailAddress.slice(0, emailAddress.indexOf("@"));
+}

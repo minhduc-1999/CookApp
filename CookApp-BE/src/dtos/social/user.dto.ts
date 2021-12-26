@@ -2,8 +2,13 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
 import { Exclude, Expose, Type } from "class-transformer";
 import { IsEmail, IsNotEmpty, IsPhoneNumber, IsString } from "class-validator";
+import { ExternalProvider } from "enums/externalProvider.enum";
 import { ProfileDTO } from "./profile.dto";
 
+class Provider {
+  type: ExternalProvider;
+  id: string;
+}
 export class UserDTO extends AuditDTO {
   @IsNotEmpty()
   @ApiProperty({ type: String })
@@ -13,7 +18,7 @@ export class UserDTO extends AuditDTO {
 
   @Expose({ toClassOnly: true })
   @Exclude({ toPlainOnly: true })
-  password: string;
+  password?: string;
 
   @ApiProperty({ type: String })
   @IsEmail()
@@ -38,6 +43,10 @@ export class UserDTO extends AuditDTO {
   @Expose()
   displayName?: string;
 
+  @Expose()
+  @Exclude({ toPlainOnly: true })
+  externalProvider?: Provider;
+
   static create(
     user: Pick<
       UserDTO,
@@ -48,6 +57,7 @@ export class UserDTO extends AuditDTO {
       | "avatar"
       | "profile"
       | "displayName"
+      | "externalProvider"
     >
   ): UserDTO {
     const newUser = new UserDTO();
@@ -59,6 +69,7 @@ export class UserDTO extends AuditDTO {
     newUser.profile = user?.profile;
     newUser.password = user?.password;
     newUser.displayName = user?.displayName;
+    newUser.externalProvider = user?.externalProvider;
     return newUser;
   }
 }
