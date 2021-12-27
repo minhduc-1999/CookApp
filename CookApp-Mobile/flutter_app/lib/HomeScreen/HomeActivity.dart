@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/FoodScreen/FoodActivity.dart';
-import 'package:flutter_app/MessageScreen/MessageActivity.dart';
-import 'package:flutter_app/NewFeedScreen/NewFeedActivity.dart';
-import 'package:flutter_app/NotificationScreen/NotificationActivity.dart';
-import 'package:flutter_app/ProfileScreen/ProfileActivity.dart';
-import 'package:flutter_app/Services/SharedService.dart';
+import 'package:tastify/FoodScreen/FoodActivity.dart';
+import 'package:tastify/MessageScreen/MessageActivity.dart';
+import 'package:tastify/NewFeedScreen/NewFeedActivity.dart';
+import 'package:tastify/NotificationScreen/NotificationActivity.dart';
+import 'package:tastify/ProfileScreen/ProfileActivity.dart';
+import 'package:tastify/Services/SharedService.dart';
 
-import 'package:flutter_app/main.dart';
+import 'package:tastify/main.dart';
 
 import '../constants.dart';
 

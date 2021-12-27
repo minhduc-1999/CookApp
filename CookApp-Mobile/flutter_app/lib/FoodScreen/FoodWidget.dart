@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/FoodScreen/FoodInstructionWidget.dart';
-import 'package:flutter_app/Model/FoodRespondModel.dart';
+import 'package:tastify/FoodScreen/FoodInstructionWidget.dart';
+import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class FoodWidget extends StatefulWidget {

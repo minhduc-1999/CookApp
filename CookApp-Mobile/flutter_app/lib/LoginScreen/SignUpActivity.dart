@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/LoginScreen/LoginActivity.dart';
-import 'package:flutter_app/LoginScreen/LoginButton.dart';
-import 'package:flutter_app/LoginScreen/TextFieldContainer.dart';
-import 'package:flutter_app/Model/RegisterRequestModel.dart';
-import 'package:flutter_app/Services/APIService.dart';
+import 'package:tastify/LoginScreen/LoginActivity.dart';
+import 'package:tastify/LoginScreen/LoginButton.dart';
+import 'package:tastify/LoginScreen/TextFieldContainer.dart';
+import 'package:tastify/Model/RegisterRequestModel.dart';
+import 'package:tastify/Services/APIService.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 

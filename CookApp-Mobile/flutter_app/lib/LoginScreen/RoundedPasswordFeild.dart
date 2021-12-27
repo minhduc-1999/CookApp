@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:flutter_app/constants.dart';
+import 'package:tastify/constants.dart';
 
 import 'TextFieldContainer.dart';
 

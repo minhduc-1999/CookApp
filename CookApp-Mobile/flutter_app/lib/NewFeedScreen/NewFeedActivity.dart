@@ -2,13 +2,13 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/NewFeedRespondModel.dart';
-import 'package:flutter_app/NewFeedScreen/SearchUserDelegate.dart';
+import 'package:tastify/Model/NewFeedRespondModel.dart';
+import 'package:tastify/NewFeedScreen/SearchUserDelegate.dart';
 import '../StaticComponent/Post.dart';
-import 'package:flutter_app/Services/APIService.dart';
-import 'package:flutter_app/Services/SharedService.dart';
-import 'package:flutter_app/UploadScreen/UploadActivity.dart';
-import 'package:flutter_app/constants.dart';
+import 'package:tastify/Services/APIService.dart';
+import 'package:tastify/Services/SharedService.dart';
+import 'package:tastify/UploadScreen/UploadActivity.dart';
+import 'package:tastify/constants.dart';
 
 import '../config.dart';
 

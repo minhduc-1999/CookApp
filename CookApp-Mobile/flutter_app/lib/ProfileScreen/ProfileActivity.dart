@@ -1,13 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Services/SharedService.dart';
+import 'package:tastify/Services/SharedService.dart';
 import '../StaticComponent/Post.dart';
-import 'package:flutter_app/Model/PostDetailsRespondModel.dart';
-import 'package:flutter_app/Model/UserRespondModel.dart';
-import 'package:flutter_app/Model/UserWallRespondModel.dart';
-import 'package:flutter_app/Model/WallPostRespondModel.dart';
-import 'package:flutter_app/Services/APIService.dart';
+import 'package:tastify/Model/PostDetailsRespondModel.dart';
+import 'package:tastify/Model/UserRespondModel.dart';
+import 'package:tastify/Model/UserWallRespondModel.dart';
+import 'package:tastify/Model/WallPostRespondModel.dart';
+import 'package:tastify/Services/APIService.dart';
 
 import '../constants.dart';
 import '../main.dart';
