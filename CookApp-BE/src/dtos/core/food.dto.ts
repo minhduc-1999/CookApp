@@ -73,4 +73,8 @@ export class FoodDTO extends AuditDTO {
   @Expose()
   @ApiPropertyOptional({ type: String })
   origin: string;
+
+  @Expose()
+  @ApiPropertyOptional({ type: String })
+  videoUrl: string;
 }

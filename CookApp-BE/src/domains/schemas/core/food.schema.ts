@@ -65,6 +65,9 @@ export class Food extends AbstractSchema {
 
   @Prop()
   origin: string;
+
+  @Prop()
+  videoUrl: string;
 }
 
 export type FoodDocument = Food & Document;

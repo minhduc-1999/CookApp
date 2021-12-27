@@ -41,11 +41,12 @@ export class GoogleSignInCommandHandler
   async execute(command: GoogleSignInCommand): Promise<GoogleSignInResponse> {
     const user = await this.verify(command.request.idToken)
       .then(async (payload) => {
+        console.log(payload);
         const userData: UserDTO = UserDTO.create({
           avatar: payload.picture,
           username: retrieveUsernameFromEmail(payload.email),
           profile: {
-            firstName: payload.name,
+            firstName: payload.given_name,
             lastName: payload.family_name,
           },
           email: payload.email,
@@ -56,9 +57,9 @@ export class GoogleSignInCommandHandler
         });
         let res = await this._userRepo.getUserByEmail(userData.email);
 
-        if (!res) {
+        if (res) {
           const profile = createUpdatingObject(clean(userData), res.id);
-          res = await this._userRepo.updateUserProfile(res.id, userData);
+          res = await this._userRepo.updateUserProfile(res.id, profile);
         }
 
         if (!res) {
@@ -69,6 +70,7 @@ export class GoogleSignInCommandHandler
         return res;
       })
       .catch((err) => {
+        console.log(err);
         throw new UnauthorizedException({
           errorCode: ErrorCode.INVALID_GOOGLE_ID_TOKEN,
           message: "Google ID Token is not valid",
@@ -79,7 +81,7 @@ export class GoogleSignInCommandHandler
 
   async verify(idToken: string): Promise<TokenPayload> {
     const clientId = await this._configService.get("auth.googleClientID");
-    const client = new OAuth2Client(clientId);
+    const client = new OAuth2Client({ clientId: clientId });
     const ticket = await client.verifyIdToken({
       idToken: idToken,
       audience: clientId,
