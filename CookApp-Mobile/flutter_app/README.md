@@ -1,4 +1,4 @@
-# flutter_app
+# tastify
 
 A new Flutter application.
 

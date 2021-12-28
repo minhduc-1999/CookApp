@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/NewFeedScreen/UserDelegateModel.dart';
-import 'package:flutter_app/ProfileScreen/ProfileActivity.dart';
-import 'package:flutter_app/Services/APIService.dart';
+import 'package:tastify/NewFeedScreen/UserDelegateModel.dart';
+import 'package:tastify/ProfileScreen/ProfileActivity.dart';
+import 'package:tastify/Services/APIService.dart';
 
 class SearchUserDelegate extends SearchDelegate<UserDelegateModel>{
   @override

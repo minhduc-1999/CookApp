@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_app/constants.dart';
+import 'package:tastify/constants.dart';
 
 class TextFieldContainer extends StatelessWidget {
   final Widget child;

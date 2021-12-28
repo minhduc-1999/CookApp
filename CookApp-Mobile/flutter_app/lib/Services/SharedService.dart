@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:api_cache_manager/api_cache_manager.dart';
 import 'package:api_cache_manager/models/cache_db_model.dart';
 import 'package:flutter/cupertino.dart';
-import 'package:flutter_app/Model/LoginRespondModel.dart';
-import 'package:flutter_app/main.dart';
+import 'package:tastify/Model/LoginRespondModel.dart';
+import 'package:tastify/main.dart';
 
 class SharedService {
   static Future<bool> isLoggedIn() async {

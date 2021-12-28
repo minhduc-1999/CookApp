@@ -1,15 +1,18 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/HomeScreen/HomeActivity.dart';
-import 'package:flutter_app/LoginScreen/LoginActivity.dart';
-import 'package:flutter_app/LoginScreen/SignUpActivity.dart';
+import 'package:tastify/HomeScreen/HomeActivity.dart';
+import 'package:tastify/LoginScreen/LoginActivity.dart';
+import 'package:tastify/LoginScreen/SignUpActivity.dart';
 
 
 import 'ProfileScreen/EditProfileActivity.dart';
+import 'Services/Auth.dart';
 import 'Services/SharedService.dart';
 String currentUserId;
-Widget _defaultHome = LoginActivity();
+Widget _defaultHome = LoginActivity(auth: Auth(),);
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();
   bool isLoggedIn = await SharedService.isLoggedIn();
   if (isLoggedIn){
     var loginDetails = await SharedService.loginDetails();
@@ -24,6 +27,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Flutter Demo',
       theme: ThemeData(
         // This is the theme of your application.
@@ -40,7 +44,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/': (context) => _defaultHome,
         '/home': (context) => HomeActivity(),
-        '/login': (context) => LoginActivity(),
+        '/login': (context) => LoginActivity(auth: Auth(),),
         '/signup': (context) => SignUpActivity(),
       },
 

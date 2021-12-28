@@ -1,10 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/HomeScreen/HomeActivity.dart';
-import 'package:flutter_app/LoginScreen/SignUpActivity.dart';
-import 'package:flutter_app/Model/LoginRequestModel.dart';
-import 'package:flutter_app/Services/APIService.dart';
-import 'package:flutter_app/constants.dart';
+import 'package:tastify/HomeScreen/HomeActivity.dart';
+import 'package:tastify/LoginScreen/SignUpActivity.dart';
+import 'package:tastify/Model/LoginRequestModel.dart';
+import 'package:tastify/Services/APIService.dart';
+import 'package:tastify/Services/Auth.dart';
+import 'package:tastify/constants.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 
@@ -14,8 +15,11 @@ import 'RoundedTextField.dart';
 import 'TextFieldContainer.dart';
 
 class LoginActivity extends StatefulWidget {
+  final AuthBase auth;
+
+  const LoginActivity({Key key, this.auth}) : super(key: key);
   @override
-  _LoginActivityState createState() => _LoginActivityState();
+  _LoginActivityState createState() => _LoginActivityState(this.auth);
 }
 
 class _LoginActivityState extends State<LoginActivity> {
@@ -24,7 +28,9 @@ class _LoginActivityState extends State<LoginActivity> {
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   String username;
   String password;
+  final AuthBase auth;
 
+  _LoginActivityState(this.auth);
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -41,7 +47,13 @@ class _LoginActivityState extends State<LoginActivity> {
       ),
     ));
   }
-
+  Future<void> _signInWithGoogle() async {
+    try {
+      await auth.signInWithGoogle();
+    } catch (e) {
+      print(e.toString());
+    }
+  }
   Widget _loginUI(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return SingleChildScrollView(
@@ -139,16 +151,6 @@ class _LoginActivityState extends State<LoginActivity> {
         SizedBox(
           height: size.height * 0.01,
         ),
-        Container(
-          alignment: Alignment.center,
-          child: Text(
-            "Forgot Password?",
-            style: TextStyle(fontSize: 16.0, color: appPrimaryColor),
-          ),
-        ),
-        SizedBox(
-          height: size.height * 0.01,
-        ),
         Center(
           child: LoginButton(
             text: "Log in",
@@ -195,6 +197,27 @@ class _LoginActivityState extends State<LoginActivity> {
                         }
                     });
               }
+            },
+          ),
+        ),
+
+        Center(
+          child: Text(
+            "Or",
+            style: TextStyle(color: appPrimaryColor),
+          ),
+        ),
+        Center(
+          child: LoginButton(
+            text: "Log in by Google",
+            press: () async{
+                setState(() {
+                  isAPIcallProcess = true;
+                });
+                await _signInWithGoogle();
+                setState(() {
+                  isAPIcallProcess = false;
+                });
             },
           ),
         ),

@@ -1,4 +1,4 @@
-name: flutter_app
+name: tastify
 description: A new Flutter application.
 
 # The following line prevents the package from being accidentally published to
@@ -40,6 +40,10 @@ dependencies:
   intl: ^0.17.0
   bubble: ^1.2.1
   carousel_slider: ^4.0.0
+  youtube_player_flutter: ^8.0.0
+  firebase_auth: ^1.2.0
+  firebase_core: ^1.2.0
+  google_sign_in: ^5.2.1
 dev_dependencies:
   flutter_test:
     sdk: flutter

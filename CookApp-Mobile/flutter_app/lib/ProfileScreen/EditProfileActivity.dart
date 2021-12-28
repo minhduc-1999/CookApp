@@ -2,10 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/EditUserRequestModel.dart';
-import 'package:flutter_app/Model/PresignedLinkedRequestModel.dart';
-import 'package:flutter_app/Model/UserRespondModel.dart';
-import 'package:flutter_app/Services/APIService.dart';
+import 'package:tastify/Model/EditUserRequestModel.dart';
+import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
+import 'package:tastify/Model/UserRespondModel.dart';
+import 'package:tastify/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
 
