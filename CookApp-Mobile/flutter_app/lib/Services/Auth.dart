@@ -19,7 +19,6 @@ class Auth implements AuthBase {
         'https://www.googleapis.com/auth/userinfo.profile',
         'openid'
       ],
-      clientId: '290846649369-a6gjncej6j02ap3djvqln4mdm8gpinnr.apps.googleusercontent.com'
     );
     final googleUser = await googleSignIn.signIn();
     if (googleUser != null) {
@@ -52,8 +51,5 @@ class Auth implements AuthBase {
   Future<void> signOut() async {
     final googleSignIn = GoogleSignIn();
     await googleSignIn.signOut();
-
-    await _firebaseAuth.signOut();
-
   }
 }

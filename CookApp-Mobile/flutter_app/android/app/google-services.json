@@ -7,18 +7,26 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:290846649369:android:f82377b9cbecbe204ace88",
+        "mobilesdk_app_id": "1:290846649369:android:43bdccab18a4a9e14ace88",
         "android_client_info": {
           "package_name": "com.example.tastify"
         }
       },
       "oauth_client": [
         {
-          "client_id": "290846649369-o888nfhguh74tq1vg5t013bmtrv8fuvj.apps.googleusercontent.com",
+          "client_id": "290846649369-a3mtcmhrgc1tss5jp6pn2edhvtjmqmdv.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.tastify",
             "certificate_hash": "ca492e14595f3d66295b8a39d1d96682460598c8"
+          }
+        },
+        {
+          "client_id": "290846649369-fpb05pomf4nndrrhu0i4j7rrh6e5tb8r.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.tastify",
+            "certificate_hash": "5423808bb2ee9e1979d860ca92a2502a5a62b0ed"
           }
         },
         {
