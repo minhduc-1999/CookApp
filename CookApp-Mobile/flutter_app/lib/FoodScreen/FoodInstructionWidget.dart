@@ -1,6 +1,8 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/FoodRespondModel.dart';
+import 'package:flutter/services.dart';
+import 'package:tastify/Model/FoodRespondModel.dart';
+import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../constants.dart';
 
@@ -90,7 +92,40 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
                 children: steps.map((item) {
                   return Step(step: item,index: steps.indexOf(item) + 1, height: height,);
                 }).toList(),
-              )
+              ),
+              SizedBox(height: 20,),
+              Text(
+                "Video",
+                style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+              ),
+              SizedBox(height: 10,),
+              Container(
+                child: YoutubePlayerBuilder(
+                  player: YoutubePlayer(
+                    controller: YoutubePlayerController(
+                      initialVideoId: YoutubePlayer.convertUrlToId("https://www.youtube.com/watch?v=cLeFx__w0lg"),
+                      flags: YoutubePlayerFlags(
+                          autoPlay: false
+                      ),
+
+                    ),
+                    showVideoProgressIndicator: true,
+                    progressIndicatorColor: Colors.blue,
+                    progressColors: ProgressBarColors(
+                        playedColor: Colors.blue,
+                        handleColor: Colors.blueAccent
+                    ),
+                  ),
+                  builder: (context, player){
+                    return Column(
+                      children: [
+                        player
+                      ],
+                    );
+                  },
+                ),
+              ),
+
             ],
           ),
         ),

@@ -1,10 +1,10 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/PostRequestModel.dart';
-import 'package:flutter_app/Model/PresignedLinkedRequestModel.dart';
-import 'package:flutter_app/Model/PresignedLinkedRespondModel.dart';
-import 'package:flutter_app/Services/APIService.dart';
+import 'package:tastify/Model/PostRequestModel.dart';
+import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
+import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
+import 'package:tastify/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:uuid/uuid.dart';

@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/FoodRespondModel.dart';
-import 'package:flutter_app/Services/APIService.dart';
+import 'package:tastify/Model/FoodRespondModel.dart';
+import 'package:tastify/Services/APIService.dart';
 
 import 'FoodWidget.dart';
 

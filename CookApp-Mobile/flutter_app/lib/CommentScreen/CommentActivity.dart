@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/CommentRequestModel.dart';
-import 'package:flutter_app/Model/CommentRespondModel.dart';
-import 'package:flutter_app/Services/APIService.dart';
+import 'package:tastify/Model/CommentRequestModel.dart';
+import 'package:tastify/Model/CommentRespondModel.dart';
+import 'package:tastify/Services/APIService.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../constants.dart';

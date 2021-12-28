@@ -1,11 +1,11 @@
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/Model/Message.dart';
-import 'package:flutter_app/Model/MessageRequestModel.dart';
-import 'package:flutter_app/Model/MessageRespondModel.dart';
-import 'package:flutter_app/Model/UserWallRespondModel.dart';
-import 'package:flutter_app/Services/APIService.dart';
-import 'package:flutter_app/main.dart';
+import 'package:tastify/Model/Message.dart';
+import 'package:tastify/Model/MessageRequestModel.dart';
+import 'package:tastify/Model/MessageRespondModel.dart';
+import 'package:tastify/Model/UserWallRespondModel.dart';
+import 'package:tastify/Services/APIService.dart';
+import 'package:tastify/main.dart';
 
 import '../config.dart';
 import '../constants.dart';

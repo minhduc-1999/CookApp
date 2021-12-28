@@ -3,11 +3,11 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_app/CommentScreen/CommentActivity.dart';
-import 'package:flutter_app/Model/ReactRequestModel.dart';
-import 'package:flutter_app/Model/UserRespondModel.dart';
-import 'package:flutter_app/ProfileScreen/ProfileActivity.dart';
-import 'package:flutter_app/Services/APIService.dart';
+import 'package:tastify/CommentScreen/CommentActivity.dart';
+import 'package:tastify/Model/ReactRequestModel.dart';
+import 'package:tastify/Model/UserRespondModel.dart';
+import 'package:tastify/ProfileScreen/ProfileActivity.dart';
+import 'package:tastify/Services/APIService.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
@@ -148,7 +148,7 @@ class _Post extends State<Post> {
                   margin: EdgeInsets.only(bottom: 10),
                   child: ClipRRect(
                     child: Image.network(images[0],
-                        fit: BoxFit.cover, width: 1000.0, height: height * 0.6),
+                        fit: BoxFit.cover, width: 1000.0, height: height * 0.55),
                   ))
               : Column(
                   children: [
@@ -158,9 +158,13 @@ class _Post extends State<Post> {
                                   child: Container(
                                     margin: EdgeInsets.only(bottom: 10),
                                     child: ClipRRect(
-                                        child: Image.network(item,
-                                            fit: BoxFit.cover,
-                                            width: 1000.0),),
+                                        child: Stack(
+                                          children: <Widget>[
+                                            Image.network(item,
+                                                fit: BoxFit.cover,
+                                                width: 1000.0),
+                                          ],
+                                        )),
                                   ),
                                 ))
                             .toList(),
@@ -172,7 +176,7 @@ class _Post extends State<Post> {
                                 _current = index;
                               });
                             },
-                            height: height * 0.6,
+                            height: height * 0.55,
                             viewportFraction: 1.0,
                             enlargeCenterPage: false)),
                     Row(
