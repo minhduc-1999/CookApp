@@ -19,8 +19,11 @@ class _CommentActivityState extends State<CommentActivity> {
   final String postId;
   List<Comment> comments;
   bool didFetchComments = false;
+
   _CommentActivityState(this.postId);
+
   final TextEditingController _commentController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -29,60 +32,65 @@ class _CommentActivityState extends State<CommentActivity> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        brightness: Brightness.dark,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: <Color>[appPrimaryColor, appPrimaryColor],
-            ),
-          ),
-        ),
-        title: Text('Comments'),
-      ),
-      body: buildPage(),
-    );
+    return buildPage();
   }
-  Widget buildPage() {
-    return Column(
-      children: [
-        Expanded(
-          child: buildComment(),
-        ),
-        Divider(),
-        ListTile(
-          title: TextFormField(
-            controller: _commentController,
-            decoration: InputDecoration(labelText: 'Write a comment...'),
-            onFieldSubmitted: addComment,
-          ),
-          trailing: OutlineButton(
-            onPressed: () {
-              addComment(_commentController.text);
-            },
-            borderSide: BorderSide.none,
-            child: Text("Post"),
-          ),
-        ),
-      ],
-    );
 
+  Widget buildPage() {
+    return DraggableScrollableSheet(
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        initialChildSize: 0.9,
+        builder: (_, controller) => Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(15),
+                  )),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                      padding: EdgeInsets.all(8),
+                      child: Center(child: Text("Comments", style: TextStyle(fontSize: 22),))),
+                  Divider(
+                    height: 10.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                  Expanded(
+                    child: buildComment(),
+                  ),
+                  Divider(),
+                  ListTile(
+                    title: TextFormField(
+                      controller: _commentController,
+                      decoration:
+                          InputDecoration(labelText: 'Write a comment...'),
+                      onFieldSubmitted: addComment,
+                    ),
+                    trailing: OutlineButton(
+                      onPressed: () {
+                        addComment(_commentController.text);
+                      },
+                      borderSide: BorderSide.none,
+                      child: Text("Post"),
+                    ),
+                  ),
+                ],
+              ),
+            ));
   }
 
   Widget buildComment() {
-      if(this.didFetchComments == false){
-        return Container(
-            alignment: FractionalOffset.center,
-            child: CircularProgressIndicator());
-      }else {
-        return ListView(children: comments);
-      }
+    if (this.didFetchComments == false) {
+      return Container(
+          alignment: FractionalOffset.center,
+          child: CircularProgressIndicator());
+    } else {
+      return ListView(children: comments);
+    }
   }
-  void fetchData() async{
+
+  void fetchData() async {
     CommentRespondModel dataComment = await APIService.getComment(postId, "");
     List<Comment> temp = [];
     print("total comment: " + dataComment.data.comments.length.toString());
@@ -100,9 +108,11 @@ class _CommentActivityState extends State<CommentActivity> {
       comments = temp;
     });
   }
-  void addComment(String comment) async{
+
+  void addComment(String comment) async {
     _commentController.clear();
-    await APIService.comment(postId, CommentRequestModel(content: comment, parentId: ""));
+    await APIService.comment(
+        postId, CommentRequestModel(content: comment, parentId: ""));
     await fetchData();
   }
 }

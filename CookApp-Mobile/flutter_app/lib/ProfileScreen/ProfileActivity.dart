@@ -315,8 +315,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
                           alignment: Alignment.centerLeft,
                           padding: const EdgeInsets.only(top: 15.0),
                           child: Text(
-                            user.data.user.displayName,
-
+                            //user.data.user.displayName,
+                            "aa",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           )),
                     ],

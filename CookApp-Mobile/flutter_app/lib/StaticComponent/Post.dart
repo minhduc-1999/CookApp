@@ -64,6 +64,7 @@ class Post extends StatefulWidget {
   final int numOfComment;
   final DateTime dateTime;
   final bool isLike;
+
   _Post createState() => _Post(
       id: this.id,
       userId: this.userId,
@@ -74,8 +75,8 @@ class Post extends StatefulWidget {
       avatar: this.avatar,
       numOfReaction: this.numOfReaction,
       numOfComment: this.numOfComment,
-  dateTime: this.dateTime,
-  liked: this.isLike);
+      dateTime: this.dateTime,
+      liked: this.isLike);
 }
 
 class _Post extends State<Post> {
@@ -153,7 +154,9 @@ class _Post extends State<Post> {
                   margin: EdgeInsets.only(bottom: 10),
                   child: ClipRRect(
                     child: Image.network(images[0],
-                        fit: BoxFit.cover, width: 1000.0, height: height * 0.55),
+                        fit: BoxFit.cover,
+                        width: 1000.0,
+                        height: height * 0.55),
                   ))
               : Column(
                   children: [
@@ -164,12 +167,11 @@ class _Post extends State<Post> {
                                     margin: EdgeInsets.only(bottom: 10),
                                     child: ClipRRect(
                                         child: Stack(
-                                          children: <Widget>[
-                                            Image.network(item,
-                                                fit: BoxFit.cover,
-                                                width: 1000.0),
-                                          ],
-                                        )),
+                                      children: <Widget>[
+                                        Image.network(item,
+                                            fit: BoxFit.cover, width: 1000.0),
+                                      ],
+                                    )),
                                   ),
                                 ))
                             .toList(),
@@ -280,9 +282,18 @@ class _Post extends State<Post> {
                   size: 25.0,
                 ),
                 onTap: () {
-                  goToComments(
+                  /*goToComments(
                     context: context,
                     postId: id,
+                  );*/
+                  return showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return CommentActivity(postId: id);
+                    },
+
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
                   );
                 }),
           ],
@@ -326,19 +337,16 @@ class _Post extends State<Post> {
         SizedBox(
           height: 5,
         ),
-        Row(
-
-          children: <Widget>[
-            Container(
-              margin: const EdgeInsets.only(left: 15.0),
+        Row(children: <Widget>[
+          Container(
+            margin: const EdgeInsets.only(left: 15.0),
             child: Text(
               timeago.format(dateTime),
               overflow: TextOverflow.ellipsis,
               style: TextStyle(fontSize: 13, color: Colors.grey),
             ),
           )
-          ]
-        )
+        ])
       ],
     );
   }
