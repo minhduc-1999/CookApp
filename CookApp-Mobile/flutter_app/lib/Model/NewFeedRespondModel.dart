@@ -83,7 +83,7 @@ class Posts {
   Author author;
   int numOfReaction;
   int numOfComment;
-
+  String reaction;
   Posts(
       {this.id,
         this.createdAt,
@@ -93,7 +93,8 @@ class Posts {
         this.videos,
         this.author,
         this.numOfReaction,
-        this.numOfComment});
+        this.numOfComment,
+      this.reaction});
 
   Posts.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -106,6 +107,7 @@ class Posts {
     json['author'] != null ? new Author.fromJson(json['author']) : null;
     numOfReaction = json['numOfReaction'];
     numOfComment = json['numOfComment'];
+    reaction = json['reaction'] != null ? json['reaction'] : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -121,6 +123,9 @@ class Posts {
     }
     data['numOfReaction'] = this.numOfReaction;
     data['numOfComment'] = this.numOfComment;
+    if (this.reaction != null){
+      data['reaction'] = this.reaction;
+    }
     return data;
   }
 }
@@ -156,10 +161,10 @@ class Metadata {
   Metadata({this.page, this.pageSize, this.totalPage, this.totalCount});
 
   Metadata.fromJson(Map<String, dynamic> json) {
-    page = json['page'];
-    pageSize = json['pageSize'];
-    totalPage = json['totalPage'];
-    totalCount = json['totalCount'];
+    page = json['page'] != null ? json['page'] : null;
+    pageSize = json['pageSize'] != null ? json['pageSize'] : null;
+    totalPage = json['totalPage'] != null ? json['totalPage'] : null;
+    totalCount = json['totalCount'] != null ? json['totalCount'] : null;
   }
 
   Map<String, dynamic> toJson() {

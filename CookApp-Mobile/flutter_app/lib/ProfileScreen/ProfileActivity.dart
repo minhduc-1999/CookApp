@@ -316,6 +316,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
                           padding: const EdgeInsets.only(top: 15.0),
                           child: Text(
                             user.data.user.displayName,
+
                             style: TextStyle(fontWeight: FontWeight.bold),
                           )),
                     ],

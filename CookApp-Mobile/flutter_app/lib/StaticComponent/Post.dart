@@ -22,7 +22,8 @@ class Post extends StatefulWidget {
       this.displayName,
       this.numOfReaction,
       this.numOfComment,
-      this.dateTime});
+      this.dateTime,
+      this.isLike});
 
   factory Post.fromJSON(Map data) {
     return Post(
@@ -62,6 +63,7 @@ class Post extends StatefulWidget {
   final int numOfReaction;
   final int numOfComment;
   final DateTime dateTime;
+  final bool isLike;
   _Post createState() => _Post(
       id: this.id,
       userId: this.userId,
@@ -72,7 +74,8 @@ class Post extends StatefulWidget {
       avatar: this.avatar,
       numOfReaction: this.numOfReaction,
       numOfComment: this.numOfComment,
-  dateTime: this.dateTime);
+  dateTime: this.dateTime,
+  liked: this.isLike);
 }
 
 class _Post extends State<Post> {
@@ -84,9 +87,10 @@ class _Post extends State<Post> {
   final String displayName;
   final String avatar;
   final DateTime dateTime;
+
   int numOfReaction;
   int numOfComment;
-  bool liked = false;
+  bool liked;
   bool showHeart = false;
   int _current = 0;
   final CarouselController _controller = CarouselController();
@@ -105,7 +109,8 @@ class _Post extends State<Post> {
       this.avatar,
       this.numOfReaction,
       this.numOfComment,
-      this.dateTime});
+      this.dateTime,
+      this.liked});
 
   GestureDetector buildLikeIcon() {
     Color color;
