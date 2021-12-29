@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
+import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
 import 'package:tastify/Model/LoginRequestModel.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/Auth.dart';
@@ -10,9 +11,6 @@ import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 
 import 'LoginButton.dart';
-import 'RoundedPasswordFeild.dart';
-import 'RoundedTextField.dart';
-import 'TextFieldContainer.dart';
 
 class LoginActivity extends StatefulWidget {
   final AuthBase auth;
@@ -47,12 +45,14 @@ class _LoginActivityState extends State<LoginActivity> {
       ),
     ));
   }
-  Future<void> _signInWithGoogle() async {
+  Future<String> _signInWithGoogle() async {
+    String s = "";
     try {
-      await auth.signInWithGoogle();
+      s = await auth.signInWithGoogle();
     } catch (e) {
       print(e.toString());
     }
+    return s;
   }
   Widget _loginUI(BuildContext context) {
     Size size = MediaQuery.of(context).size;
@@ -170,7 +170,7 @@ class _LoginActivityState extends State<LoginActivity> {
                           Navigator.pushAndRemoveUntil(context,
                               MaterialPageRoute(
                                 builder: (context) {
-                                  return HomeActivity();
+                                  return HomeActivity(auth: auth,);
                                 },
                               ), (route) => false)
                         }
@@ -211,13 +211,38 @@ class _LoginActivityState extends State<LoginActivity> {
           child: LoginButton(
             text: "Log in by Google",
             press: () async{
-                setState(() {
-                  isAPIcallProcess = true;
-                });
-                await _signInWithGoogle();
-                setState(() {
-                  isAPIcallProcess = false;
-                });
+                String idToken = await _signInWithGoogle();
+                var response = await APIService.loginByGoogle(LoginByGoogleRequestModel(idToken: idToken));
+                if (response)
+                {
+                  Navigator.pushAndRemoveUntil(context,
+                      MaterialPageRoute(
+                        builder: (context) {
+                          return HomeActivity(auth: auth,);
+                        },
+                      ), (route) => false);
+                }
+                else
+                {
+                  showDialog(
+                    context: context,
+                    builder: (_) => new AlertDialog(
+                      title: new Text("ERROR!!!"),
+                      content: new Text("There're some error"),
+                      actions: <Widget>[
+                        FlatButton(
+                          child: Text(
+                            "OK",
+                            style: TextStyle(color: appPrimaryColor),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                }
             },
           ),
         ),
