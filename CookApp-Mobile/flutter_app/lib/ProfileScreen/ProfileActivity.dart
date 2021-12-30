@@ -315,8 +315,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
                           alignment: Alignment.centerLeft,
                           padding: const EdgeInsets.only(top: 15.0),
                           child: Text(
-                            //user.data.user.displayName,
-                            "aa",
+                            user.data.user.displayName,
+
                             style: TextStyle(fontWeight: FontWeight.bold),
                           )),
                     ],
@@ -378,6 +378,7 @@ class ImageTile extends StatelessWidget {
       dateTime: DateTime.fromMillisecondsSinceEpoch(res.data.createdAt),
       numOfComment: res.data.numOfComment,
       numOfReaction: res.data.numOfReaction,
+      isLike: false,
     );
     openImagePost(context, post);
   }

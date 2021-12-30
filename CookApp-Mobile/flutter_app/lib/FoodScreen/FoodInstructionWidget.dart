@@ -89,7 +89,7 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
                   }).toList(),
                 ),
                 SizedBox(
-                  height: 20,
+                  height: 10,
                 ),
                 Text(
                   "Instructions",
@@ -101,37 +101,44 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
                   }).toList(),
                 ),*/
                 StepItem(steps: steps,),
+
+                food.videoUrl != null ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "Video",
+                      style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
+                    ),
+                    SizedBox(
+                      height: 10,
+                    ),
+                    Container(
+                      child: YoutubePlayerBuilder(
+                        player: YoutubePlayer(
+                          controller: YoutubePlayerController(
+                            initialVideoId: YoutubePlayer.convertUrlToId(
+                                food.videoUrl),
+                            flags: YoutubePlayerFlags(autoPlay: false),
+                          ),
+                          showVideoProgressIndicator: true,
+                          progressIndicatorColor: Colors.blue,
+                          progressColors: ProgressBarColors(
+                              playedColor: Colors.blue,
+                              handleColor: Colors.blueAccent),
+                        ),
+                        builder: (context, player) {
+                          return Column(
+                            children: [player],
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                ) : Container(),
                 SizedBox(
                   height: 20,
                 ),
-                Text(
-                  "Video",
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(
-                  height: 10,
-                ),
-                Container(
-                  child: YoutubePlayerBuilder(
-                    player: YoutubePlayer(
-                      controller: YoutubePlayerController(
-                        initialVideoId: YoutubePlayer.convertUrlToId(
-                            "https://www.youtube.com/watch?v=cLeFx__w0lg"),
-                        flags: YoutubePlayerFlags(autoPlay: false),
-                      ),
-                      showVideoProgressIndicator: true,
-                      progressIndicatorColor: Colors.blue,
-                      progressColors: ProgressBarColors(
-                          playedColor: Colors.blue,
-                          handleColor: Colors.blueAccent),
-                    ),
-                    builder: (context, player) {
-                      return Column(
-                        children: [player],
-                      );
-                    },
-                  ),
-                ),
+
               ],
             ),
           ),
