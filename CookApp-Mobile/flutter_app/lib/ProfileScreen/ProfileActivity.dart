@@ -378,7 +378,7 @@ class ImageTile extends StatelessWidget {
       dateTime: DateTime.fromMillisecondsSinceEpoch(res.data.createdAt),
       numOfComment: res.data.numOfComment,
       numOfReaction: res.data.numOfReaction,
-      isLike: false,
+      isLike: res.data.reaction != null,
     );
     openImagePost(context, post);
   }

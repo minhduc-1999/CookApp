@@ -1,5 +1,7 @@
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:speech_to_text/speech_recognition_result.dart';
+import 'package:speech_to_text/speech_to_text.dart';
 import 'package:tastify/Model/Message.dart';
 import 'package:tastify/Model/MessageRequestModel.dart';
 import 'package:tastify/Model/MessageRespondModel.dart';
@@ -16,20 +18,55 @@ class MessageActivity extends StatefulWidget {
 
 class _MessageActivityState extends State<MessageActivity> {
   UserWallRespondModel user;
+  SpeechToText _speechToText = SpeechToText();
   List<Message> messages = [];
   List<String> suggestions = [];
+  bool _speechEnabled = false;
   MessageRespondModel preRespond = MessageRespondModel(response: "temp", context: null);
   final messageInsert = TextEditingController();
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    _initSpeechToText();
     fetchData();
   }
   void fetchData() async {
     var response = await APIService.getUserWall(currentUserId);
     setState(() {
       user = response;
+    });
+  }
+  void _initSpeechToText() async {
+    _speechEnabled = await _speechToText.initialize();
+
+    setState(() {});
+  }
+  void _startListening() async {
+    var locales = await _speechToText.locales();
+
+    // get locale of vietnam
+    var selectedLocale = locales[121];
+
+    await _speechToText.listen(
+        onResult: _onSpeechResult, localeId: selectedLocale.localeId);
+    setState(() {});
+  }
+
+  /// Manually stop the active speech recognition session
+  /// Note that there are also timeouts that each platform enforces
+  /// and the SpeechToText plugin supports setting timeouts on the
+  /// listen method.
+  void _stopListening() async {
+    await _speechToText.stop();
+    setState(() {});
+  }
+
+  /// This is the callback that the SpeechToText plugin calls when
+  /// the platform returns recognized words.
+  void _onSpeechResult(SpeechRecognitionResult result) {
+    setState(() {
+      messageInsert.text = result.recognizedWords;
     });
   }
   @override
@@ -80,12 +117,16 @@ class _MessageActivityState extends State<MessageActivity> {
             Container(
               child: ListTile(
                 leading: IconButton(
-                  icon: Icon(
-                    Icons.keyboard_voice,
-                    color: appPrimaryColor,
-                    size: 35,
-                  ),
-                ),
+                    icon: Icon(
+                      _speechToText.isNotListening ? Icons.mic_off : Icons.mic,
+                      color: appPrimaryColor,
+                      size: 35,
+                    ),
+                    onPressed: () {
+                      _speechToText.isNotListening
+                          ? _startListening()
+                          : _stopListening();
+                    }),
                 title: Container(
                   height: 40,
                   decoration: BoxDecoration(
@@ -158,6 +199,7 @@ class _MessageActivityState extends State<MessageActivity> {
 
     );
   }
+
   Widget suggestion(String value){
     return Container(
       child: Row(
@@ -170,7 +212,7 @@ class _MessageActivityState extends State<MessageActivity> {
               },
               child: Bubble(
                   radius: Radius.circular(15.0),
-                  color: appPrimaryColor,
+                  color: Colors.grey.withOpacity(0.3),
                   elevation: 0.0,
                   child: Padding(
                     padding: EdgeInsets.only(left: 10.0,right: 10.0,top:2.0,bottom: 2.0),
@@ -184,7 +226,7 @@ class _MessageActivityState extends State<MessageActivity> {
                                 value,
                                 textAlign: TextAlign.center,
                                 style: TextStyle(
-                                    color: Colors.white, fontWeight: FontWeight.bold),
+                                    color: Colors.black),
                               ),
                             )),
 
@@ -224,8 +266,8 @@ class _MessageActivityState extends State<MessageActivity> {
             child: Bubble(
                 radius: Radius.circular(15.0),
                 color: message.isBot == false
-                    ? Color.fromRGBO(252, 186, 3, 1)
-                    : appPrimaryColor,
+                    ? appPrimaryColor
+                    :Color.fromRGBO(252, 186, 3, 1),
                 elevation: 0.0,
                 child: Padding(
                   padding: EdgeInsets.all(2.0),
@@ -241,7 +283,7 @@ class _MessageActivityState extends State<MessageActivity> {
                             child: Text(
                               message.response,
                               style: TextStyle(
-                                  color: Colors.white, fontWeight: FontWeight.bold),
+                                  color: Colors.white),
                             ),
                           ))
                     ],
