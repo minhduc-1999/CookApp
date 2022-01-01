@@ -7,6 +7,7 @@ import "dotenv/config";
 import { TransactionInterceptor } from "interceptors/transaction.interceptor";
 import { AuthModule } from "modules/auth/auth.module";
 import { CoreModule } from "modules/core/core.module";
+import { NotificationModule } from "modules/notification/notification.module";
 import { UserModule } from "modules/user/user.module";
 import { RavenModule } from "nest-raven";
 import { ConfigModule, ConfigService } from "nestjs-config";
@@ -46,7 +47,8 @@ import { contextMiddleware } from "./middleware/context.middleware";
     }),
     AuthModule,
     UserModule,
-    CoreModule
+    CoreModule,
+    NotificationModule,
   ],
   controllers: [AppController],
   providers: [

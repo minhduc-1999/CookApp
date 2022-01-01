@@ -1,8 +1,9 @@
 import { Inject } from "@nestjs/common";
-import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
+import { EventBus, IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { UserDTO } from "dtos/social/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
+import { NewPostEvent } from "modules/notification/usecases/NewPostNotification";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { GetWallResponse } from "./getWallResponse";
@@ -21,7 +22,8 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
     private _wallRepo: IWallRepository,
     @Inject("IUserService")
     private _userService: IUserService,
-    @Inject("IStorageService") private _storageService: IStorageService
+    @Inject("IStorageService") private _storageService: IStorageService,
+    private _eventBus: EventBus
   ) {}
   async execute(query: GetWallQuery): Promise<GetWallResponse> {
     const user = await this._userService.getUserPublicInfo(query.targetId);
@@ -36,6 +38,8 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
         await this._storageService.getDownloadUrls([wall.user.avatar])
       )[0];
     }
+    console.log("create event")
+    this._eventBus.publish(new NewPostEvent());
     return new GetWallResponse(wall, isFollowed);
   }
 }
