@@ -1,17 +1,13 @@
-import { AggregateRoot } from "@nestjs/cqrs";
-import { NewPostEvent } from "modules/notification/usecases/NewPostNotification";
-
 export class NotificationTemplate {
   title: string;
+  id: string;
   body: string;
 }
-export class Notification extends AggregateRoot {
+export class NotificationDTO {
   title: string;
   body: string;
-  template_id: string;
+  templateId: string;
   data: object;
-
-  push() {
-    this.apply(new NewPostEvent());
-  }
+  targets: string[];
+  image: string;
 }

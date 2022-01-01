@@ -49,7 +49,7 @@ const queryHandlers = [
   GetFeedPostsQueryHandler,
   GetPostCommentsQueryHandler,
   GetWallQueryHandler,
-  GetUsersQueryHandler
+  GetUsersQueryHandler,
 ];
 const services = [
   {
@@ -95,14 +95,14 @@ const repositories = [
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
-    AuthModule
+    AuthModule,
   ],
   controllers: [
     PostController,
     WallController,
     FeedController,
     CommentController,
-    UserController
+    UserController,
   ],
   providers: [
     ...commandHandlers,
@@ -110,5 +110,6 @@ const repositories = [
     ...repositories,
     ...queryHandlers,
   ],
+  exports: ["IWallRepository"],
 })
 export class UserModule {}

@@ -105,3 +105,9 @@ export function escapeRegExp(text: string): string {
 export function retrieveUsernameFromEmail(emailAddress: string): string {
   return emailAddress.slice(0, emailAddress.indexOf("@"));
 }
+
+export function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}

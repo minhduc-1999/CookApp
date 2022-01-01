@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
@@ -11,6 +11,7 @@ import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
+import { NewPostEvent } from "modules/notification/usecases/NewPostNotification";
 
 export class CreatePostCommand extends BaseCommand {
   postDto: CreatePostRequest;
@@ -32,7 +33,8 @@ export class CreatePostCommandHandler
     @Inject("IWallRepository")
     private _wallRepo: IWallRepository,
     @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository
+    private _feedRepo: IFeedRepository,
+    private _eventBus: EventBus
   ) {}
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { postDto, user } = command;
@@ -65,7 +67,7 @@ export class CreatePostCommandHandler
     await Promise.all(tasks);
 
     result.images = await this._storageService.getDownloadUrls(result.images);
-
+    this._eventBus.publish(new NewPostEvent(result, user))
     return result;
   }
 }

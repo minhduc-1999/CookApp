@@ -18,7 +18,12 @@ import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.rep
 import { IAuthentication } from "modules/auth/services/authentication.service";
 import { ClientSession } from "mongoose";
 import { ConfigService } from "nestjs-config";
-import { clean, createUpdatingObject, retrieveUsernameFromEmail } from "utils";
+import {
+  clean,
+  createUpdatingObject,
+  generateDisplayName,
+  retrieveUsernameFromEmail,
+} from "utils";
 import { GoogleSignInRequest } from "./googleSignInRequest";
 import { GoogleSignInResponse } from "./googleSignInResponse";
 
@@ -60,6 +65,7 @@ export class GoogleSignInCommandHandler
             id: payload.sub,
             type: ExternalProvider.GOOGLE,
           },
+          displayName: generateDisplayName(),
         });
         let res = await this._userRepo.getUserByEmail(userData.email);
 

@@ -4,6 +4,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";
+import { UserModule } from "modules/user/user.module";
 import { ConfigModule } from "nestjs-config";
 import { NotiRepository } from "./adapters/out/repositories/notification.repository";
 import { NewPostEventHandler } from "./usecases/NewPostNotification";
@@ -32,6 +33,7 @@ const repositories = [
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
+    UserModule
   ],
   controllers: [],
   providers: [...eventHandlers, ...repositories],
