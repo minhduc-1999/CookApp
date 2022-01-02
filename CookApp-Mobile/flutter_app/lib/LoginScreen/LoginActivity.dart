@@ -21,8 +21,9 @@ class LoginActivity extends StatefulWidget {
 }
 
 class _LoginActivityState extends State<LoginActivity> {
-  bool isAPIcallProcess = false;
+
   bool hidePassword = true;
+  bool isAPIcallProcess = false;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   String username;
   String password;

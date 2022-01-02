@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
@@ -18,7 +19,8 @@ class UploadActivity extends StatefulWidget {
 
 class _UploadActivityState extends State<UploadActivity> {
   List<File> files = [];
-
+  bool isAPIcallProcess = false;
+  GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   ImagePicker imagePicker = ImagePicker();
   bool circular = false;
   Map<String, double> currentLocation = Map();
@@ -152,77 +154,88 @@ class _UploadActivityState extends State<UploadActivity> {
                     return _photoList[index];
                   }),
             ))
-        : Scaffold(
-            resizeToAvoidBottomInset: false,
-            appBar: AppBar(
-                backgroundColor: appPrimaryColor,
-                leading: IconButton(
-                  icon: Icon(Icons.arrow_back, color: Colors.white),
-                  onPressed: () {
-                    setState(() {
-                      files.clear();
-                    });
-                  },
-                ),
-                title: const Text(
-                  "New Post",
-                  style: const TextStyle(color: Colors.white),
-                ),
-                actions: <Widget>[
-                  FlatButton(
-                      onPressed: () async {
-                        if (files != null) {
-                          setState(() {
-                            circular = true;
-                          });
-                          List<String> names = [];
-                          for (var i in files) {
-                            //names.add(i.path.substring(i.path.lastIndexOf("/")+1));
-                            names.add(
-                                i.path.substring(i.path.lastIndexOf("/") + 1));
-                          }
-                          List<String> objectName = [];
-                          List<String> video = [];
-                          var response = await APIService.getPresignedLink(
-                              PresignedLinkedRequestModel(fileNames: names));
-                          uploadImage(response, objectName);
-                          for (int i = 0; i < response.data.items.length; i++) {
-                            await APIService.uploadImage(
-                                files[i], response.data.items[i].signedLink);
-                            objectName.add(response.data.items[i].objectName);
-                          }
-                          print("object name " + objectName.length.toString());
-                          await APIService.uploadPost(PostRequestModel(
-                              content: descriptionController.text,
-                              images: objectName,
-                              videos: video));
-                          setState(() {
-                            circular = false;
-                          });
-                          Navigator.of(context).pop();
-                        }
-                      },
-                      child: IconButton(
-                          icon: Icon(Icons.send,
-                              color: Colors.white))
-                      )
-                ]),
-            body: circular
-                ? Center(child: CircularProgressIndicator())
-                : ListView(
-                    children: <Widget>[
-                      PostForm(
-                        imageFile: files,
-                        descriptionController: descriptionController,
-                        locationController: locationController,
-                        loading: uploading,
-                      ),
-                      Divider(),
-                    ],
+        : SafeArea(
+          child: Scaffold(
+              resizeToAvoidBottomInset: false,
+              appBar: AppBar(
+                  backgroundColor: appPrimaryColor,
+                  leading: IconButton(
+                    icon: Icon(Icons.arrow_back, color: Colors.white),
+                    onPressed: () {
+                      setState(() {
+                        files.clear();
+                      });
+                    },
                   ),
-          );
-  }
+                  title: const Text(
+                    "New Post",
+                    style: const TextStyle(color: Colors.white),
+                  ),
+                  actions: <Widget>[
+                    FlatButton(
+                        onPressed: () async {
+                          if (files != null) {
+                            setState(() {
+                              isAPIcallProcess = true;
+                            });
+                            List<String> names = [];
+                            for (var i in files) {
+                              //names.add(i.path.substring(i.path.lastIndexOf("/")+1));
+                              names.add(
+                                  i.path.substring(i.path.lastIndexOf("/") + 1));
+                            }
+                            List<String> objectName = [];
+                            List<String> video = [];
+                            var response = await APIService.getPresignedLink(
+                                PresignedLinkedRequestModel(fileNames: names));
+                            uploadImage(response, objectName);
+                            for (int i = 0; i < response.data.items.length; i++) {
+                              await APIService.uploadImage(
+                                  files[i], response.data.items[i].signedLink);
+                              objectName.add(response.data.items[i].objectName);
+                            }
+                            print("object name " + objectName.length.toString());
+                            await APIService.uploadPost(PostRequestModel(
+                                content: descriptionController.text,
+                                images: objectName,
+                                videos: video));
+                            setState(() {
+                              isAPIcallProcess = false;
+                            });
+                            Navigator.of(context).pop();
+                          }
+                        },
+                        child: IconButton(
+                            icon: Icon(Icons.send,
+                                color: Colors.white))
+                        )
+                  ]),
+              body: ProgressHUD(
+                child: Form(
+                  key: globalFormKey,
+                  child: _uploadUI(context),
+                ),
+                inAsyncCall: isAPIcallProcess,
+                key: UniqueKey(),
+                opacity: 0.3,
+              )
+            ),
+        );
 
+  }
+  Widget _uploadUI(BuildContext context){
+    return ListView(
+      children: <Widget>[
+        PostForm(
+          imageFile: files,
+          descriptionController: descriptionController,
+          locationController: locationController,
+          loading: uploading,
+        ),
+        Divider(),
+      ],
+    );
+  }
   _getFile(AssetEntity asset) async {
     File temp = await asset.file;
     setState(() {
