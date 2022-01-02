@@ -7,10 +7,15 @@ import { ShareModule } from "modules/share/share.module";
 import { UserModule } from "modules/user/user.module";
 import { ConfigModule } from "nestjs-config";
 import { NotiRepository } from "./adapters/out/repositories/notification.repository";
+import { ReactPostEventHandler } from "./usecases/LikeNotification";
 import { NewFollowerEventHandler } from "./usecases/NewFollowerNotification";
 import { NewPostEventHandler } from "./usecases/NewPostNotification";
 
-const eventHandlers = [NewPostEventHandler, NewFollowerEventHandler];
+const eventHandlers = [
+  NewPostEventHandler,
+  NewFollowerEventHandler,
+  ReactPostEventHandler,
+];
 
 const repositories = [
   {

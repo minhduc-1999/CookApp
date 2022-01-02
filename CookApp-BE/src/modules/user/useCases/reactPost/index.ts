@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
 import { UserDTO } from "dtos/social/user.dto";
 import { IPostService } from "modules/user/services/post.service";
@@ -9,6 +9,7 @@ import { ClientSession } from "mongoose";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { ReactPostResponse } from "./reactPostResponse";
 import { ReactionDTO } from "dtos/social/reaction.dto";
+import { ReactPostEvent } from "modules/notification/usecases/LikeNotification";
 export class ReactPostCommand extends BaseCommand {
   reactReq: ReactPostRequest;
   constructor(
@@ -23,18 +24,20 @@ export class ReactPostCommand extends BaseCommand {
 
 @CommandHandler(ReactPostCommand)
 export class ReactPostCommandHandler
-  implements ICommandHandler<ReactPostCommand> {
+  implements ICommandHandler<ReactPostCommand>
+{
   constructor(
     @Inject("IPostService")
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
     @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository
+    private _feedRepo: IFeedRepository,
+    private _eventBus: EventBus
   ) {}
   async execute(command: ReactPostCommand): Promise<ReactPostResponse> {
     const { user, reactReq } = command;
-    await this._postService.getPostDetail(reactReq.postId);
+    const post = await this._postService.getPostDetail(reactReq.postId);
 
     const reactDto = ReactionDTO.create({
       type: reactReq.react,
@@ -60,6 +63,12 @@ export class ReactPostCommandHandler
       reacted = true;
     }
 
-    return await Promise.all(tasks).then(() => new ReactPostResponse(reacted));
+    return await Promise.all(tasks).then(() => {
+      if (reacted) {
+        this._eventBus.publish(new ReactPostEvent(post, user));
+        console.log("noti react")
+      }
+      return new ReactPostResponse(reacted);
+    });
   }
 }
