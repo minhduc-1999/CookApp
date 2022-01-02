@@ -1,3 +1,4 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
@@ -19,8 +20,11 @@ class _CommentActivityState extends State<CommentActivity> {
   final String postId;
   List<Comment> comments;
   bool didFetchComments = false;
+
   _CommentActivityState(this.postId);
+
   final TextEditingController _commentController = TextEditingController();
+
   @override
   void initState() {
     super.initState();
@@ -29,60 +33,73 @@ class _CommentActivityState extends State<CommentActivity> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        automaticallyImplyLeading: true,
-        brightness: Brightness.dark,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: <Color>[appPrimaryColor, appPrimaryColor],
-            ),
-          ),
-        ),
-        title: Text('Comments'),
-      ),
-      body: buildPage(),
-    );
+    return buildPage();
   }
-  Widget buildPage() {
-    return Column(
-      children: [
-        Expanded(
-          child: buildComment(),
-        ),
-        Divider(),
-        ListTile(
-          title: TextFormField(
-            controller: _commentController,
-            decoration: InputDecoration(labelText: 'Write a comment...'),
-            onFieldSubmitted: addComment,
-          ),
-          trailing: OutlineButton(
-            onPressed: () {
-              addComment(_commentController.text);
-            },
-            borderSide: BorderSide.none,
-            child: Text("Post"),
-          ),
-        ),
-      ],
-    );
 
+  Widget buildPage() {
+    return DraggableScrollableSheet(
+        minChildSize: 0.5,
+        maxChildSize: 0.9,
+        initialChildSize: 0.9,
+        builder: (_, controller) => Container(
+              decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(
+                    top: Radius.circular(15),
+                  )),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Container(
+                      padding: EdgeInsets.all(8),
+                      child: Center(
+                          child: Text(
+                        "Comments",
+                        style: TextStyle(fontSize: 22),
+                      ))),
+                  Divider(
+                    height: 10.0,
+                    color: Colors.grey.withOpacity(0.5),
+                  ),
+                  Expanded(
+                    child: buildComment(),
+                  ),
+                  Divider(),
+                  Padding(
+                    padding: MediaQuery.of(context).viewInsets,
+                    child: ListTile(
+                      title: TextFormField(
+                        controller: _commentController,
+                        decoration:
+                            InputDecoration(labelText: 'Write a comment...'),
+                        onFieldSubmitted: addComment,
+                      ),
+                      trailing: OutlineButton(
+                        onPressed: () {
+                          addComment(_commentController.text);
+                        },
+                        borderSide: BorderSide.none,
+                        child: Text("Post"),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ));
   }
 
   Widget buildComment() {
-      if(this.didFetchComments == false){
-        return Container(
-            alignment: FractionalOffset.center,
-            child: CircularProgressIndicator());
-      }else {
-        return ListView(children: comments);
-      }
+    if (this.didFetchComments == false) {
+      return Container(
+          alignment: FractionalOffset.center,
+          child: CircularProgressIndicator());
+    } else {
+      return ListView(children: comments);
+    }
   }
-  void fetchData() async{
+
+  void fetchData() async {
     CommentRespondModel dataComment = await APIService.getComment(postId, "");
     List<Comment> temp = [];
     print("total comment: " + dataComment.data.comments.length.toString());
@@ -100,9 +117,11 @@ class _CommentActivityState extends State<CommentActivity> {
       comments = temp;
     });
   }
-  void addComment(String comment) async{
+
+  void addComment(String comment) async {
     _commentController.clear();
-    await APIService.comment(postId, CommentRequestModel(content: comment, parentId: ""));
+    await APIService.comment(
+        postId, CommentRequestModel(content: comment, parentId: ""));
     await fetchData();
   }
 }
@@ -125,6 +144,7 @@ class Comment extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Column(
       children: <Widget>[
         /* ListTile(
@@ -138,7 +158,7 @@ class Comment extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              margin: EdgeInsets.only(left: 20, right: 10, top: 20),
+              margin: EdgeInsets.only(left: size.width*0.03, right: size.width*0.03),
               width: 40,
               height: 40,
               child: (avatar != null)
@@ -153,56 +173,68 @@ class Comment extends StatelessWidget {
             ),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    Container(
-                      margin: EdgeInsets.only(top: 20, right: 5),
-                      child: Text(displayName,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          )),
-                    ),
-                    Container(
-                      margin: EdgeInsets.only(top: 20, right: 5),
-                      child: Text(comment,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                          )),
-                    )
-                  ],
-                ),
-/*                RichText(
-                    text: TextSpan(
-                        style: TextStyle(
-                          fontSize: 16,
-                          color: Colors.black,
-                        ),
-                        children: <TextSpan>[
-                      TextSpan(
-                          text: displayName,
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.black,
-                            fontWeight: FontWeight.bold,
-                          )),
-                      TextSpan(text: ' '),
-                      TextSpan(
-                          text: comment,
-                          style: TextStyle(fontSize: 16, color: Colors.black))
-                    ])),*/
+              children: [
                 Container(
-                  margin: EdgeInsets.only(right: 10, top: 4),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(15),
+                      color: backGroundFoodScreenColor),
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 10, top: 6, right: 8, bottom: 6),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        Text(
+                          displayName,
+                          style: TextStyle(
+                            fontSize: 16,
+                            color: Colors.black,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(height: 2,),
+                        SizedBox(
+                          width: size.width * 0.73,
+                          child: Text(comment,
+                              maxLines: 100,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.black,
+                              )),
+                        ),
+
+                      ],
+
+/*                RichText(
+                            text: TextSpan(
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.black,
+                                ),
+                                children: <TextSpan>[
+                              TextSpan(
+                                  text: displayName,
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.black,
+                                    fontWeight: FontWeight.bold,
+                                  )),
+                              TextSpan(text: ' '),
+                              TextSpan(
+                                  text: comment,
+                                  style: TextStyle(fontSize: 16, color: Colors.black))
+                            ])),*/
+                    ),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.only(left: 10, right: 10, top: 4),
                   child: Text(
                     timeago.format(dateTime),
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 16, color: Colors.grey),
+                    style: TextStyle(fontSize: 14, color: Colors.grey),
                   ),
                 ),
+                SizedBox(height: 10,)
               ],
             ),
           ],

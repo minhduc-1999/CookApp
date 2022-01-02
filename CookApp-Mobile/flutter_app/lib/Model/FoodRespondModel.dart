@@ -85,7 +85,7 @@ class Foods {
   List<String> cookingMethod;
   List<Steps> steps;
   List<Ingredients> ingredients;
-
+  String videoUrl;
   Foods(
       {this.id,
         this.servings,
@@ -95,7 +95,8 @@ class Foods {
         this.totalTime,
         this.cookingMethod,
         this.steps,
-        this.ingredients});
+        this.ingredients,
+      this.videoUrl});
 
   Foods.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -117,6 +118,7 @@ class Foods {
         ingredients.add(new Ingredients.fromJson(v));
       });
     }
+    videoUrl = json['videoUrl'] != null ? json['videoUrl'] : null;
   }
 
   Map<String, dynamic> toJson() {

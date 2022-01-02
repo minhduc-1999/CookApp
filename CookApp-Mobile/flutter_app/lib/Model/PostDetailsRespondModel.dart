@@ -53,7 +53,7 @@ class Data {
   Author author;
   int numOfReaction;
   int numOfComment;
-
+  String reaction;
   Data(
       {this.id,
         this.createdAt,
@@ -63,7 +63,8 @@ class Data {
         this.videos,
         this.author,
         this.numOfReaction,
-        this.numOfComment});
+        this.numOfComment,
+        this.reaction});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -75,6 +76,7 @@ class Data {
     author = json['author'] != null ? new Author.fromJson(json['author']) : null;
     numOfReaction = json['numOfReaction'];
     numOfComment = json['numOfComment'];
+    reaction = json['reaction'] != null ? json['reaction'] : null;
   }
 
   Map<String, dynamic> toJson() {

@@ -7,6 +7,7 @@ import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
+import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
 import 'package:tastify/Model/LoginRequestModel.dart';
 import 'package:tastify/Model/LoginRespondModel.dart';
 import 'package:tastify/Model/MessageRequestModel.dart';
@@ -49,7 +50,20 @@ class APIService {
       return false;
     }
   }
-
+  static Future<bool> loginByGoogle(LoginByGoogleRequestModel model) async {
+    var url = Uri.parse(Config.apiURL + Config.loginByGoogleAPI);
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode(model.toJson()));
+    if (respone.statusCode == 200) {
+      await SharedService.setLoginDetails(loginRespondJson(respone.body));
+      return true;
+    } else {
+      return false;
+    }
+  }
   static Future<RegisterRespondModel> register(
       RegisterRequestModel model) async {
     Map<String, String> requestHeader = {'Content-Type': 'application/json'};

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
 import '../StaticComponent/Post.dart';
 import 'package:tastify/Model/PostDetailsRespondModel.dart';
@@ -15,8 +16,8 @@ import 'EditProfileActivity.dart';
 
 class ProfileActivity extends StatefulWidget {
   final String userId;
-
-  const ProfileActivity({Key key, this.userId}) : super(key: key);
+  final AuthBase auth;
+  const ProfileActivity({Key key, this.userId, this.auth}) : super(key: key);
 
   @override
   _ProfileActivityState createState() => _ProfileActivityState(this.userId);
@@ -24,6 +25,7 @@ class ProfileActivity extends StatefulWidget {
 
 class _ProfileActivityState extends State<ProfileActivity> {
   final String profileId;
+
   UserWallRespondModel user;
   WallPostRespondModel posts;
   bool isFollowing = false;
@@ -192,7 +194,14 @@ class _ProfileActivityState extends State<ProfileActivity> {
         ],
       );
     }
-
+    Future<void> _signOut() async {
+      try {
+        await widget.auth.signOut();
+      } catch (e) {
+        print(e.toString());
+      }
+      //currentUser = null;
+    }
     Widget buildUserPosts() {
       return posts.data.posts.length == 0
           ? Container(
@@ -241,7 +250,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
           actions: [
             profileId == currentUserId ? IconButton(
               icon: Icon(Icons.logout),
-              onPressed: () {
+              onPressed: () async {
+                await _signOut();
                 SharedService.logout(context);
               },
             ) : Container()
@@ -306,6 +316,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
                           padding: const EdgeInsets.only(top: 15.0),
                           child: Text(
                             user.data.user.displayName,
+
                             style: TextStyle(fontWeight: FontWeight.bold),
                           )),
                     ],
@@ -346,6 +357,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
       user = response;
     });
   }
+
 }
 
 class ImageTile extends StatelessWidget {
@@ -366,6 +378,7 @@ class ImageTile extends StatelessWidget {
       dateTime: DateTime.fromMillisecondsSinceEpoch(res.data.createdAt),
       numOfComment: res.data.numOfComment,
       numOfReaction: res.data.numOfReaction,
+      isLike: res.data.reaction != null,
     );
     openImagePost(context, post);
   }

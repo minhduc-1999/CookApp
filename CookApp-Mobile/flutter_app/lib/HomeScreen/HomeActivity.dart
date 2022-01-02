@@ -4,6 +4,7 @@ import 'package:tastify/MessageScreen/MessageActivity.dart';
 import 'package:tastify/NewFeedScreen/NewFeedActivity.dart';
 import 'package:tastify/NotificationScreen/NotificationActivity.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
+import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
 
 import 'package:tastify/main.dart';
@@ -25,16 +26,21 @@ const List<NavigationItem> allNavigationItems = <NavigationItem>[
 ];
 
 class HomeActivity extends StatefulWidget {
+  final AuthBase auth;
+
+  const HomeActivity({Key key, this.auth}) : super(key: key);
   @override
-  HomeActivityState createState() => HomeActivityState();
+  HomeActivityState createState() => HomeActivityState(this.auth);
 }
 
 class HomeActivityState extends State<HomeActivity> {
   int _currentIndex = 0;
-
+  final AuthBase auth;
   DateTime currentBackPressTime;
 
   PageController _pageController = PageController(initialPage: 0);
+
+  HomeActivityState(this.auth);
 
   @override
   Widget build(BuildContext context) {
@@ -52,7 +58,7 @@ class HomeActivityState extends State<HomeActivity> {
               FoodActivity(),
               MessageActivity(),
               NotificationActivity(),
-              ProfileActivity(userId: currentUserId,)
+              ProfileActivity(userId: currentUserId,auth: auth,)
             ],
           ),
           bottomNavigationBar: BottomNavigationBar(

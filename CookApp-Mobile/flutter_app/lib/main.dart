@@ -17,6 +17,7 @@ void main() async {
   if (isLoggedIn){
     var loginDetails = await SharedService.loginDetails();
     currentUserId = loginDetails.data.userId;
+
     _defaultHome = HomeActivity();
   }
   runApp(MyApp());
