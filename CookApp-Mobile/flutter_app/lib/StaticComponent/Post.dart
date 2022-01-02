@@ -143,14 +143,7 @@ class _Post extends State<Post> {
         alignment: Alignment.center,
         children: [
           images.length == 1
-              ?
-              /*CachedNetworkImage(
-            imageUrl: images[0],
-            fit: BoxFit.fitWidth,
-            placeholder: (context, url) => loadingPlaceHolder,
-            errorWidget: (context, url, error) => Icon(Icons.error),
-          ),*/
-              Container(
+              ? Container(
                   margin: EdgeInsets.only(bottom: 10),
                   child: ClipRRect(
                     child: Image.network(images[0],
@@ -291,7 +284,6 @@ class _Post extends State<Post> {
                     builder: (BuildContext context) {
                       return CommentActivity(postId: id);
                     },
-
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
                   );
@@ -374,7 +366,7 @@ class _Post extends State<Post> {
         showHeart = true;
         numOfReaction++;
       });
-      Timer(const Duration(milliseconds: 2000), () {
+      Timer(const Duration(milliseconds: 1000), () {
         setState(() {
           showHeart = false;
         });

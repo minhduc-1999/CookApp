@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
@@ -24,6 +25,8 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   String _groupsexual;
   bool femaleSelected = false;
   File file;
+  bool isAPIcallProcess = false;
+  GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   ImagePicker imagePicker = ImagePicker();
   List<bool> _isSelected = [false, false];
   TextEditingController firstNameController = TextEditingController();
@@ -42,122 +45,134 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        brightness: Brightness.dark,
-        automaticallyImplyLeading: false,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.centerLeft,
-              end: Alignment.centerRight,
-              colors: <Color>[appPrimaryColor, appPrimaryColor],
-            ),
-          ),
-        ),
-        title: Container(
-          child: Text("Edit Profile"),
-        ),
-        leading: IconButton(
-          icon: Icon(Icons.arrow_back),
-          onPressed: () {
-            Navigator.of(context).pop();
-          },
-        ),
-        actions: [
-          IconButton(
-              onPressed: () async{
-                await applyChanges();
-                Navigator.of(context).pop();
-              },
-              icon: Icon(Icons.check))
-        ],
-      ),
-      body: circular
-          ? Center(child: CircularProgressIndicator())
-          : Container(
-              padding: EdgeInsets.only(left: 15, top: 25, right: 15),
-              child: GestureDetector(
-                onTap: () {
-                  FocusScope.of(context).unfocus();
-                },
-                child: ListView(
-                  children: [
-                    Center(
-                      child: Stack(
-                        children: [
-                          Container(
-                            width: 100,
-                            height: 100,
-                            decoration: BoxDecoration(
-                                border: Border.all(
-                                    width: 1,
-                                    color: Colors.black.withOpacity(0.2)),
-                                boxShadow: [
-                                  BoxShadow(
-                                      spreadRadius: 2,
-                                      blurRadius: 10,
-                                      color: Colors.black.withOpacity(0.1),
-                                      offset: Offset(0, 10))
-                                ],
-                                shape: BoxShape.circle,
-                                image: DecorationImage(
-                                    fit: BoxFit.cover,
-                                    image: file != null
-                                        ? new FileImage(file)
-                                        : user.data.avatar != null
-                                            ? NetworkImage(user.data.avatar)
-                                            : AssetImage(
-                                                'assets/images/default_avatar.png'))),
-                          ),
-                          Positioned(
-                              bottom: 0,
-                              right: 0,
-                              child: GestureDetector(
-                                onTap: () async {
-                                  PickedFile imageFile =
-                                      await imagePicker.getImage(
-                                          source: ImageSource.gallery,
-                                          maxWidth: 1920,
-                                          maxHeight: 1200,
-                                          imageQuality: 80);
-                                  if (imageFile != null) {
-                                    setState(() {
-                                      file = File(imageFile.path);
-                                    });
-                                  }
-                                },
-                                child: Container(
-                                  height: 35,
-                                  width: 35,
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: appPrimaryColor),
-                                  child: Icon(
-                                    Icons.edit,
-                                    color: Colors.white,
-                                  ),
-                                ),
-                              ))
-                        ],
-                      ),
-                    ),
-                    buildName("First Name", "Enter your first name",
-                        firstNameController),
-                    buildName("Last Name", "Enter your last name",
-                        lastNameController),
-                    buildName("Display Name", "Enter your display name",
-                        displayNameController),
-                    buildWeightAndHeight("Height (cm)", "cm", heightController),
-                    buildWeightAndHeight("Weight (kg)", "kg", weightController),
-                    buildSexual()
-                  ],
-                ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: AppBar(
+          brightness: Brightness.dark,
+          automaticallyImplyLeading: false,
+          flexibleSpace: Container(
+            decoration: BoxDecoration(
+              gradient: LinearGradient(
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
+                colors: <Color>[appPrimaryColor, appPrimaryColor],
               ),
             ),
+          ),
+          title: Container(
+            child: Text("Edit Profile"),
+          ),
+          leading: IconButton(
+            icon: Icon(Icons.arrow_back),
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+          ),
+          actions: [
+            IconButton(
+                onPressed: () async{
+                  await applyChanges();
+                  Navigator.of(context).pop();
+                },
+                icon: Icon(Icons.check))
+          ],
+        ),
+        body: circular ?
+        Center(child: CircularProgressIndicator(),) :
+        ProgressHUD(
+          child: Form(
+            key: globalFormKey,
+            child: _editProfileUI(context),
+          ),
+          inAsyncCall: isAPIcallProcess,
+          key: UniqueKey(),
+          opacity: 0.3,
+        )
+      ),
     );
   }
-
+  Widget _editProfileUI (BuildContext context){
+    return Container(
+      padding: EdgeInsets.only(left: 15, top: 25, right: 15),
+      child: GestureDetector(
+        onTap: () {
+          FocusScope.of(context).unfocus();
+        },
+        child: ListView(
+          children: [
+            Center(
+              child: Stack(
+                children: [
+                  Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                        border: Border.all(
+                            width: 1,
+                            color: Colors.black.withOpacity(0.2)),
+                        boxShadow: [
+                          BoxShadow(
+                              spreadRadius: 2,
+                              blurRadius: 10,
+                              color: Colors.black.withOpacity(0.1),
+                              offset: Offset(0, 10))
+                        ],
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                            fit: BoxFit.cover,
+                            image: file != null
+                                ? new FileImage(file)
+                                : user.data.avatar != null
+                                ? NetworkImage(user.data.avatar)
+                                : AssetImage(
+                                'assets/images/default_avatar.png'))),
+                  ),
+                  Positioned(
+                      bottom: 0,
+                      right: 0,
+                      child: GestureDetector(
+                        onTap: () async {
+                          PickedFile imageFile =
+                          await imagePicker.getImage(
+                              source: ImageSource.gallery,
+                              maxWidth: 1920,
+                              maxHeight: 1200,
+                              imageQuality: 80);
+                          if (imageFile != null) {
+                            setState(() {
+                              file = File(imageFile.path);
+                            });
+                          }
+                        },
+                        child: Container(
+                          height: 35,
+                          width: 35,
+                          decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: appPrimaryColor),
+                          child: Icon(
+                            Icons.edit,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ))
+                ],
+              ),
+            ),
+            buildName("First Name", "Enter your first name",
+                firstNameController),
+            buildName("Last Name", "Enter your last name",
+                lastNameController),
+            buildName("Display Name", "Enter your display name",
+                displayNameController),
+            buildWeightAndHeight("Height (cm)", "cm", heightController),
+            buildWeightAndHeight("Weight (kg)", "kg", weightController),
+            buildSexual()
+          ],
+        ),
+      ),
+    );
+  }
   Widget buildName(
       String label, String hintText, TextEditingController controller) {
     return TextField(
@@ -355,7 +370,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
 
   applyChanges() async {
     setState(() {
-      circular = true;
+      isAPIcallProcess = true;
     });
     String objectName;
     if (file != null) {
@@ -380,7 +395,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
         ));
     await APIService.editProfile(profile);
     setState(() {
-      circular = false;
+      isAPIcallProcess = false;
     });
   }
 }

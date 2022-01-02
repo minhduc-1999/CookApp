@@ -21,7 +21,7 @@ const List<NavigationItem> allNavigationItems = <NavigationItem>[
   NavigationItem('Home', Icons.home),
   NavigationItem('Food', Icons.lunch_dining),
   NavigationItem('Chatbot', Icons.chat_bubble),
-  NavigationItem('Notification', Icons.notifications),
+  NavigationItem('Notifications', Icons.notifications),
   NavigationItem('Profile', Icons.person)
 ];
 

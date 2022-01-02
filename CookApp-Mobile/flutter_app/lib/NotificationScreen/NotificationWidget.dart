@@ -6,22 +6,35 @@ import 'package:tastify/StaticComponent/Post.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../constants.dart';
+import '../main.dart';
+
 class NotificationWidget extends StatefulWidget {
-  const NotificationWidget({Key key, this.body, this.createdAt, this.data, this.isRead, this.templateID, this.image}) : super(key: key);
+  const NotificationWidget(
+      {Key key, this.body, this.createdAt, this.data, this.isRead, this.templateID, this.image, this.id})
+      : super(key: key);
 
   @override
-  _NotificationWidgetState createState()
-  => _NotificationWidgetState(body: this.body, createdAt: this.createdAt,data: this.data, isRead: this.isRead, templateID: this.templateID);
+  _NotificationWidgetState createState() =>
+      _NotificationWidgetState(
+          id: this.id,
+          body: this.body,
+          createdAt: this.createdAt,
+          data: this.data,
+          isRead: this.isRead,
+          templateID: this.templateID);
+  final String id;
   final String body;
-  final String createdAt;
+  final int createdAt;
   final Map data;
   final bool isRead;
   final String templateID;
   final String image;
+
   factory NotificationWidget.fromDocument(DocumentSnapshot doc) {
     return NotificationWidget(
+      id: doc.id,
       body: doc['body'],
-      createdAt: doc['createAt'],
+      createdAt: doc['createdAt'],
       data: doc['data'],
       isRead: doc['isRead'],
       templateID: doc['templateId'],
@@ -31,19 +44,23 @@ class NotificationWidget extends StatefulWidget {
 }
 
 class _NotificationWidgetState extends State<NotificationWidget> {
+  final String id;
   final String body;
-  final String createdAt;
+  final int createdAt;
   final Map data;
   bool isRead;
   final String templateID;
   final String image;
-  _NotificationWidgetState({this.image,this.body, this.createdAt, this.isRead, this.data, this.templateID,});
+
+  _NotificationWidgetState(
+      {this.id, this.image, this.body, this.createdAt, this.isRead, this.data, this.templateID,});
+
   @override
   Widget build(BuildContext context) {
     return Padding(
         padding: EdgeInsets.only(bottom: 2.0),
         child: Container(
-          color: Colors.white60,
+          color: !isRead ? backGroundUnreadNotiColor : Theme.of(context).scaffoldBackgroundColor,
           child: ListTile(
             title: GestureDetector(
               onTap: () => clickedImage(context),
@@ -66,16 +83,34 @@ class _NotificationWidgetState extends State<NotificationWidget> {
               backgroundImage: AssetImage('assets/images/default_avatar.png'),
             ),
             subtitle: Text(
-              timeago.format(DateTime.fromMillisecondsSinceEpoch(int.parse(createdAt))),
+              timeago.format(
+                  DateTime.fromMillisecondsSinceEpoch(createdAt)),
               overflow: TextOverflow.ellipsis,
             ),
 
           ),
         ));
   }
+
   clickedImage(BuildContext context) async {
-    if (templateID == "new_post") {
-      PostDetailsRespondModel res = await APIService.getDetailsPost(data['postId']);
+    if (!isRead) {
+      FirebaseFirestore.instance
+          .collection('modules')
+          .doc('notification')
+          .collection('users')
+          .doc(currentUserId)
+          .collection('badge')
+          .doc(id).update({
+            "isRead" : true,
+
+      });
+      setState(() {
+        isRead = true;
+      });
+    }
+    if (templateID == "new_post" || templateID == "react" || templateID == "comment") {
+      PostDetailsRespondModel res = await APIService.getDetailsPost(
+          data['postId']);
       Post post = Post(
         id: res.data.id,
         userId: res.data.author.id,
@@ -92,6 +127,7 @@ class _NotificationWidgetState extends State<NotificationWidget> {
       openImagePost(context, post);
     }
   }
+
   void openImagePost(BuildContext context, Post post) {
     Navigator.of(context)
         .push(MaterialPageRoute<bool>(builder: (BuildContext context) {

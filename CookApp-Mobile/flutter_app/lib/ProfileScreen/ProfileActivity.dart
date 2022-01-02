@@ -17,6 +17,7 @@ import 'EditProfileActivity.dart';
 class ProfileActivity extends StatefulWidget {
   final String userId;
   final AuthBase auth;
+
   const ProfileActivity({Key key, this.userId, this.auth}) : super(key: key);
 
   @override
@@ -194,6 +195,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
         ],
       );
     }
+
     Future<void> _signOut() async {
       try {
         await widget.auth.signOut();
@@ -202,12 +204,18 @@ class _ProfileActivityState extends State<ProfileActivity> {
       }
       //currentUser = null;
     }
+
     Widget buildUserPosts() {
       return posts.data.posts.length == 0
-          ? Container(
-              alignment: FractionalOffset.center,
-              padding: const EdgeInsets.only(top: 10.0),
-              child: CircularProgressIndicator())
+          ? Center(
+              child: Padding(
+                padding: const EdgeInsets.only(top: 20),
+                child: Text(
+                  "Nothing to show!",
+                  style: TextStyle(fontSize: 16),
+                ),
+              ),
+            )
           : view == "grid"
               ? GridView.count(
                   crossAxisCount: 3,
@@ -247,17 +255,18 @@ class _ProfileActivityState extends State<ProfileActivity> {
                   fontSize: 32,
                   fontStyle: FontStyle.italic)),
         ),
-          actions: [
-            profileId == currentUserId ? IconButton(
-              icon: Icon(Icons.logout),
-              onPressed: () async {
-                await _signOut();
-                SharedService.logout(context);
-              },
-            ) : Container()
-          ],
+        actions: [
+          profileId == currentUserId
+              ? IconButton(
+                  icon: Icon(Icons.logout),
+                  onPressed: () async {
+                    await _signOut();
+                    SharedService.logout(context);
+                  },
+                )
+              : Container()
+        ],
       ),
-
       body: circular
           ? Center(child: CircularProgressIndicator())
           : ListView(
@@ -316,7 +325,6 @@ class _ProfileActivityState extends State<ProfileActivity> {
                           padding: const EdgeInsets.only(top: 15.0),
                           child: Text(
                             user.data.user.displayName,
-
                             style: TextStyle(fontWeight: FontWeight.bold),
                           )),
                     ],
@@ -357,7 +365,6 @@ class _ProfileActivityState extends State<ProfileActivity> {
       user = response;
     });
   }
-
 }
 
 class ImageTile extends StatelessWidget {

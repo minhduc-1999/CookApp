@@ -27,7 +27,7 @@ class _NotificationActivityState extends State<NotificationActivity> {
             ),
           ),
           title: Container(
-            child: Text("Notification",
+            child: Text("Notifications",
                 style: TextStyle(
                     fontFamily: 'Billabong',
                     fontSize: 32,
