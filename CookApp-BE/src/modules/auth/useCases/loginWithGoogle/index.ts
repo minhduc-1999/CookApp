@@ -69,21 +69,16 @@ export class GoogleSignInCommandHandler
         });
         let res = await this._userRepo.getUserByEmail(userData.email);
 
-        if (res) {
-          const profile = createUpdatingObject(clean(userData), res.id);
-          res = await this._userRepo.updateUserProfile(res.id, profile);
-        } else {
+        if (!res) {
           // create new user
-          const createdUser = await this._userRepo
-            .setSession(session)
-            .createUser(userData);
+          res = await this._userRepo.setSession(session).createUser(userData);
           const wallDto = WallDTO.create({
-            user: createdUser,
+            user: res,
           });
 
           await this._wallRepo.setSession(session).createWall(wallDto);
           const feedDto = FeedDTO.create({
-            user: createdUser,
+            user: res,
           });
           await this._feedRepo.setSession(session).createFeed(feedDto);
         }

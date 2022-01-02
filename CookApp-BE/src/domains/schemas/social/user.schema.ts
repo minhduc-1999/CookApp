@@ -43,7 +43,7 @@ export class User extends AbstractSchema {
   profile?: UserProfile;
 
   @Prop()
-  provider?: Provider;
+  externalProvider?: Provider;
 
   constructor(userDto: Partial<UserDTO>) {
     super(userDto);
@@ -55,6 +55,7 @@ export class User extends AbstractSchema {
     this.password = userDto?.password;
     this._id = userDto?.id;
     this.displayName = userDto?.displayName;
+    this.externalProvider = userDto?.externalProvider;
   }
 }
 
