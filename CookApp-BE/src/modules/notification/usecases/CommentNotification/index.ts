@@ -5,36 +5,34 @@ import { PostDTO } from "dtos/social/post.dto";
 import { UserDTO } from "dtos/social/user.dto";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-export class NewPostEvent {
+export class CommentPostEvent {
   post: PostDTO;
-  author: UserDTO;
+  actor: UserDTO;
   constructor(post: PostDTO, author: UserDTO) {
     this.post = post;
-    this.author = author;
+    this.actor = author;
   }
 }
 
-@EventsHandler(NewPostEvent)
-export class NewPostEventHandler implements IEventHandler<NewPostEvent> {
+@EventsHandler(CommentPostEvent)
+export class CommentPostEventHandler
+  implements IEventHandler<CommentPostEvent>
+{
   constructor(
     @Inject("INotiRepository")
-    private _notiRepository: INotiRepository,
-    @Inject("IWallRepository")
-    private _wallRepository: IWallRepository
+    private _notiRepository: INotiRepository
   ) {}
 
-  async handle(event: NewPostEvent): Promise<void> {
-    const followers = await this._wallRepository.getFollowers(event.author.id);
+  async handle(event: CommentPostEvent): Promise<void> {
     const template = await this._notiRepository.getTemplate(
-      NotificationTemplateEnum.NewPostTemplate
+      NotificationTemplateEnum.CommentTemplate
     );
     const notification: NotificationDTO = {
-      body: template.body.replace("$user", event.author.displayName),
+      body: template.body.replace("$user", event.actor.displayName),
       title: template.title,
       templateId: template.id,
-      image: event.author.avatar,
-      targets: followers,
+      image: event.actor.avatar,
+      targets: [event.post.author.id],
       data: {
         postId: event.post.id,
       },

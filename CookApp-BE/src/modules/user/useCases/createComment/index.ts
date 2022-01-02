@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { UserDTO } from "dtos/social/user.dto";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ClientSession } from "mongoose";
@@ -10,6 +10,8 @@ import { CommentDTO } from "dtos/social/comment.dto";
 import { ICommentService } from "modules/user/services/comment.service";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
+import { CommentPostEvent } from "modules/notification/usecases/CommentNotification";
+import { IPostService } from "modules/user/services/post.service";
 
 export class CreateCommentCommand extends BaseCommand {
   commentDto: CreateCommentRequest;
@@ -25,7 +27,8 @@ export class CreateCommentCommand extends BaseCommand {
 
 @CommandHandler(CreateCommentCommand)
 export class CreateCommentCommandHandler
-  implements ICommandHandler<CreateCommentCommand> {
+  implements ICommandHandler<CreateCommentCommand>
+{
   constructor(
     @Inject("ICommentRepository")
     private _commentRepo: ICommentRepository,
@@ -34,10 +37,14 @@ export class CreateCommentCommandHandler
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
     @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository
+    private _feedRepo: IFeedRepository,
+    private _eventBus: EventBus,
+    @Inject("IPostService")
+    private _postService: IPostService
   ) {}
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
     const { commentDto, user, session } = command;
+    const post = await this._postService.getPostDetail(commentDto.postId);
     const parentComment = commentDto.parentId
       ? await this._commentService.getComment(commentDto.parentId)
       : commentDto.postId;
@@ -51,6 +58,9 @@ export class CreateCommentCommandHandler
     return await Promise.all([
       this._feedRepo.updateNumComment(commentDto.postId, 1),
       this._postRepo.updateNumComment(commentDto.postId, 1),
-    ]).then(() => createdComment);
+    ]).then(() => {
+      this._eventBus.publish(new CommentPostEvent(post, user));
+      return createdComment;
+    });
   }
 }

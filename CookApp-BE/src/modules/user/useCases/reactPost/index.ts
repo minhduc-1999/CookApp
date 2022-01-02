@@ -9,7 +9,7 @@ import { ClientSession } from "mongoose";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { ReactPostResponse } from "./reactPostResponse";
 import { ReactionDTO } from "dtos/social/reaction.dto";
-import { ReactPostEvent } from "modules/notification/usecases/LikeNotification";
+import { ReactPostEvent } from "modules/notification/usecases/ReactNotification";
 export class ReactPostCommand extends BaseCommand {
   reactReq: ReactPostRequest;
   constructor(
