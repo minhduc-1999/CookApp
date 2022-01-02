@@ -1,5 +1,5 @@
 import { BadRequestException, Inject } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { UserDTO } from "dtos/social/user.dto";
 import { FollowResponse } from "./followResponse";
 import { BaseCommand } from "base/cqrs/command.base";
@@ -7,6 +7,7 @@ import { ClientSession } from "mongoose";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { FollowType } from "enums/follow.enum";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { NewFollowerEvent } from "modules/notification/usecases/NewFollowerNotification";
 
 export class FollowCommand extends BaseCommand {
   targetId: string;
@@ -20,12 +21,13 @@ export class FollowCommand extends BaseCommand {
 export class FollowCommandHandler implements ICommandHandler<FollowCommand> {
   constructor(
     @Inject("IWallRepository")
-    private _wallRepo: IWallRepository
+    private _wallRepo: IWallRepository,
+    private _eventBus: EventBus
   ) {}
   async execute(command: FollowCommand): Promise<FollowResponse> {
     const { targetId, user } = command;
     if (user.id === targetId) {
-      throw new BadRequestException(ResponseDTO.fail("Cannot follow yourself"))
+      throw new BadRequestException(ResponseDTO.fail("Cannot follow yourself"));
     }
     const isFollowed = await this._wallRepo.isFollowed(user.id, targetId);
     if (isFollowed)
@@ -35,6 +37,9 @@ export class FollowCommandHandler implements ICommandHandler<FollowCommand> {
       this._wallRepo.updateFollowing(user.id, targetId, FollowType.Follow),
       this._wallRepo.updateFollowers(targetId, user.id, FollowType.Follow)
     );
-    return Promise.all(tasks).then(() => new FollowResponse());
+    return Promise.all(tasks).then(() => {
+      this._eventBus.publish(new NewFollowerEvent(user, targetId))
+      return new FollowResponse();
+    });
   }
 }

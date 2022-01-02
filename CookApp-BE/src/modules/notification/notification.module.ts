@@ -7,9 +7,10 @@ import { ShareModule } from "modules/share/share.module";
 import { UserModule } from "modules/user/user.module";
 import { ConfigModule } from "nestjs-config";
 import { NotiRepository } from "./adapters/out/repositories/notification.repository";
+import { NewFollowerEventHandler } from "./usecases/NewFollowerNotification";
 import { NewPostEventHandler } from "./usecases/NewPostNotification";
 
-const eventHandlers = [NewPostEventHandler];
+const eventHandlers = [NewPostEventHandler, NewFollowerEventHandler];
 
 const repositories = [
   {
@@ -33,7 +34,7 @@ const repositories = [
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
-    UserModule
+    UserModule,
   ],
   controllers: [],
   providers: [...eventHandlers, ...repositories],

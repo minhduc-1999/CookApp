@@ -1,6 +1,6 @@
 export enum NotificationTemplateEnum {
   NewPostTemplate = "new_post",
-  FollowTemplate = "follow",
+  NewFollowerTemplate = "new_follower",
   ReactTemplate = "react",
   CommentTemplate = "comment",
 }
