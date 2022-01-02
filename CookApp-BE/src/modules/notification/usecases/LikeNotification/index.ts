@@ -25,7 +25,6 @@ export class ReactPostEventHandler implements IEventHandler<ReactPostEvent> {
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.ReactTemplate
     );
-    console.log(template);
     const notification: NotificationDTO = {
       body: template.body.replace("$user", event.actor.displayName),
       title: template.title,

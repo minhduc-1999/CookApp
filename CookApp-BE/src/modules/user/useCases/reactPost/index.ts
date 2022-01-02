@@ -66,7 +66,6 @@ export class ReactPostCommandHandler
     return await Promise.all(tasks).then(() => {
       if (reacted) {
         this._eventBus.publish(new ReactPostEvent(post, user));
-        console.log("noti react")
       }
       return new ReactPostResponse(reacted);
     });
