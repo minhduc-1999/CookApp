@@ -88,7 +88,7 @@ export class GoogleSignInCommandHandler
       .catch((err) => {
         console.log(err);
         throw new UnauthorizedException({
-          errorCode: ErrorCode.INVALID_GOOGLE_ID_TOKEN,
+          errorCode: ErrorCode.INVALID_TOKEN,
           message: "Google ID Token is not valid",
         });
       });

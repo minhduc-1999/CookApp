@@ -31,7 +31,7 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
         await this._storageService.getDownloadUrls([user.avatar])
       )[0];
     }
-    this._mailService.sendEmailAddressVerification("testcainhe", "test@gmail.com")
+    this._mailService.sendEmailAddressVerification("61a9034771eb77efd736079b", "user@gmail.com")
     return user;
   }
 }

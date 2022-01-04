@@ -24,8 +24,20 @@ import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { LoginCommandHandler } from "./useCases/login";
 import { GoogleSignInCommandHandler } from "./useCases/loginWithGoogle";
 import { RegisterCommandHandler } from "./useCases/register";
+import { ResendEmailVerificationCommandHandler } from "./useCases/resendEmailVerification";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
+
+const handlers = [
+  RegisterCommandHandler,
+  LoginCommandHandler,
+  UpdateProfileCommandHandler,
+  GetProfileQueryHandler,
+  GoogleSignInCommandHandler,
+  VerifyEmailCommandHandler,
+  ResendEmailVerificationCommandHandler,
+];
+
 @Module({
   imports: [
     ConfigModule,
@@ -71,14 +83,9 @@ import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
       provide: "IFeedRepository",
       useClass: FeedRepository,
     },
-    RegisterCommandHandler,
-    LoginCommandHandler,
-    UpdateProfileCommandHandler,
-    GetProfileQueryHandler,
     BasicAuthStrategy,
     JwtStrategy,
-    GoogleSignInCommandHandler,
-    VerifyEmailCommandHandler,
+    ...handlers,
   ],
   exports: ["IUserService"],
 })

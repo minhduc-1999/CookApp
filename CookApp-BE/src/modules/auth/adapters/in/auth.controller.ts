@@ -68,7 +68,7 @@ export class AuthController {
   @HttpCode(200)
   @Public()
   @ApiOKResponseCustom(GoogleSignInResponse, "Authenticate successfully")
-  async googleCallback(
+  async loginWithGoogleCallback(
     @Body() body: GoogleSignInRequest
   ): Promise<Result<GoogleSignInResponse>> {
     let command = new GoogleSignInCommand(null, body);
@@ -76,9 +76,17 @@ export class AuthController {
     return Result.ok(jwt, { messages: ["Authenticate successfully"] });
   }
 
-  @Post("verify-email")
+  @Post("email-verification/callback")
   @Public()
-  async confirmInvitationCallback(
+  async verifyEmailCallback(@Body() body: VerifyEmailRequest): Promise<string> {
+    let command = new VerifyEmailCommand(body, null);
+    await this._commandBus.execute(command);
+    return "Confirm email successfully";
+  }
+
+  @Post("resend-email-verification")
+  @Public()
+  async resendEmailVerificationCallback(
     @Body() body: VerifyEmailRequest
   ): Promise<string> {
     let command = new VerifyEmailCommand(body, null);
