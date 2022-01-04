@@ -8,6 +8,12 @@
 		},
 		{
 			"path": "./CookApp-Mobile"
+		},
+		{
+			"path": "./crawl"
+		},
+		{
+			"path": "./db"
 		}
 	],
 	"settings": {}

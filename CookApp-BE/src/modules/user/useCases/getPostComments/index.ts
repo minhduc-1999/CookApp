@@ -10,7 +10,7 @@ import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ICommentRepository } from "modules/user/adapters/out/repositories/comment.repository";
 import { IPostService } from "modules/user/services/post.service";
-import { takeField } from "utils";
+import { isImageKey, takeField } from "utils";
 import { GetPostCommentsResponse } from "./getPostCommentsResponse";
 
 export class CommentPageOption extends PageOptionsDto {
@@ -52,10 +52,11 @@ export class GetPostCommentsQueryHandler
     for (let comment of comments) {
       comment.user = await this._userService.getUserPublicInfo(comment.user.id);
       comment.numberOfReply = await this._commentRepo.getTotalReply(comment.id);
-      if (!comment.user.avatar) continue;
-      comment.user.avatar = (
-        await this._storageService.getDownloadUrls([comment.user.avatar])
-      )[0];
+      if (comment.user.avatar && isImageKey(comment.user.avatar)) {
+        comment.user.avatar = (
+          await this._storageService.getDownloadUrls([comment.user.avatar])
+        )[0];
+      }
     }
 
     const totalCount = await this._commentRepo.getTotalReply(

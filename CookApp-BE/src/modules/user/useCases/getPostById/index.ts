@@ -6,6 +6,7 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
 import { IPostRepository } from "../../adapters/out/repositories/post.repository";
+import { isImageKey } from "utils";
 
 export class GetPostDetailQuery extends BaseQuery {
   postId: string;
@@ -30,7 +31,7 @@ export class GetPostDetailQueryHandler
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
     const post = await this._postService.getPostDetail(query.postId);
     post.images = await this._storageService.getDownloadUrls(post.images);
-    if (post.author.avatar?.length > 0) {
+    if (post.author.avatar && isImageKey(post.author.avatar)) {
       post.author.avatar = (
         await this._storageService.getDownloadUrls([post.author.avatar])
       )[0];

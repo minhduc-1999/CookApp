@@ -7,7 +7,7 @@ import { IUserRepository } from "modules/auth/adapters/out/repositories/user.rep
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ClientSession } from "mongoose";
-import { clean, createUpdatingNestedObject, createUpdatingObject } from "utils";
+import { clean, createUpdatingNestedObject, createUpdatingObject, isImageKey } from "utils";
 import { UpdateProfileRequest } from "./updateProfileRequest";
 import { UpdateProfileResponse } from "./updateProfileResponse";
 import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.repository";
@@ -66,7 +66,7 @@ export class UpdateProfileCommandHandler
       user.id
     );
 
-    if (updatedUser.avatar?.length > 0) {
+    if (updatedUser.avatar && isImageKey(updatedUser.avatar)) {
       updatedUser.avatar = (
         await this._storageService.getDownloadUrls([updatedUser.avatar])
       )[0];

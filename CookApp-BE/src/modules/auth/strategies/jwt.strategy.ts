@@ -7,6 +7,7 @@ import { UserDTO } from "dtos/social/user.dto";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { JwtAuthTokenPayload } from "base/jwtPayload";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
+import { isImageKey } from "utils";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
@@ -23,7 +24,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
 
   async validate(payload: JwtAuthTokenPayload): Promise<UserDTO> {
     const user = await this._userRepo.getUserById(payload.sub);
-    if (user.avatar) {
+    if (user.avatar && isImageKey(user.avatar)) {
       user.avatar = (
         await this._storageService.getDownloadUrls([user.avatar])
       )[0];

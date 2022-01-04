@@ -1,3 +1,4 @@
+import { url } from "inspector";
 import _ = require("lodash");
 const randomWords = require("random-words");
 
@@ -110,4 +111,9 @@ export function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
+}
+
+export function isImageKey(sample: string) {
+  const regex = /^(\w{1,256}\/){0,256}\w{1,256}\.(png|jpg|jpeg|PNG|JPG|JPEG)$/;
+  return regex.test(sample);
 }
