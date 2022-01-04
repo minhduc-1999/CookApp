@@ -11,6 +11,7 @@
   "license": "ISC",
   "dependencies": {
     "lodash": "^4.17.21",
-    "mongodb": "^4.2.1"
+    "mongodb": "^4.2.1",
+    "sanitize-html": "^2.6.1"
   }
 }
