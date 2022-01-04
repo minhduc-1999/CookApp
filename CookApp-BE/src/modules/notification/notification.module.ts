@@ -31,12 +31,6 @@ const repositories = [
     ConfigModule,
     HttpModule,
     MongooseModule.forFeature([]),
-    JwtModule.register({
-      secret: process.env.JWT_PRIVATE_KEY,
-      signOptions: {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      },
-    }),
     CqrsModule,
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },

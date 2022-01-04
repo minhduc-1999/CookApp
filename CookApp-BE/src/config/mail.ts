@@ -5,6 +5,7 @@ export default {
   port: UtilsService.getConfig("TRANSPORT_PORT"),
   user: UtilsService.getConfig("EMAIL_USER"),
   password: UtilsService.getConfig("EMAIL_PASSWORD"),
+  defaultFrom: UtilsService.getConfig("DEFAULT_FROM"),
   emailVerificationCallback: UtilsService.getConfig(
     "EMAIL_VERIFICATION_CALLBACK"
   ),

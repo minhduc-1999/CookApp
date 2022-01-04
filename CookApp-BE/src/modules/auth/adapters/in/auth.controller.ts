@@ -80,9 +80,9 @@ export class AuthController {
   @Public()
   async confirmInvitationCallback(
     @Body() body: VerifyEmailRequest
-  ): Promise<Result<void>> {
+  ): Promise<string> {
     let command = new VerifyEmailCommand(body, null);
     await this._commandBus.execute(command);
-    return Result.ok(null, { messages: ["Confirm invitation successfully"] });
+    return "Confirm email successfully";
   }
 }

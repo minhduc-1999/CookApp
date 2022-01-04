@@ -36,7 +36,7 @@ const handler = [GetUploadPresignedLinkQueryHandler];
             },
           },
           defaults: {
-            from: process.env.DEFAULT_FROM,
+            from: config.get("mail.defaultFrom"),
           },
           template: {
             dir: join(__dirname, "templates", "mail"),
@@ -49,11 +49,14 @@ const handler = [GetUploadPresignedLinkQueryHandler];
       },
       inject: [ConfigService],
     }),
-    JwtModule.register({
-      secret: process.env.EMAIL_VERIFICATION_SECRET,
-      signOptions: {
-        expiresIn: process.env.EMAIL_VERIFICATION_CALLBACK_EXPIRATION,
-      },
+    JwtModule.registerAsync({
+      useFactory: async (config: ConfigService) => ({
+        secret: config.get("mail.emailVerificationSecret"),
+        signOptions: {
+          expiresIn: config.get("mail.emailVerificationCallbackExpiration"),
+        },
+      }),
+      inject: [ConfigService],
     }),
   ],
   controllers: [StorageController],

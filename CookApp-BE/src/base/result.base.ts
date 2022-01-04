@@ -90,7 +90,7 @@ export class Result<T> {
     }
     return {
       meta,
-      data: this._data.toDto ? this._data.toDto() : this._data,
+      data: this._data?.toDto ? this._data.toDto() : this._data,
     };
   }
 }
