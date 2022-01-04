@@ -1,4 +1,5 @@
-import { HttpModule, Module } from "@nestjs/common";
+import { HttpModule } from "@nestjs/axios";
+import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { MongooseModule } from "@nestjs/mongoose";
 import { FoodModel } from "domains/schemas/core/food.schema";

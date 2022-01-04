@@ -1,6 +1,5 @@
-import { HttpModule, Module } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
-import { JwtModule } from "@nestjs/jwt";
 import { MongooseModule } from "@nestjs/mongoose";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";
@@ -11,12 +10,13 @@ import { ReactPostEventHandler } from "./usecases/ReactNotification";
 import { NewFollowerEventHandler } from "./usecases/NewFollowerNotification";
 import { NewPostEventHandler } from "./usecases/NewPostNotification";
 import { CommentPostEventHandler } from "./usecases/CommentNotification";
+import { HttpModule } from "@nestjs/axios";
 
 const eventHandlers = [
   NewPostEventHandler,
   NewFollowerEventHandler,
   ReactPostEventHandler,
-  CommentPostEventHandler
+  CommentPostEventHandler,
 ];
 
 const repositories = [
