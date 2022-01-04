@@ -23,6 +23,8 @@ import { User } from "decorators/user.decorator";
 import { GoogleSignInRequest } from "modules/auth/useCases/loginWithGoogle/googleSignInRequest";
 import { GoogleSignInCommand } from "modules/auth/useCases/loginWithGoogle";
 import { GoogleSignInResponse } from "modules/auth/useCases/loginWithGoogle/googleSignInResponse";
+import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmailRequest";
+import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
 
 @Controller()
 @ApiTags("Authentication")
@@ -72,5 +74,15 @@ export class AuthController {
     let command = new GoogleSignInCommand(null, body);
     const jwt = await this._commandBus.execute(command);
     return Result.ok(jwt, { messages: ["Authenticate successfully"] });
+  }
+
+  @Post("verify-email")
+  @Public()
+  async confirmInvitationCallback(
+    @Body() body: VerifyEmailRequest
+  ): Promise<Result<void>> {
+    let command = new VerifyEmailCommand(body, null);
+    await this._commandBus.execute(command);
+    return Result.ok(null, { messages: ["Confirm invitation successfully"] });
   }
 }

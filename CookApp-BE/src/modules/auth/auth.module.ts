@@ -25,6 +25,7 @@ import { LoginCommandHandler } from "./useCases/login";
 import { GoogleSignInCommandHandler } from "./useCases/loginWithGoogle";
 import { RegisterCommandHandler } from "./useCases/register";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
+import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
 @Module({
   imports: [
     ConfigModule,
@@ -74,6 +75,7 @@ import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
     BasicAuthStrategy,
     JwtStrategy,
     GoogleSignInCommandHandler,
+    VerifyEmailCommandHandler
   ],
   exports: ["IUserService"],
 })

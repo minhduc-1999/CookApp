@@ -1,10 +1,7 @@
-import { MailerModule } from "@nestjs-modules/mailer";
-import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
-import { TransactionInterceptor } from "interceptors/transaction.interceptor";
 import { AuthModule } from "modules/auth/auth.module";
 import { CoreModule } from "modules/core/core.module";
 import { NotificationModule } from "modules/notification/notification.module";
@@ -32,19 +29,6 @@ import { contextMiddleware } from "./middleware/context.middleware";
       inject: [ConfigService],
     }),
     RavenModule,
-    MailerModule.forRoot({
-      transport: process.env.TRANSPORT_SMTP,
-      defaults: {
-        from: process.env.DEFAULT_FROM,
-      },
-      template: {
-        dir: __dirname + "/templates",
-        adapter: new HandlebarsAdapter(),
-        options: {
-          strict: true,
-        },
-      },
-    }),
     AuthModule,
     UserModule,
     CoreModule,

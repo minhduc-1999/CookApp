@@ -1,0 +1,97 @@
+<head>
+  <style>
+    @import url("https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;700&display=swap");
+
+    body,
+    p,
+    h3,
+    button {
+      margin: 0;
+      padding: 0;
+      border: 0;
+      font-family: -apple-system, "Open Sans", "Helvetica Neue", sans-serif;
+      box-sizing: border-box;
+    }
+
+    #container {
+    }
+
+    #logo {
+    }
+
+    #main {
+      margin-top: 10px;
+      background-color: hsl(184, 63%, 97%);
+      padding: 30px;
+      border-radius: 5px;
+    }
+
+    #content {
+      background-color: white;
+      padding: 30px;
+      border-bottom: 2px solid hsl(4, 0%, 82%);
+    }
+
+    #main p {
+      font-size: 1rem;
+    }
+
+    #main h3 {
+      color: hsl(184, 63%, 44%);
+      font-size: 1.6rem;
+      margin-bottom: 10px;
+    }
+
+    #main button {
+      background-color: hsl(19, 96%, 44%);
+      cursor: pointer;
+      border-radius: 30px;
+      padding: 10px 30px;
+      font-size: 1rem;
+      color: white;
+      font-weight: bold;
+      display: inline-block;
+      font-weight: bold;
+      margin: 30px 0;
+    }
+
+    #main > p {
+      text-decoration: underline;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<body>
+  <div id="container">
+    <img
+      id="logo"
+      src="https://lh3.googleusercontent.com/a/AATXAJz5X5mASRDmBgZmrdB51rOEjz0K_Six-65_57AE=s96-c"
+      alt="Tastify"
+      title="Logo"
+      style="display: block"
+      width="176"
+      height="50"
+    />
+    <div id="main">
+      <div id="content">
+        <h3>Confirm your email address</h3>
+        <p>Please click the button below to confirm your email address:</p>
+        <form
+          target="_blank"
+          method="post"
+          action="{{callback}}"
+          class="inline"
+        >
+          <input type="text" hidden name="token" value="{{token}}" />
+          <button type="submit" value="Submit">Confirm email</button>
+        </form>
+        <p>
+          Once confirmed, this email will be uniquely associated with your
+          Tastify account.<br /><br />
+          Cheer,<br />
+          The Tastify team
+        </p>
+      </div>
+    </div>
+  </div>
+</body>
