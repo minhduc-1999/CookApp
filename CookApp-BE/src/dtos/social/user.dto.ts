@@ -22,6 +22,7 @@ export class UserDTO extends AuditDTO {
 
   @ApiProperty({ type: String })
   @IsEmail()
+  @Expose()
   email: string;
 
   @ApiPropertyOptional({ type: String })

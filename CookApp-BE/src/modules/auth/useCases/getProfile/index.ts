@@ -20,9 +20,7 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
     @Inject("IUserService")
     private _userService: IUserService,
     @Inject("IStorageService")
-    private _storageService: IStorageService,
-    @Inject("IMailService")
-    private _mailService: IMailService
+    private _storageService: IStorageService
   ) {}
   async execute(query: GetProfileQuery): Promise<GetProfileResponse> {
     const user = await this._userService.getUserById(query.user.id);
@@ -31,7 +29,6 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
         await this._storageService.getDownloadUrls([user.avatar])
       )[0];
     }
-    this._mailService.sendEmailAddressVerification("61a9034771eb77efd736079b", "user@gmail.com")
     return user;
   }
 }

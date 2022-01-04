@@ -8,8 +8,6 @@ import { BaseCommand } from "base/cqrs/command.base";
 import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { ClientSession } from "mongoose";
 import { VerifyEmailRequest } from "./verifyEmailRequest";
-import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.repository";
-import { IFeedRepository } from "modules/auth/adapters/out/repositories/feed.repository";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "nestjs-config";
 import { ResponseDTO } from "base/dtos/response.dto";
@@ -58,7 +56,6 @@ export class VerifyEmailCommandHandler
         return payload.email;
       }
     } catch (err) {
-      console.error(err);
       throw new UnauthorizedException(
         ResponseDTO.fail("Your email verification request has been expired")
       );

@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { ApiBody, ApiConflictResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { Public } from "decorators/public.decorator";
 import { RegisterCommand } from "modules/auth/useCases/register";
 import { Result } from "base/result.base";
@@ -25,6 +30,8 @@ import { GoogleSignInCommand } from "modules/auth/useCases/loginWithGoogle";
 import { GoogleSignInResponse } from "modules/auth/useCases/loginWithGoogle/googleSignInResponse";
 import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmailRequest";
 import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
+import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
+import { ResendEmailVerificationCommand } from "modules/auth/useCases/resendEmailVerification";
 
 @Controller()
 @ApiTags("Authentication")
@@ -85,12 +92,15 @@ export class AuthController {
   }
 
   @Post("resend-email-verification")
-  @Public()
+  @ApiBearerAuth()
   async resendEmailVerificationCallback(
-    @Body() body: VerifyEmailRequest
-  ): Promise<string> {
-    let command = new VerifyEmailCommand(body, null);
+    @Body() body: ResendEmailVerificationRequest,
+    @User() user: UserDTO
+  ): Promise<Result<void>> {
+    let command = new ResendEmailVerificationCommand(body, user, null);
     await this._commandBus.execute(command);
-    return "Confirm email successfully";
+    return Result.ok(null, {
+      messages: ["Resend email verification successfully"],
+    });
   }
 }
