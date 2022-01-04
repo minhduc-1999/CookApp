@@ -32,6 +32,7 @@ import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmai
 import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
 import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
 import { ResendEmailVerificationCommand } from "modules/auth/useCases/resendEmailVerification";
+import { NotRequireEmailVerification } from "decorators/not_require_email_verification.decorator";
 
 @Controller()
 @ApiTags("Authentication")
@@ -40,6 +41,7 @@ export class AuthController {
 
   @Post("register")
   @Public()
+  @NotRequireEmailVerification()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(RegisterResponse, "Register successfully")
   @ApiConflictResponse()
@@ -65,6 +67,7 @@ export class AuthController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(LoginResponse, "Login successfully")
   @Public()
+  @NotRequireEmailVerification()
   async login(@User() user: UserDTO): Promise<Result<LoginResponse>> {
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
@@ -74,6 +77,7 @@ export class AuthController {
   @Post("google/callback")
   @HttpCode(200)
   @Public()
+  @NotRequireEmailVerification()
   @ApiOKResponseCustom(GoogleSignInResponse, "Authenticate successfully")
   async loginWithGoogleCallback(
     @Body() body: GoogleSignInRequest
@@ -85,6 +89,7 @@ export class AuthController {
 
   @Post("email-verification/callback")
   @Public()
+  @NotRequireEmailVerification()
   async verifyEmailCallback(@Body() body: VerifyEmailRequest): Promise<string> {
     let command = new VerifyEmailCommand(body, null);
     await this._commandBus.execute(command);
@@ -93,6 +98,7 @@ export class AuthController {
 
   @Post("resend-email-verification")
   @ApiBearerAuth()
+  @NotRequireEmailVerification()
   async resendEmailVerificationCallback(
     @Body() body: ResendEmailVerificationRequest,
     @User() user: UserDTO

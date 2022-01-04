@@ -11,12 +11,12 @@ import { UserDTO } from "dtos/social/user.dto";
 export class EmailVerificationGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
   canActivate(context: ExecutionContext) {
-    const isPublic = this.reflector.get<boolean>(
-      "isPublic",
+    const notRequireEmailVerification = this.reflector.get<boolean>(
+      "requireEmailVerification",
       context.getHandler()
     );
 
-    if (isPublic) return true;
+    if (notRequireEmailVerification) return true;
 
     const request = context.switchToHttp().getRequest();
 

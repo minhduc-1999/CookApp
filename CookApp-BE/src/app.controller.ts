@@ -4,6 +4,7 @@ import { AppService } from './app.service';
 import { RavenInterceptor } from 'nest-raven';
 import { Public } from 'decorators/public.decorator';
 import { ApiTags } from '@nestjs/swagger';
+import { NotRequireEmailVerification } from 'decorators/not_require_email_verification.decorator';
 
 @UseInterceptors(new RavenInterceptor())
 @Controller()
@@ -13,6 +14,7 @@ export class AppController {
 
   @Get()
   @Public()
+  @NotRequireEmailVerification()
   getHello(): string {
     return this._appService.getHello();
   }
