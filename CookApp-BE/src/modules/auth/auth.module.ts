@@ -8,6 +8,7 @@ import { UserModel } from "domains/schemas/social/user.schema";
 import { WallModel } from "domains/schemas/social/wall.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
+import { EmailVerificationGuard } from "guards/email_verification.guard";
 import { JwtAuthGuard } from "guards/jwt_auth.guard";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule, ConfigService } from "nestjs-config";
@@ -36,6 +37,17 @@ const handlers = [
   GoogleSignInCommandHandler,
   VerifyEmailCommandHandler,
   ResendEmailVerificationCommandHandler,
+];
+
+const globalGuards = [
+  {
+    provide: APP_GUARD,
+    useClass: JwtAuthGuard,
+  },
+  {
+    provide: APP_GUARD,
+    useClass: EmailVerificationGuard,
+  },
 ];
 
 @Module({
@@ -72,10 +84,6 @@ const handlers = [
       useClass: AuthenticationService,
     },
     {
-      provide: APP_GUARD,
-      useClass: JwtAuthGuard,
-    },
-    {
       provide: "IWallRepository",
       useClass: WallRepository,
     },
@@ -86,6 +94,7 @@ const handlers = [
     BasicAuthStrategy,
     JwtStrategy,
     ...handlers,
+    ...globalGuards,
   ],
   exports: ["IUserService"],
 })
