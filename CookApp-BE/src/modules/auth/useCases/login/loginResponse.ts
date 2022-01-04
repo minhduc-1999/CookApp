@@ -6,4 +6,7 @@ export class LoginResponse {
 
   @ApiResponseProperty({ type: String })
   userId: string;
+
+  @ApiResponseProperty({type: Boolean})
+  emailVerified: boolean
 }

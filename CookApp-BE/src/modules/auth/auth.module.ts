@@ -10,7 +10,7 @@ import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { JwtAuthGuard } from "guards/jwt_auth.guard";
 import { ShareModule } from "modules/share/share.module";
-import { ConfigModule } from "nestjs-config";
+import { ConfigModule, ConfigService } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
@@ -24,17 +24,33 @@ import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { LoginCommandHandler } from "./useCases/login";
 import { GoogleSignInCommandHandler } from "./useCases/loginWithGoogle";
 import { RegisterCommandHandler } from "./useCases/register";
+import { ResendEmailVerificationCommandHandler } from "./useCases/resendEmailVerification";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
+import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
+
+const handlers = [
+  RegisterCommandHandler,
+  LoginCommandHandler,
+  UpdateProfileCommandHandler,
+  GetProfileQueryHandler,
+  GoogleSignInCommandHandler,
+  VerifyEmailCommandHandler,
+  ResendEmailVerificationCommandHandler,
+];
+
 @Module({
   imports: [
     ConfigModule,
     HttpModule,
     MongooseModule.forFeature([UserModel, WallModel, FeedModel]),
-    JwtModule.register({
-      secret: process.env.JWT_PRIVATE_KEY,
-      signOptions: {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-      },
+    JwtModule.registerAsync({
+      useFactory: async (config: ConfigService) => ({
+        secret: config.get("auth.jwtPrivateKey"),
+        signOptions: {
+          expiresIn: config.get("auth.jwtExpiration"),
+        },
+      }),
+      inject: [ConfigService],
     }),
     CqrsModule,
     ShareModule.register({
@@ -67,13 +83,9 @@ import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
       provide: "IFeedRepository",
       useClass: FeedRepository,
     },
-    RegisterCommandHandler,
-    LoginCommandHandler,
-    UpdateProfileCommandHandler,
-    GetProfileQueryHandler,
     BasicAuthStrategy,
     JwtStrategy,
-    GoogleSignInCommandHandler,
+    ...handlers,
   ],
   exports: ["IUserService"],
 })

@@ -21,10 +21,11 @@ class AuthenticationService implements IAuthentication {
     private jwtService: JwtService
   ) {}
   async login(user: UserDTO): Promise<LoginResponse> {
-    const payload: JwtAuthTokenPayload = { sub: user.id };
+    const payload: JwtAuthTokenPayload = { sub: user.id};
     return {
       accessToken: this.jwtService.sign(payload),
       userId: user.id,
+      emailVerified: user.emailVerified
     };
   }
 

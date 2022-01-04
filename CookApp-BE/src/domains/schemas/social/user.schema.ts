@@ -45,6 +45,9 @@ export class User extends AbstractSchema {
   @Prop()
   externalProvider?: Provider;
 
+  @Prop({ default: false })
+  emailVerified: boolean;
+
   constructor(userDto: Partial<UserDTO>) {
     super(userDto);
     this.username = userDto?.username;

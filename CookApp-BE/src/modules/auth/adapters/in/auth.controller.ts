@@ -1,6 +1,11 @@
 import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
-import { ApiBody, ApiConflictResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiConflictResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { Public } from "decorators/public.decorator";
 import { RegisterCommand } from "modules/auth/useCases/register";
 import { Result } from "base/result.base";
@@ -23,6 +28,10 @@ import { User } from "decorators/user.decorator";
 import { GoogleSignInRequest } from "modules/auth/useCases/loginWithGoogle/googleSignInRequest";
 import { GoogleSignInCommand } from "modules/auth/useCases/loginWithGoogle";
 import { GoogleSignInResponse } from "modules/auth/useCases/loginWithGoogle/googleSignInResponse";
+import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmailRequest";
+import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
+import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
+import { ResendEmailVerificationCommand } from "modules/auth/useCases/resendEmailVerification";
 
 @Controller()
 @ApiTags("Authentication")
@@ -66,11 +75,32 @@ export class AuthController {
   @HttpCode(200)
   @Public()
   @ApiOKResponseCustom(GoogleSignInResponse, "Authenticate successfully")
-  async googleCallback(
+  async loginWithGoogleCallback(
     @Body() body: GoogleSignInRequest
   ): Promise<Result<GoogleSignInResponse>> {
     let command = new GoogleSignInCommand(null, body);
     const jwt = await this._commandBus.execute(command);
     return Result.ok(jwt, { messages: ["Authenticate successfully"] });
+  }
+
+  @Post("email-verification/callback")
+  @Public()
+  async verifyEmailCallback(@Body() body: VerifyEmailRequest): Promise<string> {
+    let command = new VerifyEmailCommand(body, null);
+    await this._commandBus.execute(command);
+    return "Confirm email successfully";
+  }
+
+  @Post("resend-email-verification")
+  @ApiBearerAuth()
+  async resendEmailVerificationCallback(
+    @Body() body: ResendEmailVerificationRequest,
+    @User() user: UserDTO
+  ): Promise<Result<void>> {
+    let command = new ResendEmailVerificationCommand(body, user, null);
+    await this._commandBus.execute(command);
+    return Result.ok(null, {
+      messages: ["Resend email verification successfully"],
+    });
   }
 }

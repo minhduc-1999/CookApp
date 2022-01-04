@@ -22,6 +22,7 @@ export class UserDTO extends AuditDTO {
 
   @ApiProperty({ type: String })
   @IsEmail()
+  @Expose()
   email: string;
 
   @ApiPropertyOptional({ type: String })
@@ -47,6 +48,9 @@ export class UserDTO extends AuditDTO {
   @Exclude({ toPlainOnly: true })
   externalProvider?: Provider;
 
+  @Expose()
+  emailVerified: boolean;
+
   static create(
     user: Pick<
       UserDTO,
@@ -70,6 +74,7 @@ export class UserDTO extends AuditDTO {
     newUser.password = user?.password;
     newUser.displayName = user?.displayName;
     newUser.externalProvider = user?.externalProvider;
+    newUser.emailVerified = false;
     return newUser;
   }
 }
