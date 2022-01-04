@@ -1,0 +1,24 @@
+{
+  "name": "Tastify",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "prestart-be": "npm install --prefix CookApp-BE",
+    "start-be": "npm run start:prod --prefix CookApp-BE"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/minhduc-1999/CookApp.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/minhduc-1999/CookApp/issues"
+  },
+  "homepage": "https://github.com/minhduc-1999/CookApp#readme",
+  "engines": {
+    "node": "14.17.6",
+    "npm": "8.3.0"
+  }
+}

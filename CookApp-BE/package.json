@@ -6,12 +6,12 @@
   "license": "MIT",
   "scripts": {
     "build": "nest build",
+    "start:prod": "node dist/main.js",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --watch",
     "prestart:prod": "rm -rf dist && npm run build",
-    "start:prod": "node dist/src/main.js",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -125,5 +125,9 @@
     },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "engines": {
+    "node": "14.17.6",
+    "npm": "8.3.0"
   }
 }
