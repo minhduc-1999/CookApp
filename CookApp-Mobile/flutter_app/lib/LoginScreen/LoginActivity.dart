@@ -16,12 +16,12 @@ class LoginActivity extends StatefulWidget {
   final AuthBase auth;
 
   const LoginActivity({Key key, this.auth}) : super(key: key);
+
   @override
   _LoginActivityState createState() => _LoginActivityState(this.auth);
 }
 
 class _LoginActivityState extends State<LoginActivity> {
-
   bool hidePassword = true;
   bool isAPIcallProcess = false;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
@@ -30,6 +30,7 @@ class _LoginActivityState extends State<LoginActivity> {
   final AuthBase auth;
 
   _LoginActivityState(this.auth);
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -46,6 +47,7 @@ class _LoginActivityState extends State<LoginActivity> {
       ),
     ));
   }
+
   Future<String> _signInWithGoogle() async {
     String s = "";
     try {
@@ -55,6 +57,7 @@ class _LoginActivityState extends State<LoginActivity> {
     }
     return s;
   }
+
   Widget _loginUI(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return SingleChildScrollView(
@@ -125,7 +128,7 @@ class _LoginActivityState extends State<LoginActivity> {
           if (onValidateVal.isEmpty) {
             return "Password can\'t be empty";
           }
-          if (onValidateVal.length < 8){
+          if (onValidateVal.length < 8) {
             return "Password must have at least 8 characters";
           }
           return null;
@@ -170,10 +173,12 @@ class _LoginActivityState extends State<LoginActivity> {
                         {
                           Navigator.pushAndRemoveUntil(context,
                               MaterialPageRoute(
-                                builder: (context) {
-                                  return HomeActivity(auth: auth,);
-                                },
-                              ), (route) => false)
+                            builder: (context) {
+                              return HomeActivity(
+                                auth: auth,
+                              );
+                            },
+                          ), (route) => false)
                         }
                       else
                         {
@@ -201,7 +206,6 @@ class _LoginActivityState extends State<LoginActivity> {
             },
           ),
         ),
-
         Center(
           child: Text(
             "Or",
@@ -211,39 +215,38 @@ class _LoginActivityState extends State<LoginActivity> {
         Center(
           child: LoginButton(
             text: "Log in by Google",
-            press: () async{
-                String idToken = await _signInWithGoogle();
-                var response = await APIService.loginByGoogle(LoginByGoogleRequestModel(idToken: idToken));
-                if (response)
-                {
-                  Navigator.pushAndRemoveUntil(context,
-                      MaterialPageRoute(
-                        builder: (context) {
-                          return HomeActivity(auth: auth,);
+            press: () async {
+              String idToken = await _signInWithGoogle();
+              var response = await APIService.loginByGoogle(
+                  LoginByGoogleRequestModel(idToken: idToken));
+              if (response) {
+                Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                  builder: (context) {
+                    return HomeActivity(
+                      auth: auth,
+                    );
+                  },
+                ), (route) => false);
+              } else {
+                showDialog(
+                  context: context,
+                  builder: (_) => new AlertDialog(
+                    title: new Text("ERROR!!!"),
+                    content: new Text("There're some error"),
+                    actions: <Widget>[
+                      FlatButton(
+                        child: Text(
+                          "OK",
+                          style: TextStyle(color: appPrimaryColor),
+                        ),
+                        onPressed: () {
+                          Navigator.of(context).pop();
                         },
-                      ), (route) => false);
-                }
-                else
-                {
-                  showDialog(
-                    context: context,
-                    builder: (_) => new AlertDialog(
-                      title: new Text("ERROR!!!"),
-                      content: new Text("There're some error"),
-                      actions: <Widget>[
-                        FlatButton(
-                          child: Text(
-                            "OK",
-                            style: TextStyle(color: appPrimaryColor),
-                          ),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        )
-                      ],
-                    ),
-                  );
-                }
+                      )
+                    ],
+                  ),
+                );
+              }
             },
           ),
         ),

@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tastify/Model/PostDetailsRespondModel.dart';
+import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/StaticComponent/Post.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -21,7 +22,8 @@ class NotificationWidget extends StatefulWidget {
           createdAt: this.createdAt,
           data: this.data,
           isRead: this.isRead,
-          templateID: this.templateID);
+          templateID: this.templateID,
+          image: this.image);
   final String id;
   final String body;
   final int createdAt;
@@ -41,6 +43,17 @@ class NotificationWidget extends StatefulWidget {
       image: doc['image'],
     );
   }
+  factory NotificationWidget.fromMap(Map<String, dynamic> data){
+    return NotificationWidget(
+      id: data['id'],
+      body: data['body'],
+      createdAt: data['createdAt'],
+      data: data['data'],
+      isRead: data['isRead'],
+      templateID: data['templateId'],
+      image: data['image'],
+    );
+  }
 }
 
 class _NotificationWidgetState extends State<NotificationWidget> {
@@ -57,42 +70,77 @@ class _NotificationWidgetState extends State<NotificationWidget> {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-        padding: EdgeInsets.only(bottom: 2.0),
-        child: Container(
-          color: !isRead ? backGroundUnreadNotiColor : Theme.of(context).scaffoldBackgroundColor,
-          child: ListTile(
-            title: GestureDetector(
-              onTap: () => clickedImage(context),
-              child: RichText(
-                overflow: TextOverflow.ellipsis,
-                text: TextSpan(
-                    style: TextStyle(
-                      fontSize: 14.0,
-                      color: Colors.black,
-                    ),
+    final Size size = MediaQuery.of(context).size;
+    return GestureDetector(
+      onTap: (){
+        clickedNoti(context);
+      },
+      child: Container(
+
+            color: !isRead ? backGroundUnreadNotiColor : Theme.of(context).scaffoldBackgroundColor,
+            child: Padding(
+              padding: EdgeInsets.only(left: 8,right: 8,top: 15,bottom: 5),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  Container(
+                    margin: EdgeInsets.only(left: size.width*0.03, right: size.width*0.03),
+                    width: 38,
+                    height: 38,
+                    child: (image != null)
+                        ? CircleAvatar(
+                      backgroundColor: Colors.grey,
+                      backgroundImage: NetworkImage(image),
+                    )
+                        : CircleAvatar(
+                        backgroundColor: Colors.grey,
+                        backgroundImage:
+                        AssetImage('assets/images/default_avatar.png')),
+                  ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      TextSpan(
-                        text: body,
-                      )
-                    ]),
+                        Padding(
+                          padding: const EdgeInsets.only(left: 10, right: 8),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+
+                              SizedBox(
+                                width: size.width * 0.73,
+                                child: Text(body,
+                                    maxLines: 100,
+                                    style: TextStyle(
+                                      fontSize: 14,
+                                      color: Colors.black,
+                                    )),
+                              ),
+
+                            ],
+
+
+                          ),
+                        ),
+
+                      Container(
+                        margin: EdgeInsets.only(left: 10, right: 10, top: 4),
+                        child: Text(
+                          timeago.format(DateTime.fromMillisecondsSinceEpoch(createdAt)),
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(fontSize: 13, color: Colors.grey),
+                        ),
+                      ),
+                      SizedBox(height: 10,)
+                    ],
+                  ),
+                ],
               ),
             ),
-            leading: CircleAvatar(
-              backgroundColor: Colors.grey,
-              backgroundImage: AssetImage('assets/images/default_avatar.png'),
-            ),
-            subtitle: Text(
-              timeago.format(
-                  DateTime.fromMillisecondsSinceEpoch(createdAt)),
-              overflow: TextOverflow.ellipsis,
-            ),
-
           ),
-        ));
+    );
   }
 
-  clickedImage(BuildContext context) async {
+  clickedNoti(BuildContext context) async {
     if (!isRead) {
       FirebaseFirestore.instance
           .collection('modules')
@@ -125,6 +173,14 @@ class _NotificationWidgetState extends State<NotificationWidget> {
         isLike: res.data.reaction != null,
       );
       openImagePost(context, post);
+    } else if (templateID == "new_follower"){
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => ProfileActivity(
+                userId: data['followerID'],
+              )));
+
     }
   }
 

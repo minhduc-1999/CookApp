@@ -46,6 +46,9 @@ dependencies:
   google_sign_in: ^5.2.1
   speech_to_text: ^5.4.2
   cloud_firestore: ^3.1.5
+  firebase_analytics: ^9.0.4
+  firebase_messaging: ^11.2.4
+  flutter_local_notifications: ^5.0.0+4
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -1,5 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tastify/NotificationScreen/NotificationWidget.dart';
 import 'package:tastify/main.dart';
 
@@ -11,6 +13,53 @@ class NotificationActivity extends StatefulWidget {
 }
 
 class _NotificationActivityState extends State<NotificationActivity> {
+  List<NotificationWidget> _notiData;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    FirebaseMessaging.onMessage.listen((RemoteMessage noti) {
+      RemoteNotification notification = noti.notification;
+      AndroidNotification android = noti.notification?.android;
+      if (notification != null && android != null) {
+        flutterLocalNotificationsPlugin.show(
+            notification.hashCode,
+            notification.title,
+            notification.body,
+            NotificationDetails(
+              android: AndroidNotificationDetails(
+                channel.id,
+                channel.name,
+                channel.description,
+                color: Colors.blue,
+                playSound: false,
+                icon: '@mipmap/ic_launcher',
+              ),
+            ));
+      }
+    });
+
+    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+      print('A new onMessageOpenedApp event was published!');
+      RemoteNotification notification = message.notification;
+      AndroidNotification android = message.notification?.android;
+      if (notification != null && android != null) {
+        showDialog(
+            context: context,
+            builder: (_) {
+              return AlertDialog(
+                title: Text(notification.title),
+                content: SingleChildScrollView(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [Text(notification.body)],
+                  ),
+                ),
+              );
+            });
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -47,29 +96,60 @@ class _NotificationActivityState extends State<NotificationActivity> {
             .collection('users')
             .doc(currentUserId)
             .collection('badge')
+            .orderBy('createdAt',descending: true)
             .snapshots(),
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return Center(
               child: CircularProgressIndicator(),
             );
-          } else if (!snapshot.hasData) {
+          } else if (!snapshot.hasData || snapshot.connectionState == ConnectionState.none) {
             return Center(
               child: Text(
                 "Nothing to show!",
                 style: TextStyle(fontSize: 16),
               ),
             );
-          } else {
+          } else if (snapshot.hasData){
             return ListView.builder(
                 itemCount: snapshot.data.docs.length,
                 itemBuilder: (context, index){
-                  return NotificationWidget.fromDocument(snapshot.data.docs[index]);
+                DocumentSnapshot documentSnapshot = snapshot.data.docs[index];
+                  return
+                  NotificationWidget(
+                    key: ValueKey(documentSnapshot.id),
+                    id: documentSnapshot.id,
+                    body: documentSnapshot['body'],
+                    createdAt: documentSnapshot['createdAt'],
+                    data: documentSnapshot['data'],
+                    isRead: documentSnapshot['isRead'],
+                    templateID: documentSnapshot['templateId'],
+                    image: documentSnapshot['image'],
+                  );
                 }
-                );
+            );
+          } else {
+            return Container(
+                    alignment: FractionalOffset.center,
+                    child: CircularProgressIndicator());
+            }
           }
-        },
+
       ),
     );
+  }
+  Stream<List<NotificationWidget>> _getNoti() {
+    var snapshots = FirebaseFirestore.instance
+        .collection('modules')
+        .doc('notification')
+        .collection('users')
+        .doc(currentUserId)
+        .collection('badge')
+        .orderBy('createdAt', descending: true)
+        .snapshots();
+    return snapshots.map((snapshot) => snapshot.docs
+        .map(
+          (snapshot) => NotificationWidget.fromDocument(snapshot),
+    ).toList());
   }
 }
