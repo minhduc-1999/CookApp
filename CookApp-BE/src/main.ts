@@ -4,7 +4,6 @@ import {
   NestExpressApplication,
   ExpressAdapter,
 } from "@nestjs/platform-express";
-import * as Sentry from "@sentry/node";
 import { SwaggerModule, DocumentBuilder } from "@nestjs/swagger";
 import { AppModule } from "./app.module";
 import { ConfigService } from "nestjs-config";
@@ -25,12 +24,16 @@ async function bootstrap() {
     new ExpressAdapter(),
     {
       cors: {
-        origin: ["http://localhost:8000"],
+        origin: [],
         credentials: true,
       },
     }
   );
   const configService = app.get(ConfigService);
+
+  const APP_HOST = configService.get("app.host");
+  const APP_PORT = configService.get("app.port");
+  const APP_ENV = configService.get("app.env");
 
   app.use(morgan(morganFormat));
   app.use(helmet());
@@ -40,7 +43,7 @@ async function bootstrap() {
 
   app.useGlobalPipes(
     new ValidationPipe({
-      disableErrorMessages: configService.get("app.env") === "production",
+      disableErrorMessages: APP_ENV === "production",
     })
   );
 
@@ -51,29 +54,32 @@ async function bootstrap() {
   /**
    * Swagger API
    */
-  const APP_HOST = configService.get("app.host");
-  const APP_PORT = configService.get("app.port");
+  if (APP_ENV !== "production") {
+    const swaggerBuilder = new DocumentBuilder()
+      .setTitle("API SPECS TASTIFY 1.0")
+      .setDescription("The TASTIFY API description")
+      .setVersion("1.0")
+      .addBearerAuth();
 
-  const options = new DocumentBuilder()
-    .setTitle("API SPECS COOKAPP 1.0")
-    .setDescription("The COOKAPP API description")
-    .setVersion("1.0")
-    .addBearerAuth()
-    .addServer(`http://localhost:${APP_PORT}`)
-    .build();
-  const document = SwaggerModule.createDocument(app, options);
-  SwaggerModule.setup("docs", app, document, {
-    swaggerOptions: {
-      persistAuthorization: true,
-    },
-  });
+    if (APP_ENV === "staging")
+      swaggerBuilder.addServer(configService.get("app.stagingUrl"));
+    else swaggerBuilder.addServer(`http://localhost:${APP_PORT}`);
+    const options = swaggerBuilder.build();
+    const document = SwaggerModule.createDocument(app, options);
 
-  if (configService.get("app.env") === "production") {
-    Sentry.init({ dsn: configService.get("app.sentryUrl") });
+    SwaggerModule.setup("docs", app, document, {
+      swaggerOptions: {
+        persistAuthorization: true,
+      },
+    });
   }
 
+  // if (APP_ENV === "production") {
+  //   Sentry.init({ dsn: configService.get("app.sentryUrl") });
+  // }
+
   const logLevels: LogLevel[] =
-    configService.get("app.env") === "production"
+    APP_ENV === "production"
       ? ["log", "error", "warn"]
       : ["log", "error", "warn", "debug", "verbose"];
   Logger.overrideLogger(logLevels);

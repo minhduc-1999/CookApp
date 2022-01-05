@@ -2,4 +2,4 @@ setup-deploy:
 	./deploy/setup.sh
 
 deploy-api:
-	git push tastify-api HEAD:main
+	git subtree push --prefix=CookApp-BE tastify-be main
