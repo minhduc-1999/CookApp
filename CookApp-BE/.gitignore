@@ -1,5 +1,6 @@
 *.rest
 dist/
+**/credential.json
 .env.staging
 node_modules/
 stack/

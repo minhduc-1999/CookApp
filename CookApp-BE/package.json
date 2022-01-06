@@ -5,13 +5,13 @@
   "author": "",
   "license": "MIT",
   "scripts": {
+    "prebuild": "rm -rf dist",
     "build": "nest build",
+    "start:prod": "node --optimize_for_size --max_old_space_size=460 --gc_interval=100 dist/main.js",
     "format": "prettier --write \"src/**/*.ts\"",
     "start": "nest start",
     "start:dev": "nest start --watch",
     "start:debug": "nest start --watch",
-    "prestart:prod": "rm -rf dist && npm run build",
-    "start:prod": "node dist/src/main.js",
     "lint": "tslint -p tsconfig.json -c tslint.json",
     "test": "jest",
     "test:watch": "jest --watch",
@@ -125,5 +125,9 @@
     },
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
+  },
+  "engines": {
+    "node": "14.17.6",
+    "npm": "8.3.0"
   }
 }

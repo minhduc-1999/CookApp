@@ -2,6 +2,7 @@
 import { UtilsService } from '../providers/utils.service';
 
 export default {
+  credentialJson: UtilsService.getConfig("CREDENTIAL_JSON"),
   credentialPath: UtilsService.getConfig("CREDENTIAL_PATH", ""),
   storageBucket: UtilsService.getConfig("STORAGE_BUCKET"),
   presignedLinkExpiration: UtilsService.getConfig(

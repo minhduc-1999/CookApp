@@ -13,7 +13,7 @@ export interface IStorageProvider {
 export class FirebaseStorageProvider implements IStorageProvider {
     constructor(private _configService: ConfigService) {
       const firebaseCredentialPath = this._configService.get(
-        "storage.credentialPath"
+        "storage.credentialJson"
       );
 
       initializeApp({

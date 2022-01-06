@@ -40,6 +40,7 @@ export class RegisterCommandHandler
       ...registerDto,
       password: hashedPassword,
       displayName: generateDisplayName(),
+      emailVerified: false
     });
     const createdUser = await this._userRepo
       .setSession(session)

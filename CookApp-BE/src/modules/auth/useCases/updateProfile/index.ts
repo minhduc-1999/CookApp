@@ -9,7 +9,6 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { ClientSession } from "mongoose";
 import { clean, createUpdatingNestedObject, createUpdatingObject, isImageKey } from "utils";
 import { UpdateProfileRequest } from "./updateProfileRequest";
-import { UpdateProfileResponse } from "./updateProfileResponse";
 import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.repository";
 
 export class UpdateProfileCommand extends BaseCommand {
@@ -38,7 +37,7 @@ export class UpdateProfileCommandHandler
     @Inject("IWallRepository")
     private _wallRepo: IWallRepository
   ) {}
-  async execute(command: UpdateProfileCommand): Promise<UpdateProfileResponse> {
+  async execute(command: UpdateProfileCommand): Promise<void> {
     const user = await this._userService.getUserById(command.user.id);
     if (command.updateProfileReq.avatar) {
       const { avatar } = command.updateProfileReq;
@@ -71,6 +70,6 @@ export class UpdateProfileCommandHandler
         await this._storageService.getDownloadUrls([updatedUser.avatar])
       )[0];
     }
-    return updatedUser;
+    return;
   }
 }

@@ -27,7 +27,7 @@ export class NotiRepository implements INotiRepository {
   private firestore: FirebaseFirestore.Firestore;
   constructor(private _configService: ConfigService) {
     const firebaseCredentialPath = this._configService.get(
-      "storage.credentialPath"
+      "storage.credentialJson"
     );
 
     if (getApps().length === 0) {
