@@ -12,7 +12,6 @@ import { GetProfileQuery } from "modules/auth/useCases/getProfile";
 import { GetProfileResponse } from "modules/auth/useCases/getProfile/getProfileResponse";
 import { UpdateProfileCommand } from "modules/auth/useCases/updateProfile";
 import { UpdateProfileRequest } from "modules/auth/useCases/updateProfile/updateProfileRequest";
-import { UpdateProfileResponse } from "modules/auth/useCases/updateProfile/updateProfileResponse";
 
 @Controller("users")
 @ApiTags("Authentication")
@@ -31,14 +30,13 @@ export class UserController {
 
   @Patch("profile")
   @ApiFailResponseCustom()
-  @ApiOKResponseCustom(UpdateProfileResponse, "Getting profile successfully")
   @ApiConflictResponse()
   async updateProfile(
     @User() user: UserDTO,
     @Body() body: UpdateProfileRequest
-  ): Promise<Result<UpdateProfileResponse>> {
+  ): Promise<Result<void>> {
     const command = new UpdateProfileCommand(null, user, body);
-    const result = await this._commandBus.execute(command);
-    return Result.ok(result, { messages: ["Updating profile successfully"] });
+    await this._commandBus.execute(command);
+    return Result.ok(null, { messages: ["Updating profile successfully"] });
   }
 }
