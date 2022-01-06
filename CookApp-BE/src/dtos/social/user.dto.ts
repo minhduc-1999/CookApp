@@ -62,6 +62,7 @@ export class UserDTO extends AuditDTO {
       | "profile"
       | "displayName"
       | "externalProvider"
+      | "emailVerified"
     >
   ): UserDTO {
     const newUser = new UserDTO();
@@ -74,7 +75,7 @@ export class UserDTO extends AuditDTO {
     newUser.password = user?.password;
     newUser.displayName = user?.displayName;
     newUser.externalProvider = user?.externalProvider;
-    newUser.emailVerified = false;
+    newUser.emailVerified = user?.emailVerified;
     return newUser;
   }
 }

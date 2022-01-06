@@ -10,7 +10,7 @@ export class UpdateProfileRequest {
   @IsValidDisplayName()
   @IsOptional()
   @IsNotEmpty()
-  @Length(8, 16)
+  @Length(2, 16)
   @ApiPropertyOptional({ type: String })
   displayName: string;
 

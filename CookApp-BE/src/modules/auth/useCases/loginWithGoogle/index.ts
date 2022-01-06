@@ -66,6 +66,7 @@ export class GoogleSignInCommandHandler
             type: ExternalProvider.GOOGLE,
           },
           displayName: generateDisplayName(),
+          emailVerified: true
         });
         let res = await this._userRepo.getUserByEmail(userData.email);
 
