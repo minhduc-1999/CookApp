@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
+import 'package:tastify/Model/EditProfileRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
@@ -22,6 +23,7 @@ import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
 import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/RegisterRequestModel.dart';
 import 'package:tastify/Model/RegisterRespondModel.dart';
+import 'package:tastify/Model/ResendEmailRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Model/UserWallRespondModel.dart';
 import 'package:tastify/Model/WallPostRespondModel.dart';
@@ -35,7 +37,7 @@ import 'SharedService.dart';
 class APIService {
   static var client = http.Client();
 
-  static Future<bool> login(LoginRequestModel model) async {
+  static Future<LoginRespondModel> login(LoginRequestModel model) async {
     Map<String, String> requestHeader = {'Content-Type': 'application/json'};
     var url = Uri.parse(Config.apiURL + Config.loginAPI);
     var respone = await client.post(url,
@@ -43,13 +45,15 @@ class APIService {
           'Content-Type': 'application/json',
         },
         body: jsonEncode(model.toJson()));
-    if (respone.statusCode == 200) {
+    /*  if (respone.statusCode == 200) {
       await SharedService.setLoginDetails(loginRespondJson(respone.body));
       return true;
     } else {
       return false;
-    }
+    }*/
+    return loginRespondJson(respone.body);
   }
+
   static Future<bool> loginByGoogle(LoginByGoogleRequestModel model) async {
     var url = Uri.parse(Config.apiURL + Config.loginByGoogleAPI);
     var respone = await client.post(url,
@@ -64,6 +68,7 @@ class APIService {
       return false;
     }
   }
+
   static Future<RegisterRespondModel> register(
       RegisterRequestModel model) async {
     Map<String, String> requestHeader = {'Content-Type': 'application/json'};
@@ -165,7 +170,10 @@ class APIService {
 
   static Future<NewFeedRespondModel> getNewFeed(int offset) async {
     var url = Uri.parse(Config.apiURL + Config.userFeedAPI).replace(
-        queryParameters: <String, String>{'offset': offset.toString(), 'limit': '10'});
+        queryParameters: <String, String>{
+          'offset': offset.toString(),
+          'limit': '10'
+        });
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{
@@ -275,7 +283,7 @@ class APIService {
     }
   }
 
-  static Future<bool> editProfile(EditUserRequestModel model) async {
+  static Future<EditProfileRespondModel> editProfile(EditUserRequestModel model) async {
     var url = Uri.parse(Config.apiURL + Config.userProfileAPI);
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
@@ -285,11 +293,7 @@ class APIService {
           'Authorization': 'Bearer ${loginDetails.data.accessToken}',
         },
         body: jsonEncode(model.toJson()));
-    if (respone.statusCode == 200) {
-      return true;
-    } else {
-      return false;
-    }
+    return editProfileRespondJson(respone.body);
   }
 
   static Future<FoodRespondModel> getFood(int offset) async {
@@ -325,7 +329,8 @@ class APIService {
     return foodRespondModel(respone.body);
   }
 
-  static Future<UserDelegateModel> getUserByQuery(int offset, String query) async {
+  static Future<UserDelegateModel> getUserByQuery(
+      int offset, String query) async {
     var url = Uri.parse(Config.apiURL + Config.preUserWallAPI).replace(
         queryParameters: <String, String>{
           'offset': offset.toString(),
@@ -341,7 +346,8 @@ class APIService {
     return userDelegateModel(respone.body);
   }
 
-  static Future<MessageRespondModel> sendMessage(MessageRequestModel model) async {
+  static Future<MessageRespondModel> sendMessage(
+      MessageRequestModel model) async {
     var url = Uri.parse(Config.apiURLChatBot + Config.sendMessage);
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.post(url,
@@ -351,5 +357,23 @@ class APIService {
         },
         body: jsonEncode(model.toJson()));
     return messageRespondModel(respone.body);
+  }
+
+  static Future<bool> resendEmail(
+      ResendEmailRequestModel model, String token) async {
+    var url = Uri.parse(Config.apiURL + Config.resendEmailAPI);
+    print("url: " + url.toString());
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${token}',
+        },
+        body: jsonEncode(model.toJson()));
+
+    if (respone.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
   }
 }

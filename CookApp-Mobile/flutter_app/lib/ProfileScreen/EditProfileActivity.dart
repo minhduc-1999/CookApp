@@ -2,7 +2,9 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
+import 'package:tastify/Model/EditProfileRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
@@ -35,16 +37,19 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   TextEditingController heightController = TextEditingController();
   TextEditingController weightController = TextEditingController();
   TextEditingController displayNameController = TextEditingController();
-
+  FToast fToast;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    fToast = FToast();
+    fToast.init(context);
     fetchData();
   }
 
   @override
   Widget build(BuildContext context) {
+    final Size size = MediaQuery.of(context).size;
     return SafeArea(
       child: Scaffold(
         appBar: AppBar(
@@ -71,8 +76,38 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
           actions: [
             IconButton(
                 onPressed: () async{
-                  await applyChanges();
-                  Navigator.of(context).pop();
+                  setState(() {
+                    isAPIcallProcess = true;
+                  });
+                  String objectName;
+                  if (file != null) {
+                    List<String> names = [];
+                    names.add(file.path.substring(file.path.lastIndexOf("/") + 1));
+                    var response = await APIService.getPresignedLink(
+                        PresignedLinkedRequestModel(fileNames: names));
+                    await APIService.uploadImage(file, response.data.items[0].signedLink);
+                    objectName = response.data.items[0].objectName;
+                  }
+                  EditUserRequestModel profile = EditUserRequestModel(
+                      displayName: displayNameController.text,
+                      avatar: file != null ? objectName : user.data.avatar,
+                      profile: new Profile(
+                        height: int.parse(heightController.text),
+                        weight: int.parse(weightController.text),
+                        birthDate: DateTime.now().microsecondsSinceEpoch,
+                        firstName: firstNameController.text,
+                        lastName: lastNameController.text,
+                        sex: _groupsexual,
+                      ));
+                  EditProfileRespondModel response = await APIService.editProfile(profile);
+
+                  setState(() {
+                    isAPIcallProcess = false;
+                  });
+                  _showToast(response.meta.messages[0], size);
+                  if (response.meta.ok) {
+                    Navigator.of(context).pop();
+                  }
                 },
                 icon: Icon(Icons.check))
           ],
@@ -201,7 +236,36 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
           )),
     );
   }
+  _showToast(String content, Size size) {
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: appPrimaryColor,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: size.width * 0.73,
+            child: Text(content,
+                textAlign: TextAlign.center,
+                maxLines: 100,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                )),
+          ),
+        ],
+      ),
+    );
 
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(seconds: 6),
+    );
+  }
   void fetchData() async {
     var response = await APIService.getUser();
     setState(() {
@@ -393,7 +457,8 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
           lastName: lastNameController.text,
           sex: _groupsexual,
         ));
-    await APIService.editProfile(profile);
+    EditProfileRespondModel response = await APIService.editProfile(profile);
+
     setState(() {
       isAPIcallProcess = false;
     });

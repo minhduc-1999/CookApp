@@ -4,8 +4,10 @@ import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
 import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
 import 'package:tastify/Model/LoginRequestModel.dart';
+import 'package:tastify/Model/ResendEmailRequestModel.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/Auth.dart';
+import 'package:tastify/Services/SharedService.dart';
 import 'package:tastify/constants.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
@@ -158,19 +160,21 @@ class _LoginActivityState extends State<LoginActivity> {
         Center(
           child: LoginButton(
             text: "Log in",
-            press: () {
+            press: () async {
               if (validateAndSave()) {
                 setState(() {
                   isAPIcallProcess = true;
                 });
                 LoginRequestModel model =
                     LoginRequestModel(username: username, password: password);
-                APIService.login(model).then((response) => {
-                      setState(() {
-                        isAPIcallProcess = false;
-                      }),
-                      if (response)
+                APIService.login(model).then((response) async => {
+
+                      if (response.data.emailVerified)
                         {
+                          await SharedService.setLoginDetails(response),
+                          setState(() {
+                            isAPIcallProcess = false;
+                          }),
                           Navigator.pushAndRemoveUntil(context,
                               MaterialPageRoute(
                             builder: (context) {
@@ -180,15 +184,28 @@ class _LoginActivityState extends State<LoginActivity> {
                             },
                           ), (route) => false)
                         }
-                      else
+                      else if (!response.data.emailVerified)
                         {
+                          setState(() {
+                            isAPIcallProcess = false;
+                          }),
                           showDialog(
                             context: context,
                             builder: (_) => new AlertDialog(
-                              title: new Text("ERROR!!!"),
-                              content: new Text("Wrong email or password"),
+                              title: new Text("NOTIFICATION"),
+                              content: new Text("Please confirm your email first!"),
                               actions: <Widget>[
-                                FlatButton(
+                                TextButton(
+                                  child: Text(
+                                    "RESEND",
+                                    style: TextStyle(color: appPrimaryColor),
+                                  ),
+                                  onPressed: () {
+                                    APIService.resendEmail(ResendEmailRequestModel(email: response.data.email), response.data.accessToken);
+
+                                  },
+                                ),
+                                TextButton(
                                   child: Text(
                                     "OK",
                                     style: TextStyle(color: appPrimaryColor),

@@ -4,7 +4,8 @@ class Config {
   static const String food = "Food Instructions";
   static const String chatbot = "Chatbot";
   //url
-  static const String apiURL = "http://192.168.1.11:3000";
+  //static const String apiURL = "http://192.168.1.11:3000";
+  static const String apiURL = "https://tastify-be.herokuapp.com";
   static const String loginAPI = "/api/login";
   static const String loginByGoogleAPI = "/api/google/callback";
   static const String registerAPI = "/api/register";
@@ -18,7 +19,7 @@ class Config {
   static const String postDetails = "/api/users/posts/";
   static const String userFeedAPI = "/api/users/feeds/posts";
   static const String foodAPI = "/api/foods";
-
+  static const String resendEmailAPI = "/api/resend-email-verification";
   //urlChatbot
   static const String apiURLChatBot = "http://yourchatstarter.xyz";
   static const String sendMessage = "/api/send_message";

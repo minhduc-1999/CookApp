@@ -40,63 +40,66 @@ class _FoodWidgetState extends State<FoodWidget> {
           color: Colors.white,
           borderRadius: BorderRadius.all(Radius.circular(20.0)),
         ),
-        child: Column(
-          children: [
-            Container(
-              margin: EdgeInsets.only(left: 10, top: 15, right: 10, bottom: 15),
-              child: ClipRRect(
-                borderRadius: BorderRadius.all(Radius.circular(5.0)),
-                child: Image.network(
-                  food.photos[0],
-                  //"https://image.cooky.vn/recipe/g6/54859/s1242/cooky-recipe-637387013241463008.jpg",
-                  fit: BoxFit.cover,
-                  height: height * 0.5,
+        child: Padding(
+          padding: const EdgeInsets.all(12.0),
+          child: Column(
+            children: [
+              Container(
+                margin: EdgeInsets.only(left: 10, top: 15, right: 10, bottom: 15),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                  child: Image.network(
+                    food.photos[0],
+                    //"https://image.cooky.vn/recipe/g6/54859/s1242/cooky-recipe-637387013241463008.jpg",
+                    fit: BoxFit.cover,
+                    height: height * 0.5,
+                  ),
                 ),
               ),
-            ),
-            Center(
-              child: Text(
-                food.name,
-                textAlign: TextAlign.center,
-                style: TextStyle(
-                  fontSize: 20,
-                  fontWeight: FontWeight.bold,
+              Center(
+                child: Text(
+                  food.name,
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                  ),
                 ),
               ),
-            ),
-            SizedBox(height: 10,),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  FontAwesomeIcons.clock,
-                  size: 16,
-                ),
-                Text(
-                  " " + food.totalTime.toString() + " minutes ",
-                  style: TextStyle(fontSize: 16),
-                ),
-                SizedBox(width: 10,),
-                Icon(
-                  FontAwesomeIcons.user,
-                  size: 16,
-                ),
-                food.servings == 1 ? Text(
-                  " " + food.servings.toString() + " person",
-                  style: TextStyle(fontSize: 16),
-                ) : Text (
-                  " " + food.servings.toString() + " people",
-                  style: TextStyle(fontSize: 16),
-                )
-              ],
-            ),
-            SizedBox(
-              height: 10,
-            ),
-            Container(
-                margin: EdgeInsets.only(left: 10, right: 10,bottom: 10),
-                child: Center(child: Text(ingredients))),
-          ],
+              SizedBox(height: 10,),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    FontAwesomeIcons.clock,
+                    size: 16,
+                  ),
+                  Text(
+                    " " + food.totalTime.toString() + " minutes ",
+                    style: TextStyle(fontSize: 16),
+                  ),
+                  SizedBox(width: 10,),
+                  Icon(
+                    FontAwesomeIcons.user,
+                    size: 16,
+                  ),
+                  food.servings == 1 ? Text(
+                    " " + food.servings.toString() + " person",
+                    style: TextStyle(fontSize: 16),
+                  ) : Text (
+                    " " + food.servings.toString() + " people",
+                    style: TextStyle(fontSize: 16),
+                  )
+                ],
+              ),
+              SizedBox(
+                height: 10,
+              ),
+              Container(
+                  margin: EdgeInsets.only(left: 10, right: 10,bottom: 10),
+                  child: Center(child: Text(ingredients, textAlign: TextAlign.justify,))),
+            ],
+          ),
         ),
       ),
 

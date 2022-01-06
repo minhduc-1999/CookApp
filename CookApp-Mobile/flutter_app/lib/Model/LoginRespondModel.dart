@@ -47,18 +47,23 @@ class Meta {
 class Data {
   String accessToken;
   String userId;
-
-  Data({this.accessToken, this.userId});
+  bool emailVerified;
+  String email;
+  Data({this.accessToken, this.userId, this.emailVerified, this.email});
 
   Data.fromJson(Map<String, dynamic> json) {
     accessToken = json['accessToken'];
     userId = json['userId'];
+    emailVerified = json['emailVerified'];
+    email = json['email'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['accessToken'] = this.accessToken;
     data['userId'] = this.userId;
+    data['emailVerified'] = this.emailVerified;
+    data['email'] = this.email;
     return data;
   }
 }

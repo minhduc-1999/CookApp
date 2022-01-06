@@ -13,33 +13,14 @@ class NotificationActivity extends StatefulWidget {
 }
 
 class _NotificationActivityState extends State<NotificationActivity> {
-  List<NotificationWidget> _notiData;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    FirebaseMessaging.onMessage.listen((RemoteMessage noti) {
-      RemoteNotification notification = noti.notification;
-      AndroidNotification android = noti.notification?.android;
-      if (notification != null && android != null) {
-        flutterLocalNotificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channel.description,
-                color: Colors.blue,
-                playSound: false,
-                icon: '@mipmap/ic_launcher',
-              ),
-            ));
-      }
-    });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
+
+    /*FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
       print('A new onMessageOpenedApp event was published!');
       RemoteNotification notification = message.notification;
       AndroidNotification android = message.notification?.android;
@@ -58,7 +39,28 @@ class _NotificationActivityState extends State<NotificationActivity> {
               );
             });
       }
-    });
+    });*/
+    setupInteractedMessage();
+  }
+  Future<void> setupInteractedMessage() async {
+    // Get any messages which caused the application to open from
+    // a terminated state.
+    RemoteMessage initialMessage =
+    await FirebaseMessaging.instance.getInitialMessage();
+
+    // If the message also contains a data property with a "type" of "chat",
+    // navigate to a chat screen
+    if (initialMessage != null) {
+      _handleMessage(initialMessage);
+    }
+
+    // Also handle any interaction when the app is in the background via a
+    // Stream listener
+    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
+  }
+
+  void _handleMessage(RemoteMessage message) {
+   print("there is a message");
   }
   @override
   Widget build(BuildContext context) {
@@ -152,4 +154,5 @@ class _NotificationActivityState extends State<NotificationActivity> {
           (snapshot) => NotificationWidget.fromDocument(snapshot),
     ).toList());
   }
+
 }
