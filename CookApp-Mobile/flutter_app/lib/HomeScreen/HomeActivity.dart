@@ -1,4 +1,7 @@
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:tastify/FoodScreen/FoodActivity.dart';
 import 'package:tastify/MessageScreen/MessageActivity.dart';
 import 'package:tastify/NewFeedScreen/NewFeedActivity.dart';
@@ -6,6 +9,7 @@ import 'package:tastify/NotificationScreen/NotificationActivity.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
+import 'package:tastify/keyOneSignal.dart';
 
 import 'package:tastify/main.dart';
 
@@ -41,6 +45,31 @@ class HomeActivityState extends State<HomeActivity> {
   PageController _pageController = PageController(initialPage: 0);
 
   HomeActivityState(this.auth);
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    //Remove this method to stop OneSignal Debugging
+    OneSignal.shared.setLogLevel(OSLogLevel.verbose, OSLogLevel.none);
+
+    OneSignal.shared.setAppId(oneSignalAppID);
+
+// The promptForPushNotificationsWithUserResponse function will show the iOS push notification prompt. We recommend removing the following code and instead using an In-App Message to prompt for notification permission
+    OneSignal.shared.promptUserForPushNotificationPermission().then((accepted) {
+      print("Accepted permission: $accepted");
+    });
+    OneSignal.shared.setNotificationWillShowInForegroundHandler((OSNotificationReceivedEvent event) {
+      // Will be called whenever a notification is received in foreground
+      // Display Notification, pass null param for not displaying the notification
+      event.complete(event.notification);
+    });
+
+    OneSignal.shared.setNotificationOpenedHandler((OSNotificationOpenedResult result) {
+      // Will be called whenever a notification is opened/button pressed.
+    });
+    OneSignal.shared.setExternalUserId(currentUserId);
+  }
 
   @override
   Widget build(BuildContext context) {

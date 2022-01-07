@@ -18,50 +18,8 @@ class _NotificationActivityState extends State<NotificationActivity> {
   void initState() {
     // TODO: implement initState
     super.initState();
-
-
-    /*FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
-      RemoteNotification notification = message.notification;
-      AndroidNotification android = message.notification?.android;
-      if (notification != null && android != null) {
-        showDialog(
-            context: context,
-            builder: (_) {
-              return AlertDialog(
-                title: Text(notification.title),
-                content: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [Text(notification.body)],
-                  ),
-                ),
-              );
-            });
-      }
-    });*/
-    setupInteractedMessage();
-  }
-  Future<void> setupInteractedMessage() async {
-    // Get any messages which caused the application to open from
-    // a terminated state.
-    RemoteMessage initialMessage =
-    await FirebaseMessaging.instance.getInitialMessage();
-
-    // If the message also contains a data property with a "type" of "chat",
-    // navigate to a chat screen
-    if (initialMessage != null) {
-      _handleMessage(initialMessage);
-    }
-
-    // Also handle any interaction when the app is in the background via a
-    // Stream listener
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleMessage);
   }
 
-  void _handleMessage(RemoteMessage message) {
-   print("there is a message");
-  }
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -140,19 +98,8 @@ class _NotificationActivityState extends State<NotificationActivity> {
       ),
     );
   }
-  Stream<List<NotificationWidget>> _getNoti() {
-    var snapshots = FirebaseFirestore.instance
-        .collection('modules')
-        .doc('notification')
-        .collection('users')
-        .doc(currentUserId)
-        .collection('badge')
-        .orderBy('createdAt', descending: true)
-        .snapshots();
-    return snapshots.map((snapshot) => snapshot.docs
-        .map(
-          (snapshot) => NotificationWidget.fromDocument(snapshot),
-    ).toList());
-  }
+
+
+
 
 }

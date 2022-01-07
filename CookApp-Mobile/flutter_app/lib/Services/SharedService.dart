@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:api_cache_manager/api_cache_manager.dart';
 import 'package:api_cache_manager/models/cache_db_model.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:tastify/Model/LoginRespondModel.dart';
 import 'package:tastify/main.dart';
 
@@ -33,6 +34,7 @@ class SharedService {
 
   static Future<void> logout(BuildContext context) async {
     await APICacheManager().deleteCache("login");
+    await OneSignal.shared.removeExternalUserId();
     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 }
