@@ -7,7 +7,7 @@ import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'firebase_options.dart';
+
 import 'ProfileScreen/EditProfileActivity.dart';
 import 'Services/Auth.dart';
 import 'Services/SharedService.dart';
@@ -32,9 +32,7 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  await Firebase.initializeApp();
 
 
 
