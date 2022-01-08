@@ -5,6 +5,7 @@ import { PostDTO } from "dtos/social/post.dto";
 import { UserDTO } from "dtos/social/user.dto";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
+import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 export class NewPostEvent {
   post: PostDTO;
@@ -21,7 +22,9 @@ export class NewPostEventHandler implements IEventHandler<NewPostEvent> {
     @Inject("INotiRepository")
     private _notiRepository: INotiRepository,
     @Inject("IWallRepository")
-    private _wallRepository: IWallRepository
+    private _wallRepository: IWallRepository,
+    @Inject("INotificationService")
+    private _notiService: INotificationService
   ) {}
 
   async handle(event: NewPostEvent): Promise<void> {
@@ -33,12 +36,13 @@ export class NewPostEventHandler implements IEventHandler<NewPostEvent> {
       body: template.body.replace("$user", event.author.displayName),
       title: template.title,
       templateId: template.id,
-      image: event.author.avatar,
+      image: event.post.images.length > 0 ? event.post.images[0] : "",
       targets: followers,
       data: {
-        postId: event.post.id,
+        postID: event.post.id,
       },
     };
     this._notiRepository.push(notification);
+    this._notiService.sendNotificationToUser(notification);
   }
 }

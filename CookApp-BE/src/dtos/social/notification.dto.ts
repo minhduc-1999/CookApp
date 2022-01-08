@@ -7,7 +7,7 @@ export class NotificationDTO {
   title: string;
   body: string;
   templateId: string;
-  data: object;
+  data?: object;
   targets: string[];
-  image: string;
+  image?: string;
 }

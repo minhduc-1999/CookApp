@@ -3,6 +3,7 @@ import {
   ConflictException,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { ClientSession, Model } from "mongoose";
@@ -31,6 +32,7 @@ export interface IUserRepository {
 
 @Injectable()
 export class UserRepository extends BaseRepository implements IUserRepository {
+  private _logger = new Logger(UserRepository.name)
   constructor(@InjectModel(User.name) private _userModel: Model<UserDocument>) {
     super();
   }
@@ -75,7 +77,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       );
       return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
     } catch (error) {
-      console.error(error);
+      this._logger.error(error);
       if (error.code === MongoErrorCode.DUPLICATE_KEY)
         throw new ConflictException(
           ResponseDTO.fail(
@@ -114,7 +116,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       if (!userDoc) return null;
       return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
     } catch (error) {
-      console.error(error);
+      this._logger.error(error);
       if (error.code === MongoErrorCode.DUPLICATE_KEY)
         throw new ConflictException(
           ResponseDTO.fail(
