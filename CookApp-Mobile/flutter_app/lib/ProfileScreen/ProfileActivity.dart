@@ -32,7 +32,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
   bool isFollowing = false;
   String view = "grid";
   int postCount = 0;
-
+  int followerCount = 0;
+  int followingCount = 0;
   bool circular = true;
   EditProfileActivity editProfile = new EditProfileActivity();
 
@@ -72,6 +73,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
       user = response;
       posts = listPosts;
       postCount = listPosts.data.posts.length;
+      followerCount = user.data.numberOfFollower;
+      followingCount = user.data.numberOfFollowing;
       circular = false;
     });
   }
@@ -303,15 +306,12 @@ class _ProfileActivityState extends State<ProfileActivity> {
                                       MainAxisAlignment.spaceEvenly,
                                   children: <Widget>[
                                     buildStatColumn("posts", postCount),
-                                    buildStatColumn("followers",
-                                        user.data.numberOfFollower),
-                                    buildStatColumn("following",
-                                        user.data.numberOfFollowing),
+                                    buildStatColumn("followers", followerCount),
+                                    buildStatColumn("following", followingCount),
                                   ],
                                 ),
                                 Row(
-                                    mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
+                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                                     children: <Widget>[
                                       buildProfileFollowButton(context)
                                     ]),

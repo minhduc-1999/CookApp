@@ -244,7 +244,7 @@ class _Post extends State<Post> {
           openProfile(context, userId);
         },
       ),
-      subtitle: Text(this.location),
+
       trailing: const Icon(Icons.more_vert),
     );
   }
@@ -294,7 +294,7 @@ class _Post extends State<Post> {
           children: <Widget>[
             Container(
               margin: const EdgeInsets.only(left: 15.0),
-              child: numOfReaction != null
+              child: numOfReaction != 0
                   ? Text(
                       "${numOfReaction} likes",
                       style: boldStyle,

@@ -4,11 +4,15 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:tastify/FoodScreen/FoodActivity.dart';
 import 'package:tastify/MessageScreen/MessageActivity.dart';
+import 'package:tastify/Model/PostDetailsRespondModel.dart';
 import 'package:tastify/NewFeedScreen/NewFeedActivity.dart';
 import 'package:tastify/NotificationScreen/NotificationActivity.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
+import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
+import 'package:tastify/StaticComponent/Post.dart';
+import 'package:tastify/StaticComponent/PostDetail.dart';
 import 'package:tastify/keyOneSignal.dart';
 
 import 'package:tastify/main.dart';
@@ -65,8 +69,15 @@ class HomeActivityState extends State<HomeActivity> {
       event.complete(event.notification);
     });
 
-    OneSignal.shared.setNotificationOpenedHandler((OSNotificationOpenedResult result) {
+    OneSignal.shared.setNotificationOpenedHandler((OSNotificationOpenedResult result) async{
       // Will be called whenever a notification is opened/button pressed.
+      String templateId = result.notification.additionalData['template_id'];
+      if ( templateId == "new_post" || templateId == "comment" || templateId == "react") {
+        openImagePost(context, result.notification.additionalData['postID']);
+      } else if (templateId == "new_follower"){
+        openProfile(context, result.notification.additionalData['followerID']);
+      }
+      
     });
     OneSignal.shared.setExternalUserId(currentUserId);
   }
@@ -112,6 +123,20 @@ class HomeActivityState extends State<HomeActivity> {
           ),
         ),
         onWillPop: onBackPress);
+  }
+  void openProfile(BuildContext context, String userId) {
+    Navigator.push(
+        context,
+        MaterialPageRoute(
+            builder: (context) => ProfileActivity(
+              userId: userId,
+            )));
+  }
+  void openImagePost(BuildContext context, String id) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PostDetail(id: id)),
+    );
   }
   Future<bool> onBackPress() {
     DateTime now = DateTime.now();
