@@ -2,3 +2,4 @@
 **/.vscode
 crawl
 **/*.zip
+**/**.env

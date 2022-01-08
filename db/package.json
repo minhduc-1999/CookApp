@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "dotenv": "^10.0.0",
     "lodash": "^4.17.21",
     "mongodb": "^4.2.1",
     "sanitize-html": "^2.6.1"

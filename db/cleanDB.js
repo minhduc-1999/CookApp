@@ -16,15 +16,21 @@ async function main() {
   await client.connect();
   console.log('Connected successfully to server');
   const db = client.db(dbName);
-  const collection = db.collection(collectionName);
-  const raw = fs.readFileSync(fileName)
+  const userCol = db.collection("users");
+  const wallCol = db.collection("walls");
+  const feedCol = db.collection("feeds");
+  const postCol = db.collection("posts");
+  const commentCol = db.collection("comments");
 
 
-  const foods = JSON.parse(raw);
-  console.log(foods)
-  const iRe = await collection.insertMany(foods)
-  console.log("insert result", iRe)
-
+  console.log("start clean")
+  await Promise.allSettled([
+    userCol.deleteMany({}),
+    wallCol.deleteMany({}),
+    feedCol.deleteMany({}),
+    postCol.deleteMany({}),
+    commentCol.deleteMany({})
+  ])
   return 'done.';
 }
 
