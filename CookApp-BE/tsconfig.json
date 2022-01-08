@@ -12,7 +12,9 @@
       "sourceMap": true,
       "allowJs": true,
       "outDir": "./dist",
-      "baseUrl": "./src"
+      "baseUrl": "./src",
+      "allowUnreachableCode": false,
+      "alwaysStrict": true
   },
   "include": [
       "src/**/*"
