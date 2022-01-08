@@ -343,6 +343,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
     await APIService.follow(profileId);
     setState(() {
       this.isFollowing = true;
+      followerCount++;
     });
   }
 
@@ -350,6 +351,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
     await APIService.unfollow(profileId);
     setState(() {
       isFollowing = false;
+      followerCount--;
     });
   }
 
