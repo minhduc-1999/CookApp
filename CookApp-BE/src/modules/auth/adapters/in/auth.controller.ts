@@ -4,6 +4,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
+  ApiOkResponse,
   ApiTags,
 } from "@nestjs/swagger";
 import { Public } from "decorators/public.decorator";
@@ -15,6 +16,7 @@ import {
   ApiFailResponseCustom,
   ApiCreatedResponseCustom,
   ApiOKResponseCustom,
+  ApiOKResponseCustomWithoutData,
 } from "../../../../decorators/ApiSuccessResponse.decorator";
 import { LoginRequest } from "modules/auth/useCases/login/loginRequest";
 import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
@@ -90,6 +92,7 @@ export class AuthController {
   @Post("email-verification/callback")
   @Public()
   @NotRequireEmailVerification()
+  @ApiOkResponse({ description: "Confirm email successfully" })
   async verifyEmailCallback(@Body() body: VerifyEmailRequest): Promise<string> {
     let command = new VerifyEmailCommand(body, null);
     await this._commandBus.execute(command);
@@ -99,6 +102,7 @@ export class AuthController {
   @Post("resend-email-verification")
   @ApiBearerAuth()
   @NotRequireEmailVerification()
+  @ApiOKResponseCustomWithoutData("Resend email verification successfully")
   async resendEmailVerificationCallback(
     @Body() body: ResendEmailVerificationRequest,
     @User() user: UserDTO

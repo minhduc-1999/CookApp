@@ -14,7 +14,9 @@ export const ApiFailResponseCustom = <TModel extends Type<any>>() => {
   return applyDecorators(
     ApiUnauthorizedResponse({ description: "Unauthorized" }),
     ApiInternalServerErrorResponse({ description: "Server Error" }),
-    ApiBadRequestResponse({description: 'Bad Request - Check messages in response'})
+    ApiBadRequestResponse({
+      description: "Bad Request - Check messages in response",
+    })
   );
 };
 
@@ -73,6 +75,22 @@ export const ApiOKResponseCustom = <TModel extends Type<any>>(
       },
     }),
     ApiExtraModels(MetaDTO, model)
+  );
+};
+
+export const ApiOKResponseCustomWithoutData = (description?: string) => {
+  return applyDecorators(
+    ApiOkResponse({
+      description: description,
+      schema: {
+        properties: {
+          meta: {
+            type: "object",
+            $ref: getSchemaPath(MetaDTO),
+          },
+        },
+      },
+    })
   );
 };
 

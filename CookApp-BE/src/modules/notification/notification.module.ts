@@ -4,13 +4,13 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";
 import { UserModule } from "modules/user/user.module";
-import { ConfigModule } from "nestjs-config";
 import { NotiRepository } from "./adapters/out/repositories/notification.repository";
 import { ReactPostEventHandler } from "./usecases/ReactNotification";
 import { NewFollowerEventHandler } from "./usecases/NewFollowerNotification";
 import { NewPostEventHandler } from "./usecases/NewPostNotification";
 import { CommentPostEventHandler } from "./usecases/CommentNotification";
 import { HttpModule } from "@nestjs/axios";
+import { NotificationService } from "./adapters/out/services/notification.service";
 
 const eventHandlers = [
   NewPostEventHandler,
@@ -26,9 +26,15 @@ const repositories = [
   },
 ];
 
+const services = [
+  {
+    provide: "INotificationService",
+    useClass: NotificationService,
+  },
+];
+
 @Module({
   imports: [
-    ConfigModule,
     HttpModule,
     MongooseModule.forFeature([]),
     CqrsModule,
@@ -38,7 +44,7 @@ const repositories = [
     UserModule,
   ],
   controllers: [],
-  providers: [...eventHandlers, ...repositories],
+  providers: [...eventHandlers, ...repositories, ...services],
   exports: [],
 })
 export class NotificationModule {}

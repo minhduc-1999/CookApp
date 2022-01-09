@@ -7,7 +7,6 @@ import {
   addFilePrefix,
   getMimeType,
   getNameFromPath,
-  retrieveObjectNameFromUrl,
 } from "utils";
 import { IStorageProvider } from "./provider.service";
 

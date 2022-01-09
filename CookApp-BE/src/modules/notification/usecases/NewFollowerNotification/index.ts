@@ -4,6 +4,7 @@ import { NotificationDTO } from "dtos/social/notification.dto";
 import { UserDTO } from "dtos/social/user.dto";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
+import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 export class NewFollowerEvent {
   targetID: string;
   follower: UserDTO;
@@ -19,7 +20,9 @@ export class NewFollowerEventHandler
 {
   constructor(
     @Inject("INotiRepository")
-    private _notiRepository: INotiRepository
+    private _notiRepository: INotiRepository,
+    @Inject("INotificationService")
+    private _notiService: INotificationService
   ) {}
 
   async handle(event: NewFollowerEvent): Promise<void> {
@@ -37,5 +40,6 @@ export class NewFollowerEventHandler
       },
     };
     this._notiRepository.push(notification);
+    this._notiService.sendNotificationToUser(notification);
   }
 }

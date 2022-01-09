@@ -33,5 +33,8 @@ heroku config:set -a tastify-be PRESIGNED_LINK_EXPIRATION=$PRESIGNED_LINK_EXPIRA
 heroku config:set -a tastify-be MAX_IMAGES_PER_REQ=$MAX_IMAGES_PER_REQ
 heroku config:set -a tastify-be PUBLIC_URL=$PUBLIC_URL
 heroku config:set -a tastify-be STAGING_URL=$STAGING_URL
+heroku config:set -a tastify-be ONESIGNAL_APP_ID=$ONESIGNAL_APP_ID
+heroku config:set -a tastify-be ONESIGNAL_REST_API_KEY=$ONESIGNAL_REST_API_KEY
+heroku config:set -a tastify-be ONESIGNAL_API_BASE_URL=$ONESIGNAL_API_BASE_URL
 
 heroku buildpacks:add -a tastify-be heroku/nodejs

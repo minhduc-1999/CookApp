@@ -4,7 +4,9 @@ import { ApiBearerAuth, ApiConflictResponse, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
+  ApiOKListResponseCustom,
   ApiOKResponseCustom,
+  ApiOKResponseCustomWithoutData,
 } from "decorators/ApiSuccessResponse.decorator";
 import { User } from "decorators/user.decorator";
 import { UserDTO } from "dtos/social/user.dto";
@@ -31,6 +33,7 @@ export class UserController {
   @Patch("profile")
   @ApiFailResponseCustom()
   @ApiConflictResponse()
+  @ApiOKResponseCustomWithoutData("Updating profile successfully")
   async updateProfile(
     @User() user: UserDTO,
     @Body() body: UpdateProfileRequest

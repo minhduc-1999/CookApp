@@ -5,6 +5,7 @@ import { PostDTO } from "dtos/social/post.dto";
 import { UserDTO } from "dtos/social/user.dto";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
+import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 export class CommentPostEvent {
   post: PostDTO;
   actor: UserDTO;
@@ -20,7 +21,9 @@ export class CommentPostEventHandler
 {
   constructor(
     @Inject("INotiRepository")
-    private _notiRepository: INotiRepository
+    private _notiRepository: INotiRepository,
+    @Inject("INotificationService")
+    private _notiService: INotificationService
   ) {}
 
   async handle(event: CommentPostEvent): Promise<void> {
@@ -34,9 +37,10 @@ export class CommentPostEventHandler
       image: event.actor.avatar,
       targets: [event.post.author.id],
       data: {
-        postId: event.post.id,
+        postID: event.post.id,
       },
     };
     this._notiRepository.push(notification);
+    this._notiService.sendNotificationToUser(notification);
   }
 }

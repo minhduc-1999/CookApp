@@ -59,6 +59,7 @@ export class User extends AbstractSchema {
     this._id = userDto?.id;
     this.displayName = userDto?.displayName;
     this.externalProvider = userDto?.externalProvider;
+    this.emailVerified = userDto?.emailVerified;
   }
 }
 
