@@ -7,6 +7,7 @@ import { ClientSession } from "mongoose";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { FollowType } from "enums/follow.enum";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { IUserService } from "modules/auth/services/user.service";
 
 export class UnfolllowCommand extends BaseCommand {
   targetId: string;
@@ -22,7 +23,9 @@ export class UnfolllowCommandHandler
 {
   constructor(
     @Inject("IWallRepository")
-    private _wallRepo: IWallRepository
+    private _wallRepo: IWallRepository,
+    @Inject("IUserService")
+    private _userService: IUserService
   ) {}
   async execute(command: UnfolllowCommand): Promise<UnfollowResponse> {
     const { targetId, user } = command;
@@ -31,6 +34,9 @@ export class UnfolllowCommandHandler
         ResponseDTO.fail("Cannot unfollow yourself")
       );
     }
+
+    await this._userService.getUserById(targetId);
+
     const isFollowed = await this._wallRepo.isFollowed(user.id, targetId);
     if (!isFollowed)
       throw new BadRequestException(ResponseDTO.fail("Not follow yet"));
