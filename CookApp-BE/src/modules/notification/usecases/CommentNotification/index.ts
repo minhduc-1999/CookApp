@@ -27,17 +27,21 @@ export class CommentPostEventHandler
   ) {}
 
   async handle(event: CommentPostEvent): Promise<void> {
+    const { actor, post } = event;
+    if (actor.id === post.author.id) {
+      return;
+    }
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.CommentTemplate
     );
     const notification: NotificationDTO = {
-      body: template.body.replace("$user", event.actor.displayName),
+      body: template.body.replace("$user", actor.displayName),
       title: template.title,
       templateId: template.id,
-      image: event.actor.avatar,
-      targets: [event.post.author.id],
+      image: actor.avatar,
+      targets: [post.author.id],
       data: {
-        postID: event.post.id,
+        postID: post.id,
       },
     };
     this._notiRepository.push(notification);
