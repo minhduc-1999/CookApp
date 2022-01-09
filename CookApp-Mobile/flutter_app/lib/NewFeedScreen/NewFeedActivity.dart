@@ -4,7 +4,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/NewFeedScreen/SearchUserDelegate.dart';
-import '../StaticComponent/Post.dart';
+import 'Post.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/SharedService.dart';
 import 'package:tastify/UploadScreen/UploadActivity.dart';

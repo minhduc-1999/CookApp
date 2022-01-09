@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:tastify/Model/PostDetailsRespondModel.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
-import 'package:tastify/StaticComponent/Post.dart';
+import '../NewFeedScreen/Post.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../constants.dart';

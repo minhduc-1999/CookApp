@@ -50,8 +50,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           brightness: Brightness.dark,
           automaticallyImplyLeading: false,
@@ -123,8 +122,8 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
           key: UniqueKey(),
           opacity: 0.3,
         )
-      ),
-    );
+      );
+
   }
   Widget _editProfileUI (BuildContext context){
     return Container(

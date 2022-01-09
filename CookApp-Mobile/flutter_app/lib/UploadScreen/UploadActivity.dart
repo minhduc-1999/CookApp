@@ -154,8 +154,7 @@ class _UploadActivityState extends State<UploadActivity> {
                     return _photoList[index];
                   }),
             ))
-        : SafeArea(
-          child: Scaffold(
+        : Scaffold(
               resizeToAvoidBottomInset: false,
               appBar: AppBar(
                   backgroundColor: appPrimaryColor,
@@ -219,8 +218,7 @@ class _UploadActivityState extends State<UploadActivity> {
                 key: UniqueKey(),
                 opacity: 0.3,
               )
-            ),
-        );
+            );
 
   }
   Widget _uploadUI(BuildContext context){
