@@ -1,5 +1,4 @@
 import { Injectable } from "@nestjs/common";
-import { BaseBackend } from "@sentry/core";
 import { plainToClass } from "class-transformer";
 import {
   NotificationDTO,
@@ -9,7 +8,6 @@ import { NotificationTemplateEnum } from "enums/notification.enum";
 import { initializeApp } from "firebase-admin";
 import { applicationDefault, cert, getApps } from "firebase-admin/app";
 import { getFirestore } from "firebase-admin/firestore";
-import _ = require("lodash");
 import { NotificationEntity } from "modules/notification/entities/notification.entity";
 import { ConfigService } from "nestjs-config";
 
