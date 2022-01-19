@@ -1,9 +1,11 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
-import '../StaticComponent/Post.dart';
+import '../NewFeedScreen/PostDetail.dart';
+import '../NewFeedScreen/Post.dart';
 import 'package:tastify/Model/PostDetailsRespondModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Model/UserWallRespondModel.dart';
@@ -35,6 +37,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
   int followerCount = 0;
   int followingCount = 0;
   bool circular = true;
+  bool isAPIcallProcess = false;
+  GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   EditProfileActivity editProfile = new EditProfileActivity();
 
   _ProfileActivityState(this.profileId);
@@ -141,8 +145,6 @@ class _ProfileActivityState extends State<ProfileActivity> {
           function: openEditProfilePage,
         );
       }
-
-      // already following user - should show unfollow button
       if (isFollowing) {
         return buildFollowButton(
           text: "Unfollow",
@@ -153,7 +155,6 @@ class _ProfileActivityState extends State<ProfileActivity> {
         );
       }
 
-      // does not follow user - should show follow button
       if (!isFollowing) {
         return buildFollowButton(
           text: "Follow",
@@ -263,8 +264,14 @@ class _ProfileActivityState extends State<ProfileActivity> {
               ? IconButton(
                   icon: Icon(Icons.logout),
                   onPressed: () async {
+                    setState(() {
+                      isAPIcallProcess = true;
+                    });
                     await _signOut();
-                    SharedService.logout(context);
+                    await SharedService.logout(context);
+                    setState(() {
+                      isAPIcallProcess = false;
+                    });
                   },
                 )
               : Container()
@@ -272,70 +279,78 @@ class _ProfileActivityState extends State<ProfileActivity> {
       ),
       body: circular
           ? Center(child: CircularProgressIndicator())
-          : ListView(
-              children: <Widget>[
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    children: <Widget>[
-                      Row(
+          : ProgressHUD(
+        inAsyncCall: isAPIcallProcess,
+        key: UniqueKey(),
+        opacity: 0.3,
+            child: Form(
+              key: globalFormKey,
+              child: ListView(
+                  children: <Widget>[
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
                         children: <Widget>[
-                          (user.data.user.avatar != null)
-                              ? CircleAvatar(
-                                  radius: size.width * 0.11,
-                                  backgroundColor: Colors.grey,
-                                  backgroundImage:
-                                      NetworkImage(user.data.user.avatar),
-                                )
-                              : CircleAvatar(
-                                  /*child: Image.asset("assets/images/default_avatar.png",
-                                    width: size.width * 0.20,
-                                    height: size.width * 0.20,
-                                    fit: BoxFit.fill),*/
-                                  radius: size.width * 0.11,
-                                  backgroundColor: Colors.grey,
-                                  backgroundImage: AssetImage(
-                                      'assets/images/default_avatar.png')),
-                          Expanded(
-                            flex: 1,
-                            child: Column(
-                              children: <Widget>[
-                                Row(
-                                  mainAxisSize: MainAxisSize.max,
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceEvenly,
+                          Row(
+                            children: <Widget>[
+                              (user.data.user.avatar != null)
+                                  ? CircleAvatar(
+                                      radius: size.width * 0.11,
+                                      backgroundColor: Colors.grey,
+                                      backgroundImage:
+                                          NetworkImage(user.data.user.avatar),
+                                    )
+                                  : CircleAvatar(
+                                      /*child: Image.asset("assets/images/default_avatar.png",
+                                        width: size.width * 0.20,
+                                        height: size.width * 0.20,
+                                        fit: BoxFit.fill),*/
+                                      radius: size.width * 0.11,
+                                      backgroundColor: Colors.grey,
+                                      backgroundImage: AssetImage(
+                                          'assets/images/default_avatar.png')),
+                              Expanded(
+                                flex: 1,
+                                child: Column(
                                   children: <Widget>[
-                                    buildStatColumn("posts", postCount),
-                                    buildStatColumn("followers", followerCount),
-                                    buildStatColumn("following", followingCount),
+                                    Row(
+                                      mainAxisSize: MainAxisSize.max,
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.spaceEvenly,
+                                      children: <Widget>[
+                                        buildStatColumn("posts", postCount),
+                                        buildStatColumn("followers", followerCount),
+                                        buildStatColumn("following", followingCount),
+                                      ],
+                                    ),
+                                    Row(
+                                        mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                        children: <Widget>[
+                                          buildProfileFollowButton(context)
+                                        ]),
                                   ],
                                 ),
-                                Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                                    children: <Widget>[
-                                      buildProfileFollowButton(context)
-                                    ]),
-                              ],
-                            ),
-                          )
+                              )
+                            ],
+                          ),
+                          Container(
+                              alignment: Alignment.centerLeft,
+                              padding: const EdgeInsets.only(top: 15.0),
+                              child: Text(
+                                user.data.user.displayName,
+                                style: TextStyle(fontWeight: FontWeight.bold),
+                              )),
                         ],
                       ),
-                      Container(
-                          alignment: Alignment.centerLeft,
-                          padding: const EdgeInsets.only(top: 15.0),
-                          child: Text(
-                            user.data.user.displayName,
-                            style: TextStyle(fontWeight: FontWeight.bold),
-                          )),
-                    ],
-                  ),
+                    ),
+                    Divider(),
+                    buildImageViewButtonBar(),
+                    Divider(height: 0.0),
+                    buildUserPosts(),
+                  ],
                 ),
-                Divider(),
-                buildImageViewButtonBar(),
-                Divider(height: 0.0),
-                buildUserPosts(),
-              ],
             ),
+          ),
     );
   }
 
@@ -375,21 +390,7 @@ class ImageTile extends StatelessWidget {
   ImageTile(this.posts);
 
   clickedImage(BuildContext context) async {
-    PostDetailsRespondModel res = await APIService.getDetailsPost(posts.id);
-    Post post = Post(
-      id: res.data.id,
-      userId: res.data.author.id,
-      location: "Quang Binh",
-      content: res.data.content,
-      images: res.data.images,
-      avatar: res.data.author.avatar,
-      displayName: res.data.author.displayName,
-      dateTime: DateTime.fromMillisecondsSinceEpoch(res.data.createdAt),
-      numOfComment: res.data.numOfComment,
-      numOfReaction: res.data.numOfReaction,
-      isLike: res.data.reaction != null,
-    );
-    openImagePost(context, post);
+    openImagePost(context, posts.id);
   }
 
   Widget build(BuildContext context) {
@@ -398,33 +399,10 @@ class ImageTile extends StatelessWidget {
         child: Image.network(posts.images[0], fit: BoxFit.cover));
   }
 }
-
-void openImagePost(BuildContext context, Post post) {
-  Navigator.of(context)
-      .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-    return Center(
-      child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: true,
-            brightness: Brightness.dark,
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: <Color>[appPrimaryColor, appPrimaryColor],
-                ),
-              ),
-            ),
-            title: Text('Post'),
-          ),
-          body: ListView(
-            children: <Widget>[
-              Container(
-                child: post,
-              ),
-            ],
-          )),
-    );
-  }));
+void openImagePost(BuildContext context, String id) {
+  Navigator.push(
+    context,
+    MaterialPageRoute(builder: (context) => PostDetail(id: id)),
+  );
 }
+

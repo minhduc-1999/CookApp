@@ -11,8 +11,8 @@ import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
-import 'package:tastify/StaticComponent/Post.dart';
-import 'package:tastify/StaticComponent/PostDetail.dart';
+import '../NewFeedScreen/Post.dart';
+import '../NewFeedScreen/PostDetail.dart';
 import 'package:tastify/keyOneSignal.dart';
 
 import 'package:tastify/main.dart';

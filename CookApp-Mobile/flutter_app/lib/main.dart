@@ -41,7 +41,7 @@ Future<void> main() async {
     var loginDetails = await SharedService.loginDetails();
     currentUserId = loginDetails.data.userId;
 
-    _defaultHome = HomeActivity();
+    _defaultHome = HomeActivity(auth: Auth(),);
   }
   runApp(MyApp());
 }
@@ -67,7 +67,7 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/': (context) => _defaultHome,
-        '/home': (context) => HomeActivity(),
+        '/home': (context) => HomeActivity(auth: Auth(),),
         '/login': (context) => LoginActivity(auth: Auth(),),
         '/signup': (context) => SignUpActivity(),
       },
