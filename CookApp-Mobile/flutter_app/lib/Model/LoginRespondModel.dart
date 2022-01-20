@@ -49,13 +49,15 @@ class Data {
   String userId;
   bool emailVerified;
   String email;
-  Data({this.accessToken, this.userId, this.emailVerified, this.email});
+  String loginToken;
+  Data({this.accessToken, this.userId, this.emailVerified, this.email, this.loginToken});
 
   Data.fromJson(Map<String, dynamic> json) {
-    accessToken = json['accessToken'];
-    userId = json['userId'];
-    emailVerified = json['emailVerified'];
-    email = json['email'];
+    accessToken = json['accessToken'] != null ? json['accessToken'] : null;
+    userId = json['userId'] != null ? json['userId'] : null;
+    emailVerified = json['emailVerified'] != null ? json['emailVerified'] : false;
+    email = json['email'] != null ? json['email'] : null;
+    loginToken = json['loginToken'] != null ? json['loginToken'] : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -64,6 +66,7 @@ class Data {
     data['userId'] = this.userId;
     data['emailVerified'] = this.emailVerified;
     data['email'] = this.email;
+    data['loginToken'] = this.loginToken;
     return data;
   }
 }

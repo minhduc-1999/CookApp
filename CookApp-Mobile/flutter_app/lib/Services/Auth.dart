@@ -5,12 +5,18 @@ abstract class AuthBase {
   User get currentUser;
   Future<void> signOut();
   Future<String> signInWithGoogle();
+  Future<void> signInFirebaseWithToken(String token);
   Stream<User> authStateChanges();
 }
 
 class Auth implements AuthBase {
   final _firebaseAuth = FirebaseAuth.instance;
 
+  @override
+  Future<void> signInFirebaseWithToken(String token) async {
+    await _firebaseAuth.signInAnonymously();
+
+  }
   @override
   Future<String> signInWithGoogle() async {
     final googleSignIn = GoogleSignIn(

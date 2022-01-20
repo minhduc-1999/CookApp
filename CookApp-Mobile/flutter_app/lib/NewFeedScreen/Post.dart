@@ -352,26 +352,26 @@ class _Post extends State<Post> {
 
   void _likePost(String postId2) async {
     await APIService.react(id, ReactRequestModel(react: 'LOVE'));
-    bool _liked = liked;
-    if (_liked) {
+    if (liked) {
       setState(() {
         liked = false;
         numOfReaction--;
       });
     }
-
-    if (!_liked) {
+    print("l");
+    if (!liked) {
       setState(() {
         liked = true;
         showHeart = true;
         numOfReaction++;
       });
-      Timer(const Duration(milliseconds: 1000), () {
+      Timer(const Duration(milliseconds: 2000), () {
         setState(() {
           showHeart = false;
         });
       });
     }
+    print("l");
   }
 
   void openProfile(BuildContext context, String userId) {

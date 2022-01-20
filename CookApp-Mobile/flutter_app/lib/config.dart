@@ -1,8 +1,10 @@
 class Config {
   //string
   static const String appName = "Tastify";
+  static const String settings = "Settings";
   static const String food = "Food Instructions";
   static const String chatbot = "Chatbot";
+  static const String notifications = "Notifications";
   //url
   //static const String apiURL = "http://192.168.1.11:3000";
   static const String apiURL = "https://tastify-be.herokuapp.com";
