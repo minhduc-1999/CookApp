@@ -2,7 +2,7 @@
 dist/
 **/credential.json
 .env.staging
-node_modules/
+neo4j-db/
 stack/
 *.env
 attachments/

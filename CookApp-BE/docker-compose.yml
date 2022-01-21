@@ -21,6 +21,14 @@ services:
     ports:
       - 1025:1025
       - 8025:8025
-
+  neo4j:
+    image: neo4j:4.4
+    ports:
+      - 7474:7474
+      - 7687:7687
+    volumes:
+      - ./neo4j-db/data:/data
+      - ./neo4j-db/logs:/logs
+      - ./neo4j-db/conf:/conf
 volumes:
   tastify-db:
