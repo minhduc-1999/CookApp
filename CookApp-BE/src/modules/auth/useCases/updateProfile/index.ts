@@ -6,19 +6,19 @@ import { MediaType } from "enums/mediaType.enum";
 import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { ClientSession } from "mongoose";
 import { clean, createUpdatingNestedObject, createUpdatingObject, isImageKey } from "utils";
 import { UpdateProfileRequest } from "./updateProfileRequest";
 import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.repository";
+import { Transaction } from "neo4j-driver";
 
 export class UpdateProfileCommand extends BaseCommand {
   updateProfileReq: UpdateProfileRequest;
   constructor(
-    session: ClientSession,
+    tx: Transaction,
     user: UserDTO,
     profile: UpdateProfileRequest
   ) {
-    super(session, user);
+    super(tx, user);
     this.updateProfileReq = profile;
   }
 }
@@ -53,7 +53,7 @@ export class UpdateProfileCommandHandler
       user.id
     );
     const updatedUser = await this._userRepo
-      .setSession(command.session)
+      .setTransaction(command.tx)
       .updateUserProfile(user.id, profile);
 
     await this._wallRepo.updateWallInfo(

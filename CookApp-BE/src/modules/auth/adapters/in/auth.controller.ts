@@ -23,9 +23,7 @@ import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
 import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
 import { UserDTO } from "dtos/social/user.dto";
-import { Transaction } from "decorators/transaction.decorator";
-import { MongooseSession } from "decorators/mongooseSession.decorator";
-import { ClientSession } from "mongoose";
+import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
 import { User } from "decorators/user.decorator";
 import { GoogleSignInRequest } from "modules/auth/useCases/loginWithGoogle/googleSignInRequest";
 import { GoogleSignInCommand } from "modules/auth/useCases/loginWithGoogle";
@@ -35,11 +33,12 @@ import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
 import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
 import { ResendEmailVerificationCommand } from "modules/auth/useCases/resendEmailVerification";
 import { NotRequireEmailVerification } from "decorators/not_require_email_verification.decorator";
+import { Transaction } from "neo4j-driver";
 
 @Controller()
 @ApiTags("Authentication")
 export class AuthController {
-  constructor(private _commandBus: CommandBus) {}
+  constructor(private _commandBus: CommandBus) { }
 
   @Post("register")
   @Public()
@@ -47,12 +46,12 @@ export class AuthController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(RegisterResponse, "Register successfully")
   @ApiConflictResponse()
-  @Transaction()
+  @RequestTransaction()
   async register(
     @Body() body: RegisterRequest,
-    @MongooseSession() session: ClientSession
+    @ParamTransaction() tx: Transaction
   ): Promise<Result<RegisterResponse>> {
-    const registerCommand = new RegisterCommand(body, session);
+    const registerCommand = new RegisterCommand(body, tx);
     const user = (await this._commandBus.execute(registerCommand)) as UserDTO;
     return Result.ok(
       { id: user.id, username: user.username },
@@ -81,10 +80,12 @@ export class AuthController {
   @Public()
   @NotRequireEmailVerification()
   @ApiOKResponseCustom(GoogleSignInResponse, "Authenticate successfully")
+  @RequestTransaction()
   async loginWithGoogleCallback(
-    @Body() body: GoogleSignInRequest
+    @Body() body: GoogleSignInRequest,
+    @ParamTransaction() tx: Transaction
   ): Promise<Result<GoogleSignInResponse>> {
-    let command = new GoogleSignInCommand(null, body);
+    let command = new GoogleSignInCommand(tx, body);
     const jwt = await this._commandBus.execute(command);
     return Result.ok(jwt, { messages: ["Authenticate successfully"] });
   }
@@ -93,8 +94,12 @@ export class AuthController {
   @Public()
   @NotRequireEmailVerification()
   @ApiOkResponse({ description: "Confirm email successfully" })
-  async verifyEmailCallback(@Body() body: VerifyEmailRequest): Promise<string> {
-    let command = new VerifyEmailCommand(body, null);
+  @RequestTransaction()
+  async verifyEmailCallback(
+    @Body() body: VerifyEmailRequest,
+    @ParamTransaction() tx: Transaction
+  ): Promise<string> {
+    let command = new VerifyEmailCommand(body, tx);
     await this._commandBus.execute(command);
     return "Confirm email successfully";
   }

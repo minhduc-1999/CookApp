@@ -5,19 +5,19 @@ import { UserDTO } from "dtos/social/user.dto";
 import { IPostService } from "modules/user/services/post.service";
 import { ReactPostRequest } from "./reactPostRequest";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { ReactPostResponse } from "./reactPostResponse";
 import { ReactionDTO } from "dtos/social/reaction.dto";
 import { ReactPostEvent } from "modules/notification/usecases/ReactNotification";
+import { Transaction } from "neo4j-driver";
 export class ReactPostCommand extends BaseCommand {
   reactReq: ReactPostRequest;
   constructor(
-    session: ClientSession,
+    tx: Transaction,
     user: UserDTO,
     reactReq: ReactPostRequest
   ) {
-    super(session, user);
+    super(tx, user);
     this.reactReq = reactReq;
   }
 }

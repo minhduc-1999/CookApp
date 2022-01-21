@@ -6,7 +6,8 @@ import { plainToClass } from "class-transformer";
 import { Feed, FeedDocument } from "domains/schemas/social/feed.schema";
 import { PostDTO } from "dtos/social/post.dto";
 import { UserDTO } from "dtos/social/user.dto";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
+import { Transaction } from "neo4j-driver";
 
 export interface IFeedRepository {
   pushNewPost(post: PostDTO, userId: string): Promise<void>;
@@ -15,7 +16,7 @@ export interface IFeedRepository {
   getTotalPosts(userId: UserDTO): Promise<number>;
   updateNumReaction(postId: string, delta: number): Promise<void>;
   updateNumComment(postId: string, delta: number): Promise<void>;
-  setSession(session: ClientSession): IFeedRepository;
+  setTransaction(tx: Transaction): IFeedRepository
 }
 
 @Injectable()
@@ -32,9 +33,6 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       {
         $inc: { "posts.$.numOfComment": delta },
       },
-      {
-        session: this.session,
-      }
     );
   }
   async updateNumReaction(postId: string, delta: number): Promise<void> {
@@ -45,9 +43,6 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       {
         $inc: { "posts.$.numOfReaction": delta },
       },
-      {
-        session: this.session,
-      }
     );
   }
 
@@ -84,9 +79,6 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
         $push: { posts: Feed.generatePostItem(post) },
         $inc: { numberOfPost: 1 },
       },
-      {
-        session: this.session,
-      }
     );
   }
 
@@ -99,7 +91,6 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       {
         $set: { "posts.$": Feed.generatePostItem(post) },
       },
-      { session: this.session }
     );
   }
 }

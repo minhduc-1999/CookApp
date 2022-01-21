@@ -8,14 +8,15 @@ import { PostDTO } from "dtos/social/post.dto";
 import { UserDTO } from "dtos/social/user.dto";
 import { WallDTO } from "dtos/social/wall.dto";
 import { FollowType } from "enums/follow.enum";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
+import { Transaction } from "neo4j-driver";
 
 export interface IWallRepository {
   pushNewPost(post: PostDTO, user: UserDTO): Promise<void>;
   updatePostInWall(post: Partial<PostDTO>, user: UserDTO): Promise<void>;
   getPosts(userId: string, query: PageOptionsDto): Promise<PostDTO[]>;
   getTotalPosts(userId: string): Promise<number>;
-  setSession(session: ClientSession): IWallRepository;
+  setTransaction(tx: Transaction): IWallRepository
   updateFollowers(
     userId: string,
     targetId: string,
@@ -76,9 +77,6 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       {
         $set: { "posts.$": Wall.generatePostItem(post) },
       },
-      {
-        session: this.session,
-      }
     );
   }
   async pushNewPost(post: PostDTO, user: UserDTO): Promise<void> {
@@ -90,9 +88,6 @@ export class WallRepository extends BaseRepository implements IWallRepository {
         $push: { posts: Wall.generatePostItem(post) },
         $inc: { numberOfPost: 1 },
       },
-      {
-        session: this.session,
-      }
     );
   }
 
@@ -111,9 +106,6 @@ export class WallRepository extends BaseRepository implements IWallRepository {
             $push: { followers: targetId },
             $inc: { numberOfFollower: 1 },
           },
-          {
-            session: this.session,
-          }
         );
         break;
       case FollowType.Unfollow:
@@ -125,9 +117,6 @@ export class WallRepository extends BaseRepository implements IWallRepository {
             $pull: { followers: targetId },
             $inc: { numberOfFollower: -1 },
           },
-          {
-            session: this.session,
-          }
         );
         break;
       default:
@@ -149,9 +138,6 @@ export class WallRepository extends BaseRepository implements IWallRepository {
             $push: { following: targetId },
             $inc: { numberOfFollowing: 1 },
           },
-          {
-            session: this.session,
-          }
         );
         break;
       case FollowType.Unfollow:
@@ -163,9 +149,6 @@ export class WallRepository extends BaseRepository implements IWallRepository {
             $pull: { following: targetId },
             $inc: { numberOfFollowing: -1 },
           },
-          {
-            session: this.session,
-          }
         );
         break;
       default:

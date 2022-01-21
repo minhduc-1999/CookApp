@@ -15,7 +15,7 @@ import { IFeedRepository } from "modules/auth/adapters/out/repositories/feed.rep
 import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.repository";
 import { IAuthentication } from "modules/auth/services/authentication.service";
-import { ClientSession } from "mongoose";
+import { Transaction } from "neo4j-driver";
 import { ConfigService } from "nestjs-config";
 import {
   generateDisplayName,
@@ -26,8 +26,8 @@ import { GoogleSignInResponse } from "./googleSignInResponse";
 
 export class GoogleSignInCommand extends BaseCommand {
   request: GoogleSignInRequest;
-  constructor(session: ClientSession, req: GoogleSignInRequest) {
-    super(session);
+  constructor(tx: Transaction, req: GoogleSignInRequest) {
+    super(tx);
     this.request = req;
   }
 }
@@ -43,11 +43,11 @@ export class GoogleSignInCommandHandler
     private _configService: ConfigService,
     @Inject("IUserRepository")
     private _userRepo: IUserRepository,
-    @Inject("IWallRepository") private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository") private _feedRepo: IFeedRepository
+    // @Inject("IWallRepository") private _wallRepo: IWallRepository,
+    // @Inject("IFeedRepository") private _feedRepo: IFeedRepository
   ) {}
   async execute(command: GoogleSignInCommand): Promise<GoogleSignInResponse> {
-    const { session } = command;
+    const { tx } = command;
     const user = await this.verify(command.request.idToken)
       .then(async (payload) => {
         const userData: UserDTO = UserDTO.create({
@@ -69,21 +69,21 @@ export class GoogleSignInCommandHandler
 
         if (!res) {
           // create new user
-          res = await this._userRepo.setSession(session).createUser(userData);
-          const wallDto = WallDTO.create({
-            user: res,
-          });
+          res = await this._userRepo.setTransaction(tx).createUser(userData);
+          // const wallDto = WallDTO.create({
+          //   user: res,
+          // });
 
-          await this._wallRepo.setSession(session).createWall(wallDto);
-          const feedDto = FeedDTO.create({
-            user: res,
-          });
-          await this._feedRepo.setSession(session).createFeed(feedDto);
+          // await this._wallRepo.setSession(session).createWall(wallDto);
+          // const feedDto = FeedDTO.create({
+          //   user: res,
+          // });
+          // await this._feedRepo.setSession(session).createFeed(feedDto);
         }
 
         return res;
       })
-      .catch((err) => {
+      .catch(() => {
         throw new UnauthorizedException({
           errorCode: ErrorCode.INVALID_TOKEN,
           message: "Google ID Token is not valid",

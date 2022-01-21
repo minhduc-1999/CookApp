@@ -8,15 +8,15 @@ import { UserDTO } from "dtos/social/user.dto";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { NewPostEvent } from "modules/notification/usecases/NewPostNotification";
+import { Transaction } from "neo4j-driver";
 
 export class CreatePostCommand extends BaseCommand {
   postDto: CreatePostRequest;
-  constructor(user: UserDTO, post: CreatePostRequest, session?: ClientSession) {
-    super(session, user);
+  constructor(user: UserDTO, post: CreatePostRequest, tx: Transaction) {
+    super(tx, user);
     this.postDto = post;
   }
 }
@@ -35,7 +35,7 @@ export class CreatePostCommandHandler
     @Inject("IFeedRepository")
     private _feedRepo: IFeedRepository,
     private _eventBus: EventBus
-  ) {}
+  ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { postDto, user } = command;
 
@@ -52,10 +52,10 @@ export class CreatePostCommandHandler
     });
     const result = await this._postRepo.createPost(creatingPost);
 
-    tasks.push(
-      this._feedRepo.pushNewPost(result, user.id),
-      this._wallRepo.pushNewPost(result, user)
-    );
+    // tasks.push(
+    //   this._feedRepo.pushNewPost(result, user.id),
+    //   this._wallRepo.pushNewPost(result, user)
+    // );
 
     // push posts to followers
     const followers = await this._wallRepo.getFollowers(user.id);

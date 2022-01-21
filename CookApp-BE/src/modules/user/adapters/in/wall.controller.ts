@@ -3,7 +3,6 @@ import {
   Delete,
   Get,
   Param,
-  ParseIntPipe,
   Post,
   Query,
 } from "@nestjs/common";
@@ -15,6 +14,7 @@ import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/ApiSuccessResponse.decorator";
+import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
 import { User } from "decorators/user.decorator";
 import { UserDTO } from "dtos/social/user.dto";
 import { FollowCommand } from "modules/user/useCases/follow";
@@ -24,6 +24,7 @@ import { GetWallResponse } from "modules/user/useCases/getWall/getWallResponse";
 import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";
 import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWallPostsResponse";
 import { UnfolllowCommand } from "modules/user/useCases/unfollow";
+import { Transaction } from "neo4j-driver";
 import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
 import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
 
@@ -51,11 +52,13 @@ export class WallController {
   @Post("followers")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(FollowResponse, "Follow successfully")
+  @RequestTransaction()
   async follow(
     @Param("id", ParseObjectIdPipe) targetId: string,
-    @User() user: UserDTO
+    @User() user: UserDTO,
+    @ParamTransaction() tx: Transaction
   ): Promise<Result<FollowResponse>> {
-    const command = new FollowCommand(user, targetId, null);
+    const command = new FollowCommand(user, targetId, tx);
     const result = await this._commandBus.execute(command);
     return Result.ok(result, {
       messages: ["Follow successfully"],
@@ -65,11 +68,13 @@ export class WallController {
   @Delete("followers")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(UnfolllowCommand, "Unfollow successfully")
+  @RequestTransaction()
   async unfollow(
     @Param("id", ParseObjectIdPipe) targetId: string,
-    @User() user: UserDTO
+    @User() user: UserDTO,
+    @ParamTransaction() tx: Transaction
   ): Promise<Result<UnfolllowCommand>> {
-    const command = new UnfolllowCommand(user, targetId, null);
+    const command = new UnfolllowCommand(user, targetId, tx);
     const result = await this._commandBus.execute(command);
     return Result.ok(result, {
       messages: ["Unfollow successfully"],

@@ -1,10 +1,10 @@
-import { ClientSession } from "mongoose";
+import { Transaction } from "neo4j-driver";
 
 export abstract class BaseRepository {
-  protected session: ClientSession;
+  protected tx: Transaction;
 
-  public setSession(session: ClientSession) {
-    this.session = session;
+  public setTransaction(tx: Transaction) {
+    this.tx = tx;
     return this;
   }
 }

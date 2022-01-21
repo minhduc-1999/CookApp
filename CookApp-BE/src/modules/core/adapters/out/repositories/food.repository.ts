@@ -5,12 +5,13 @@ import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
 import { Food, FoodDocument } from "domains/schemas/core/food.schema";
 import { FoodDTO } from "dtos/core/food.dto";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
+import { Transaction } from "neo4j-driver";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<FoodDTO[]>;
   getTotalFoods(query: PageOptionsDto): Promise<number>;
-  setSession(session: ClientSession): IFoodRepository;
+  setTransaction(tx: Transaction): IFoodRepository
 }
 
 @Injectable()

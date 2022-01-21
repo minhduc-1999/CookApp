@@ -5,12 +5,13 @@ import { plainToClass } from "class-transformer";
 import { Wall, WallDocument } from "domains/schemas/social/wall.schema";
 import { UserDTO } from "dtos/social/user.dto";
 import { WallDTO } from "dtos/social/wall.dto";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
+import { Transaction } from "neo4j-driver";
 
 export interface IWallRepository {
   createWall(wall: WallDTO): Promise<WallDTO>;
-  setSession(session: ClientSession): IWallRepository;
   updateWallInfo(info: Partial<UserDTO>, userId: string): Promise<WallDTO>;
+  setTransaction(tx: Transaction): IWallRepository
 }
 
 @Injectable()
@@ -30,15 +31,12 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       {
         $set: info,
       },
-      {
-        session: this.session,
-      }
     );
     return plainToClass(WallDTO, updated, { excludeExtraneousValues: true });
   }
   async createWall(wall: WallDTO): Promise<WallDTO> {
     const creatingWall = new this._wallModel(new Wall(wall));
-    const wallDoc = await creatingWall.save({ session: this.session });
+    const wallDoc = await creatingWall.save();
     if (!wallDoc) return null;
     return plainToClass(WallDTO, wallDoc, { excludeExtraneousValues: true });
   }

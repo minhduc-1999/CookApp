@@ -4,16 +4,17 @@ import {
   Comment,
   CommentDocument,
 } from "domains/schemas/social/comment.schema";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
 import { CommentDTO } from "dtos/social/comment.dto";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
 import { CommentPageOption } from "modules/user/useCases/getPostComments";
+import { Transaction } from "neo4j-driver";
 
 export interface ICommentRepository {
   createComment(comment: CommentDTO): Promise<CommentDTO>;
-  setSession(session: ClientSession): ICommentRepository;
   getCommentById(id: string): Promise<CommentDTO>;
+  setTransaction(tx: Transaction): ICommentRepository
   getPostComments(
     postId: string,
     query: CommentPageOption
@@ -66,7 +67,7 @@ export class CommentRepository
   }
   async createComment(comment: CommentDTO): Promise<CommentDTO> {
     const creatingComment = new this._commentModel(new Comment(comment));
-    const commentDoc = await creatingComment.save({ session: this.session });
+    const commentDoc = await creatingComment.save();
     if (!commentDoc) return null;
     return plainToClass(CommentDTO, commentDoc, {
       excludeExtraneousValues: true,

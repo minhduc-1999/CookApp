@@ -5,20 +5,17 @@ import { ErrorCode } from "enums/errorCode.enum";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
 import { UserDTO } from "dtos/social/user.dto";
 import { IPostService } from "modules/user/services/post.service";
-import { createUpdatingObject, retrieveObjectNameFromUrl } from "utils";
+import { createUpdatingObject } from "utils";
 import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
 import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
-import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { ConfigService } from "nestjs-config";
-import { MediaType } from "enums/mediaType.enum";
+import { Transaction } from "neo4j-driver";
 export class EditPostCommand extends BaseCommand {
   postDto: EditPostRequest;
-  constructor(session: ClientSession, user: UserDTO, post: EditPostRequest) {
-    super(session, user);
+  constructor(tx: Transaction, user: UserDTO, post: EditPostRequest) {
+    super(tx, user);
     this.postDto = post;
   }
 }
@@ -35,9 +32,6 @@ export class EditPostCommandHandler
     private _wallRepo: IWallRepository,
     @Inject("IFeedRepository")
     private _feedRepo: IFeedRepository,
-    @Inject("IStorageService")
-    private _storageService: IStorageService,
-    private _configService: ConfigService
   ) {}
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
     const { user, postDto } = command;

@@ -21,7 +21,7 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
     @Inject("IFoodRepository")
     private _foodRepo: IFoodRepository,
     @Inject("IStorageService") private _storageService: IStorageService
-  ) {}
+  ) { }
   async execute(query: GetFoodsQuery): Promise<GetFoodsResponse> {
     const { queryOptions } = query;
     const foods = await this._foodRepo.getFoods(queryOptions);

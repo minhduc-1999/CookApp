@@ -3,7 +3,6 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { UserDTO } from "dtos/social/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
-import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { isImageKey } from "utils";
 import { GetProfileResponse } from "./getProfileResponse";

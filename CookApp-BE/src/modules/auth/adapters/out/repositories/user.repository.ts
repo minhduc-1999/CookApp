@@ -1,12 +1,12 @@
 import {
-  BadRequestException,
   ConflictException,
+  Inject,
   Injectable,
   InternalServerErrorException,
   Logger,
 } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
 import { ErrorCode } from "enums/errorCode.enum";
 import { MongoErrorCode } from "enums/mongoErrorCode.enum";
 import { ResponseDTO } from "base/dtos/response.dto";
@@ -15,6 +15,9 @@ import { User, UserDocument } from "domains/schemas/social/user.schema";
 import { plainToClass } from "class-transformer";
 import { BaseRepository } from "base/repository.base";
 import { PageOptionsDto } from "base/pageOptions.base";
+import { INeo4jService } from "modules/neo4j/services/neo4j.service";
+import _ = require("lodash");
+import { Transaction } from "neo4j-driver";
 
 export interface IUserRepository {
   createUser(userData: UserDTO): Promise<UserDTO>;
@@ -25,7 +28,7 @@ export interface IUserRepository {
     userId: string,
     profile: Partial<UserDTO>
   ): Promise<UserDTO>;
-  setSession(session: ClientSession): IUserRepository;
+  setTransaction(tx: Transaction): IUserRepository
   getUsers(query: PageOptionsDto): Promise<UserDTO[]>;
   countUsers(query: PageOptionsDto): Promise<number>;
 }
@@ -33,9 +36,14 @@ export interface IUserRepository {
 @Injectable()
 export class UserRepository extends BaseRepository implements IUserRepository {
   private _logger = new Logger(UserRepository.name)
-  constructor(@InjectModel(User.name) private _userModel: Model<UserDocument>) {
+  private _tx: Transaction
+  constructor(
+    @Inject("INeo4jService")
+    private neo4jService: INeo4jService,
+    @InjectModel(User.name) private _userModel: Model<UserDocument>) {
     super();
   }
+
   async countUsers(query: PageOptionsDto): Promise<number> {
     let textSearch = {};
     if (query.q !== "") {
@@ -70,10 +78,6 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       const userDoc = await this._userModel.findByIdAndUpdate(
         userId,
         { $set: profile },
-        {
-          new: true,
-          session: this.session,
-        }
       );
       return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
     } catch (error) {
@@ -110,21 +114,24 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   }
 
   async createUser(userData: UserDTO): Promise<UserDTO> {
-    const createdUser = new this._userModel(new User(userData));
-    try {
-      const userDoc = await createdUser.save({ session: this.session });
-      if (!userDoc) return null;
-      return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
-    } catch (error) {
-      this._logger.error(error);
-      if (error.code === MongoErrorCode.DUPLICATE_KEY)
-        throw new ConflictException(
-          ResponseDTO.fail(
-            "This user is already existed",
-            ErrorCode.ACCOUNT_ALREADY_EXISTED
-          )
-        );
-      throw new InternalServerErrorException();
-    }
+    const res = await this.neo4jService.write(`
+            CREATE (u:User)
+            SET u += $properties, u.id = randomUUID()
+            RETURN u
+        `, {
+      properties: {
+        email: userData.email,
+        password: userData.password,
+        displayName: userData.displayName,
+        username: userData.username,
+        createdAt: _.now(),
+        profile: userData.profile,
+        avatar: userData.avatar,
+        emailVerified: userData.emailVerified
+      },
+    }, this._tx)
+    console.log(res.records[0].get('u'))
+    return plainToClass(UserDTO, res.records[0].get('u').properties, { excludeExtraneousValues: true });
   }
 }
+

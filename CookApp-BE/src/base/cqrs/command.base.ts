@@ -1,12 +1,12 @@
 import { ICommand } from "@nestjs/cqrs";
 import { UserDTO } from "dtos/social/user.dto";
-import { ClientSession } from "mongoose";
+import { Transaction } from "neo4j-driver";
 
 export class BaseCommand implements ICommand {
   user?: UserDTO;
-  session: ClientSession;
-  constructor(session: ClientSession, user?: UserDTO ) {
+  tx: Transaction
+  constructor(tx: Transaction, user?: UserDTO ) {
     this.user = user;
-    this.session = session;
+    this.tx = tx;
   }
 }

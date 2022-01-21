@@ -14,6 +14,7 @@ import * as cookieParser from "cookie-parser";
 import { TransformResponse } from "./interceptors/transform.interceptor";
 import { ErrorsInterceptor } from "./interceptors/errors.interceptor";
 import { HttpExceptionFilter } from "exception_filter/http-exception.filter";
+import { Neo4jErrorFilter } from "modules/neo4j/exception-filters/neo4j-exception.filter";
 
 const morganFormat =
   ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
@@ -49,7 +50,7 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new TransformResponse(), new ErrorsInterceptor());
 
-  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalFilters(new HttpExceptionFilter(), new Neo4jErrorFilter());
 
   /**
    * Swagger API

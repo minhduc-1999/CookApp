@@ -5,7 +5,8 @@ import { plainToClass } from "class-transformer";
 import { Post, PostDocument } from "domains/schemas/social/post.schema";
 import { PostDTO } from "dtos/social/post.dto";
 import { ReactionDTO } from "dtos/social/reaction.dto";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
+import { Transaction } from "neo4j-driver";
 
 export interface IPostRepository {
   createPost(post: PostDTO): Promise<PostDTO>;
@@ -15,7 +16,7 @@ export interface IPostRepository {
   reactPost(react: ReactionDTO, userId: string): Promise<boolean>;
   deleteReact(userId: string, postId: string): Promise<boolean>;
   getReactionByUserId(userId: string, postId: string): Promise<ReactionDTO>;
-  setSession(session: ClientSession): IPostRepository;
+  setTransaction(tx: Transaction): IPostRepository
   updateNumComment(postId: string, delta: number): Promise<void>;
   deleteImages(postId: string, changedImages: string[]): Promise<PostDTO>;
   pushImages(postId: string, changedImages: string[]): Promise<PostDTO>;
@@ -37,7 +38,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     const updatedPost = await this._postModel.findOneAndUpdate(
       { _id: postId },
       { $push: { images: changedImages } },
-      { new: true, session: this.session }
+      { new: true }
     );
     return plainToClass(PostDTO, updatedPost, {
       excludeExtraneousValues: true,
@@ -50,7 +51,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     const updatedPost = await this._postModel.findOneAndUpdate(
       { _id: postId },
       { $pullAll: { images: changedImages } },
-      { new: true, session: this.session }
+      { new: true }
     );
     return plainToClass(PostDTO, updatedPost, {
       excludeExtraneousValues: true,
@@ -64,9 +65,6 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       {
         $inc: { numOfComment: delta },
       },
-      {
-        session: this.session,
-      }
     );
   }
 
@@ -74,12 +72,13 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     const updatedPost = await this._postModel.findOneAndUpdate(
       { _id: post.id },
       { $set: post },
-      { new: true, session: this.session }
+      { new: true }
     );
     return plainToClass(PostDTO, updatedPost, {
       excludeExtraneousValues: true,
     });
   }
+
   async getPostById(postId: string): Promise<PostDTO> {
     const postDoc = await this._postModel.findById(postId);
     if (!postDoc) return null;
@@ -91,7 +90,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
 
   async createPost(post: PostDTO): Promise<PostDTO> {
     const creatingPost = new this._postModel(new Post(post));
-    const postDoc = await creatingPost.save({ session: this.session });
+    const postDoc = await creatingPost.save();
     if (!postDoc) return null;
     return plainToClass(PostDTO, postDoc, { excludeExtraneousValues: true });
   }
@@ -105,9 +104,6 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         $push: { reactions: react },
         $inc: { numOfReaction: 1 },
       },
-      {
-        session: this.session,
-      }
     );
     return result.modifiedCount === 1;
   }
@@ -122,9 +118,6 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         $pull: { reactions: { userId: userId } },
         $inc: { numOfReaction: -1 },
       },
-      {
-        session: this.session,
-      }
     );
     return result.modifiedCount !== 0;
   }

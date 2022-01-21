@@ -14,11 +14,12 @@ import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.rep
 import { IFeedRepository } from "modules/auth/adapters/out/repositories/feed.repository";
 import { generateDisplayName } from "utils";
 import { IMailService } from "modules/share/adapters/out/services/mail.service";
+import { Transaction } from "neo4j-driver";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
-  constructor(registerDto: RegisterRequest, session: ClientSession) {
-    super(session);
+  constructor(registerDto: RegisterRequest, tx: Transaction) {
+    super(tx);
     this.registerDto = registerDto;
   }
 }
@@ -28,14 +29,14 @@ export class RegisterCommandHandler
 {
   constructor(
     @Inject("IUserRepository") private _userRepo: IUserRepository,
-    @Inject("IWallRepository") private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository") private _feedRepo: IFeedRepository,
+    // @Inject("IWallRepository") private _wallRepo: IWallRepository,
+    // @Inject("IFeedRepository") private _feedRepo: IFeedRepository,
     @Inject("IMailService")
     private _mailService: IMailService
   ) {}
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
-    const { registerDto, session } = command;
-    const hashedPassword = await bcrypt.hashSync(registerDto.password, 10);
+    const { registerDto, tx} = command;
+    const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
     const newUserDto = UserDTO.create({
       ...registerDto,
       password: hashedPassword,
@@ -43,17 +44,17 @@ export class RegisterCommandHandler
       emailVerified: false
     });
     const createdUser = await this._userRepo
-      .setSession(session)
+      .setTransaction(tx)
       .createUser(newUserDto);
-    const wallDto = WallDTO.create({
-      user: createdUser,
-    });
+    // const wallDto = WallDTO.create({
+    //   user: createdUser,
+    // });
 
-    await this._wallRepo.setSession(session).createWall(wallDto);
-    const feedDto = FeedDTO.create({
-      user: createdUser,
-    });
-    await this._feedRepo.setSession(session).createFeed(feedDto);
+    // await this._wallRepo.setSession(session).createWall(wallDto);
+    // const feedDto = FeedDTO.create({
+    //   user: createdUser,
+    // });
+    // await this._feedRepo.setSession(session).createFeed(feedDto);
     this._mailService.sendEmailAddressVerification(
       createdUser.id,
       createdUser.email

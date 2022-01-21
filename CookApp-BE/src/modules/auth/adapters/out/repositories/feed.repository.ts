@@ -4,11 +4,12 @@ import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
 import { Feed, FeedDocument } from "domains/schemas/social/feed.schema";
 import { FeedDTO } from "dtos/social/feed.dto";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
+import { Transaction } from "neo4j-driver";
 
 export interface IFeedRepository {
   createFeed(feed: FeedDTO): Promise<FeedDTO>;
-  setSession(session: ClientSession): IFeedRepository;
+  setTransaction(tx: Transaction): IFeedRepository
 }
 
 @Injectable()
@@ -20,7 +21,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
 
   async createFeed(feed: FeedDTO): Promise<FeedDTO> {
     const creatingFeed = new this._feedModel(new Feed(feed));
-    const feedDoc = await creatingFeed.save({ session: this.session });
+    const feedDoc = await creatingFeed.save();
     if (!feedDoc) return null;
     return plainToClass(FeedDTO, feedDoc, { excludeExtraneousValues: true });
   }

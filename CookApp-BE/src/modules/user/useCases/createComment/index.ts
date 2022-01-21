@@ -12,15 +12,16 @@ import { IPostRepository } from "modules/user/adapters/out/repositories/post.rep
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { CommentPostEvent } from "modules/notification/usecases/CommentNotification";
 import { IPostService } from "modules/user/services/post.service";
+import { Transaction } from "neo4j-driver";
 
 export class CreateCommentCommand extends BaseCommand {
   commentDto: CreateCommentRequest;
   constructor(
     user: UserDTO,
     comment: CreateCommentRequest,
-    session?: ClientSession
+    tx: Transaction
   ) {
-    super(session, user);
+    super(tx, user);
     this.commentDto = comment;
   }
 }
@@ -41,9 +42,9 @@ export class CreateCommentCommandHandler
     private _eventBus: EventBus,
     @Inject("IPostService")
     private _postService: IPostService
-  ) {}
+  ) { }
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
-    const { commentDto, user, session } = command;
+    const { commentDto, user, tx } = command;
     const post = await this._postService.getPostDetail(commentDto.postId);
     const parentComment = commentDto.parentId
       ? await this._commentService.getComment(commentDto.parentId)
@@ -53,7 +54,7 @@ export class CreateCommentCommandHandler
       user,
     }).setParent(parentComment);
     const createdComment = await this._commentRepo
-      .setSession(session)
+      .setTransaction(tx)
       .createComment(comment);
     return await Promise.all([
       this._feedRepo.updateNumComment(commentDto.postId, 1),

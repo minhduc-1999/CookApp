@@ -3,12 +3,12 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
 import { UserDTO } from "dtos/social/user.dto";
 import { IAuthentication } from "modules/auth/services/authentication.service";
-import { ClientSession } from "mongoose";
+import { Transaction } from "neo4j-driver";
 import { LoginResponse } from "./loginResponse";
 
 export class LoginCommand extends BaseCommand {
-  constructor(session: ClientSession, user: UserDTO) {
-    super(session, user)
+  constructor(tx: Transaction, user: UserDTO) {
+    super(tx, user)
   }
 }
 

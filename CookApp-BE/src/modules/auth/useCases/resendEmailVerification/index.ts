@@ -5,20 +5,20 @@ import {
 } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
 import { ResendEmailVerificationRequest } from "./resendEmailVerificationRequest";
 import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { UserDTO } from "dtos/social/user.dto";
+import { Transaction } from "neo4j-driver";
 
 export class ResendEmailVerificationCommand extends BaseCommand {
   requestDto: ResendEmailVerificationRequest;
   constructor(
     requestDto: ResendEmailVerificationRequest,
     user: UserDTO,
-    session: ClientSession
+    tx: Transaction
   ) {
-    super(session, user);
+    super(tx, user);
     this.requestDto = requestDto;
   }
 }

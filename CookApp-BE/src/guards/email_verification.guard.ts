@@ -12,7 +12,7 @@ export class EmailVerificationGuard implements CanActivate {
   constructor(private readonly reflector: Reflector) {}
   canActivate(context: ExecutionContext) {
     const notRequireEmailVerification = this.reflector.get<boolean>(
-      "requireEmailVerification",
+      "notRequireEmailVerification",
       context.getHandler()
     );
 
