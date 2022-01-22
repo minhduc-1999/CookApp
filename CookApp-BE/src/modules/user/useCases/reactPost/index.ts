@@ -39,9 +39,9 @@ export class ReactPostCommandHandler
     const { user, reactReq } = command;
     const post = await this._postService.getPostDetail(reactReq.postId);
 
-    const reactDto = ReactionDTO.create({
+    const reactDto = new ReactionDTO({
       type: reactReq.react,
-      userId: user.id,
+      userID: user.id,
     });
     const tasks = [];
     let reacted: boolean;

@@ -1,50 +1,17 @@
-import { AbstractSchema } from "base/schemas/schema.base";
-import { Type } from "class-transformer";
-import { UserDTO } from "dtos/social/user.dto";
-import { ExternalProvider } from "enums/externalProvider.enum";
-import { UserProfile } from "./user-profile.entity";
+import { ProfileDTO } from 'dtos/social/profile.dto';
+import { UserDTO } from 'dtos/social/user.dto';
+import { Node } from 'neo4j-driver'
 
-export type UserDocument = User & Document;
+export class UserEntity {
+  constructor(private readonly node: Node) {
+  }
 
-class Provider {
-  type: ExternalProvider;
-  id: string;
-}
+  toDomain(): UserDTO {
+    const profile = new ProfileDTO()
+    const user = new UserDTO({
+      profile
+    })
+    return user
 
-export class User extends AbstractSchema {
-  _id: string;
-
-  username: string;
-
-  password?: string;
-
-  email: string;
-
-  phone?: string;
-
-  avatar?: string;
-
-  displayName?: string;
-
-  @Type(() => UserProfile)
-  profile?: UserProfile;
-
-  @Type(() => Provider)
-  externalProvider?: Provider;
-
-  emailVerified: boolean;
-
-  constructor(userDto: Partial<UserDTO>) {
-    super(userDto);
-    this.username = userDto?.username;
-    this.email = userDto?.email;
-    this.phone = userDto?.phone;
-    this.avatar = userDto?.avatar;
-    this.profile = userDto?.profile && new UserProfile(userDto?.profile);
-    this.password = userDto?.password;
-    this._id = userDto?.id;
-    this.displayName = userDto?.displayName;
-    this.externalProvider = userDto?.externalProvider;
-    this.emailVerified = userDto?.emailVerified;
   }
 }

@@ -1,25 +1,14 @@
-import {
-  ApiProperty,
-} from "@nestjs/swagger";
-import { Expose } from "class-transformer";
-import {
-  IsNotEmpty,
-} from "class-validator";
+import { AuditDTO } from "base/dtos/audit.dto";
 import { ReactionType } from "enums/reaction.enum";
 
-export class ReactionDTO {
-  @IsNotEmpty()
-  @ApiProperty({ enum: ReactionType })
-  @Expose()
+export class ReactionDTO extends AuditDTO {
   type: ReactionType;
 
-  @Expose()
-  userId: string;
+  userID: string;
 
-  static create(reaction: ReactionDTO): ReactionDTO {
-    const createdReaction = new ReactionDTO();
-    createdReaction.type = reaction.type;
-    createdReaction.userId = reaction.userId;
-    return createdReaction;
+  constructor(reaction?: Partial<ReactionDTO>) {
+    super()
+    this.type = reaction?.type
+    this.userID = reaction?.userID
   }
 }

@@ -1,10 +1,9 @@
-import { AuditDTO } from "base/dto/audit.dto";
+import { ApiResponseProperty } from "@nestjs/swagger";
 import { PostDTO } from "dtos/social/post.dto";
 import { ReactionType } from "enums/reaction.enum";
 
-export class GetPostResponse extends AuditDTO {
+export class GetPostResponse {
   constructor(post: PostDTO) {
-    super(post);
     this.content = post.content;
     this.images = post.images;
     this.videos = post.videos;
@@ -16,15 +15,22 @@ export class GetPostResponse extends AuditDTO {
     this.numOfComment = post.numOfComment;
     this.numOfReaction = post.numOfReaction;
   }
+  @ApiResponseProperty({ type: String })
   content: string;
+  @ApiResponseProperty({ type: [String] })
   images: string[];
+  @ApiResponseProperty({ type: [String] })
   videos: string[];
+  @ApiResponseProperty({ type: Object })
   author: {
     id: string;
     avatar: string;
     displayName: string;
   };
+  @ApiResponseProperty({ type: Number })
   numOfReaction: number;
+  @ApiResponseProperty({ type: Number })
   numOfComment: number;
+  @ApiResponseProperty({ enum: ReactionType })
   reaction?: ReactionType;
 }

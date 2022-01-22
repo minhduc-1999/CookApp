@@ -46,7 +46,7 @@ export class CreatePostCommandHandler
       );
     }
     const tasks = [];
-    const creatingPost = PostDTO.create({
+    const creatingPost = new PostDTO({
       ...postDto,
       author: user,
     });

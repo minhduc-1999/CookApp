@@ -1,45 +1,27 @@
-import { ApiResponseProperty, PickType } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
-import { Exclude, Expose, Type } from "class-transformer";
 import { UserDTO } from "./user.dto";
 
 export class CommentDTO extends AuditDTO {
-  @Type(() => UserDTO)
-  @ApiResponseProperty({
-    type: PickType(UserDTO, ["id", "displayName", "avatar"]),
-  })
-  @Expose()
   user: UserDTO;
 
-  @Expose()
-  @ApiResponseProperty({ type: String })
   postId: string;
 
-  @Expose()
-  @ApiResponseProperty({ type: String })
   content: string;
 
-  @Expose()
-  @Type(() => CommentDTO)
-  @ApiResponseProperty({ type: [CommentDTO] })
   replies?: CommentDTO[];
 
-  @Exclude({ toPlainOnly: true })
-  @Expose({ toClassOnly: true })
   path: string;
 
   numberOfReply: number
 
-  static create(
-    comment: Pick<CommentDTO, "user" | "postId" | "content" | "replies">
-  ): CommentDTO {
-    const createdComment = new CommentDTO();
-    createdComment.create(comment?.user.id);
-    createdComment.content = comment?.content;
-    createdComment.postId = comment?.postId;
-    createdComment.replies = comment?.replies;
-    createdComment.user = comment?.user;
-    return createdComment;
+  constructor(comment?: Partial<CommentDTO>) {
+    super()
+    this.user = comment?.user
+    this.postId = comment?.postId
+    this.content = comment?.content
+    this.replies = comment?.replies
+    this.path = comment?.path
+    this.numberOfReply = comment?.numberOfReply
   }
 
   setParent(parentComment: CommentDTO | string): CommentDTO {

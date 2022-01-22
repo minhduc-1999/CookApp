@@ -4,9 +4,6 @@ import { AuditDTO } from "base/dtos/audit.dto";
 export abstract class AbstractSchema {
   id: string;
 
-  @Prop({ schemaName: "created_by", required: true })
-  createdBy: string;
-
   @Prop({ schemaName: "updated_at", required: true })
   updatedAt: number;
 
@@ -23,7 +20,6 @@ export abstract class AbstractSchema {
   deletedBy: string;
 
   constructor(audit: Partial<AuditDTO>) {
-    this.createdBy = audit?.createdBy;
     this.updatedAt = audit?.updatedAt;
     this.createdAt = audit?.createdAt;
     this.updatedBy = audit?.updatedBy;

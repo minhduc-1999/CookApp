@@ -2,6 +2,7 @@ import { Inject, Injectable, InternalServerErrorException, Logger } from '@nestj
 import { Driver, int, Result, Session, Transaction } from 'neo4j-driver';
 import { Neo4jConfig } from '../interfaces/config';
 import neo4j from 'neo4j-driver'
+import { isArray, isObject } from 'lodash';
 
 export interface INeo4jService {
   getReadSession(database?: string): Session

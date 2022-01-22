@@ -50,7 +50,7 @@ export class GoogleSignInCommandHandler
     const { tx } = command;
     const user = await this.verify(command.request.idToken)
       .then(async (payload) => {
-        const userData: UserDTO = UserDTO.create({
+        const userData: UserDTO = new UserDTO({
           avatar: payload.picture,
           username: retrieveUsernameFromEmail(payload.email),
           profile: {

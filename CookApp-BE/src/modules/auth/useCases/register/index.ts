@@ -37,7 +37,7 @@ export class RegisterCommandHandler
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
     const { registerDto, tx} = command;
     const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
-    const newUserDto = UserDTO.create({
+    const newUserDto = new UserDTO({
       ...registerDto,
       password: hashedPassword,
       displayName: generateDisplayName(),

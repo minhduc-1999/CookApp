@@ -30,5 +30,7 @@ services:
       - ./neo4j-db/data:/data
       - ./neo4j-db/logs:/logs
       - ./neo4j-db/conf:/conf
+      - ./neo4j-db/plugins:/plugins
+    env_file: .neo4j.env
 volumes:
   tastify-db:

@@ -25,5 +25,4 @@ export class RegisterRequest {
   @IsNotEmpty()
   @ApiProperty({ type: String, format: "email", example: "user@gmail.com" })
   email: string;
-
 }

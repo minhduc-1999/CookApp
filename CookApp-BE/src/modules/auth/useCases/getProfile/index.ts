@@ -28,6 +28,6 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
         await this._storageService.getDownloadUrls([user.avatar])
       )[0];
     }
-    return user;
+    return new GetProfileResponse(user);
   }
 }

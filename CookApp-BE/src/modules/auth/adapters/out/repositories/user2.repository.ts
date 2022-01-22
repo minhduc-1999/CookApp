@@ -26,7 +26,9 @@ export class UserRepository extends BaseRepository implements IUserRepository {
           ...userData
         }
       })
-    return plainToClass(UserDTO, res.records[0].get('u').properties, { excludeExtraneousValues: true });
+    if (res.records.length === 0)
+      return null
+    return plainToClass(UserDTO, res.records[0].get('u').properties);
   }
   async getUserByEmail(email: string): Promise<UserDTO> {
     const res = await this.neo4jService.read(
@@ -35,7 +37,9 @@ export class UserRepository extends BaseRepository implements IUserRepository {
         email: email
       }
     )
-    return plainToClass(UserDTO, res.records[0].get('u').properties, { excludeExtraneousValues: true });
+    if (res.records.length === 0)
+      return null
+    return plainToClass(UserDTO, res.records[0].get('u').properties);
   }
 
   async getUserByUsername(username: string): Promise<UserDTO> {
@@ -45,7 +49,9 @@ export class UserRepository extends BaseRepository implements IUserRepository {
         username: username
       }
     )
-    return plainToClass(UserDTO, res.records[0].get('u').properties, { excludeExtraneousValues: true });
+    if (res.records.length === 0)
+      return null
+    return plainToClass(UserDTO, res.records[0].get('u').properties);
   }
 
   async getUserById(id: string): Promise<UserDTO> {
@@ -55,11 +61,31 @@ export class UserRepository extends BaseRepository implements IUserRepository {
         id: id
       }
     )
-    return plainToClass(UserDTO, res.records[0].get('u').properties, { excludeExtraneousValues: true });
+    if (res.records.length === 0)
+      return null
+    return plainToClass(UserDTO, res.records[0].get('u').properties);
   }
 
-  updateUserProfile(userId: string, profile: Partial<UserDTO>): Promise<UserDTO> {
-    throw new Error("Method not implemented.");
+  async updateUserProfile(userID: string, profile: Partial<UserDTO>): Promise<UserDTO> {
+    console.log(profile)
+    const res = await this.neo4jService.write(`
+            MATCH (u:User{id: $userID})
+            SET u += $newUpdate
+            RETURN u
+ 
+      `,
+      this.tx,
+      {
+        userID,
+        newUpdate: {
+          ...profile
+        }
+      },
+    )
+    if (res.records.length === 0)
+      return null
+    console.log(res.records[0].get('u'))
+    return plainToClass(UserDTO, res.records[0].get('u').properties);
   }
   getUsers(query: PageOptionsDto): Promise<UserDTO[]> {
     throw new Error("Method not implemented.");

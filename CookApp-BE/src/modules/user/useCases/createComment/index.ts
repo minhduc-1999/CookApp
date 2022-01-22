@@ -49,7 +49,7 @@ export class CreateCommentCommandHandler
     const parentComment = commentDto.parentId
       ? await this._commentService.getComment(commentDto.parentId)
       : commentDto.postId;
-    const comment = CommentDTO.create({
+    const comment = new CommentDTO({
       ...commentDto,
       user,
     }).setParent(parentComment);
