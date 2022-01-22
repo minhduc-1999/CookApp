@@ -1,4 +1,4 @@
-import { Inject, Injectable } from '@nestjs/common';
+import { Inject, Injectable, InternalServerErrorException, Logger } from '@nestjs/common';
 import { Driver, int, Result, Session, Transaction } from 'neo4j-driver';
 import { Neo4jConfig } from '../interfaces/config';
 import neo4j from 'neo4j-driver'
@@ -7,11 +7,12 @@ export interface INeo4jService {
   getReadSession(database?: string): Session
   getWriteSession(database?: string): Session
   beginTransaction(database?: string): Transaction
-  read(cypher: string, params?: Record<string, any>, databaseOrTransaction?: string | Transaction): Result
-  write(cypher: string, params?: Record<string, any>, databaseOrTransaction?: string | Transaction): Result
+  read(cypher: string, params?: Record<string, any>, database?: string): Result
+  write(cypher: string, tx: Transaction, params?: Record<string, any>): Result
 }
 @Injectable()
 export class Neo4jService implements INeo4jService {
+  private _logger: Logger = new Logger(Neo4jService.name)
   constructor(
     @Inject('NEO4J_CONFIG') private readonly config: Neo4jConfig,
     @Inject('NEO4J_DRIVER') private readonly driver: Driver
@@ -49,22 +50,18 @@ export class Neo4jService implements INeo4jService {
     })
   }
 
-  read(cypher: string, params?: Record<string, any>, databaseOrTransaction?: string | Transaction): Result {
-    if (databaseOrTransaction instanceof String) {
-      const session = this.getReadSession(<string>databaseOrTransaction)
-      return session.run(cypher, params)
-    }
-
-    return (<Transaction>databaseOrTransaction).run(cypher, params)
+  read(cypher: string, params?: Record<string, any>, database?: string): Result {
+    const session = this.getReadSession(database)
+    return session.run(cypher, params)
   }
 
-  write(cypher: string, params?: Record<string, any>, databaseOrTransaction?: string | Transaction): Result {
-    if (databaseOrTransaction instanceof String) {
-      const session = this.getWriteSession(<string>databaseOrTransaction)
-      return session.run(cypher, params)
+  write(cypher: string, tx: Transaction, params?: Record<string, any>): Result {
+    if (!tx) {
+      this._logger.error("Not found transaction for write operation")
+      throw new InternalServerErrorException();
     }
 
-    return (<Transaction>databaseOrTransaction).run(cypher, params)
+    return tx.run(cypher, params)
   }
 
   onApplicationShutdown() {

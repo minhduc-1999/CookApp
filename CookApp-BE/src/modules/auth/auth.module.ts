@@ -16,7 +16,7 @@ import { ConfigModule, ConfigService } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
-import { UserRepository } from "./adapters/out/repositories/user.repository";
+import { UserRepository } from "./adapters/out/repositories/user2.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
