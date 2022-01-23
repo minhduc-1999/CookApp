@@ -5,3 +5,4 @@ CREATE CONSTRAINT username_unique IF NOT EXISTS FOR (n:User) REQUIRE n.username 
 
 -- Create index
 CREATE INDEX user_id_index IF NOT EXISTS FOR (n:User) ON (n.id)
+CREATE FULLTEXT INDEX user_search_index IF NOT EXISTS FOR (n:User) ON EACH [n.displayName, n.firstName, n.lastName]

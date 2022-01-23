@@ -4,6 +4,7 @@ import { BaseRepository } from "base/repository.base";
 import { UserEntity } from "domains/entities/social/user.entity";
 import { UserDTO } from "dtos/social/user.dto";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
+import { int } from "neo4j-driver";
 import { IUserRepository } from "../repositories/user.repository";
 
 @Injectable()
@@ -70,7 +71,6 @@ export class UserRepository extends BaseRepository implements IUserRepository {
             MATCH (u:User{id: $userID})
             SET u += $newUpdate
             RETURN u
- 
       `,
       this.tx,
       {
@@ -84,11 +84,33 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       return null
     return UserEntity.toDomain(res.records[0].get("u"))
   }
-  getUsers(query: PageOptionsDto): Promise<UserDTO[]> {
-    throw new Error("Method not implemented.");
+  async getUsers(query: PageOptionsDto): Promise<UserDTO[]> {
+    const res = await this.neo4jService.read(`
+        CALL db.index.fulltext.queryNodes("user_search_index", "(?i)${query.q}*") YIELD node
+        RETURN node
+        SKIP $skip
+        LIMIT $limit
+      `,
+      {
+        skip: int(query.offset * query.limit),
+        limit: int(query.limit)
+      },
+    )
+    if (res.records.length === 0)
+      return []
+    return res.records.map(record => {
+      return UserEntity.toDomain(record.get('node'))
+    })
   }
-  countUsers(query: PageOptionsDto): Promise<number> {
-    throw new Error("Method not implemented.");
+  async countUsers(query: PageOptionsDto): Promise<number> {
+    const res = await this.neo4jService.read(`
+        CALL db.index.fulltext.queryNodes("user_search_index", "(?i)${query.q}*") YIELD node
+        RETURN count(node) as numOfResult
+      `
+    )
+    if (res.records.length === 0)
+      return 0
+    return res.records[0].get("numOfResult").toNumber() 
   }
 }
 

@@ -1,3 +1,4 @@
+import { ApiProperty, ApiPropertyOptional, ApiResponseProperty } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
 import { ExternalProvider } from "enums/externalProvider.enum";
 import { ProfileDTO } from "./profile.dto";
@@ -8,22 +9,29 @@ class Provider {
 }
 
 export class UserDTO extends AuditDTO {
+  @ApiProperty({ type: String })
   username: string;
 
   password?: string;
 
+  @ApiProperty({ type: String })
   email: string;
 
+  @ApiPropertyOptional({ type: String })
   phone?: string;
 
+  @ApiPropertyOptional({ type: String })
   avatar?: string;
 
+  @ApiPropertyOptional({ type: ProfileDTO })
   profile?: ProfileDTO;
 
+  @ApiPropertyOptional({ type: String })
   displayName?: string;
 
   externalProvider?: Provider;
 
+  @ApiResponseProperty({type: Boolean})
   emailVerified: boolean;
 
   constructor(user?: Partial<UserDTO>) {

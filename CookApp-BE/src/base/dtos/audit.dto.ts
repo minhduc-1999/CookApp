@@ -1,16 +1,23 @@
+import { ApiResponseProperty } from "@nestjs/swagger";
 import _ = require("lodash");
 
 export class AuditDTO {
+  @ApiResponseProperty({type: String})
   id: string;
 
+  @ApiResponseProperty({type: Number})
   createdAt: number;
 
+  @ApiResponseProperty({type: Number})
   updatedAt: number;
 
+  @ApiResponseProperty({type: String})
   updatedBy: string;
 
+  @ApiResponseProperty({type: Number})
   deletedAt?: number;
 
+  @ApiResponseProperty({type: String})
   deletedBy?: string;
 
   constructor(audit: Partial<AuditDTO>) {

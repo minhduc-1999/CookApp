@@ -1,17 +1,24 @@
+import { ApiResponseProperty } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
 import { UserDTO } from "./user.dto";
 
 export class CommentDTO extends AuditDTO {
+  @ApiResponseProperty({ type: UserDTO })
   user: UserDTO;
 
+  @ApiResponseProperty({ type: String })
   postId: string;
 
+  @ApiResponseProperty({ type: String })
   content: string;
 
+  @ApiResponseProperty({ type: [CommentDTO] })
   replies?: CommentDTO[];
 
+  @ApiResponseProperty({ type: String })
   path: string;
 
+  @ApiResponseProperty({ type: Number })
   numberOfReply: number
 
   constructor(comment?: Partial<CommentDTO>) {
