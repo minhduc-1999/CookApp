@@ -5,7 +5,6 @@ import { UserDTO } from "dtos/social/user.dto";
 import { IPostService } from "modules/user/services/post.service";
 import { ReactPostRequest } from "./reactPostRequest";
 import { BaseCommand } from "base/cqrs/command.base";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { ReactPostResponse } from "./reactPostResponse";
 import { ReactionDTO } from "dtos/social/reaction.dto";
 import { ReactPostEvent } from "modules/notification/usecases/ReactNotification";
@@ -31,12 +30,10 @@ export class ReactPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
     private _eventBus: EventBus
-  ) {}
+  ) { }
   async execute(command: ReactPostCommand): Promise<ReactPostResponse> {
-    const { user, reactReq } = command;
+    const { user, reactReq, tx } = command;
     const post = await this._postService.getPostDetail(reactReq.postId);
 
     const reactDto = new ReactionDTO({
@@ -51,22 +48,20 @@ export class ReactPostCommandHandler
     );
     if (react && react.type === reactReq.react) {
       tasks.push(
-        this._postRepo.deleteReact(user.id, reactReq.postId),
-        this._feedRepo.updateNumReaction(reactReq.postId, -1)
+        this._postRepo.setTransaction(tx).deleteReact(user.id, reactReq.postId),
       );
       reacted = false;
     } else {
       tasks.push(
-        this._postRepo.reactPost(reactDto, reactReq.postId),
-        this._feedRepo.updateNumReaction(reactReq.postId, 1)
+        this._postRepo.setTransaction(tx).reactPost(reactDto, reactReq.postId),
       );
       reacted = true;
     }
 
     return await Promise.all(tasks).then(() => {
-      if (reacted) {
-        this._eventBus.publish(new ReactPostEvent(post, user));
-      }
+      // if (reacted) {
+      //   this._eventBus.publish(new ReactPostEvent(post, user));
+      // }
       return new ReactPostResponse(reacted);
     });
   }

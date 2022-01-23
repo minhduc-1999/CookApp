@@ -14,10 +14,10 @@ import { NewPostEvent } from "modules/notification/usecases/NewPostNotification"
 import { Transaction } from "neo4j-driver";
 
 export class CreatePostCommand extends BaseCommand {
-  postDto: CreatePostRequest;
+  post: CreatePostRequest;
   constructor(user: UserDTO, post: CreatePostRequest, tx: Transaction) {
     super(tx, user);
-    this.postDto = post;
+    this.post = post;
   }
 }
 
@@ -30,44 +30,31 @@ export class CreatePostCommandHandler
     private _postRepo: IPostRepository,
     @Inject("IStorageService")
     private _storageService: IStorageService,
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
     private _eventBus: EventBus
   ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
-    const { postDto, user } = command;
+    const { post, user, tx } = command;
 
-    if (postDto.images?.length > 0) {
-      postDto.images = await this._storageService.makePublic(
-        postDto.images,
+    if (post.images?.length > 0) {
+      post.images = await this._storageService.makePublic(
+        post.images,
         MediaType.POST_IMAGES
       );
     }
-    const tasks = [];
     const creatingPost = new PostDTO({
-      ...postDto,
+      ...post,
       author: user,
     });
-    const result = await this._postRepo.createPost(creatingPost);
-
-    // tasks.push(
-    //   this._feedRepo.pushNewPost(result, user.id),
-    //   this._wallRepo.pushNewPost(result, user)
-    // );
+    const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
 
     // push posts to followers
-    const followers = await this._wallRepo.getFollowers(user.id);
-    followers.forEach(async (follower) => {
-      tasks.push(this._feedRepo.pushNewPost(result, follower));
-    });
-
-    // waiting for all tasks
-    await Promise.all(tasks);
+    // const followers = await this._wallRepo.getFollowers(user.id);
+    // followers.forEach(async (follower) => {
+    //   tasks.push(this._feedRepo.pushNewPost(result, follower));
+    // });
 
     result.images = await this._storageService.getDownloadUrls(result.images);
-    this._eventBus.publish(new NewPostEvent(result, user))
+    // this._eventBus.publish(new NewPostEvent(result, user))
     return result;
   }
 }

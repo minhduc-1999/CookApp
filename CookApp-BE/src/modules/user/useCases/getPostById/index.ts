@@ -31,20 +31,20 @@ export class GetPostDetailQueryHandler
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
     const post = await this._postService.getPostDetail(query.postId);
     post.images = await this._storageService.getDownloadUrls(post.images);
-    if (post.author.avatar && isImageKey(post.author.avatar)) {
+    if (post.author?.avatar && isImageKey(post.author.avatar)) {
       post.author.avatar = (
         await this._storageService.getDownloadUrls([post.author.avatar])
       )[0];
     }
     const result = new GetPostResponse(post);
 
-    const reaction = await this._postRepo.getReactionByUserId(
-      query.user.id,
-      post.id
-    );
-    if (reaction) {
-      result.reaction = reaction.type;
-    }
+    // const reaction = await this._postRepo.getReactionByUserId(
+    //   query.user.id,
+    //   post.id
+    // );
+    // if (reaction) {
+    //   result.reaction = reaction.type;
+    // }
     return result;
   }
 }

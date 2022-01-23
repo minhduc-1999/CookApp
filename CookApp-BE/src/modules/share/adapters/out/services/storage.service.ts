@@ -109,7 +109,7 @@ export class FireBaseService implements IStorageService {
           newFile
             .move(basePath + getNameFromPath(newObj))
             .then((movedFile) => {
-              movedFile[0].makePublic().catch((err) => this.logger.error(err));
+              movedFile[0].makePublic().catch((err: Error) => this.logger.error(err));
               return movedFile[0].name;
             })
             .catch((err) => {
@@ -127,6 +127,7 @@ export class FireBaseService implements IStorageService {
   }
 
   async getDownloadUrls(objectNames: string[]): Promise<string[]> {
+    if (!objectNames) return []
     return objectNames.map(
       (objName) => this._configService.get("storage.publicUrl") + objName
     );

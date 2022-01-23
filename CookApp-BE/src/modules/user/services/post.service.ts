@@ -34,11 +34,11 @@ export class PostService implements IPostService {
         ResponseDTO.fail("Post not found", ErrorCode.INVALID_ID)
       );
 
-    if (option?.attachAuthor) {
-      post.author = await this._userService.getUserPublicInfo(post.author.id);
-    } else {
-      delete post.author;
-    }
+    // if (option?.attachAuthor) {
+    //   post.author = await this._userService.getUserPublicInfo(post.author.id);
+    // } else {
+    //   delete post.author;
+    // }
 
     return post;
   }

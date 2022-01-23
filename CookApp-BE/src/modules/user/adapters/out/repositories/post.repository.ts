@@ -13,13 +13,10 @@ export interface IPostRepository {
   getPostById(postId: string): Promise<PostDTO>;
   getPostByIds(postId: string[]): Promise<PostDTO[]>;
   updatePost(post: Partial<PostDTO>): Promise<PostDTO>;
-  reactPost(react: ReactionDTO, userId: string): Promise<boolean>;
+  reactPost(react: ReactionDTO, postID: string): Promise<boolean>;
   deleteReact(userId: string, postId: string): Promise<boolean>;
   getReactionByUserId(userId: string, postId: string): Promise<ReactionDTO>;
   setTransaction(tx: Transaction): IPostRepository
-  updateNumComment(postId: string, delta: number): Promise<void>;
-  deleteImages(postId: string, changedImages: string[]): Promise<PostDTO>;
-  pushImages(postId: string, changedImages: string[]): Promise<PostDTO>;
 }
 
 @Injectable()
@@ -33,29 +30,6 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       id: { $in: postId },
     });
     return plainToClass(PostDTO, posts, { excludeExtraneousValues: true });
-  }
-  async pushImages(postId: string, changedImages: string[]): Promise<PostDTO> {
-    const updatedPost = await this._postModel.findOneAndUpdate(
-      { _id: postId },
-      { $push: { images: changedImages } },
-      { new: true }
-    );
-    return plainToClass(PostDTO, updatedPost, {
-      excludeExtraneousValues: true,
-    });
-  }
-  async deleteImages(
-    postId: string,
-    changedImages: string[]
-  ): Promise<PostDTO> {
-    const updatedPost = await this._postModel.findOneAndUpdate(
-      { _id: postId },
-      { $pullAll: { images: changedImages } },
-      { new: true }
-    );
-    return plainToClass(PostDTO, updatedPost, {
-      excludeExtraneousValues: true,
-    });
   }
   async updateNumComment(postId: string, delta: number): Promise<void> {
     await this._postModel.updateOne(

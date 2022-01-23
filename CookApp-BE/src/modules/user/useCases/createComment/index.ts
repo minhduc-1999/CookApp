@@ -57,8 +57,8 @@ export class CreateCommentCommandHandler
       .setTransaction(tx)
       .createComment(comment);
     return await Promise.all([
-      this._feedRepo.updateNumComment(commentDto.postId, 1),
-      this._postRepo.updateNumComment(commentDto.postId, 1),
+      // this._feedRepo.updateNumComment(commentDto.postId, 1),
+      // this._postRepo.updateNumComment(commentDto.postId, 1),
     ]).then(() => {
       this._eventBus.publish(new CommentPostEvent(post, user));
       return createdComment;
