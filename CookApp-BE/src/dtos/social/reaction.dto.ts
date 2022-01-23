@@ -7,7 +7,7 @@ export class ReactionDTO extends AuditDTO {
   userID: string;
 
   constructor(reaction?: Partial<ReactionDTO>) {
-    super()
+    super(reaction)
     this.type = reaction?.type
     this.userID = reaction?.userID
   }

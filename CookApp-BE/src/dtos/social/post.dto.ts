@@ -18,7 +18,7 @@ export class PostDTO extends AuditDTO {
   numOfComment: number;
 
   constructor(post: Partial<PostDTO>) {
-    super()
+    super(post)
     this.content = post?.content
     this.images = post?.images
     this.videos = post?.videos

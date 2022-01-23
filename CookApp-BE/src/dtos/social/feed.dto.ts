@@ -10,7 +10,7 @@ export class FeedDTO extends AuditDTO {
   numberOfPost: number;
 
   constructor(feed: Partial<FeedDTO>) {
-    super()
+    super(feed)
     this.user = feed?.user
     this.posts = feed?.posts
     this.numberOfPost = feed?.numberOfPost

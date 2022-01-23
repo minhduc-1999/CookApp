@@ -15,7 +15,7 @@ export class CommentDTO extends AuditDTO {
   numberOfReply: number
 
   constructor(comment?: Partial<CommentDTO>) {
-    super()
+    super(comment)
     this.user = comment?.user
     this.postId = comment?.postId
     this.content = comment?.content

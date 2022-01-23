@@ -1,10 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { plainToClass } from "class-transformer";
+import { UserEntity } from "domains/entities/social/user.entity";
 import { UserDTO } from "dtos/social/user.dto";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
-import { IUserRepository } from "./user.repository";
+import { IUserRepository } from "../repositories/user.repository";
 
 @Injectable()
 export class UserRepository extends BaseRepository implements IUserRepository {
@@ -18,17 +18,16 @@ export class UserRepository extends BaseRepository implements IUserRepository {
             CREATE (u:User)
             SET u += $properties, u.id = randomUUID()
             RETURN u
- 
       `,
       this.tx,
       {
         properties: {
-          ...userData
+          ...(UserEntity.fromDomain(userData))
         }
       })
     if (res.records.length === 0)
       return null
-    return plainToClass(UserDTO, res.records[0].get('u').properties);
+    return UserEntity.toDomain(res.records[0].get("u"))
   }
   async getUserByEmail(email: string): Promise<UserDTO> {
     const res = await this.neo4jService.read(
@@ -39,7 +38,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     )
     if (res.records.length === 0)
       return null
-    return plainToClass(UserDTO, res.records[0].get('u').properties);
+    return UserEntity.toDomain(res.records[0].get("u"))
   }
 
   async getUserByUsername(username: string): Promise<UserDTO> {
@@ -51,7 +50,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     )
     if (res.records.length === 0)
       return null
-    return plainToClass(UserDTO, res.records[0].get('u').properties);
+    return UserEntity.toDomain(res.records[0].get("u"))
   }
 
   async getUserById(id: string): Promise<UserDTO> {
@@ -63,11 +62,10 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     )
     if (res.records.length === 0)
       return null
-    return plainToClass(UserDTO, res.records[0].get('u').properties);
+    return UserEntity.toDomain(res.records[0].get("u"))
   }
 
   async updateUserProfile(userID: string, profile: Partial<UserDTO>): Promise<UserDTO> {
-    console.log(profile)
     const res = await this.neo4jService.write(`
             MATCH (u:User{id: $userID})
             SET u += $newUpdate
@@ -78,14 +76,13 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       {
         userID,
         newUpdate: {
-          ...profile
+          ...(UserEntity.fromDomain(profile))
         }
       },
     )
     if (res.records.length === 0)
       return null
-    console.log(res.records[0].get('u'))
-    return plainToClass(UserDTO, res.records[0].get('u').properties);
+    return UserEntity.toDomain(res.records[0].get("u"))
   }
   getUsers(query: PageOptionsDto): Promise<UserDTO[]> {
     throw new Error("Method not implemented.");

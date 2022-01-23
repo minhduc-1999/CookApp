@@ -20,9 +20,10 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
     private _userService: IUserService,
     @Inject("IStorageService")
     private _storageService: IStorageService
-  ) {}
+  ) { }
   async execute(query: GetProfileQuery): Promise<GetProfileResponse> {
     const user = await this._userService.getUserById(query.user.id);
+
     if (user.avatar && isImageKey(user.avatar)) {
       user.avatar = (
         await this._storageService.getDownloadUrls([user.avatar])

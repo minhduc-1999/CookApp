@@ -27,7 +27,7 @@ export class UserDTO extends AuditDTO {
   emailVerified: boolean;
 
   constructor(user?: Partial<UserDTO>) {
-    super()
+    super(user)
     this.username = user?.username
     this.email = user?.email 
     this.phone = user?.phone

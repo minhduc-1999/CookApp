@@ -13,8 +13,13 @@ export class AuditDTO {
 
   deletedBy?: string;
 
-  constructor() {
-    this.createdAt = _.now()
+  constructor(audit: Partial<AuditDTO>) {
+    this.createdAt = audit.createdAt ?? _.now()
+    this.id = audit.id
+    this.updatedAt = audit.updatedAt
+    this.updatedBy = audit.updatedBy
+    this.deletedAt = audit.deletedAt
+    this.deletedBy = audit.deletedBy
   }
 
   update(userId: string) {
