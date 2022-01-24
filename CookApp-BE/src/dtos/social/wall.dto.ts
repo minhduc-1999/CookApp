@@ -1,9 +1,8 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
-import { AuditDTO } from "base/dtos/audit.dto";
 import { PostDTO } from "./post.dto";
 import { UserDTO } from "./user.dto";
 
-export class WallDTO extends AuditDTO {
+export class WallDTO {
   @ApiResponseProperty({ type: UserDTO })
   user: UserDTO;
 
@@ -19,9 +18,10 @@ export class WallDTO extends AuditDTO {
   @ApiResponseProperty({ type: Number })
   numberOfPost: number;
 
-  @ApiResponseProperty({ type: [String] })
-  followers: string[];
-
-  @ApiResponseProperty({ type: [String] })
-  following: string[];
+  constructor(wall: Partial<WallDTO>){
+    this.user = wall.user
+    this.numberOfPost = wall.numberOfPost
+    this.numberOfFollower = wall.numberOfFollower
+    this.numberOfFollowing = wall.numberOfFollowing
+  }
 }

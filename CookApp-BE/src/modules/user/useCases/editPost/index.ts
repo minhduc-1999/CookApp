@@ -9,8 +9,6 @@ import { createUpdatingObject } from "utils";
 import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { Transaction } from "neo4j-driver";
 export class EditPostCommand extends BaseCommand {
   postDto: EditPostRequest;
@@ -28,10 +26,6 @@ export class EditPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
   ) {}
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
     const { user, postDto } = command;
@@ -71,8 +65,8 @@ export class EditPostCommandHandler
     const updatePost = createUpdatingObject({ ...postDto }, user.id);
     const updatedResult = await this._postRepo.updatePost(updatePost);
     await Promise.all([
-      this._wallRepo.updatePostInWall(updatedResult, user),
-      this._feedRepo.updatePostInFeed(updatedResult, user),
+      // this._wallRepo.updatePostInWall(updatedResult, user),
+      // this._feedRepo.updatePostInFeed(updatedResult, user),
     ]);
     return updatedResult;
   }

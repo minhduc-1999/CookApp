@@ -5,7 +5,6 @@ import { MongooseModule } from "@nestjs/mongoose";
 import { FeedModel } from "domains/schemas/social/feed.schema";
 import { PostModel } from "domains/schemas/social/post.schema";
 import { UserModel } from "domains/schemas/social/user.schema";
-import { WallModel } from "domains/schemas/social/wall.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { AuthModule } from "modules/auth/auth.module";
@@ -18,8 +17,8 @@ import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/neo4j-repositories/comment.repository";
 import { PostRepository } from "./adapters/out/neo4j-repositories/post.repository";
+import { WallRepository } from "./adapters/out/neo4j-repositories/wall.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
-import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
@@ -87,7 +86,6 @@ const repositories = [
     MongooseModule.forFeature([
       UserModel,
       PostModel,
-      WallModel,
       FeedModel,
     ]),
     CqrsModule,

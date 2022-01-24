@@ -1,4 +1,3 @@
-
 import { CommentDTO } from 'dtos/social/comment.dto';
 import { UserDTO } from 'dtos/social/user.dto';
 import { Node } from 'neo4j-driver'
@@ -12,7 +11,7 @@ export class CommentEntity {
       ...audit,
       content: properties.content,
       user : new UserDTO({
-        id: properties.authorID
+        id: properties.id
       }),
       numberOfReply: numReply ?? 0
     })

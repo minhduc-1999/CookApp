@@ -6,7 +6,6 @@ import { JwtModule } from "@nestjs/jwt";
 import { MongooseModule } from "@nestjs/mongoose";
 import { FeedModel } from "domains/schemas/social/feed.schema";
 import { UserModel } from "domains/schemas/social/user.schema";
-import { WallModel } from "domains/schemas/social/wall.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { EmailVerificationGuard } from "guards/email_verification.guard";
@@ -16,8 +15,6 @@ import { ConfigModule, ConfigService } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { UserRepository } from "./adapters/out/neo4j-repositories/user.repository";
-import { FeedRepository } from "./adapters/out/repositories/feed.repository";
-import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
@@ -55,7 +52,7 @@ const globalGuards = [
   imports: [
     ConfigModule,
     HttpModule,
-    MongooseModule.forFeature([UserModel, WallModel, FeedModel]),
+    MongooseModule.forFeature([UserModel, FeedModel]),
     JwtModule.registerAsync({
       useFactory: async (config: ConfigService) => ({
         secret: config.get("auth.jwtPrivateKey"),
@@ -84,14 +81,6 @@ const globalGuards = [
       provide: "IAuthentication",
       useClass: AuthenticationService,
     },
-    {
-      provide: "IWallRepository",
-      useClass: WallRepository,
-    },
-    {
-      provide: "IFeedRepository",
-      useClass: FeedRepository,
-    },
     BasicAuthStrategy,
     JwtStrategy,
     ...handlers,
@@ -99,4 +88,4 @@ const globalGuards = [
   ],
   exports: ["IUserService"],
 })
-export class AuthModule {}
+export class AuthModule { }
