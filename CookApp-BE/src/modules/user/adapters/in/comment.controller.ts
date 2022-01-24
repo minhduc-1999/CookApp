@@ -58,7 +58,6 @@ export class CommentController {
     @User() user: UserDTO,
     @Param("postId", ParseObjectIdPipe) postId: string
   ): Promise<Result<GetPostCommentsResponse>> {
-    if (!query.parent) query.parent = postId;
     const getCommentsQuery = new GetPostCommentsQuery(user, postId, query);
     const result = await this._queryBus.execute(getCommentsQuery);
     return Result.ok(result, {

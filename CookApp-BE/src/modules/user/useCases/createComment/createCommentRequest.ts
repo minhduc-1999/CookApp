@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsMongoId, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 
 export class CreateCommentRequest {
     postId: string;
@@ -9,7 +9,7 @@ export class CreateCommentRequest {
     @ApiProperty({type: String})
     content: string;
 
-    @IsMongoId()
+    @IsUUID()
     @IsOptional()
     @ApiPropertyOptional({type: String})
     parentId: string;

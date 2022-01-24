@@ -2,7 +2,6 @@ import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { MongooseModule } from "@nestjs/mongoose";
-import { CommentModel } from "domains/schemas/social/comment.schema";
 import { FeedModel } from "domains/schemas/social/feed.schema";
 import { PostModel } from "domains/schemas/social/post.schema";
 import { UserModel } from "domains/schemas/social/user.schema";
@@ -17,8 +16,8 @@ import { FeedController } from "./adapters/in/feed.controller";
 import { PostController } from "./adapters/in/post.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
+import { CommentRepository } from "./adapters/out/neo4j-repositories/comment.repository";
 import { PostRepository } from "./adapters/out/neo4j-repositories/post.repository";
-import { CommentRepository } from "./adapters/out/repositories/comment.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { CommentService } from "./services/comment.service";
@@ -90,7 +89,6 @@ const repositories = [
       PostModel,
       WallModel,
       FeedModel,
-      CommentModel,
     ]),
     CqrsModule,
     ShareModule.register({
