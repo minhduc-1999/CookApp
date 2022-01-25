@@ -10,21 +10,20 @@ import {
 import { Public } from "decorators/public.decorator";
 import { RegisterCommand } from "modules/auth/useCases/register";
 import { Result } from "base/result.base";
-import { BasicAuthGuard } from "guards/basic_auth.guard";
 import { LoginCommand } from "modules/auth/useCases/login";
 import {
   ApiFailResponseCustom,
   ApiCreatedResponseCustom,
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
-} from "../../../../decorators/ApiSuccessResponse.decorator";
+} from "../../../../decorators/apiSuccessResponse.decorator";
 import { LoginRequest } from "modules/auth/useCases/login/loginRequest";
 import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
 import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
-import { User } from "decorators/user.decorator";
+import { UserReq } from "decorators/user.decorator";
 import { GoogleSignInRequest } from "modules/auth/useCases/loginWithGoogle/googleSignInRequest";
 import { GoogleSignInCommand } from "modules/auth/useCases/loginWithGoogle";
 import { GoogleSignInResponse } from "modules/auth/useCases/loginWithGoogle/googleSignInResponse";
@@ -32,8 +31,9 @@ import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmai
 import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
 import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
 import { ResendEmailVerificationCommand } from "modules/auth/useCases/resendEmailVerification";
-import { NotRequireEmailVerification } from "decorators/not_require_email_verification.decorator";
 import { Transaction } from "neo4j-driver";
+import { NotRequireEmailVerification } from "decorators/notRequireEmailVerification.decorator";
+import { BasicAuthGuard } from "guards/basicAuth.guard";
 
 @Controller()
 @ApiTags("Authentication")
@@ -52,7 +52,7 @@ export class AuthController {
     @ParamTransaction() tx: Transaction
   ): Promise<Result<RegisterResponse>> {
     const registerCommand = new RegisterCommand(body, tx);
-    const user = (await this._commandBus.execute(registerCommand)) as UserDTO;
+    const user = (await this._commandBus.execute(registerCommand)) as User;
     return Result.ok(
       { id: user.id, username: user.username },
       { messages: ["Register successfully"] }
@@ -69,7 +69,7 @@ export class AuthController {
   @ApiOKResponseCustom(LoginResponse, "Login successfully")
   @Public()
   @NotRequireEmailVerification()
-  async login(@User() user: UserDTO): Promise<Result<LoginResponse>> {
+  async login(@UserReq() user: User): Promise<Result<LoginResponse>> {
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
     return Result.ok(result, { messages: ["Login successfully"] });
@@ -110,7 +110,7 @@ export class AuthController {
   @ApiOKResponseCustomWithoutData("Resend email verification successfully")
   async resendEmailVerificationCallback(
     @Body() body: ResendEmailVerificationRequest,
-    @User() user: UserDTO
+    @UserReq() user: User
   ): Promise<Result<void>> {
     let command = new ResendEmailVerificationCommand(body, user, null);
     await this._commandBus.execute(command);

@@ -3,8 +3,8 @@ import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
-import { Food, FoodDocument } from "domains/schemas/core/food.schema";
-import { FoodDTO } from "dtos/core/food.dto";
+import { Food, FoodDocument } from "schemas/core/food.schema";
+import { FoodDTO } from "domains/core/food.dto";
 import { Model } from "mongoose";
 import { Transaction } from "neo4j-driver";
 

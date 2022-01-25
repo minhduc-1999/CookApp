@@ -1,5 +1,5 @@
 import { Prop } from "@nestjs/mongoose";
-import { AuditDTO } from "base/dtos/audit.dto";
+import { Audit } from "domains/audit.domain";
 
 export abstract class AbstractSchema {
   id: string;
@@ -19,7 +19,7 @@ export abstract class AbstractSchema {
   @Prop({ schemaName: "deleted_by" })
   deletedBy: string;
 
-  constructor(audit: Partial<AuditDTO>) {
+  constructor(audit: Partial<Audit>) {
     this.updatedAt = audit?.updatedAt;
     this.createdAt = audit?.createdAt;
     this.updatedBy = audit?.updatedBy;

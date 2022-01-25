@@ -1,8 +1,8 @@
 import { ApiResponseProperty, PickType } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 
-class UserResponse extends PickType(UserDTO, ["id", "avatar", "displayName"]) { }
+class UserResponse extends PickType(User, ["id", "avatar", "displayName"]) { }
 
 export class GetUsersResponse {
   @ApiResponseProperty({ type: [UserResponse] })
@@ -11,7 +11,7 @@ export class GetUsersResponse {
   @ApiResponseProperty({ type: PageMetadata })
   metadata: PageMetadata;
 
-  constructor(users: UserDTO[], meta: PageMetadata) {
+  constructor(users: User[], meta: PageMetadata) {
     this.users = users.map(user => {
       return {
         id: user.id,

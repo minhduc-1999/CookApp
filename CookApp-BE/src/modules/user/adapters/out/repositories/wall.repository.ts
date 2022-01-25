@@ -1,10 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { PostEntity } from "domains/entities/social/post.entity";
-import { WallEntity } from "domains/entities/social/wall.entity";
-import { PostDTO } from "dtos/social/post.dto";
-import { WallDTO } from "dtos/social/wall.dto";
+import { PostEntity } from "entities/social/post.entity";
+import { WallEntity } from "entities/social/wall.entity";
+import { Post } from "domains/social/post.domain";
+import { Wall } from "domains/social/wall.domain";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 import { int } from "neo4j-driver";
@@ -17,7 +17,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     super()
   }
 
-  async getPosts(userID: string, query: PageOptionsDto): Promise<PostDTO[]> {
+  async getPosts(userID: string, query: PageOptionsDto): Promise<Post[]> {
     const res = await this.neo4jService.read(`
         MATCH (:User{id: $userID})-[:OWN]->(p:Post) 
         RETURN p
@@ -115,7 +115,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     return res.records[0].get("followingIds")
   }
 
-  async getWall(userID: string): Promise<WallDTO> {
+  async getWall(userID: string): Promise<Wall> {
     const res = await this.neo4jService.read(`
         MATCH (u:User{id: $userID})
         CALL {

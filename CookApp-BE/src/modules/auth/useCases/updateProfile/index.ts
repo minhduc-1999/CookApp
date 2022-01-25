@@ -1,7 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { MediaType } from "enums/mediaType.enum";
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
@@ -14,7 +14,7 @@ export class UpdateProfileCommand extends BaseCommand {
   updateProfileReq: UpdateProfileRequest;
   constructor(
     tx: Transaction,
-    user: UserDTO,
+    user: User,
     profile: UpdateProfileRequest
   ) {
     super(tx, user);

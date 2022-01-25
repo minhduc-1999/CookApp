@@ -1,5 +1,5 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { Sex } from "enums/sex.enum";
 
 class ProfileResponse {
@@ -32,7 +32,7 @@ export class GetProfileResponse {
   @ApiResponseProperty({ type: String })
   avatar: string
 
-  constructor(user: UserDTO) {
+  constructor(user: User) {
     this.displayName = user.displayName
     this.avatar = user.avatar
     this.profile = {

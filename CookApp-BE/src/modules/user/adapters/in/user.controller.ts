@@ -6,9 +6,9 @@ import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
-import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/social/user.dto";
+} from "decorators/apiSuccessResponse.decorator";
+import { UserReq } from "decorators/user.decorator";
+import { User } from "domains/social/user.domain";
 import { GetUsersQuery } from "modules/user/useCases/getUsers";
 import { GetUsersResponse } from "modules/user/useCases/getUsers/getUsersResponse";
 import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
@@ -24,7 +24,7 @@ export class UserController {
   @ApiOKResponseCustom(GetUsersResponse, "Get users successfully")
   async findUsers(
     @Query(ParsePaginationPipe) query: PageOptionsDto,
-    @User() user: UserDTO
+    @UserReq() user: User
   ): Promise<Result<GetUsersResponse>> {
     const queryOp = new GetUsersQuery(user, query);
     const result = await this._queryBus.execute(queryOp);

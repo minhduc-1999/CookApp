@@ -1,12 +1,12 @@
 import { ApiResponseProperty, PickType } from "@nestjs/swagger";
-import { PostDTO } from "dtos/social/post.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { Post } from "domains/social/post.domain";
+import { User } from "domains/social/user.domain";
 import { ReactionType } from "enums/reaction.enum";
 
-class Author extends PickType(UserDTO, ["id", "avatar", "displayName"]) { }
+class Author extends PickType(User, ["id", "avatar", "displayName"]) { }
 
 export class GetPostResponse {
-  constructor(post: PostDTO) {
+  constructor(post: Post) {
     this.id = post.id
     this.createdAt = post.createdAt
     this.updatedAt = post.updatedAt

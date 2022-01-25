@@ -1,13 +1,13 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-import { IsMeaningfulString } from "decorators/IsMeaningfulString.decorator";
+import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
 
 export class CreatePostRequest {
   @IsNotEmpty()
   @ApiProperty({ type: String })
   @IsString()
-  @IsMeaningfulString(2)
+  @IsMeaningfulString(1)
   content: string;
 
   @ApiPropertyOptional({ type: [String] })

@@ -1,11 +1,11 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IPostService } from "modules/user/services/post.service";
 import { ReactPostRequest } from "./reactPostRequest";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ReactPostResponse } from "./reactPostResponse";
-import { ReactionDTO } from "dtos/social/reaction.dto";
+import { Reaction } from "domains/social/reaction.domain";
 import { ReactPostEvent } from "modules/notification/usecases/ReactNotification";
 import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
@@ -14,7 +14,7 @@ export class ReactPostCommand extends BaseCommand {
   reactReq: ReactPostRequest;
   constructor(
     tx: Transaction,
-    user: UserDTO,
+    user: User,
     reactReq: ReactPostRequest
   ) {
     super(tx, user);
@@ -39,7 +39,7 @@ export class ReactPostCommandHandler
     const { user, reactReq, tx } = command;
     const post = await this._postService.getPostDetail(reactReq.postId);
 
-    const reactDto = new ReactionDTO({
+    const reactDto = new Reaction({
       type: reactReq.react,
       reactor: user,
       target: post

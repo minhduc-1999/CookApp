@@ -1,14 +1,14 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
+} from "decorators/apiSuccessResponse.decorator";
 import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
-import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/social/user.dto";
+import { UserReq } from "decorators/user.decorator";
+import { User } from "domains/social/user.domain";
 import { CreateCommentCommand } from "modules/user/useCases/createComment";
 import { CreateCommentRequest } from "modules/user/useCases/createComment/createCommentRequest";
 import { CreateCommentResponse } from "modules/user/useCases/createComment/createCommentResponse";
@@ -18,7 +18,6 @@ import {
 } from "modules/user/useCases/getPostComments";
 import { GetPostCommentsResponse } from "modules/user/useCases/getPostComments/getPostCommentsResponse";
 import { Transaction } from "neo4j-driver";
-import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
 import {
   ParseCommentPaginationPipe,
 } from "pipes/parsePagination.pipe";
@@ -34,9 +33,9 @@ export class CommentController {
   @ApiOKResponseCustom(CreateCommentResponse, "Create comment successfully")
   @RequestTransaction()
   async createComment(
-    @Param("postId", ParseObjectIdPipe) postId: string,
+    @Param("postId", ParseUUIDPipe) postId: string,
     @Body() body: CreateCommentRequest,
-    @User() user: UserDTO,
+    @UserReq() user: User,
     @ParamTransaction() tx: Transaction
   ): Promise<Result<CreateCommentResponse>> {
     body.postId = postId;
@@ -55,8 +54,8 @@ export class CommentController {
   )
   async getPostCommentsPosts(
     @Query(ParseCommentPaginationPipe) query: CommentPageOption,
-    @User() user: UserDTO,
-    @Param("postId", ParseObjectIdPipe) postId: string
+    @UserReq() user: User,
+    @Param("postId", ParseUUIDPipe) postId: string
   ): Promise<Result<GetPostCommentsResponse>> {
     const getCommentsQuery = new GetPostCommentsQuery(user, postId, query);
     const result = await this._queryBus.execute(getCommentsQuery);

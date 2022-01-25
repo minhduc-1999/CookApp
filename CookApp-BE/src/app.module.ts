@@ -13,7 +13,7 @@ import * as path from "path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import "./boilerplate.polyfill";
-import { TraceIdInterceptor } from "./interceptors/trace-id-interceptor.service";
+import { TraceIdInterceptor } from "./interceptors/traceId.interceptor";
 import { contextMiddleware } from "./middleware/context.middleware";
 import { Neo4jModule } from './modules/neo4j/neo4j.module';
 
@@ -51,10 +51,6 @@ import { Neo4jModule } from './modules/neo4j/neo4j.module';
       provide: APP_INTERCEPTOR,
       useClass: TraceIdInterceptor,
     },
-    // {
-    //   provide: APP_INTERCEPTOR,
-    //   useClass: TransactionInterceptor,
-    // },
   ],
 })
 export class AppModule implements NestModule {

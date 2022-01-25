@@ -2,8 +2,8 @@ import { Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { PostDTO } from "dtos/social/post.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { Post } from "domains/social/post.domain";
+import { User } from "domains/social/user.domain";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
@@ -13,7 +13,7 @@ import { IPostRepository } from "modules/user/interfaces/repositories/post.inter
 
 export class CreatePostCommand extends BaseCommand {
   post: CreatePostRequest;
-  constructor(user: UserDTO, post: CreatePostRequest, tx: Transaction) {
+  constructor(user: User, post: CreatePostRequest, tx: Transaction) {
     super(tx, user);
     this.post = post;
   }
@@ -39,7 +39,7 @@ export class CreatePostCommandHandler
         MediaType.POST_IMAGES
       );
     }
-    const creatingPost = new PostDTO({
+    const creatingPost = new Post({
       ...post,
       author: user,
     });

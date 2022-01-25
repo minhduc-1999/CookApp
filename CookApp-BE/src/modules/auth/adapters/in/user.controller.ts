@@ -6,10 +6,10 @@ import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
-} from "decorators/ApiSuccessResponse.decorator";
+} from "decorators/apiSuccessResponse.decorator";
 import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
-import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/social/user.dto";
+import { UserReq } from "decorators/user.decorator";
+import { User } from "domains/social/user.domain";
 import { GetProfileQuery } from "modules/auth/useCases/getProfile";
 import { GetProfileResponse } from "modules/auth/useCases/getProfile/getProfileResponse";
 import { UpdateProfileCommand } from "modules/auth/useCases/updateProfile";
@@ -25,7 +25,7 @@ export class UserController {
   @Get("profile")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetProfileResponse, "Getting profile successfully")
-  async getProfile(@User() user: UserDTO): Promise<Result<GetProfileResponse>> {
+  async getProfile(@UserReq() user: User): Promise<Result<GetProfileResponse>> {
     const query = new GetProfileQuery(user);
     const result = await this._queryBus.execute(query);
     return Result.ok(result, { messages: ["Getting profile successfully"] });
@@ -37,7 +37,7 @@ export class UserController {
   @ApiOKResponseCustomWithoutData("Updating profile successfully")
   @RequestTransaction()
   async updateProfile(
-    @User() user: UserDTO,
+    @UserReq() user: User,
     @Body() body: UpdateProfileRequest,
     @ParamTransaction() tx: Transaction 
   ): Promise<Result<void>> {

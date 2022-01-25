@@ -2,7 +2,7 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { PassportStrategy } from "@nestjs/passport";
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import AuthConfig from "../../../config/auth";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { JwtAuthTokenPayload } from "base/jwtPayload";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
@@ -22,7 +22,7 @@ export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {
     });
   }
 
-  async validate(payload: JwtAuthTokenPayload): Promise<UserDTO> {
+  async validate(payload: JwtAuthTokenPayload): Promise<User> {
     const user = await this._userRepo.getUserById(payload.sub);
     if (user.avatar && isImageKey(user.avatar)) {
       user.avatar = (

@@ -1,9 +1,9 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { PostEntity } from "domains/entities/social/post.entity";
-import { PostDTO } from "dtos/social/post.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { PostEntity } from "entities/social/post.entity";
+import { Post } from "domains/social/post.domain";
+import { User } from "domains/social/user.domain";
 import { parseInt } from "lodash";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
@@ -17,7 +17,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
     private neo4jService: INeo4jService) {
     super()
   }
-  async pushNewPost(post: PostDTO, followerIDs: string[]): Promise<void> {
+  async pushNewPost(post: Post, followerIDs: string[]): Promise<void> {
     this.neo4jService.write(`
         MATCH (u:User) WHERE u.id IN $followerIDs
         MATCH (p:Post{id: $postID})
@@ -30,7 +30,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       })
   }
 
-  async getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]> {
+  async getPosts(user: User, query: PageOptionsDto): Promise<Post[]> {
     const res = await this.neo4jService.read(`
         MATCH (u:User{id: $userID})-[:SEE|OWN]->(p:Post)
         WITH p
@@ -70,7 +70,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
     })
   }
 
-  async getTotalPosts(user: UserDTO): Promise<number> {
+  async getTotalPosts(user: User): Promise<number> {
     const res = await this.neo4jService.read(`
         MATCH (:User{id: $userID})-[r:OWN|SEE]->(:Post) RETURN count(r) AS totalPost
       `,

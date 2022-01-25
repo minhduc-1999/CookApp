@@ -1,15 +1,15 @@
-import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
 import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
+} from "decorators/apiSuccessResponse.decorator";
 import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
-import { User } from "decorators/user.decorator";
-import { PostDTO } from "dtos/social/post.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { UserReq } from "decorators/user.decorator";
+import { Post } from "domains/social/post.domain";
+import { User } from "domains/social/user.domain";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
 import { CreatePostRequest } from "modules/user/useCases/createPost/createPostRequest";
 import { CreatePostResponse } from "modules/user/useCases/createPost/createPostResponse";
@@ -22,7 +22,6 @@ import { ReactPostCommand } from "modules/user/useCases/reactPost";
 import { ReactPostRequest } from "modules/user/useCases/reactPost/reactPostRequest";
 import { ReactPostResponse } from "modules/user/useCases/reactPost/reactPostResponse";
 import { Transaction } from "neo4j-driver";
-import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
 
 @Controller("users/posts")
 @ApiTags("User/Post")
@@ -30,15 +29,15 @@ import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
 export class PostController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
 
-  @Post()
+  @PostHttp()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
   @RequestTransaction()
   async createPost(
     @Body() post: CreatePostRequest,
-    @User() user: UserDTO,
+    @UserReq() user: User,
     @ParamTransaction() tx: Transaction
-  ): Promise<Result<PostDTO>> {
+  ): Promise<Result<Post>> {
     const createPostCommand = new CreatePostCommand(user, post, tx);
     const createdPost = await this._commandBus.execute(createPostCommand);
     return Result.ok(createdPost, { messages: ["Create post successfully"] });
@@ -49,8 +48,8 @@ export class PostController {
   @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
   async getPostById(
-    @Param("postId", ParseObjectIdPipe) postId: string,
-    @User() user: UserDTO
+    @Param("postId", ParseUUIDPipe) postId: string,
+    @UserReq() user: User
   ): Promise<Result<GetPostResponse>> {
     const query = new GetPostDetailQuery(user, postId);
     const post = await this._queryBus.execute(query);
@@ -63,8 +62,8 @@ export class PostController {
   @RequestTransaction()
   async editPost(
     @Body() post: EditPostRequest,
-    @User() user: UserDTO,
-    @Param("postId", ParseObjectIdPipe) postId: string,
+    @UserReq() user: User,
+    @Param("postId", ParseUUIDPipe) postId: string,
     @ParamTransaction() tx: Transaction
   ): Promise<Result<EditPostResponse>> {
     post.id = postId;
@@ -73,14 +72,14 @@ export class PostController {
     return Result.ok(updatedPost, { messages: ["Edit post successfully"] });
   }
 
-  @Post(":postId/react")
+  @PostHttp(":postId/react")
   @RequestTransaction()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(ReactPostResponse, "Update react status successfully")
   async reactPost(
-    @User() user: UserDTO,
+    @UserReq() user: User,
     @Body() body: ReactPostRequest,
-    @Param("postId", ParseObjectIdPipe) postId: string,
+    @Param("postId", ParseUUIDPipe) postId: string,
     @ParamTransaction() tx: Transaction
   ): Promise<Result<ReactPostResponse>> {
     body.postId = postId;

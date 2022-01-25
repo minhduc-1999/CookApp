@@ -5,8 +5,8 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { IsOptional, IsUUID } from "class-validator";
-import { CommentDTO } from "dtos/social/comment.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { Comment } from "domains/social/comment.domain";
+import { User } from "domains/social/user.domain";
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
@@ -24,7 +24,7 @@ export class CommentPageOption extends PageOptionsDto {
 export class GetPostCommentsQuery extends BaseQuery {
   queryOptions: CommentPageOption;
   postId: string;
-  constructor(user: UserDTO, postId: string, queryOptions?: CommentPageOption) {
+  constructor(user: User, postId: string, queryOptions?: CommentPageOption) {
     super(user);
     this.queryOptions = queryOptions;
     this.postId = postId;
@@ -47,7 +47,7 @@ export class GetPostCommentsQueryHandler
     const { queryOptions, postId } = query;
     await this._postService.getPostDetail(postId);
 
-    let comments: CommentDTO[] = []
+    let comments: Comment[] = []
     let totalCount: number = 0
 
     if (queryOptions.parent) {

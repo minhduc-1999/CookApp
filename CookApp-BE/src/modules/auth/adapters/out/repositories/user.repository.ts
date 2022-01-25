@@ -1,8 +1,8 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { UserEntity } from "domains/entities/social/user.entity";
-import { UserDTO } from "dtos/social/user.dto";
+import { UserEntity } from "entities/social/user.entity";
+import { User } from "domains/social/user.domain";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { int } from "neo4j-driver";
@@ -14,7 +14,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     private neo4jService: INeo4jService) {
     super()
   }
-  async createUser(userData: UserDTO): Promise<UserDTO> {
+  async createUser(userData: User): Promise<User> {
     const res = await this.neo4jService.write(`
             CREATE (u:User)
             SET u += $properties, u.id = randomUUID()
@@ -30,7 +30,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       return null
     return UserEntity.toDomain(res.records[0].get("u"))
   }
-  async getUserByEmail(email: string): Promise<UserDTO> {
+  async getUserByEmail(email: string): Promise<User> {
     const res = await this.neo4jService.read(
       `MATCH (u:User{email: $email}) RETURN u LIMIT 1`,
       {
@@ -42,7 +42,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     return UserEntity.toDomain(res.records[0].get("u"))
   }
 
-  async getUserByUsername(username: string): Promise<UserDTO> {
+  async getUserByUsername(username: string): Promise<User> {
     const res = await this.neo4jService.read(
       `MATCH (u:User{username: $username}) RETURN u LIMIT 1`,
       {
@@ -54,7 +54,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     return UserEntity.toDomain(res.records[0].get("u"))
   }
 
-  async getUserById(id: string): Promise<UserDTO> {
+  async getUserById(id: string): Promise<User> {
     const res = await this.neo4jService.read(
       `MATCH (u:User{id: $id}) RETURN u LIMIT 1`,
       {
@@ -66,7 +66,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     return UserEntity.toDomain(res.records[0].get("u"))
   }
 
-  async updateUserProfile(userID: string, profile: Partial<UserDTO>): Promise<UserDTO> {
+  async updateUserProfile(userID: string, profile: Partial<User>): Promise<User> {
     const res = await this.neo4jService.write(`
             MATCH (u:User{id: $userID})
             SET u += $newUpdate
@@ -84,7 +84,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       return null
     return UserEntity.toDomain(res.records[0].get("u"))
   }
-  async getUsers(query: PageOptionsDto): Promise<UserDTO[]> {
+  async getUsers(query: PageOptionsDto): Promise<User[]> {
     const res = await this.neo4jService.read(`
         CALL db.index.fulltext.queryNodes("user_search_index", "(?i)${query.q}*") YIELD node
         RETURN node

@@ -1,6 +1,6 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { Type } from "class-transformer";
-import { WallDTO } from "dtos/social/wall.dto";
+import { Wall } from "domains/social/wall.domain";
 
 class User {
   @ApiResponseProperty({ type: String })
@@ -28,7 +28,7 @@ export class GetWallResponse {
   @ApiResponseProperty({ type: Boolean })
   isFollowed?: boolean;
 
-  constructor(wall: WallDTO, isFollowed: boolean = null) {
+  constructor(wall: Wall, isFollowed: boolean = null) {
     this.user = {
       avatar: wall.user.avatar,
       id: wall.user.id,

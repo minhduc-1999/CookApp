@@ -2,7 +2,7 @@ import { ForbiddenException, Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IPostService } from "modules/user/services/post.service";
 import { createUpdatingObject } from "utils";
 import { EditPostRequest } from "./editPostRequest";
@@ -12,7 +12,7 @@ import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 export class EditPostCommand extends BaseCommand {
   postDto: EditPostRequest;
-  constructor(tx: Transaction, user: UserDTO, post: EditPostRequest) {
+  constructor(tx: Transaction, user: User, post: EditPostRequest) {
     super(tx, user);
     this.postDto = post;
   }

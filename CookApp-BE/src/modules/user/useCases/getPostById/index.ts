@@ -1,7 +1,7 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
@@ -10,7 +10,7 @@ import { IPostRepository } from "modules/user/interfaces/repositories/post.inter
 
 export class GetPostDetailQuery extends BaseQuery {
   postId: string;
-  constructor(user: UserDTO, postId: string) {
+  constructor(user: User, postId: string) {
     super(user);
     this.postId = postId;
   }

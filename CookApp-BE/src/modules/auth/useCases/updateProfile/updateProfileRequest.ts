@@ -3,7 +3,7 @@ import { Type } from "class-transformer";
 import { IsNotEmpty, IsOptional, IsString, Length } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsValidDisplayName } from "decorators/isValidDisplayName.decorator";
-import { ProfileDTO } from "dtos/social/profile.dto";
+import { Profile } from "domains/social/profile.domain";
 
 export class UpdateProfileRequest {
   @IsString()
@@ -21,8 +21,8 @@ export class UpdateProfileRequest {
   @IsOptional()
   avatar: string;
 
-  @Type(() => ProfileDTO)
+  @Type(() => Profile)
   @IsOptional()
-  @ApiPropertyOptional({ type: ProfileDTO })
-  profile: ProfileDTO;
+  @ApiPropertyOptional({ type: Profile })
+  profile: Profile;
 }

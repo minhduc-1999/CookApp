@@ -1,10 +1,10 @@
 import { PageOptionsDto } from "base/pageOptions.base";
-import { PostDTO } from "dtos/social/post.dto";
-import { WallDTO } from "dtos/social/wall.dto";
+import { Post } from "domains/social/post.domain";
+import { Wall } from "domains/social/wall.domain";
 import { Transaction } from "neo4j-driver";
 
 export interface IWallRepository {
-  getPosts(userId: string, query: PageOptionsDto): Promise<PostDTO[]>;
+  getPosts(userId: string, query: PageOptionsDto): Promise<Post[]>;
   getTotalPosts(userId: string): Promise<number>;
   setTransaction(tx: Transaction): IWallRepository
   createFollower(
@@ -18,5 +18,5 @@ export interface IWallRepository {
   isFollowed(sourceId: string, targetId: string): Promise<boolean>;
   getFollowers(userId: string): Promise<string[]>;
   getFollowing(userId: string): Promise<string[]>;
-  getWall(userId: string): Promise<WallDTO>;
+  getWall(userId: string): Promise<Wall>;
 }

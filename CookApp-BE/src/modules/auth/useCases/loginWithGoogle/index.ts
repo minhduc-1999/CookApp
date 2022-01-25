@@ -5,7 +5,7 @@ import {
 } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { ErrorCode } from "enums/errorCode.enum";
 import { ExternalProvider } from "enums/externalProvider.enum";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
@@ -44,7 +44,7 @@ export class GoogleSignInCommandHandler
     const { tx } = command;
     const user = await this.verify(command.request.idToken)
       .then(async (payload) => {
-        const userData: UserDTO = new UserDTO({
+        const userData: User = new User({
           avatar: payload.picture,
           username: retrieveUsernameFromEmail(payload.email),
           profile: {

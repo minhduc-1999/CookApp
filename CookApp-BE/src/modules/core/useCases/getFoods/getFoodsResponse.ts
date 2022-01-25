@@ -1,7 +1,7 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { Type } from "class-transformer";
-import { FoodDTO } from "dtos/core/food.dto";
+import { FoodDTO } from "domains/core/food.dto";
 
 export class GetFoodsResponse {
   @ApiResponseProperty({ type: [FoodDTO] })

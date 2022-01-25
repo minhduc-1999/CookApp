@@ -1,12 +1,12 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
-import { PostDTO } from "../../../dtos/social/post.dto";
+import { Post } from "../../../domains/social/post.domain";
 import { IUserService } from "modules/auth/services/user.service";
 import { IPostRepository } from "../interfaces/repositories/post.interface";
 
 export interface IPostService {
-  getPostDetail(postId: string, option?: PostOption): Promise<PostDTO>;
+  getPostDetail(postId: string, option?: PostOption): Promise<Post>;
 }
 
 type PostOption = {
@@ -20,7 +20,7 @@ export class PostService implements IPostService {
     @Inject("IUserService") private _userService: IUserService
   ) {}
 
-  async getPostDetail(postId: string, option?: PostOption): Promise<PostDTO> {
+  async getPostDetail(postId: string, option?: PostOption): Promise<Post> {
     const defaultOpt: PostOption = {
       attachAuthor: true,
     };

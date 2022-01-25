@@ -1,12 +1,12 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PostDTO } from "dtos/social/post.dto";
-import { ReactionDTO } from "dtos/social/reaction.dto";
+import { Post } from "domains/social/post.domain";
+import { Reaction } from "domains/social/reaction.domain";
 import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "../interfaces/repositories/post.interface";
 
 export interface IReactionService {
-  react(reaction: ReactionDTO, tx: Transaction): Promise<void>
-  unreact(reaction: ReactionDTO, tx: Transaction): Promise<void>
+  react(reaction: Reaction, tx: Transaction): Promise<void>
+  unreact(reaction: Reaction, tx: Transaction): Promise<void>
 }
 
 @Injectable()
@@ -15,13 +15,13 @@ export class ReactionService implements IReactionService {
     @Inject("IPostRepository")
     private _postRepo: IPostRepository
   ) { }
-  async unreact(reaction: ReactionDTO, tx: Transaction): Promise<void> {
-    if (reaction.target instanceof PostDTO) {
+  async unreact(reaction: Reaction, tx: Transaction): Promise<void> {
+    if (reaction.target instanceof Post) {
       await this._postRepo.setTransaction(tx).deleteReact(reaction)
     }
   }
-  async react(reaction: ReactionDTO, tx: Transaction): Promise<void> {
-    if (reaction.target instanceof PostDTO) {
+  async react(reaction: Reaction, tx: Transaction): Promise<void> {
+    if (reaction.target instanceof Post) {
       await this._postRepo.setTransaction(tx).reactPost(reaction)
     }
   }

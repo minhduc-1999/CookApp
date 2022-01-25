@@ -4,7 +4,7 @@ import { BaseCommand } from "base/cqrs/command.base";
 import { RegisterRequest } from "./registerRequest";
 import { RegisterResponse } from "./registerResponse";
 import * as bcrypt from "bcrypt";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { generateDisplayName } from "utils";
 import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { Transaction } from "neo4j-driver";
@@ -29,7 +29,7 @@ export class RegisterCommandHandler
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
     const { registerDto, tx} = command;
     const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
-    const newUserDto = new UserDTO({
+    const newUser = new User({
       ...registerDto,
       password: hashedPassword,
       displayName: generateDisplayName(),
@@ -37,7 +37,7 @@ export class RegisterCommandHandler
     });
     const createdUser = await this._userRepo
       .setTransaction(tx)
-      .createUser(newUserDto);
+      .createUser(newUser);
     this._mailService.sendEmailAddressVerification(
       createdUser.id,
       createdUser.email
