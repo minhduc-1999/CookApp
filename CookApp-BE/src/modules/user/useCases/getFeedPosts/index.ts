@@ -4,10 +4,10 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { UserDTO } from "dtos/social/user.dto";
+import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { IPostService } from "modules/user/services/post.service";
 import { isImageKey } from "utils";
 import { GetPostResponse } from "../getPostById/getPostResponse";
 import { GetFeedPostsResponse } from "./getFeedPostsResponse";
@@ -26,20 +26,23 @@ export class GetFeedPostsQueryHandler
   constructor(
     @Inject("IFeedRepository")
     private _feedRepo: IFeedRepository,
-    @Inject("IPostService")
-    private _postService: IPostService,
     @Inject("IStorageService") private _storageService: IStorageService,
     @Inject("IPostRepository")
-    private _postRepo: IPostRepository
+    private _postRepo: IPostRepository,
+    @Inject("IUserService")
+    private _userService: IUserService
   ) {}
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
-    const tempPosts = await this._feedRepo.getPosts(user, queryOptions);
-    const posts = await Promise.all(
-      tempPosts.map(async (post) => {
-        return this._postService.getPostDetail(post.id);
+    const posts = await this._feedRepo.getPosts(user, queryOptions);
+
+    posts.forEach(post => {
+      this._userService.getUserPublicInfo(post.author.id)
+      .then(userInfo => {
+        post.author = userInfo
       })
-    );
+    })
+
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
       if (post.author?.avatar && isImageKey(post.author?.avatar)) {

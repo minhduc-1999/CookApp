@@ -33,7 +33,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     )
     if (res.records.length === 0)
       return []
-    return res.records.map(record => PostEntity.toDomain(record.get("p")))
+    return res.records.map(record => PostEntity.toDomain(record.get("p"), userID))
   }
 
   async getTotalPosts(userID: string): Promise<number> {
@@ -91,7 +91,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
 
   async getFollowers(userID: string): Promise<string[]> {
     const res = await this.neo4jService.read(`
-        MATCH (follower:User)-[r:FOLLOW]->(:User{id: $userID}) return follwer.id as followerIds
+        MATCH (follower:User)-[r:FOLLOW]->(:User{id: $userID}) return follower.id as followerId
       `,
       {
         userID
@@ -99,7 +99,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     )
     if (res.records.length === 0)
       return []
-    return res.records[0].get("followerIds")
+    return res.records.map(record => record.get("followerId") as string)
   }
 
   async getFollowing(userID: string): Promise<string[]> {

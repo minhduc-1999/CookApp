@@ -32,22 +32,25 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       })
     if (res.records.length === 0)
       return null
-    return PostEntity.toDomain(res.records[0].get("p"))
+    const postNode = res.records[0].get("p")
+    return PostEntity.toDomain(postNode, post.author.id)
   }
   async getPostById(postID: string): Promise<PostDTO> {
     const res = await this.neo4jService.read(
-      `MATCH (p:Post{id: $postID}) RETURN p LIMIT 1`,
+      `MATCH (p:Post{id: $postID})<-[:OWN]-(u:User) RETURN p, u.id AS authorID LIMIT 1`,
       {
         postID
       }
     )
     if (res.records.length === 0)
       return null
-    return PostEntity.toDomain(res.records[0].get("p"))
+    const postNode = res.records[0].get("p")
+    const authorID = res.records[0].get("authorID")
+    return PostEntity.toDomain(postNode, authorID)
   }
   async getPostByIds(postIDs: string[]): Promise<PostDTO[]> {
     const res = await this.neo4jService.read(
-      `MATCH (p:Post) WHERE p.id IN $postIDs RETURN p`,
+      `MATCH (p:Post)<-[:OWN]-(u:User) WHERE p.id IN $postIDs RETURN p, u.id AS authorID`,
       {
         postIDs
       }
@@ -55,7 +58,9 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     if (res.records.length === 0)
       return null
     return res.records.map(record => {
-      return PostEntity.toDomain(record.get("p"))
+      const postNode = record.get("p")
+      const authorID = record.get("authorID")
+      return PostEntity.toDomain(postNode, authorID)
     })
   }
   async updatePost(post: Partial<PostDTO>): Promise<PostDTO> {
@@ -74,7 +79,8 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     )
     if (res.records.length === 0)
       return null
-    return PostEntity.toDomain(res.records[0].get("u"))
+    const postNode = res.records[0].get("p")
+    return PostEntity.toDomain(postNode, post.author.id)
   }
   async reactPost(react: ReactionDTO, postID: string): Promise<boolean> {
     const res = await this.neo4jService.write(`

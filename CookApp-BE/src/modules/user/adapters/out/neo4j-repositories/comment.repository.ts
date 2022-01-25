@@ -95,9 +95,9 @@ export class CommentRepository
     if (res.records.length === 0)
       return []
     return res.records.map(record => {
-      const comment = record.get("comment")
+      const commentNode = record.get("comment")
       const numReply = parseInt(record.get("numOfReply"))
-      return CommentEntity.toDomain(comment, numReply)
+      return CommentEntity.toDomain(commentNode, numReply)
     })
   }
 
@@ -145,11 +145,7 @@ export class CommentRepository
 
   async getTotalPostComments(postID: string): Promise<number> {
     const res = await this.neo4jService.read(`
-        MATCH p =  (:Post)-[*]-(n:Comment)
-        WITH nodes(p) AS comments
-        UNWIND comments AS comment
-        WITH DISTINCT comment AS comment
-        RETURN count(comment) - 1 AS totalComment
+        MATCH (c:Comment)-[*]->(:Post{id: $postID}) return count(c) AS totalComment
       `,
       {
         postID

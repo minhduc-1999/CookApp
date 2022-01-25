@@ -8,8 +8,6 @@ import { UserDTO } from "dtos/social/user.dto";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { NewPostEvent } from "modules/notification/usecases/NewPostNotification";
 import { Transaction } from "neo4j-driver";
 
@@ -54,7 +52,7 @@ export class CreatePostCommandHandler
     // });
 
     result.images = await this._storageService.getDownloadUrls(result.images);
-    // this._eventBus.publish(new NewPostEvent(result, user))
+    this._eventBus.publish(new NewPostEvent(result, user))
     return result;
   }
 }

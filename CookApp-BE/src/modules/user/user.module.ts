@@ -16,9 +16,9 @@ import { PostController } from "./adapters/in/post.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/neo4j-repositories/comment.repository";
+import { FeedRepository } from "./adapters/out/neo4j-repositories/feed.repository";
 import { PostRepository } from "./adapters/out/neo4j-repositories/post.repository";
 import { WallRepository } from "./adapters/out/neo4j-repositories/wall.repository";
-import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
@@ -31,9 +31,13 @@ import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
+import { NewPostEventHandler } from "./useCases/PropagateNewPost";
 import { ReactPostCommandHandler } from "./useCases/reactPost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
 
+const eventHandlers = [
+  NewPostEventHandler
+]
 const commandHandlers = [
   CreatePostCommandHandler,
   EditPostCommandHandler,
@@ -106,6 +110,7 @@ const repositories = [
     ...services,
     ...repositories,
     ...queryHandlers,
+    ...eventHandlers
   ],
   exports: ["IWallRepository"],
 })

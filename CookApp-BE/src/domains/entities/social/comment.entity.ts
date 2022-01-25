@@ -11,7 +11,7 @@ export class CommentEntity {
       ...audit,
       content: properties.content,
       user : new UserDTO({
-        id: properties.id
+        id: properties.authorID
       }),
       numberOfReply: numReply ?? 0
     })

@@ -22,7 +22,6 @@ export class Neo4jTransactionInterceptor implements NestInterceptor {
           transaction.commit()
         }),
         catchError(e => {
-          console.log("neo4j interceptor")
           transaction.rollback()
           throw e
         }),

@@ -29,6 +29,7 @@ export class NewPostEventHandler implements IEventHandler<NewPostEvent> {
 
   async handle(event: NewPostEvent): Promise<void> {
     const followers = await this._wallRepository.getFollowers(event.author.id);
+    if (followers.length === 0) return
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.NewPostTemplate
     );
