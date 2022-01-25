@@ -2,17 +2,13 @@ import { Inject, InternalServerErrorException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { UserDTO } from "dtos/social/user.dto";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ICommentRepository } from "modules/user/adapters/out/repositories/comment.repository";
 import { CreateCommentRequest } from "./createCommentRequest";
 import { CreateCommentResponse } from "./createCommentResponse";
 import { CommentDTO } from "dtos/social/comment.dto";
 import { ICommentService } from "modules/user/services/comment.service";
-import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
-import { CommentPostEvent } from "modules/notification/usecases/CommentNotification";
 import { IPostService } from "modules/user/services/post.service";
 import { Transaction } from "neo4j-driver";
-import { PostDTO } from "dtos/social/post.dto";
+import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;

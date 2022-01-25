@@ -2,7 +2,6 @@ import { Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
 import { PostDTO } from "dtos/social/post.dto";
 import { UserDTO } from "dtos/social/user.dto";
 import { CreatePostRequest } from "./createPostRequest";
@@ -10,6 +9,7 @@ import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { NewPostEvent } from "modules/notification/usecases/NewPostNotification";
 import { Transaction } from "neo4j-driver";
+import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 
 export class CreatePostCommand extends BaseCommand {
   post: CreatePostRequest;

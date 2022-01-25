@@ -1,6 +1,5 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
-import { IUserRepository } from "../adapters/out/repositories/user.repository";
 import { ErrorCode } from "enums/errorCode.enum";
 import { isEmail } from "class-validator";
 import { ResponseDTO } from "base/dtos/response.dto";
@@ -11,6 +10,7 @@ import { JwtAuthTokenPayload } from "base/jwtPayload";
 import { ConfigService } from "nestjs-config";
 import { applicationDefault, cert, getApps, initializeApp } from "firebase-admin/app";
 import { Auth, getAuth } from 'firebase-admin/auth'
+import { IUserRepository } from "../interfaces/repositories/user.interface";
 
 export interface IAuthentication {
   getAuthUser(usernameOrEmail: string, password: string): Promise<UserDTO>;

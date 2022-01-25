@@ -4,7 +4,7 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { UserDTO } from "dtos/social/user.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { takeField } from "utils";
-import { IUserRepository } from "../adapters/out/repositories/user.repository";
+import { IUserRepository } from "../interfaces/repositories/user.interface";
 
 export interface IUserService {
   getUserById(userId: string): Promise<UserDTO>;

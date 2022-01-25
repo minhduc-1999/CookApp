@@ -9,7 +9,7 @@ import { UserDTO } from "dtos/social/user.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { ExternalProvider } from "enums/externalProvider.enum";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
-import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
+import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 import { IAuthentication } from "modules/auth/services/authentication.service";
 import { Transaction } from "neo4j-driver";
 import { ConfigService } from "nestjs-config";

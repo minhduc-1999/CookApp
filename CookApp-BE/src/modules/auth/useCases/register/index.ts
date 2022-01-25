@@ -1,7 +1,6 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { RegisterRequest } from "./registerRequest";
 import { RegisterResponse } from "./registerResponse";
 import * as bcrypt from "bcrypt";
@@ -9,6 +8,7 @@ import { UserDTO } from "dtos/social/user.dto";
 import { generateDisplayName } from "utils";
 import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { Transaction } from "neo4j-driver";
+import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;

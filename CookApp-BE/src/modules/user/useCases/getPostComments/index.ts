@@ -9,7 +9,7 @@ import { CommentDTO } from "dtos/social/comment.dto";
 import { UserDTO } from "dtos/social/user.dto";
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { ICommentRepository } from "modules/user/adapters/out/repositories/comment.repository";
+import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { IPostService } from "modules/user/services/post.service";
 import { isImageKey } from "utils";
 import { GetPostCommentsResponse } from "./getPostCommentsResponse";

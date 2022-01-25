@@ -5,7 +5,7 @@ import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { UserDTO } from "dtos/social/user.dto";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
+import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 import { IPostService } from "modules/user/services/post.service";
 import { GetWallPostsResponse } from "./getWallPostsResponse";
 export class GetWallPostsQuery extends BaseQuery {

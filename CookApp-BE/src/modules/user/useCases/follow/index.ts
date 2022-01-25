@@ -3,11 +3,11 @@ import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { UserDTO } from "dtos/social/user.dto";
 import { FollowResponse } from "./followResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { NewFollowerEvent } from "modules/notification/usecases/NewFollowerNotification";
 import { IUserService } from "modules/auth/services/user.service";
 import { Transaction } from "neo4j-driver";
+import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 
 export class FollowCommand extends BaseCommand {
   targetId: string;

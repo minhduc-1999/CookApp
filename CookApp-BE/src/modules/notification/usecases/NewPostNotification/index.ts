@@ -6,7 +6,7 @@ import { UserDTO } from "dtos/social/user.dto";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
 import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
+import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 export class NewPostEvent {
   post: PostDTO;
   author: UserDTO;

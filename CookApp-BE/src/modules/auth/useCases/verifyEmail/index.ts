@@ -5,13 +5,13 @@ import {
 } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { VerifyEmailRequest } from "./verifyEmailRequest";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "nestjs-config";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { Transaction } from "neo4j-driver";
+import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 
 export class VerifyEmailCommand extends BaseCommand {
   requestDto: VerifyEmailRequest;

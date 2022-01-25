@@ -2,12 +2,12 @@ import { ExtractJwt, Strategy } from "passport-jwt";
 import { PassportStrategy } from "@nestjs/passport";
 import { Inject, Injectable, UnauthorizedException } from "@nestjs/common";
 import AuthConfig from "../../../config/auth";
-import { IUserRepository } from "../adapters/out/repositories/user.repository";
 import { UserDTO } from "dtos/social/user.dto";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { JwtAuthTokenPayload } from "base/jwtPayload";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { isImageKey } from "utils";
+import { IUserRepository } from "../interfaces/repositories/user.interface";
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, "jwt") {

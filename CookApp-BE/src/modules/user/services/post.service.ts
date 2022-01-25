@@ -1,9 +1,9 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
-import { IPostRepository } from "../adapters/out/repositories/post.repository";
 import { PostDTO } from "../../../dtos/social/post.dto";
 import { IUserService } from "modules/auth/services/user.service";
+import { IPostRepository } from "../interfaces/repositories/post.interface";
 
 export interface IPostService {
   getPostDetail(postId: string, option?: PostOption): Promise<PostDTO>;
