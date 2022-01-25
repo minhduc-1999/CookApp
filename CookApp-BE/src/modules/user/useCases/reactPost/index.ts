@@ -9,6 +9,7 @@ import { ReactionDTO } from "dtos/social/reaction.dto";
 import { ReactPostEvent } from "modules/notification/usecases/ReactNotification";
 import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { IReactionService } from "modules/user/services/reaction.service";
 export class ReactPostCommand extends BaseCommand {
   reactReq: ReactPostRequest;
   constructor(
@@ -30,39 +31,37 @@ export class ReactPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
+    @Inject("IReactionService")
+    private _reactionService: IReactionService,
     private _eventBus: EventBus
   ) { }
   async execute(command: ReactPostCommand): Promise<ReactPostResponse> {
     const { user, reactReq, tx } = command;
-    await this._postService.getPostDetail(reactReq.postId);
+    const post = await this._postService.getPostDetail(reactReq.postId);
 
     const reactDto = new ReactionDTO({
       type: reactReq.react,
-      userID: user.id,
+      reactor: user,
+      target: post
     });
-    const tasks = [];
+
     let reacted: boolean;
+
     const react = await this._postRepo.getReactionByUserId(
       user.id,
       reactReq.postId
     );
     if (react && react.type === reactReq.react) {
-      tasks.push(
-        this._postRepo.setTransaction(tx).deleteReact(user.id, reactReq.postId),
-      );
+      await this._reactionService.unreact(reactDto, tx)
       reacted = false;
     } else {
-      tasks.push(
-        this._postRepo.setTransaction(tx).reactPost(reactDto, reactReq.postId),
-      );
+      await this._reactionService.react(reactDto, tx)
       reacted = true;
     }
 
-    return await Promise.all(tasks).then(() => {
-      // if (reacted) {
-      //   this._eventBus.publish(new ReactPostEvent(post, user));
-      // }
-      return new ReactPostResponse(reacted);
-    });
+    if (reacted) {
+      this._eventBus.publish(new ReactPostEvent(post, user));
+    }
+    return new ReactPostResponse(reacted);
   }
 }

@@ -1,10 +1,6 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
-import { MongooseModule } from "@nestjs/mongoose";
-import { FeedModel } from "domains/schemas/social/feed.schema";
-import { PostModel } from "domains/schemas/social/post.schema";
-import { UserModel } from "domains/schemas/social/user.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { AuthModule } from "modules/auth/auth.module";
@@ -21,6 +17,7 @@ import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
+import { ReactionService } from "./services/reaction.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
@@ -63,6 +60,10 @@ const services = [
     provide: "ICommentService",
     useClass: CommentService,
   },
+  {
+    provide: "IReactionService",
+    useClass: ReactionService,
+  },
 ];
 const repositories = [
   {
@@ -87,11 +88,6 @@ const repositories = [
   imports: [
     ConfigModule,
     HttpModule,
-    MongooseModule.forFeature([
-      UserModel,
-      PostModel,
-      FeedModel,
-    ]),
     CqrsModule,
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },

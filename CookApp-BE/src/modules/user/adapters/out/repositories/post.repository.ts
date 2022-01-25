@@ -82,7 +82,8 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     const postNode = res.records[0].get("p")
     return PostEntity.toDomain(postNode, post.author.id)
   }
-  async reactPost(react: ReactionDTO, postID: string): Promise<boolean> {
+
+  async reactPost(reaction: ReactionDTO): Promise<boolean> {
     const res = await this.neo4jService.write(`
         MATCH (u:User{id: $userID})
         MATCH (p:Post{id: $postID})
@@ -91,10 +92,10 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       `,
       this.tx,
       {
-        postID,
-        userID: react.userID,
+        postID: reaction.target.id,
+        userID: reaction.reactor.id,
         properties: {
-          type: react.type
+          type: reaction.type
         }
       },
     )
@@ -102,15 +103,16 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       return false
     return true
   }
-  async deleteReact(userID: string, postID: string): Promise<boolean> {
+
+  async deleteReact(reaction: ReactionDTO): Promise<boolean> {
     const res = await this.neo4jService.write(`
         MATCH (u:User{id: $userID})-[r:REACT]->(p:Post{id: $postID})
         DELETE r
       `,
       this.tx,
       {
-        postID,
-        userID,
+        postID: reaction.target.id,
+        userID: reaction.reactor.id
       },
     )
     if (res.records.length === 0)

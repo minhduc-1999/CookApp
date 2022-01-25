@@ -1,6 +1,5 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { AuditDTO } from "base/dtos/audit.dto";
-import { ReactionDTO } from "./reaction.dto";
 import { UserDTO } from "./user.dto";
 
 export class PostDTO extends AuditDTO {
@@ -16,9 +15,6 @@ export class PostDTO extends AuditDTO {
   @ApiResponseProperty({ type: UserDTO })
   author: UserDTO
 
-  @ApiResponseProperty({ type: [ReactionDTO] })
-  reactions: ReactionDTO[];
-
   @ApiResponseProperty({ type: Number })
   numOfReaction: number;
 
@@ -31,7 +27,6 @@ export class PostDTO extends AuditDTO {
     this.images = post?.images
     this.videos = post?.videos
     this.author = post?.author
-    this.reactions = post?.reactions
     this.numOfComment = post?.numOfComment
     this.numOfReaction = post?.numOfReaction
   }

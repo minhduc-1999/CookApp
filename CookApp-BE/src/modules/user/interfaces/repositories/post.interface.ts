@@ -7,8 +7,8 @@ export interface IPostRepository {
   getPostById(postId: string): Promise<PostDTO>;
   getPostByIds(postId: string[]): Promise<PostDTO[]>;
   updatePost(post: Partial<PostDTO>): Promise<PostDTO>;
-  reactPost(react: ReactionDTO, postID: string): Promise<boolean>;
-  deleteReact(userId: string, postId: string): Promise<boolean>;
+  reactPost(reaction: ReactionDTO): Promise<boolean>;
+  deleteReact(reaction: ReactionDTO): Promise<boolean>;
   getReactionByUserId(userId: string, postId: string): Promise<ReactionDTO>;
   setTransaction(tx: Transaction): IPostRepository
 }

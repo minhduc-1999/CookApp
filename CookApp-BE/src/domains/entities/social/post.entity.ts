@@ -22,7 +22,7 @@ export class PostEntity {
   }
 
   static fromDomain(post: Partial<PostDTO>): Record<string, any> {
-    const { images, videos, author, reactions, numOfReaction, numOfComment, ...remain } = post
+    const { images, videos, author, numOfReaction, numOfComment, ...remain } = post
     return {
       ...remain
     }

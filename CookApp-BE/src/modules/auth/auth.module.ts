@@ -3,9 +3,6 @@ import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { CqrsModule } from "@nestjs/cqrs";
 import { JwtModule } from "@nestjs/jwt";
-import { MongooseModule } from "@nestjs/mongoose";
-import { FeedModel } from "domains/schemas/social/feed.schema";
-import { UserModel } from "domains/schemas/social/user.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { EmailVerificationGuard } from "guards/email_verification.guard";
@@ -52,7 +49,6 @@ const globalGuards = [
   imports: [
     ConfigModule,
     HttpModule,
-    MongooseModule.forFeature([UserModel, FeedModel]),
     JwtModule.registerAsync({
       useFactory: async (config: ConfigService) => ({
         secret: config.get("auth.jwtPrivateKey"),

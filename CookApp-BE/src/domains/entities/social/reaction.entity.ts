@@ -1,4 +1,5 @@
 import { ReactionDTO } from 'dtos/social/reaction.dto';
+import { UserDTO } from 'dtos/social/user.dto';
 import { Path } from 'neo4j-driver'
 
 export class ReactionEntity {
@@ -7,7 +8,9 @@ export class ReactionEntity {
     const [segment] = path.segments
     const reaction = new ReactionDTO({
       type: segment.relationship.properties.type,
-      userID: segment.start.properties.id
+      reactor: new UserDTO({
+        id: segment.start.properties.id
+      }) 
     })
     return reaction
 
