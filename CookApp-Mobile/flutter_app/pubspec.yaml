@@ -41,7 +41,7 @@ dependencies:
   bubble: ^1.2.1
   carousel_slider: ^4.0.0
   youtube_player_flutter: ^8.0.0
-  firebase_auth: ^1.2.0
+  firebase_auth: ^3.3.5
   firebase_core: ^1.10.6
   google_sign_in: ^5.2.1
   speech_to_text: ^5.4.2
@@ -51,6 +51,7 @@ dependencies:
   flutter_local_notifications: ^5.0.0+4
   fluttertoast: ^8.0.8
   onesignal_flutter: ^3.0.0
+
 
 
 dev_dependencies:

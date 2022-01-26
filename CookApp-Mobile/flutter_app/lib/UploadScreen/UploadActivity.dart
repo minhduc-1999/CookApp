@@ -365,19 +365,7 @@ class PostForm extends StatelessWidget {
             ),
           ],
         ),
-        Divider(),
-        ListTile(
-          leading: Icon(Icons.pin_drop),
-          title: Container(
-            width: 250.0,
-            child: TextField(
-              controller: locationController,
-              decoration: InputDecoration(
-                  hintText: "Where was this photo taken?",
-                  border: InputBorder.none),
-            ),
-          ),
-        )
+
       ],
     );
   }
