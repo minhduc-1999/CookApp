@@ -1,4 +1,4 @@
-import { NotificationDTO } from "dtos/social/notification.dto";
+import { Notification } from "domains/social/notification.domain";
 import _ = require("lodash");
 
 export class NotificationEntity {
@@ -10,7 +10,7 @@ export class NotificationEntity {
   templateId: string;
   image: string;
 
-  constructor(noti: NotificationDTO) {
+  constructor(noti: Notification) {
     this.body = noti?.body;
     this.title = noti?.title;
     this.data = noti?.data;

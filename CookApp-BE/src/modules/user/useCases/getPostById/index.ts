@@ -1,16 +1,16 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
-import { IPostRepository } from "../../adapters/out/repositories/post.repository";
 import { isImageKey } from "utils";
+import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 
 export class GetPostDetailQuery extends BaseQuery {
   postId: string;
-  constructor(user: UserDTO, postId: string) {
+  constructor(user: User, postId: string) {
     super(user);
     this.postId = postId;
   }
@@ -31,20 +31,20 @@ export class GetPostDetailQueryHandler
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
     const post = await this._postService.getPostDetail(query.postId);
     post.images = await this._storageService.getDownloadUrls(post.images);
-    if (post.author.avatar && isImageKey(post.author.avatar)) {
+    if (post.author?.avatar && isImageKey(post.author.avatar)) {
       post.author.avatar = (
         await this._storageService.getDownloadUrls([post.author.avatar])
       )[0];
     }
     const result = new GetPostResponse(post);
 
-    const reaction = await this._postRepo.getReactionByUserId(
-      query.user.id,
-      post.id
-    );
-    if (reaction) {
-      result.reaction = reaction.type;
-    }
+    // const reaction = await this._postRepo.getReactionByUserId(
+    //   query.user.id,
+    //   post.id
+    // );
+    // if (reaction) {
+    //   result.reaction = reaction.type;
+    // }
     return result;
   }
 }

@@ -1,15 +1,15 @@
 import { Inject } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { NotificationDTO } from "dtos/social/notification.dto";
-import { PostDTO } from "dtos/social/post.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { Notification } from "domains/social/notification.domain";
+import { Post } from "domains/social/post.domain";
+import { User } from "domains/social/user.domain";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
 import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 export class ReactPostEvent {
-  post: PostDTO;
-  actor: UserDTO;
-  constructor(post: PostDTO, author: UserDTO) {
+  post: Post;
+  actor: User;
+  constructor(post: Post, author: User) {
     this.post = post;
     this.actor = author;
   }
@@ -32,7 +32,7 @@ export class ReactPostEventHandler implements IEventHandler<ReactPostEvent> {
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.ReactTemplate
     );
-    const notification: NotificationDTO = {
+    const notification: Notification = {
       body: template.body.replace("$user", actor.displayName),
       title: template.title,
       templateId: template.id,

@@ -1,15 +1,14 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IUserService } from "modules/auth/services/user.service";
-import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { isImageKey } from "utils";
 import { GetProfileResponse } from "./getProfileResponse";
 
 export class GetProfileQuery extends BaseQuery {
-  constructor(user: UserDTO) {
+  constructor(user: User) {
     super(user);
   }
 }
@@ -21,14 +20,15 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
     private _userService: IUserService,
     @Inject("IStorageService")
     private _storageService: IStorageService
-  ) {}
+  ) { }
   async execute(query: GetProfileQuery): Promise<GetProfileResponse> {
     const user = await this._userService.getUserById(query.user.id);
+
     if (user.avatar && isImageKey(user.avatar)) {
       user.avatar = (
         await this._storageService.getDownloadUrls([user.avatar])
       )[0];
     }
-    return user;
+    return new GetProfileResponse(user);
   }
 }

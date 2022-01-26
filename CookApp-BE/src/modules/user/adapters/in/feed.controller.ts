@@ -10,9 +10,9 @@ import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
-import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/social/user.dto";
+} from "decorators/apiSuccessResponse.decorator";
+import { UserReq } from "decorators/user.decorator";
+import { User } from "domains/social/user.domain";
 import { GetFeedPostsQuery } from "modules/user/useCases/getFeedPosts";
 import { GetFeedPostsResponse } from "modules/user/useCases/getFeedPosts/getFeedPostsResponse";
 import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
@@ -31,7 +31,7 @@ export class FeedController {
   )
   async getFeedPosts(
     @Query(ParsePaginationPipe) query: PageOptionsDto,
-    @User() user: UserDTO
+    @UserReq() user: User
   ): Promise<Result<GetFeedPostsResponse>> {
     const postsQuery = new GetFeedPostsQuery(user, query);
     const result = await this._queryBus.execute(postsQuery);

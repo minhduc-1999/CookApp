@@ -1,27 +1,25 @@
-import { Inject } from "@nestjs/common";
+import { Inject, InternalServerErrorException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
-import { ICommentRepository } from "modules/user/adapters/out/repositories/comment.repository";
 import { CreateCommentRequest } from "./createCommentRequest";
 import { CreateCommentResponse } from "./createCommentResponse";
-import { CommentDTO } from "dtos/social/comment.dto";
+import { Comment } from "domains/social/comment.domain";
 import { ICommentService } from "modules/user/services/comment.service";
-import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
-import { CommentPostEvent } from "modules/notification/usecases/CommentNotification";
 import { IPostService } from "modules/user/services/post.service";
+import { Transaction } from "neo4j-driver";
+import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
+import { CommentPostEvent } from "modules/notification/usecases/CommentNotification";
 
 export class CreateCommentCommand extends BaseCommand {
-  commentDto: CreateCommentRequest;
+  commentReq: CreateCommentRequest;
   constructor(
-    user: UserDTO,
+    user: User,
     comment: CreateCommentRequest,
-    session?: ClientSession
+    tx: Transaction
   ) {
-    super(session, user);
-    this.commentDto = comment;
+    super(tx, user);
+    this.commentReq = comment;
   }
 }
 
@@ -34,33 +32,36 @@ export class CreateCommentCommandHandler
     private _commentRepo: ICommentRepository,
     @Inject("ICommentService")
     private _commentService: ICommentService,
-    @Inject("IPostRepository")
-    private _postRepo: IPostRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
     private _eventBus: EventBus,
     @Inject("IPostService")
     private _postService: IPostService
-  ) {}
+  ) { }
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
-    const { commentDto, user, session } = command;
-    const post = await this._postService.getPostDetail(commentDto.postId);
-    const parentComment = commentDto.parentId
-      ? await this._commentService.getComment(commentDto.parentId)
-      : commentDto.postId;
-    const comment = CommentDTO.create({
-      ...commentDto,
+    const { commentReq, user, tx } = command;
+    const post = await this._postService.getPostDetail(commentReq.postId);
+    const comment = new Comment({
+      content: commentReq.content,
       user,
-    }).setParent(parentComment);
-    const createdComment = await this._commentRepo
-      .setSession(session)
-      .createComment(comment);
-    return await Promise.all([
-      this._feedRepo.updateNumComment(commentDto.postId, 1),
-      this._postRepo.updateNumComment(commentDto.postId, 1),
-    ]).then(() => {
-      this._eventBus.publish(new CommentPostEvent(post, user));
-      return createdComment;
-    });
+      target: post
+    })
+    let createdComment: Comment = null
+    if (commentReq.parentId) {
+      const parentComment = await this._commentService.getComment(commentReq.parentId)
+      comment.parent = parentComment
+      createdComment = await this._commentRepo
+        .setTransaction(tx)
+        .createReply(comment);
+    } else {
+      createdComment = await this._commentRepo
+        .setTransaction(tx)
+        .createComment(comment);
+    }
+
+    if(!createdComment) {
+      throw new InternalServerErrorException() 
+    }
+    
+    this._eventBus.publish(new CommentPostEvent(post, user));
+    return createdComment;
   }
 }

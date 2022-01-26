@@ -1,23 +1,23 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IPostService } from "modules/user/services/post.service";
 import { ReactPostRequest } from "./reactPostRequest";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
 import { ReactPostResponse } from "./reactPostResponse";
-import { ReactionDTO } from "dtos/social/reaction.dto";
+import { Reaction } from "domains/social/reaction.domain";
 import { ReactPostEvent } from "modules/notification/usecases/ReactNotification";
+import { Transaction } from "neo4j-driver";
+import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { IReactionService } from "modules/user/services/reaction.service";
 export class ReactPostCommand extends BaseCommand {
   reactReq: ReactPostRequest;
   constructor(
-    session: ClientSession,
-    user: UserDTO,
+    tx: Transaction,
+    user: User,
     reactReq: ReactPostRequest
   ) {
-    super(session, user);
+    super(tx, user);
     this.reactReq = reactReq;
   }
 }
@@ -31,43 +31,37 @@ export class ReactPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
+    @Inject("IReactionService")
+    private _reactionService: IReactionService,
     private _eventBus: EventBus
-  ) {}
+  ) { }
   async execute(command: ReactPostCommand): Promise<ReactPostResponse> {
-    const { user, reactReq } = command;
+    const { user, reactReq, tx } = command;
     const post = await this._postService.getPostDetail(reactReq.postId);
 
-    const reactDto = ReactionDTO.create({
+    const reactDto = new Reaction({
       type: reactReq.react,
-      userId: user.id,
+      reactor: user,
+      target: post
     });
-    const tasks = [];
+
     let reacted: boolean;
+
     const react = await this._postRepo.getReactionByUserId(
       user.id,
       reactReq.postId
     );
     if (react && react.type === reactReq.react) {
-      tasks.push(
-        this._postRepo.deleteReact(user.id, reactReq.postId),
-        this._feedRepo.updateNumReaction(reactReq.postId, -1)
-      );
+      await this._reactionService.unreact(reactDto, tx)
       reacted = false;
     } else {
-      tasks.push(
-        this._postRepo.reactPost(reactDto, reactReq.postId),
-        this._feedRepo.updateNumReaction(reactReq.postId, 1)
-      );
+      await this._reactionService.react(reactDto, tx)
       reacted = true;
     }
 
-    return await Promise.all(tasks).then(() => {
-      if (reacted) {
-        this._eventBus.publish(new ReactPostEvent(post, user));
-      }
-      return new ReactPostResponse(reacted);
-    });
+    if (reacted) {
+      this._eventBus.publish(new ReactPostEvent(post, user));
+    }
+    return new ReactPostResponse(reacted);
   }
 }

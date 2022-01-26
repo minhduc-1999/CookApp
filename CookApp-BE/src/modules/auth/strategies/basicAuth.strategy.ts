@@ -3,7 +3,7 @@ import {
   Injectable,
 } from "@nestjs/common";
 import { PassportStrategy } from "@nestjs/passport";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { Strategy } from "passport-local";
 import { IAuthentication } from "../services/authentication.service";
 
@@ -15,7 +15,7 @@ export class BasicAuthStrategy extends PassportStrategy(Strategy, "basic") {
     super();
   }
 
-  async validate(username: string, password: string): Promise<UserDTO> {
+  async validate(username: string, password: string): Promise<User> {
     const user = await this._authService.getAuthUser(username, password);
     return user;
   }

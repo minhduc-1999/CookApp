@@ -1,3 +1,3 @@
-import { PostDTO } from "dtos/social/post.dto";
+import { Post } from "domains/social/post.domain";
 
-export class CreatePostResponse extends PostDTO {}
+export class CreatePostResponse extends Post {}

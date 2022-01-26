@@ -5,17 +5,13 @@ import {
 } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { FeedDTO } from "dtos/social/feed.dto";
-import { UserDTO } from "dtos/social/user.dto";
-import { WallDTO } from "dtos/social/wall.dto";
+import { User } from "domains/social/user.domain";
 import { ErrorCode } from "enums/errorCode.enum";
 import { ExternalProvider } from "enums/externalProvider.enum";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
-import { IFeedRepository } from "modules/auth/adapters/out/repositories/feed.repository";
-import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
-import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.repository";
+import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 import { IAuthentication } from "modules/auth/services/authentication.service";
-import { ClientSession } from "mongoose";
+import { Transaction } from "neo4j-driver";
 import { ConfigService } from "nestjs-config";
 import {
   generateDisplayName,
@@ -26,8 +22,8 @@ import { GoogleSignInResponse } from "./googleSignInResponse";
 
 export class GoogleSignInCommand extends BaseCommand {
   request: GoogleSignInRequest;
-  constructor(session: ClientSession, req: GoogleSignInRequest) {
-    super(session);
+  constructor(tx: Transaction, req: GoogleSignInRequest) {
+    super(tx);
     this.request = req;
   }
 }
@@ -43,14 +39,12 @@ export class GoogleSignInCommandHandler
     private _configService: ConfigService,
     @Inject("IUserRepository")
     private _userRepo: IUserRepository,
-    @Inject("IWallRepository") private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository") private _feedRepo: IFeedRepository
   ) {}
   async execute(command: GoogleSignInCommand): Promise<GoogleSignInResponse> {
-    const { session } = command;
+    const { tx } = command;
     const user = await this.verify(command.request.idToken)
       .then(async (payload) => {
-        const userData: UserDTO = UserDTO.create({
+        const userData: User = new User({
           avatar: payload.picture,
           username: retrieveUsernameFromEmail(payload.email),
           profile: {
@@ -69,21 +63,12 @@ export class GoogleSignInCommandHandler
 
         if (!res) {
           // create new user
-          res = await this._userRepo.setSession(session).createUser(userData);
-          const wallDto = WallDTO.create({
-            user: res,
-          });
-
-          await this._wallRepo.setSession(session).createWall(wallDto);
-          const feedDto = FeedDTO.create({
-            user: res,
-          });
-          await this._feedRepo.setSession(session).createFeed(feedDto);
+          res = await this._userRepo.setTransaction(tx).createUser(userData);
         }
 
         return res;
       })
-      .catch((err) => {
+      .catch(() => {
         throw new UnauthorizedException({
           errorCode: ErrorCode.INVALID_TOKEN,
           message: "Google ID Token is not valid",

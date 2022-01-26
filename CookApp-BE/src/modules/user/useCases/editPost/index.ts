@@ -2,23 +2,18 @@ import { ForbiddenException, Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
-import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IPostService } from "modules/user/services/post.service";
-import { createUpdatingObject, retrieveObjectNameFromUrl } from "utils";
+import { createUpdatingObject } from "utils";
 import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
-import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { ConfigService } from "nestjs-config";
-import { MediaType } from "enums/mediaType.enum";
+import { Transaction } from "neo4j-driver";
+import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 export class EditPostCommand extends BaseCommand {
   postDto: EditPostRequest;
-  constructor(session: ClientSession, user: UserDTO, post: EditPostRequest) {
-    super(session, user);
+  constructor(tx: Transaction, user: User, post: EditPostRequest) {
+    super(tx, user);
     this.postDto = post;
   }
 }
@@ -31,13 +26,6 @@ export class EditPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
-    @Inject("IStorageService")
-    private _storageService: IStorageService,
-    private _configService: ConfigService
   ) {}
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
     const { user, postDto } = command;
@@ -77,8 +65,8 @@ export class EditPostCommandHandler
     const updatePost = createUpdatingObject({ ...postDto }, user.id);
     const updatedResult = await this._postRepo.updatePost(updatePost);
     await Promise.all([
-      this._wallRepo.updatePostInWall(updatedResult, user),
-      this._feedRepo.updatePostInFeed(updatedResult, user),
+      // this._wallRepo.updatePostInWall(updatedResult, user),
+      // this._feedRepo.updatePostInFeed(updatedResult, user),
     ]);
     return updatedResult;
   }

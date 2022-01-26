@@ -1,12 +1,12 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
-import { IPostRepository } from "../adapters/out/repositories/post.repository";
-import { PostDTO } from "../../../dtos/social/post.dto";
+import { Post } from "../../../domains/social/post.domain";
 import { IUserService } from "modules/auth/services/user.service";
+import { IPostRepository } from "../interfaces/repositories/post.interface";
 
 export interface IPostService {
-  getPostDetail(postId: string, option?: PostOption): Promise<PostDTO>;
+  getPostDetail(postId: string, option?: PostOption): Promise<Post>;
 }
 
 type PostOption = {
@@ -20,7 +20,7 @@ export class PostService implements IPostService {
     @Inject("IUserService") private _userService: IUserService
   ) {}
 
-  async getPostDetail(postId: string, option?: PostOption): Promise<PostDTO> {
+  async getPostDetail(postId: string, option?: PostOption): Promise<Post> {
     const defaultOpt: PostOption = {
       attachAuthor: true,
     };
@@ -34,11 +34,11 @@ export class PostService implements IPostService {
         ResponseDTO.fail("Post not found", ErrorCode.INVALID_ID)
       );
 
-    if (option?.attachAuthor) {
-      post.author = await this._userService.getUserPublicInfo(post.author.id);
-    } else {
-      delete post.author;
-    }
+    // if (option?.attachAuthor) {
+    //   post.author = await this._userService.getUserPublicInfo(post.author.id);
+    // } else {
+    //   delete post.author;
+    // }
 
     return post;
   }

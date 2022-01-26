@@ -1,7 +1,9 @@
+import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { GetPostResponse } from "../getPostById/getPostResponse";
 
 export class GetFeedPostsResponse {
+  @ApiResponseProperty({ type: [GetPostResponse] })
   posts: GetPostResponse[];
 
   metadata: PageMetadata;

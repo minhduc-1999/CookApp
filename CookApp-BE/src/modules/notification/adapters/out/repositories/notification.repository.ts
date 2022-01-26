@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { plainToClass } from "class-transformer";
 import {
-  NotificationDTO,
+  Notification,
   NotificationTemplate,
-} from "dtos/social/notification.dto";
+} from "domains/social/notification.domain";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { initializeApp } from "firebase-admin";
 import { applicationDefault, cert, getApps } from "firebase-admin/app";
@@ -12,7 +12,7 @@ import { NotificationEntity } from "modules/notification/entities/notification.e
 import { ConfigService } from "nestjs-config";
 
 export interface INotiRepository {
-  push(notification: NotificationDTO): Promise<void>;
+  push(notification: Notification): Promise<void>;
   getTemplate(path: NotificationTemplateEnum): Promise<NotificationTemplate>;
 }
 
@@ -45,7 +45,7 @@ export class NotiRepository implements INotiRepository {
       .get();
     return plainToClass(NotificationTemplate, tpl.data());
   }
-  async push(notification: NotificationDTO): Promise<void> {
+  async push(notification: Notification): Promise<void> {
     const batch = this.firestore.batch();
     notification.targets.forEach((target) => {
       const userNotiRef = this.firestore

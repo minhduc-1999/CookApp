@@ -1,12 +1,6 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
-import { MongooseModule } from "@nestjs/mongoose";
-import { CommentModel } from "domains/schemas/social/comment.schema";
-import { FeedModel } from "domains/schemas/social/feed.schema";
-import { PostModel } from "domains/schemas/social/post.schema";
-import { UserModel } from "domains/schemas/social/user.schema";
-import { WallModel } from "domains/schemas/social/wall.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { AuthModule } from "modules/auth/auth.module";
@@ -23,6 +17,7 @@ import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
+import { ReactionService } from "./services/reaction.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
@@ -33,9 +28,13 @@ import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
+import { NewPostEventHandler } from "./useCases/propagateNewPost";
 import { ReactPostCommandHandler } from "./useCases/reactPost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
 
+const eventHandlers = [
+  NewPostEventHandler
+]
 const commandHandlers = [
   CreatePostCommandHandler,
   EditPostCommandHandler,
@@ -61,6 +60,10 @@ const services = [
     provide: "ICommentService",
     useClass: CommentService,
   },
+  {
+    provide: "IReactionService",
+    useClass: ReactionService,
+  },
 ];
 const repositories = [
   {
@@ -85,13 +88,6 @@ const repositories = [
   imports: [
     ConfigModule,
     HttpModule,
-    MongooseModule.forFeature([
-      UserModel,
-      PostModel,
-      WallModel,
-      FeedModel,
-      CommentModel,
-    ]),
     CqrsModule,
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
@@ -110,6 +106,7 @@ const repositories = [
     ...services,
     ...repositories,
     ...queryHandlers,
+    ...eventHandlers
   ],
   exports: ["IWallRepository"],
 })

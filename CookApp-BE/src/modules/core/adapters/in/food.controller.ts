@@ -6,9 +6,9 @@ import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
-import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/social/user.dto";
+} from "decorators/apiSuccessResponse.decorator";
+import { UserReq } from "decorators/user.decorator";
+import { User } from "domains/social/user.domain";
 import { GetFoodsQuery } from "modules/core/useCases/getFoods";
 import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
 import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
@@ -24,7 +24,7 @@ export class FoodController {
   @ApiOKResponseCustom(GetFoodsResponse, "Get foods foods successfully")
   async getFeedPosts(
     @Query(ParsePaginationPipe) query: PageOptionsDto,
-    @User() user: UserDTO
+    @UserReq() user: User
   ): Promise<Result<GetFoodsResponse>> {
     const foodQuery = new GetFoodsQuery(user, query);
     const result = await this._queryBus.execute(foodQuery);

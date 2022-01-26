@@ -3,13 +3,13 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { GetFoodsResponse } from "./getFoodsResponse";
 export class GetFoodsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
-  constructor(user: UserDTO, queryOptions?: PageOptionsDto) {
+  constructor(user: User, queryOptions?: PageOptionsDto) {
     super(user);
     this.queryOptions = queryOptions;
   }
@@ -21,7 +21,7 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
     @Inject("IFoodRepository")
     private _foodRepo: IFoodRepository,
     @Inject("IStorageService") private _storageService: IStorageService
-  ) {}
+  ) { }
   async execute(query: GetFoodsQuery): Promise<GetFoodsResponse> {
     const { queryOptions } = query;
     const foods = await this._foodRepo.getFoods(queryOptions);

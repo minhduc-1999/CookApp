@@ -45,7 +45,7 @@ export class FireBaseService implements IStorageService {
   constructor(
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
-  ) {}
+  ) { }
   async deleteFiles(urls: string[]): Promise<string[]> {
     const deleteTasks: Promise<string>[] = [];
     const bucket = await this._provider.getBucket();
@@ -84,9 +84,9 @@ export class FireBaseService implements IStorageService {
     mediaType: MediaType
   ): Promise<string[]> {
     const bucket = await this._provider.getBucket();
-    let basePath;
+    let basePath: string;
     switch (mediaType) {
-      case MediaType.POST_IMAGES:
+      case MediaType.POST_IMAGE:
         basePath = this.storageTree.postImages;
         break;
       case MediaType.AVATAR:
@@ -109,7 +109,7 @@ export class FireBaseService implements IStorageService {
           newFile
             .move(basePath + getNameFromPath(newObj))
             .then((movedFile) => {
-              movedFile[0].makePublic().catch((err) => this.logger.error(err));
+              movedFile[0].makePublic().catch((err: Error) => this.logger.error(err));
               return movedFile[0].name;
             })
             .catch((err) => {
@@ -127,6 +127,7 @@ export class FireBaseService implements IStorageService {
   }
 
   async getDownloadUrls(objectNames: string[]): Promise<string[]> {
+    if (!objectNames) return []
     return objectNames.map(
       (objName) => this._configService.get("storage.publicUrl") + objName
     );
@@ -144,7 +145,7 @@ export class FireBaseService implements IStorageService {
       if (fileExited) {
         let basePath = "";
         switch (mediaType) {
-          case MediaType.POST_IMAGES:
+          case MediaType.POST_IMAGE:
             basePath = this.storageTree.postImages;
             break;
           case MediaType.AVATAR:

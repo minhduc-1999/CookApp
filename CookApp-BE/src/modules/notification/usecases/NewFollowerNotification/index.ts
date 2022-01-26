@@ -1,14 +1,14 @@
 import { Inject } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { NotificationDTO } from "dtos/social/notification.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { Notification } from "domains/social/notification.domain";
+import { User } from "domains/social/user.domain";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
 import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 export class NewFollowerEvent {
   targetID: string;
-  follower: UserDTO;
-  constructor(follower: UserDTO, targetID: string) {
+  follower: User;
+  constructor(follower: User, targetID: string) {
     this.follower = follower;
     this.targetID = targetID;
   }
@@ -29,7 +29,7 @@ export class NewFollowerEventHandler
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.NewFollowerTemplate
     );
-    const notification: NotificationDTO = {
+    const notification: Notification = {
       body: template.body.replace("$user", event.follower.displayName),
       title: template.title,
       templateId: template.id,
