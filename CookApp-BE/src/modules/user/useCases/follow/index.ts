@@ -39,7 +39,7 @@ export class FollowCommandHandler implements ICommandHandler<FollowCommand> {
     if (isFollowed)
       throw new BadRequestException(ResponseDTO.fail("Already follow"));
     this._wallRepo.setTransaction(tx).createFollower(user.id, targetId)
-    // this._eventBus.publish(new NewFollowerEvent(user, targetId));
+    this._eventBus.publish(new NewFollowerEvent(user, targetId));
     return new FollowResponse();
   }
 }

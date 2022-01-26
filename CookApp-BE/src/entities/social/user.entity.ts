@@ -8,12 +8,12 @@ export class UserEntity {
   static toDomain(node: Node): User {
     const { properties } = node
     const profile = new Profile({
-      height: properties["height"],
-      weight: properties["weight"],
-      firstName: properties["firstName"],
-      lastName: properties["lastName"],
-      birthDate: properties["birthDate"],
-      sex: properties["sex"]
+      height: properties.height,
+      weight: properties.weight,
+      firstName: properties.firstName,
+      lastName: properties.lastName,
+      birthDate: properties.birthDate,
+      sex: properties.sex
     })
     const audit = AuditEntity.toDomain(node)
     const user = new User({

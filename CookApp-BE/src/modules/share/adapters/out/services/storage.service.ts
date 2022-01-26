@@ -45,7 +45,7 @@ export class FireBaseService implements IStorageService {
   constructor(
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
-  ) {}
+  ) { }
   async deleteFiles(urls: string[]): Promise<string[]> {
     const deleteTasks: Promise<string>[] = [];
     const bucket = await this._provider.getBucket();
@@ -84,9 +84,9 @@ export class FireBaseService implements IStorageService {
     mediaType: MediaType
   ): Promise<string[]> {
     const bucket = await this._provider.getBucket();
-    let basePath;
+    let basePath: string;
     switch (mediaType) {
-      case MediaType.POST_IMAGES:
+      case MediaType.POST_IMAGE:
         basePath = this.storageTree.postImages;
         break;
       case MediaType.AVATAR:
@@ -145,7 +145,7 @@ export class FireBaseService implements IStorageService {
       if (fileExited) {
         let basePath = "";
         switch (mediaType) {
-          case MediaType.POST_IMAGES:
+          case MediaType.POST_IMAGE:
             basePath = this.storageTree.postImages;
             break;
           case MediaType.AVATAR:

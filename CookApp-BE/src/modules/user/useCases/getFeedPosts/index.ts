@@ -4,7 +4,6 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
-import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
@@ -29,19 +28,10 @@ export class GetFeedPostsQueryHandler
     @Inject("IStorageService") private _storageService: IStorageService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-    @Inject("IUserService")
-    private _userService: IUserService
   ) {}
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
     const posts = await this._feedRepo.getPosts(user, queryOptions);
-
-    posts.forEach(post => {
-      this._userService.getUserPublicInfo(post.author.id)
-      .then(userInfo => {
-        post.author = userInfo
-      })
-    })
 
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
@@ -51,6 +41,7 @@ export class GetFeedPostsQueryHandler
         )[0];
       }
     }
+
     const totalCount = await this._feedRepo.getTotalPosts(user);
     let meta: PageMetadata;
     if (posts.length > 0) {
@@ -60,6 +51,7 @@ export class GetFeedPostsQueryHandler
         totalCount
       );
     }
+
     const postsRes = await Promise.all(
       posts.map(async (post) => {
         const temp = new GetPostResponse(post);

@@ -6,6 +6,7 @@ import { Post } from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { MediaType } from "enums/mediaType.enum";
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
@@ -21,36 +22,88 @@ export class PostRepository extends BaseRepository implements IPostRepository {
             CREATE (p:Post)
             SET p += $properties, p.id = randomUUID()
             CREATE (u)-[:OWN]->(p)
-            RETURN p
+            WITH p, u
+            CALL {
+                WITH p
+                UNWIND $images AS image
+                CREATE (p)-[:CONTAIN]->(m:Media{type: $imageType, key: image})
+              UNION
+                WITH p
+                UNWIND $videos AS video
+                CREATE (p)-[:CONTAIN]->(n:Media{type: $videoType, key: video})
+            }
+            RETURN p AS post, u AS author
       `,
       this.tx,
       {
         properties: {
           ...(PostEntity.fromDomain(post))
         },
-        authorID: post.author.id
+        authorID: post.author.id,
+        images: post.images,
+        videos: post.videos,
+        imageType: MediaType.POST_IMAGE,
+        videoType: MediaType.POST_VIDEO
       })
     if (res.records.length === 0)
       return null
-    const postNode = res.records[0].get("p")
-    return PostEntity.toDomain(postNode, post.author.id)
+    const postNode = res.records[0].get("post")
+    const authorNode = res.records[0].get("author")
+    return PostEntity.toDomain(postNode, authorNode)
   }
   async getPostById(postID: string): Promise<Post> {
-    const res = await this.neo4jService.read(
-      `MATCH (p:Post{id: $postID})<-[:OWN]-(u:User) RETURN p, u.id AS authorID LIMIT 1`,
+    const res = await this.neo4jService.read(`
+        MATCH (post:Post{id: $postID})<-[:OWN]-(u:User)
+        CALL {
+          WITH post
+          MATCH (c:Comment)-[*]->(post) 
+          RETURN count(c) AS totalComment
+        }
+        CALL {
+          WITH post
+          MATCH (post)<-[r:REACT]-(:User)
+          RETURN count(r) AS totalReaction
+        }
+        RETURN 
+          post, 
+          u AS author, 
+          [(post)-[:CONTAIN]->(m:Media) | m.key] as images, 
+          totalComment,
+          totalReaction
+      `,
       {
         postID
       }
     )
     if (res.records.length === 0)
       return null
-    const postNode = res.records[0].get("p")
-    const authorID = res.records[0].get("authorID")
-    return PostEntity.toDomain(postNode, authorID)
+    const postNode = res.records[0].get("post")
+    const author = res.records[0].get("author")
+    const images: string[] = res.records[0].get("images")
+    const totalComment = parseInt(res.records[0].get("totalComment"))
+    const totalReaction = parseInt(res.records[0].get("totalReaction"))
+    return PostEntity.toDomain(postNode, author, totalComment, totalReaction, images)
   }
   async getPostByIds(postIDs: string[]): Promise<Post[]> {
-    const res = await this.neo4jService.read(
-      `MATCH (p:Post)<-[:OWN]-(u:User) WHERE p.id IN $postIDs RETURN p, u.id AS authorID`,
+    const res = await this.neo4jService.read(`
+        MATCH (post:Post{id: $postID})<-[:OWN]-(u:User)
+        CALL {
+          WITH post
+          MATCH (c:Comment)-[*]->(post) 
+          RETURN count(c) AS totalComment
+        }
+        CALL {
+          WITH post
+          MATCH (post)<-[r:REACT]-(:User)
+          RETURN count(r) AS totalReaction
+        }
+        RETURN 
+          post, 
+          u.id AS authorID, 
+          [(post)-[:CONTAIN]->(m:Media) | m.key] as images, 
+          totalComment,
+          totalReaction
+      `,
       {
         postIDs
       }
@@ -58,9 +111,12 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     if (res.records.length === 0)
       return null
     return res.records.map(record => {
-      const postNode = record.get("p")
-      const authorID = record.get("authorID")
-      return PostEntity.toDomain(postNode, authorID)
+      const postNode = record[0].get("post")
+      const authorID = record[0].get("authorID")
+      const images: string[] = record[0].get("images")
+      const totalComment = parseInt(record[0].get("totalComment"))
+      const totalReaction = parseInt(record[0].get("totalReaction"))
+      return PostEntity.toDomain(postNode, authorID, totalComment, totalReaction, images)
     })
   }
   async updatePost(post: Partial<Post>): Promise<Post> {
@@ -80,7 +136,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     if (res.records.length === 0)
       return null
     const postNode = res.records[0].get("p")
-    return PostEntity.toDomain(postNode, post.author.id)
+    return PostEntity.toDomain(postNode)
   }
 
   async reactPost(reaction: Reaction): Promise<boolean> {

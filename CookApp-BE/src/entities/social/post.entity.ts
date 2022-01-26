@@ -1,22 +1,23 @@
 import { Post } from 'domains/social/post.domain';
-import { User } from 'domains/social/user.domain';
 import { Node } from 'neo4j-driver'
 import { AuditEntity } from '../base.entity';
+import { UserEntity } from './user.entity';
 
 export class PostEntity {
 
-  static toDomain(node: Node, authorID: string, numOfComment?: number, numOfReaction?: number): Post {
-    const { properties } = node
-    const audit = AuditEntity.toDomain(node)
+  static toDomain(postNode: Node, authorNode?: Node, numOfComment?: number, numOfReaction?: number, images?: string[]): Post {
+    const { properties } = postNode
+    const audit = AuditEntity.toDomain(postNode)
     const post = new Post({
       ...audit,
       content: properties.content,
       numOfComment: numOfComment,
       numOfReaction: numOfReaction,
-      author: new User({
-        id: authorID
-      })
+      images: images
     })
+    if (authorNode) {
+      post.author = UserEntity.toDomain(authorNode)
+    }
     return post
 
   }

@@ -1,19 +1,25 @@
-import { ApiResponseProperty } from "@nestjs/swagger";
+import { ApiResponseProperty, PickType } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
-import { Type } from "class-transformer";
 import { Post } from "domains/social/post.domain";
 
+class PostResponse extends PickType(Post, ["id", "content", "images", "videos", "createdAt"]) { }
 export class GetWallPostsResponse {
-  @ApiResponseProperty({ type: [Post] })
-  @Type(() => Post)
-  posts: Post[];
+  @ApiResponseProperty({ type: [PostResponse] })
+  posts: PostResponse[];
 
   @ApiResponseProperty({ type: PageMetadata })
-  @Type(() => PageMetadata)
   metadata: PageMetadata;
 
   constructor(posts: Post[], meta: PageMetadata) {
-    this.posts = posts;
+    this.posts = posts.map(post => {
+      return {
+        id: post.id,
+        images: post.images,
+        videos: post.videos,
+        createdAt: post.createdAt,
+        content: post.content
+      }
+    })
     this.metadata = meta;
   }
 }

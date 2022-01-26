@@ -9,6 +9,7 @@ import { ICommentService } from "modules/user/services/comment.service";
 import { IPostService } from "modules/user/services/post.service";
 import { Transaction } from "neo4j-driver";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
+import { CommentPostEvent } from "modules/notification/usecases/CommentNotification";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
@@ -60,7 +61,7 @@ export class CreateCommentCommandHandler
       throw new InternalServerErrorException() 
     }
     
-    // this._eventBus.publish(new CommentPostEvent(post, user));
+    this._eventBus.publish(new CommentPostEvent(post, user));
     return createdComment;
   }
 }

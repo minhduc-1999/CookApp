@@ -36,7 +36,7 @@ export class CreatePostCommandHandler
     if (post.images?.length > 0) {
       post.images = await this._storageService.makePublic(
         post.images,
-        MediaType.POST_IMAGES
+        MediaType.POST_IMAGE
       );
     }
     const creatingPost = new Post({
@@ -44,12 +44,6 @@ export class CreatePostCommandHandler
       author: user,
     });
     const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
-
-    // push posts to followers
-    // const followers = await this._wallRepo.getFollowers(user.id);
-    // followers.forEach(async (follower) => {
-    //   tasks.push(this._feedRepo.pushNewPost(result, follower));
-    // });
 
     result.images = await this._storageService.getDownloadUrls(result.images);
     this._eventBus.publish(new NewPostEvent(result, user))

@@ -24,8 +24,8 @@ export class Post extends Audit {
   constructor(post: Partial<Post>) {
     super(post)
     this.content = post?.content
-    this.images = post?.images
-    this.videos = post?.videos
+    this.images = post?.images ?? []
+    this.videos = post?.videos ?? []
     this.author = post?.author
     this.numOfComment = post?.numOfComment
     this.numOfReaction = post?.numOfReaction

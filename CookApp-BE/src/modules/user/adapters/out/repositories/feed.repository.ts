@@ -7,7 +7,7 @@ import { User } from "domains/social/user.domain";
 import { parseInt } from "lodash";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
-import { int } from "neo4j-driver";
+import { int, Integer } from "neo4j-driver";
 
 @Injectable()
 export class FeedRepository extends BaseRepository implements IFeedRepository {
@@ -33,7 +33,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
   async getPosts(user: User, query: PageOptionsDto): Promise<Post[]> {
     const res = await this.neo4jService.read(`
         MATCH (u:User{id: $userID})-[:SEE|OWN]->(p:Post)
-        WITH p
+        WITH p, u
         ORDER BY p.createdAt DESC
         SKIP $skip
         LIMIT $limit
@@ -48,12 +48,11 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
           MATCH (post)<-[r:REACT]-(:User)
           RETURN count(r) AS totalReaction
         }
-        CALL {
-          WITH post
-          MATCH (post)<-[:OWN]-(u:User)
-          RETURN u.id AS authorID
-        }
-        RETURN post, totalComment, totalReaction, authorID
+        RETURN post, 
+          totalComment, 
+          totalReaction, 
+          u AS author,
+          [(post)-[:CONTAIN]->(m:Media) | m.key] AS images
       `,
       {
         userID: user.id,
@@ -65,8 +64,9 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       const postNode = record.get("post")
       const totalComment = parseInt(record.get("totalComment"))
       const totalReaction = parseInt(record.get("totalReaction"))
-      const authorID = record.get("authorID")
-      return PostEntity.toDomain(postNode, authorID, totalComment, totalReaction)
+      const author = record.get("author")
+      const images: string[] = record.get("images")
+      return PostEntity.toDomain(postNode, author, totalComment, totalReaction, images)
     })
   }
 

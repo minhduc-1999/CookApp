@@ -33,7 +33,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     )
     if (res.records.length === 0)
       return []
-    return res.records.map(record => PostEntity.toDomain(record.get("p"), userID))
+    return res.records.map(record => PostEntity.toDomain(record.get("p")))
   }
 
   async getTotalPosts(userID: string): Promise<number> {

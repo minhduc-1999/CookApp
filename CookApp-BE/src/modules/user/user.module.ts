@@ -28,7 +28,7 @@ import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
-import { NewPostEventHandler } from "./useCases/PropagateNewPost";
+import { NewPostEventHandler } from "./useCases/propagateNewPost";
 import { ReactPostCommandHandler } from "./useCases/reactPost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
 

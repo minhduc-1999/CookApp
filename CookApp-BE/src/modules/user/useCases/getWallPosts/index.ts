@@ -6,7 +6,6 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
-import { IPostService } from "modules/user/services/post.service";
 import { GetWallPostsResponse } from "./getWallPostsResponse";
 export class GetWallPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -25,20 +24,11 @@ export class GetWallPostsQueryHandler
   constructor(
     @Inject("IWallRepository")
     private _wallRepo: IWallRepository,
-    @Inject("IPostService")
-    private _postService: IPostService,
     @Inject("IStorageService") private _storageService: IStorageService
-  ) {}
+  ) { }
   async execute(query: GetWallPostsQuery): Promise<GetWallPostsResponse> {
-    const { queryOptions, user, targetId } = query;
-    const tempPosts = await this._wallRepo.getPosts(targetId, queryOptions);
-    const posts = await Promise.all(
-      tempPosts.map(async (post) => {
-        return this._postService.getPostDetail(post.id, {
-          attachAuthor: false,
-        });
-      })
-    );
+    const { queryOptions, targetId } = query;
+    const posts = await this._wallRepo.getPosts(targetId, queryOptions);
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
     }
