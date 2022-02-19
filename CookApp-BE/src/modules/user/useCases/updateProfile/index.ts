@@ -3,7 +3,6 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
 import { User } from "domains/social/user.domain";
 import { MediaType } from "enums/mediaType.enum";
-import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { clean, createUpdatingObject, isImageKey } from "utils";
 import { UpdateProfileRequest } from "./updateProfileRequest";
@@ -27,15 +26,13 @@ export class UpdateProfileCommandHandler
   implements ICommandHandler<UpdateProfileCommand>
 {
   constructor(
-    @Inject("IUserService")
-    private _userService: IUserService,
     @Inject("IUserRepository")
     private _userRepo: IUserRepository,
     @Inject("IStorageService")
     private _storageService: IStorageService,
-  ) {}
+  ) { }
   async execute(command: UpdateProfileCommand): Promise<void> {
-    const user = await this._userService.getUserById(command.user.id);
+    const { user } = command
     if (command.updateProfileReq.avatar) {
       const { avatar } = command.updateProfileReq;
       const result = await this._storageService.replaceFiles(
@@ -45,10 +42,12 @@ export class UpdateProfileCommandHandler
       );
       command.updateProfileReq.avatar = result[0];
     }
+
     const profile = createUpdatingObject(
       clean(command.updateProfileReq),
       user.id
     );
+
     const updatedUser = await this._userRepo
       .setTransaction(command.tx)
       .updateUserProfile(user.id, profile);

@@ -59,7 +59,7 @@ export function getNameFromPath(filePath: string): string {
   return filePath.slice(filePath.lastIndexOf("/") + 1);
 }
 
-export function clean(obj) {
+export function clean(obj: any) {
   if (obj === null || obj === undefined) return null;
   for (const propName of Object.keys(obj)) {
     if (typeof obj[propName] === "object") {

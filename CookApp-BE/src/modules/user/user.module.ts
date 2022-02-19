@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
+import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { AuthModule } from "modules/auth/auth.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
@@ -25,12 +26,14 @@ import { FollowCommandHandler } from "./useCases/follow";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
+import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
 import { NewPostEventHandler } from "./useCases/propagateNewPost";
 import { ReactPostCommandHandler } from "./useCases/reactPost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
+import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 
 const eventHandlers = [
   NewPostEventHandler
@@ -42,9 +45,11 @@ const commandHandlers = [
   ReactPostCommandHandler,
   FollowCommandHandler,
   UnfolllowCommandHandler,
+  UpdateProfileCommandHandler,
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
+  GetProfileQueryHandler,
   GetWallPostsQueryHandler,
   GetFeedPostsQueryHandler,
   GetPostCommentsQueryHandler,
@@ -66,6 +71,10 @@ const services = [
   },
 ];
 const repositories = [
+  {
+    provide: "IUserRepository",
+    useClass: UserRepository,
+  },
   {
     provide: "IPostRepository",
     useClass: PostRepository,

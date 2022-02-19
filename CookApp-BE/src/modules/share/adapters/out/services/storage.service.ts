@@ -38,7 +38,7 @@ export class FireBaseService implements IStorageService {
 
   private readonly storageTree = {
     postImages: "images/posts/",
-    avatar: "images/avatar/",
+    avatars: "images/avatars/",
     temp: "temp/",
   };
 
@@ -90,13 +90,14 @@ export class FireBaseService implements IStorageService {
         basePath = this.storageTree.postImages;
         break;
       case MediaType.AVATAR:
-        basePath = this.storageTree.avatar;
+        basePath = this.storageTree.avatars;
         break;
       default:
         break;
     }
     const moveTasks: Promise<string>[] = [];
     oldObjects.forEach(async (oldObj) => {
+      if (!oldObj) return;
       const oldFile = bucket.file(oldObj);
       oldFile
         .delete({ ignoreNotFound: true })
@@ -149,7 +150,7 @@ export class FireBaseService implements IStorageService {
             basePath = this.storageTree.postImages;
             break;
           case MediaType.AVATAR:
-            basePath = this.storageTree.avatar;
+            basePath = this.storageTree.avatars;
             break;
           default:
             break;

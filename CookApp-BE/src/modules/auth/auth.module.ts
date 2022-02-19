@@ -10,25 +10,20 @@ import { JwtAuthGuard } from "guards/jwtAuth.guard";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule, ConfigService } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
-import { UserController } from "./adapters/in/user.controller";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
-import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { LoginCommandHandler } from "./useCases/login";
 import { GoogleSignInCommandHandler } from "./useCases/loginWithGoogle";
 import { RegisterCommandHandler } from "./useCases/register";
 import { ResendEmailVerificationCommandHandler } from "./useCases/resendEmailVerification";
-import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
 
 const handlers = [
   RegisterCommandHandler,
   LoginCommandHandler,
-  UpdateProfileCommandHandler,
-  GetProfileQueryHandler,
   GoogleSignInCommandHandler,
   VerifyEmailCommandHandler,
   ResendEmailVerificationCommandHandler,
@@ -63,7 +58,7 @@ const globalGuards = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
   ],
-  controllers: [AuthController, UserController],
+  controllers: [AuthController],
   providers: [
     {
       provide: "IUserService",

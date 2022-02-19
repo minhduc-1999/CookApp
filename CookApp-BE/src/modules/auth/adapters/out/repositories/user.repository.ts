@@ -6,6 +6,7 @@ import { User } from "domains/social/user.domain";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { int } from "neo4j-driver";
+import { MediaType } from "enums/mediaType.enum";
 
 @Injectable()
 export class UserRepository extends BaseRepository implements IUserRepository {
@@ -68,16 +69,16 @@ export class UserRepository extends BaseRepository implements IUserRepository {
 
   async updateUserProfile(userID: string, profile: Partial<User>): Promise<User> {
     const res = await this.neo4jService.write(`
-            MATCH (u:User{id: $userID})
-            SET u += $newUpdate
-            RETURN u
+        MATCH (u:User{id: $userID})
+        SET u += $newUpdate
+        RETURN u
       `,
       this.tx,
       {
         userID,
         newUpdate: {
           ...(UserEntity.fromDomain(profile))
-        }
+        },
       },
     )
     if (res.records.length === 0)
