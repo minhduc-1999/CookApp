@@ -28,25 +28,24 @@ export class CreatePostCommandHandler
     private _postRepo: IPostRepository,
     @Inject("IStorageService")
     private _storageService: IStorageService,
-    private _eventBus: EventBus
+    private _eventBus: EventBus,
   ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { post, user, tx } = command;
-
     if (post.images?.length > 0) {
       post.images = await this._storageService.makePublic(
         post.images,
         MediaType.POST_IMAGE
       );
     }
+    
     const creatingPost = new Post({
       ...post,
       author: user,
     });
     const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
-
-    result.images = await this._storageService.getDownloadUrls(result.images);
+    result.images = await this._storageService.getDownloadUrls(result.images)
     this._eventBus.publish(new NewPostEvent(result, user))
-    return result;
+    return new CreatePostResponse(result);
   }
 }

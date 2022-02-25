@@ -5,7 +5,7 @@ import { UserEntity } from './user.entity';
 
 export class PostEntity {
 
-  static toDomain(postNode: Node, authorNode?: Node, numOfComment?: number, numOfReaction?: number, images?: string[]): Post {
+  static toDomain(postNode: Node, authorNode?: Node, images?: string[], numOfComment?: number, numOfReaction?: number): Post {
     const { properties } = postNode
     const audit = AuditEntity.toDomain(postNode)
     const post = new Post({

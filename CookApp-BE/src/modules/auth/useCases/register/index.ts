@@ -33,7 +33,7 @@ export class RegisterCommandHandler
       ...registerDto,
       password: hashedPassword,
       displayName: generateDisplayName(),
-      emailVerified: false
+      emailVerified: true
     });
     const createdUser = await this._userRepo
       .setTransaction(tx)

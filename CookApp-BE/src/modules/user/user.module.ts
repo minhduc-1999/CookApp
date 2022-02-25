@@ -14,6 +14,7 @@ import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
+import { MediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { CommentService } from "./services/comment.service";
@@ -90,6 +91,10 @@ const repositories = [
   {
     provide: "ICommentRepository",
     useClass: CommentRepository,
+  },
+  {
+    provide: "IMediaRepository",
+    useClass: MediaRepository,
   },
 ];
 

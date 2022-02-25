@@ -6,7 +6,6 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
 import { isImageKey } from "utils";
-import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 
 export class GetPostDetailQuery extends BaseQuery {
   postId: string;
@@ -23,8 +22,6 @@ export class GetPostDetailQueryHandler
   constructor(
     @Inject("IPostService")
     private _postService: IPostService,
-    @Inject("IPostRepository")
-    private _postRepo: IPostRepository,
     @Inject("IStorageService")
     private _storageService: IStorageService
   ) {}

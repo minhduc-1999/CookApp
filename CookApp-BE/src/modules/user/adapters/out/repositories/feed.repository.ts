@@ -66,7 +66,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       const totalReaction = parseInt(record.get("totalReaction"))
       const author = record.get("author")
       const images: string[] = record.get("images")
-      return PostEntity.toDomain(postNode, author, totalComment, totalReaction, images)
+      return PostEntity.toDomain(postNode, author, images, totalComment, totalReaction)
     })
   }
 

@@ -4,17 +4,20 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { User } from "domains/social/user.domain";
 import { IPostService } from "modules/user/services/post.service";
-import { createUpdatingObject } from "utils";
+import { retrieveObjectNameFromUrl } from "utils";
 import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { ConfigService } from "nestjs-config";
+import { IStorageService } from "modules/share/adapters/out/services/storage.service";
+import { MediaType } from "enums/mediaType.enum";
 export class EditPostCommand extends BaseCommand {
-  postDto: EditPostRequest;
+  editPostDto: EditPostRequest;
   constructor(tx: Transaction, user: User, post: EditPostRequest) {
     super(tx, user);
-    this.postDto = post;
+    this.editPostDto = Object.assign(new EditPostRequest(), post);
   }
 }
 
@@ -26,10 +29,13 @@ export class EditPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-  ) {}
+    private _configService: ConfigService,
+    @Inject("IStorageService")
+    private _storageService: IStorageService,
+  ) { }
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
-    const { user, postDto } = command;
-    const existedPost = await this._postService.getPostDetail(postDto.id);
+    const { user, tx, editPostDto } = command;
+    const existedPost = await this._postService.getPostDetail(editPostDto.id);
 
     if (existedPost.author.id !== user.id)
       throw new ForbiddenException(
@@ -39,35 +45,32 @@ export class EditPostCommandHandler
         )
       );
 
-    // const deletedResult = await this._storageService.deleteFiles([
-    //   "images\\posts\\61a1c2f8493ba21f434f7a71_1638036969077_salad.png",
-    //   "temp\\619b6fc1c99dd48c2aec7ac6_1637592003945_salad.png",
-    // ]);
-    // const addResult = await this._storageService.makePublic(
-    //   command.postDto.addImages,
-    //   MediaType.POST_IMAGES
-    // );
+    // Convert delete image urls to image key
+    const deleteImageKeys = editPostDto.deleteImages ? editPostDto.deleteImages.map(url => {
+      return retrieveObjectNameFromUrl(
+        url,
+        this._configService.get("storage.publicUrl")
+      )
+    }) : []
 
-    // await Promise.all([
-    //   this._postRepo.deleteImages(command.postDto.id, deletedResult),
-    //   this._postRepo.pushImages(command.postDto.id, addResult),
-    // ]);
+    // Delete images
+    if (editPostDto.deleteImages && editPostDto.deleteImages.length > 0) {
+      // await this._mediaRepository.setTransaction(tx).deleteMedias(deleteImageKeys)
+      await this._storageService.deleteFiles(deleteImageKeys);
+      editPostDto.deleteImages = deleteImageKeys
+    }
 
-    // const images = existedPost.images.filter(
-    //   (image) => !deletedResult.includes(image)
-    // );
-    // // const images = [];
-    // images.push(...addResult);
+    // Add new images
+    if (editPostDto.addImages && editPostDto.addImages.length > 0) {
+      const keys = await this._storageService.makePublic(
+        command.editPostDto.addImages,
+        MediaType.POST_IMAGE
+      );
+      editPostDto.addImages = keys
+      // await this._mediaRepository.setTransaction(tx).addMedias(keys, MediaType.POST_IMAGE)
+    }
 
-    delete postDto.addImages;
-    delete postDto.deleteImages;
-
-    const updatePost = createUpdatingObject({ ...postDto }, user.id);
-    const updatedResult = await this._postRepo.updatePost(updatePost);
-    await Promise.all([
-      // this._wallRepo.updatePostInWall(updatedResult, user),
-      // this._feedRepo.updatePostInFeed(updatedResult, user),
-    ]);
-    return updatedResult;
+     await this._postRepo.setTransaction(tx).updatePost(editPostDto.toUpdateDomain(existedPost), editPostDto);
+    return new EditPostResponse();
   }
 }

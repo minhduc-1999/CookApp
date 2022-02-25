@@ -7,6 +7,7 @@ import { Reaction } from "domains/social/reaction.domain";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { MediaType } from "enums/mediaType.enum";
+import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
@@ -26,11 +27,11 @@ export class PostRepository extends BaseRepository implements IPostRepository {
             CALL {
                 WITH p
                 UNWIND $images AS image
-                CREATE (p)-[:CONTAIN]->(m:Media{type: $imageType, key: image})
+                CREATE (p)-[:CONTAIN]->(m:Media {type: $imageType, key: image})
               UNION
                 WITH p
                 UNWIND $videos AS video
-                CREATE (p)-[:CONTAIN]->(n:Media{type: $videoType, key: video})
+                CREATE (p)-[:CONTAIN]->(n:Media {type: $videoType, key: video})
             }
             RETURN p AS post, u AS author
       `,
@@ -49,7 +50,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       return null
     const postNode = res.records[0].get("post")
     const authorNode = res.records[0].get("author")
-    return PostEntity.toDomain(postNode, authorNode)
+    return PostEntity.toDomain(postNode, authorNode, post.images)
   }
   async getPostById(postID: string): Promise<Post> {
     const res = await this.neo4jService.read(`
@@ -67,7 +68,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         RETURN 
           post, 
           u AS author, 
-          [(post)-[:CONTAIN]->(m:Media) | m.key] as images, 
+          [(post)-[:CONTAIN]->(m:Media) | m.key] AS images, 
           totalComment,
           totalReaction
       `,
@@ -82,7 +83,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     const images: string[] = res.records[0].get("images")
     const totalComment = parseInt(res.records[0].get("totalComment"))
     const totalReaction = parseInt(res.records[0].get("totalReaction"))
-    return PostEntity.toDomain(postNode, author, totalComment, totalReaction, images)
+    return PostEntity.toDomain(postNode, author, images, totalComment, totalReaction)
   }
   async getPostByIds(postIDs: string[]): Promise<Post[]> {
     const res = await this.neo4jService.read(`
@@ -116,27 +117,39 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       const images: string[] = record[0].get("images")
       const totalComment = parseInt(record[0].get("totalComment"))
       const totalReaction = parseInt(record[0].get("totalReaction"))
-      return PostEntity.toDomain(postNode, authorID, totalComment, totalReaction, images)
+      return PostEntity.toDomain(postNode, authorID, images, totalComment, totalReaction)
     })
   }
-  async updatePost(post: Partial<Post>): Promise<Post> {
-    const res = await this.neo4jService.write(`
+  async updatePost(updatingPost: Partial<Post>, editPostDto: EditPostRequest): Promise<void> {
+    await this.neo4jService.write(`
             MATCH (p:Post{id: $postID})
             SET p += $newUpdate
-            RETURN p
+            WITH p
+            CALL {
+                WITH p
+                UNWIND $addedImages AS addImage
+                CREATE (p)-[:CONTAIN]->(m:Media)
+                SET m.key = addImage, m.type = $postImageType
+            }
+            CALL {
+                WITH p
+                UNWIND $deletedImages AS deleteImage
+                MATCH (m:Media)
+                WHERE m.key = deleteImage
+                DETACH DELETE m
+            }
       `,
       this.tx,
       {
-        postID: post.id,
+        postID: updatingPost.id,
         newUpdate: {
-          ...(PostEntity.fromDomain(post))
-        }
+          ...(PostEntity.fromDomain(updatingPost))
+        },
+        addedImages: editPostDto.addImages ?? [],
+        deletedImages: editPostDto.deleteImages ?? [],
+        postImageType: MediaType.POST_IMAGE
       },
     )
-    if (res.records.length === 0)
-      return null
-    const postNode = res.records[0].get("p")
-    return PostEntity.toDomain(postNode)
   }
 
   async reactPost(reaction: Reaction): Promise<boolean> {

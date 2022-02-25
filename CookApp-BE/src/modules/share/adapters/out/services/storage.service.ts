@@ -46,23 +46,16 @@ export class FireBaseService implements IStorageService {
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
   ) { }
-  async deleteFiles(urls: string[]): Promise<string[]> {
+  async deleteFiles(objectKeys: string[]): Promise<string[]> {
     const deleteTasks: Promise<string>[] = [];
     const bucket = await this._provider.getBucket();
-    // const objectNameList = urls.map((url) =>
-    //   retrieveObjectNameFromUrl(
-    //     url,
-    //     this._configService.get("storage.publicUrl")
-    //   )
-    // );
-    const objectNameList = urls;
-    for (let i = 0; i < objectNameList.length; i++) {
-      const file = bucket.file(objectNameList[i]);
+    for (let objectKey of objectKeys) {
+      const file = bucket.file(objectKey);
       deleteTasks.push(
         file
           .delete({ ignoreNotFound: true })
           .then((res) => {
-            if (res[0].statusCode === 204) return objectNameList[i];
+            if (res[0].statusCode === 204) return objectKey;
             else return "";
           })
           .catch((err) => {
@@ -135,12 +128,14 @@ export class FireBaseService implements IStorageService {
   }
 
   async makePublic(
-    objectNames: string[],
+    objectKeys: string[],
     mediaType: MediaType
   ): Promise<string[]> {
+    if (!objectKeys || objectKeys.length === 0) return []
     const bucket = await this._provider.getBucket();
-    const tasks: Promise<string>[] = [];
-    for (const name of objectNames) {
+    const tasks = [];
+    const result: string[] = []
+    for (const name of objectKeys) {
       const file = bucket.file(name);
       const fileExited = (await file.exists())[0];
       if (fileExited) {
@@ -159,20 +154,18 @@ export class FireBaseService implements IStorageService {
           file
             .move(basePath + getNameFromPath(name))
             .then((movedFile) => {
-              movedFile[0].makePublic().catch((err) => this.logger.error(err));
-              return movedFile[0].name;
+              movedFile[0].makePublic().catch((err: unknown) => this.logger.error(err));
+              result.push(movedFile[0].name)
             })
             .catch((err) => {
               this.logger.error(err);
-              return "";
             })
         );
       }
     }
-    return Promise.all(tasks).then((objectNames) =>
-      objectNames.filter((objName) => {
-        return objName !== "";
-      })
+    return Promise.all(tasks).then(() => {
+      return result
+    }
     );
   }
 
@@ -181,6 +174,7 @@ export class FireBaseService implements IStorageService {
     const response = bucket.file(objectName).setMetadata(meta);
     return response;
   }
+
   async getUploadSignedLink(
     objectName: string
   ): Promise<PreSignedLinkResponse> {
