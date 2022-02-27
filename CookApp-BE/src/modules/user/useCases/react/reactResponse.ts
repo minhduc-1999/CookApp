@@ -1,6 +1,6 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 
-export class ReactPostResponse {
+export class ReactResponse {
   @ApiResponseProperty({ type: Boolean })
   reacted: boolean;
 

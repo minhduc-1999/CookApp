@@ -153,41 +153,46 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   }
 
   async reactPost(reaction: Reaction): Promise<boolean> {
-    const res = await this.neo4jService.write(`
+    if (reaction.target instanceof Post) {
+      const res = await this.neo4jService.write(`
         MATCH (u:User{id: $userID})
         MATCH (p:Post{id: $postID})
         CREATE (u)-[r:REACT]->(p) SET r += $properties 
         RETURN r
       `,
-      this.tx,
-      {
-        postID: reaction.target.id,
-        userID: reaction.reactor.id,
-        properties: {
-          type: reaction.type
-        }
-      },
-    )
-    if (res.records.length === 0)
-      return false
-    return true
+        this.tx,
+        {
+          postID: reaction.target.id,
+          userID: reaction.reactor.id,
+          properties: {
+            type: reaction.type
+          }
+        },
+      )
+      if (res.records.length === 0)
+        return false
+      return true
+    }
   }
 
   async deleteReact(reaction: Reaction): Promise<boolean> {
-    const res = await this.neo4jService.write(`
+    if (reaction.target instanceof Post) {
+      const res = await this.neo4jService.write(`
         MATCH (u:User{id: $userID})-[r:REACT]->(p:Post{id: $postID})
         DELETE r
       `,
-      this.tx,
-      {
-        postID: reaction.target.id,
-        userID: reaction.reactor.id
-      },
-    )
-    if (res.records.length === 0)
-      return false
-    return true
+        this.tx,
+        {
+          postID: reaction.target.id,
+          userID: reaction.reactor.id
+        },
+      )
+      if (res.records.length === 0)
+        return false
+      return true
+    }
   }
+
   async getReactionByUserId(userID: string, postID: string): Promise<Reaction> {
     const res = await this.neo4jService.read(`
         MATCH path = (u:User{id: $userID})-[r:REACT]->(p:Post{id: $postID})

@@ -1,41 +1,21 @@
-import { Post } from 'domains/social/post.domain';
-import { Profile } from 'domains/social/profile.domain';
-import { User } from 'domains/social/user.domain';
+import { Media } from 'domains/social/media.domain';
 import { Node } from 'neo4j-driver'
-import { AuditEntity } from '../base.entity';
 
 export class MediaEntity {
 
-  static toDomain(node: Node): User {
+  static toDomain(node: Node): Media {
     const { properties } = node
-    const profile = new Profile({
-      height: properties["height"],
-      weight: properties["weight"],
-      firstName: properties["firstName"],
-      lastName: properties["lastName"],
-      birthDate: properties["birthDate"],
-      sex: properties["sex"]
+    return new Media({
+      key: properties.key,
+      type: properties.type
     })
-    const audit = AuditEntity.toDomain(node)
-    const user = new User({
-      profile,
-      ...audit,
-      username: properties.username,
-      displayName: properties.displayName,
-      email: properties.email,
-      password: properties.password,
-      phone: properties.phone,
-      avatar: properties.avatar,
-      emailVerified: properties.emailVerified,
-    })
-    return user
 
   }
 
-  static fromDomain(user: Partial<Post>): Record<string, any> {
-    const {content} = user
+  static fromDomain(media: Partial<Media>): Record<string, any> {
     return {
-      content
+      key: media.key,
+      type: media.type
     }
   }
 }

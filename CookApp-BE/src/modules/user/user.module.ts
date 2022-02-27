@@ -10,6 +10,7 @@ import { ConfigModule } from "nestjs-config";
 import { CommentController } from "./adapters/in/comment.controller";
 import { FeedController } from "./adapters/in/feed.controller";
 import { PostController } from "./adapters/in/post.controller";
+import { ReactionController } from "./adapters/in/reaction.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
@@ -32,7 +33,7 @@ import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
 import { NewPostEventHandler } from "./useCases/propagateNewPost";
-import { ReactPostCommandHandler } from "./useCases/reactPost";
+import { ReactCommandHandler } from "./useCases/react";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 
@@ -43,7 +44,7 @@ const commandHandlers = [
   CreatePostCommandHandler,
   EditPostCommandHandler,
   CreateCommentCommandHandler,
-  ReactPostCommandHandler,
+  ReactCommandHandler,
   FollowCommandHandler,
   UnfolllowCommandHandler,
   UpdateProfileCommandHandler,
@@ -114,6 +115,7 @@ const repositories = [
     FeedController,
     CommentController,
     UserController,
+    ReactionController,
   ],
   providers: [
     ...commandHandlers,
