@@ -6,13 +6,13 @@ import { ReactRequest } from "./reactRequest";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ReactResponse } from "./reactResponse";
 import { Reaction } from "domains/social/reaction.domain";
-import { ReactPostEvent } from "modules/notification/usecases/ReactNotification";
 import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { IReactionService } from "modules/user/services/reaction.service";
 import { ReactionTargetType } from "enums/reactionTarget.enum";
 import { IMediaRepository } from "modules/user/interfaces/repositories/media.interface";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { ReactPostEvent } from "modules/notification/events/ReactNotification";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(

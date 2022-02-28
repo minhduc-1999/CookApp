@@ -9,7 +9,7 @@ import { ICommentService } from "modules/user/services/comment.service";
 import { IPostService } from "modules/user/services/post.service";
 import { Transaction } from "neo4j-driver";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
-import { CommentPostEvent } from "modules/notification/usecases/CommentNotification";
+import { CommentPostEvent } from "modules/notification/events/CommentNotification";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;

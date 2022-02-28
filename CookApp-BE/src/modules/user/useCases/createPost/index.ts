@@ -7,9 +7,9 @@ import { User } from "domains/social/user.domain";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { NewPostEvent } from "modules/notification/usecases/NewPostNotification";
 import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { NewPostEvent } from "modules/notification/events/NewPostNotification";
 
 export class CreatePostCommand extends BaseCommand {
   post: CreatePostRequest;

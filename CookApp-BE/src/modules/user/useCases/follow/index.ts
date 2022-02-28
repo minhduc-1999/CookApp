@@ -4,10 +4,10 @@ import { User } from "domains/social/user.domain";
 import { FollowResponse } from "./followResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { NewFollowerEvent } from "modules/notification/usecases/NewFollowerNotification";
 import { IUserService } from "modules/auth/services/user.service";
 import { Transaction } from "neo4j-driver";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
+import { NewFollowerEvent } from "modules/notification/events/NewFollowerNotification";
 
 export class FollowCommand extends BaseCommand {
   targetId: string;

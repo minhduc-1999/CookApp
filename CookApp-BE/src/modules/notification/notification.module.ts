@@ -3,12 +3,12 @@ import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";
 import { UserModule } from "modules/user/user.module";
 import { NotiRepository } from "./adapters/out/repositories/notification.repository";
-import { ReactPostEventHandler } from "./usecases/ReactNotification";
-import { NewFollowerEventHandler } from "./usecases/NewFollowerNotification";
-import { NewPostEventHandler } from "./usecases/NewPostNotification";
-import { CommentPostEventHandler } from "./usecases/CommentNotification";
 import { HttpModule } from "@nestjs/axios";
 import { NotificationService } from "./adapters/out/services/notification.service";
+import { NewPostEventHandler } from "./events/NewPostNotification";
+import { NewFollowerEventHandler } from "./events/NewFollowerNotification";
+import { ReactPostEventHandler } from "./events/ReactNotification";
+import { CommentPostEventHandler } from "./events/CommentNotification";
 
 const eventHandlers = [
   NewPostEventHandler,
