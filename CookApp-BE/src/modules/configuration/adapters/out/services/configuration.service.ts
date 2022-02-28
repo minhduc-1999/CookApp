@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { Notification } from "domains/social/notification.domain";
 import { NotificationConfiguration } from "domains/social/notificationConfiguration.domain";
 import { User } from "domains/social/user.domain";
-import { IConfigurationRepository } from "../repositories/notification.repository";
+import { IConfigurationRepository } from "../repositories/configuration.repository";
 
 export interface IConfigurationService {
   setupConfigForNewUser(user: User): Promise<void>

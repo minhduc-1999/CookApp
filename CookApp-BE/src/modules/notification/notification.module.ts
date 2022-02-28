@@ -1,6 +1,4 @@
 import { Module } from "@nestjs/common";
-import { CqrsModule } from "@nestjs/cqrs";
-import { MongooseModule } from "@nestjs/mongoose";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";
 import { UserModule } from "modules/user/user.module";
@@ -36,12 +34,10 @@ const services = [
 @Module({
   imports: [
     HttpModule,
-    MongooseModule.forFeature([]),
-    CqrsModule,
+    UserModule,
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
-    UserModule,
   ],
   controllers: [],
   providers: [...eventHandlers, ...repositories, ...services],

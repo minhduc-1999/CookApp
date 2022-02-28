@@ -3,6 +3,7 @@ import { MediaType } from "enums/mediaType.enum";
 import _ = require("lodash");
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
 import { ConfigService } from "nestjs-config";
+import { Bucket } from "@google-cloud/storage";
 import {
   addFilePrefix,
   getMimeType,
@@ -41,16 +42,18 @@ export class FireBaseService implements IStorageService {
     avatars: "images/avatars/",
     temp: "temp/",
   };
+  private bucket: Bucket
 
   constructor(
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
-  ) { }
+  ) {
+    this.bucket = _provider.getBucket()
+  }
   async deleteFiles(objectKeys: string[]): Promise<string[]> {
     const deleteTasks: Promise<string>[] = [];
-    const bucket = await this._provider.getBucket();
     for (let objectKey of objectKeys) {
-      const file = bucket.file(objectKey);
+      const file = this.bucket.file(objectKey);
       deleteTasks.push(
         file
           .delete({ ignoreNotFound: true })
@@ -76,7 +79,6 @@ export class FireBaseService implements IStorageService {
     newObjects: string[],
     mediaType: MediaType
   ): Promise<string[]> {
-    const bucket = await this._provider.getBucket();
     let basePath: string;
     switch (mediaType) {
       case MediaType.POST_IMAGE:
@@ -91,13 +93,13 @@ export class FireBaseService implements IStorageService {
     const moveTasks: Promise<string>[] = [];
     oldObjects.forEach(async (oldObj) => {
       if (!oldObj) return;
-      const oldFile = bucket.file(oldObj);
+      const oldFile = this.bucket.file(oldObj);
       oldFile
         .delete({ ignoreNotFound: true })
         .catch((err) => this.logger.error(err));
     });
     for (let newObj of newObjects) {
-      const newFile = bucket.file(newObj);
+      const newFile = this.bucket.file(newObj);
       if ((await newFile.exists())[0]) {
         moveTasks.push(
           newFile
@@ -132,11 +134,10 @@ export class FireBaseService implements IStorageService {
     mediaType: MediaType
   ): Promise<string[]> {
     if (!objectKeys || objectKeys.length === 0) return []
-    const bucket = await this._provider.getBucket();
     const tasks = [];
     const result: string[] = []
     for (const name of objectKeys) {
-      const file = bucket.file(name);
+      const file = this.bucket.file(name);
       const fileExited = (await file.exists())[0];
       if (fileExited) {
         let basePath = "";
@@ -170,8 +171,7 @@ export class FireBaseService implements IStorageService {
   }
 
   async setMetadata(objectName: string, meta: ObjectMetadata): Promise<any> {
-    const bucket = await this._provider.getBucket();
-    const response = bucket.file(objectName).setMetadata(meta);
+    const response = this.bucket.file(objectName).setMetadata(meta);
     return response;
   }
 
@@ -179,11 +179,10 @@ export class FireBaseService implements IStorageService {
     objectName: string
   ): Promise<PreSignedLinkResponse> {
     const mimeType = getMimeType(objectName);
-    const bucket = await this._provider.getBucket();
     const expiredIn: number = this._configService.get(
       "storage.presignedLinkExpiration"
     );
-    const signedLink = await bucket.file(objectName).getSignedUrl({
+    const signedLink = await this.bucket.file(objectName).getSignedUrl({
       version: "v4",
       action: "write",
       expires: Date.now() + expiredIn * 60 * 1000,
@@ -209,8 +208,7 @@ export class FireBaseService implements IStorageService {
   }
 
   async getDownLoadSignedLink(objectName: string): Promise<string> {
-    const bucket = await this._provider.getBucket();
-    const signedLink = await bucket.file(objectName).getSignedUrl({
+    const signedLink = await this.bucket.file(objectName).getSignedUrl({
       action: "read",
       expires:
         _.now() +

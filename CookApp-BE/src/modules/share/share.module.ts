@@ -75,7 +75,7 @@ const handler = [GetUploadPresignedLinkQueryHandler];
 })
 export class ShareModule {
   static register(options: { storage: StorageOptions }): DynamicModule {
-    let storageClass;
+    let storageClass: any
     switch (options.storage.provider) {
       case ThirdPartyProviders.FIREBASE:
         storageClass = FirebaseStorageProvider;
@@ -92,6 +92,7 @@ export class ShareModule {
           useClass: storageClass,
         },
       ],
+      exports: ["IStorageProvider"]
     };
   }
 }

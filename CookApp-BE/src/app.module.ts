@@ -3,6 +3,7 @@ import { APP_INTERCEPTOR } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
 import "dotenv/config";
 import { AuthModule } from "modules/auth/auth.module";
+import { ConfigurationModule } from "modules/configuration/configuration.module";
 import { CoreModule } from "modules/core/core.module";
 import { Neo4jScheme } from "modules/neo4j/interfaces/config";
 import { NotificationModule } from "modules/notification/notification.module";
@@ -42,7 +43,8 @@ import { Neo4jModule } from './modules/neo4j/neo4j.module';
       username: process.env.NEO4J_USERNAME,
       password: process.env.NEO4J_PASSWORD,
       database: process.env.NEO4J_DATABASE,
-    })
+    }),
+    ConfigurationModule,
   ],
   controllers: [AppController],
   providers: [

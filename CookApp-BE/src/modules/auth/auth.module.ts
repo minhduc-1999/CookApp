@@ -7,6 +7,7 @@ import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { EmailVerificationGuard } from "guards/emailVerification.guard";
 import { JwtAuthGuard } from "guards/jwtAuth.guard";
+import { ConfigurationModule } from "modules/configuration/configuration.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule, ConfigService } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
@@ -57,6 +58,7 @@ const globalGuards = [
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
+    ConfigurationModule
   ],
   controllers: [AuthController],
   providers: [

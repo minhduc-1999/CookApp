@@ -9,6 +9,7 @@ import { generateDisplayName } from "utils";
 import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { Transaction } from "neo4j-driver";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
+import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
@@ -24,7 +25,9 @@ export class RegisterCommandHandler
   constructor(
     @Inject("IUserRepository") private _userRepo: IUserRepository,
     @Inject("IMailService")
-    private _mailService: IMailService
+    private _mailService: IMailService,
+    @Inject("IConfigurationService")
+    private _configurationService: IConfigurationService
   ) {}
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
     const { registerDto, tx} = command;
@@ -38,6 +41,7 @@ export class RegisterCommandHandler
     const createdUser = await this._userRepo
       .setTransaction(tx)
       .createUser(newUser);
+    await this._configurationService.setupConfigForNewUser(createdUser)
     this._mailService.sendEmailAddressVerification(
       createdUser.id,
       createdUser.email
