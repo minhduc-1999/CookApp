@@ -32,14 +32,14 @@ export class FollowCommandHandler implements ICommandHandler<FollowCommand> {
       throw new BadRequestException(ResponseDTO.fail("Cannot follow yourself"));
     }
 
-    await this._userService.getUserById(targetId);
+    const target = await this._userService.getUserById(targetId);
 
     const isFollowed = await this._wallRepo.setTransaction(tx).isFollowed(user.id, targetId);
 
     if (isFollowed)
       throw new BadRequestException(ResponseDTO.fail("Already follow"));
-    this._wallRepo.setTransaction(tx).createFollower(user.id, targetId)
-    this._eventBus.publish(new NewFollowerEvent(user, targetId));
+    this._wallRepo.setTransaction(tx).createFollower(user.id, target.id)
+    this._eventBus.publish(new NewFollowerEvent(user, target));
     return new FollowResponse();
   }
 }

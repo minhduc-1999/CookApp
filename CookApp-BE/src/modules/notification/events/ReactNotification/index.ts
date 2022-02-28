@@ -4,6 +4,7 @@ import { Notification } from "domains/social/notification.domain";
 import { Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { NotificationTemplateEnum } from "enums/notification.enum";
+import { ConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
 import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 export class ReactPostEvent {
@@ -21,7 +22,9 @@ export class ReactPostEventHandler implements IEventHandler<ReactPostEvent> {
     @Inject("INotiRepository")
     private _notiRepository: INotiRepository,
     @Inject("INotificationService")
-    private _notiService: INotificationService
+    private _notiService: INotificationService,
+    @Inject("IConfigurationService")
+    private _configurationService: ConfigurationService
   ) {}
 
   async handle(event: ReactPostEvent): Promise<void> {
@@ -29,6 +32,12 @@ export class ReactPostEventHandler implements IEventHandler<ReactPostEvent> {
     if (actor.id === post.author.id) {
       return;
     }
+
+    // Cancel if post's author turn off notification for reaction
+    const authorNotiConfig = await this._configurationService.getNotificationConfig(post.author)
+    if (!authorNotiConfig.postReaction)
+      return
+
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.ReactTemplate
     );

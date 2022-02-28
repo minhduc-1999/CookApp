@@ -3,11 +3,13 @@ export class NotificationConfiguration {
   newPost: boolean
   postComment: boolean
   postReaction: boolean
+  userID: string
 
-  constructor() {
+  constructor(userID: string) {
     this.newFollower = false
     this.newPost = false
     this.postComment = false
     this.postReaction = false
+    this.userID = userID
   }
 }

@@ -5,7 +5,6 @@ import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { AuthModule } from "modules/auth/auth.module";
-import { ConfigurationModule } from "modules/configuration/configuration.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
 import { CommentController } from "./adapters/in/comment.controller";
@@ -109,7 +108,6 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
     AuthModule,
-    ConfigurationModule
   ],
   controllers: [
     PostController,

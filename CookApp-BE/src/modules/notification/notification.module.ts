@@ -9,6 +9,7 @@ import { NewPostEventHandler } from "./events/NewPostNotification";
 import { NewFollowerEventHandler } from "./events/NewFollowerNotification";
 import { ReactPostEventHandler } from "./events/ReactNotification";
 import { CommentPostEventHandler } from "./events/CommentNotification";
+import { ConfigurationModule } from "modules/configuration/configuration.module";
 
 const eventHandlers = [
   NewPostEventHandler,
@@ -33,6 +34,7 @@ const services = [
 
 @Module({
   imports: [
+    ConfigurationModule,
     HttpModule,
     UserModule,
     ShareModule.register({
