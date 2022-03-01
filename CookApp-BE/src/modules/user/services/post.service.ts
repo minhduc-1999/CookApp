@@ -2,7 +2,6 @@ import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ErrorCode } from "enums/errorCode.enum";
 import { Post } from "../../../domains/social/post.domain";
-import { IUserService } from "modules/auth/services/user.service";
 import { IPostRepository } from "../interfaces/repositories/post.interface";
 
 export interface IPostService {
@@ -17,7 +16,6 @@ type PostOption = {
 export class PostService implements IPostService {
   constructor(
     @Inject("IPostRepository") private _postRepo: IPostRepository,
-    @Inject("IUserService") private _userService: IUserService
   ) {}
 
   async getPostDetail(postId: string, option?: PostOption): Promise<Post> {
@@ -31,7 +29,7 @@ export class PostService implements IPostService {
 
     if (!post)
       throw new NotFoundException(
-        ResponseDTO.fail("Post not found", ErrorCode.INVALID_ID)
+        ResponseDTO.fail("Post not found", ErrorCode.POST_NOT_FOUND)
       );
 
     // if (option?.attachAuthor) {

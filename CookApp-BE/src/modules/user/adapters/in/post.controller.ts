@@ -1,6 +1,6 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConflictResponse, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
 import {
   ApiCreatedResponseCustom,
@@ -14,13 +14,15 @@ import { User } from "domains/social/user.domain";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
 import { CreatePostRequest } from "modules/user/useCases/createPost/createPostRequest";
 import { CreatePostResponse } from "modules/user/useCases/createPost/createPostResponse";
+import { DeleteSavedPostCommand } from "modules/user/useCases/deleteSavedPost";
+import { DeleteSavedPostRequest } from "modules/user/useCases/deleteSavedPost/deleteSavedPostRequest";
 import { EditPostCommand } from "modules/user/useCases/editPost";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
 import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
 import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";
-import { SavePostRequest } from "modules/user/useCases/savePost/savePostReponse";
+import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
 import { Transaction } from "neo4j-driver";
 
 @Controller("users/posts")
@@ -47,6 +49,7 @@ export class PostController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
+  @ApiNotFoundResponse({description: "Post not found"})
   async getPostById(
     @Param("postId", ParseUUIDPipe) postId: string,
     @UserReq() user: User
@@ -60,6 +63,7 @@ export class PostController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
   @RequestTransaction()
+  @ApiNotFoundResponse({description: "Post not found"})
   async editPost(
     @Body() post: EditPostRequest,
     @UserReq() user: User,
@@ -76,7 +80,9 @@ export class PostController {
   @RequestTransaction()
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Save post successfully")
-  async reactPost(
+  @ApiConflictResponse({description: "Post have been saved already"})
+  @ApiNotFoundResponse({description: "Post not found"})
+  async savePost(
     @UserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
     @ParamTransaction() tx: Transaction
@@ -86,6 +92,25 @@ export class PostController {
     await this._commandBus.execute(savePostCommand);
     return Result.ok(null, {
       messages: ["Save post successfully"],
+    });
+  }
+
+  @Delete(":postId/save")
+  @RequestTransaction()
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Delete saved post successfully")
+  @ApiConflictResponse({description: "Post have not been saved yet"})
+  @ApiNotFoundResponse({description: "Post not found"})
+  async deleteSavedPost(
+    @UserReq() user: User,
+    @Param("postId", ParseUUIDPipe) postID: string,
+    @ParamTransaction() tx: Transaction
+  ): Promise<Result<void>> {
+    const dto = new DeleteSavedPostRequest(postID)
+    const deleteSavedPostCommand = new DeleteSavedPostCommand(dto, user, tx);
+    await this._commandBus.execute(deleteSavedPostCommand);
+    return Result.ok(null, {
+      messages: ["Delete saved post successfully"],
     });
   }
 }

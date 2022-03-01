@@ -15,4 +15,6 @@ export interface IPostRepository {
   setTransaction(tx: Transaction): IPostRepository
   isExisted(postID: string): Promise<boolean>
   savePost(postID: string, user: User): Promise<void>
+  deleteSavedPost(postID: string, user: User): Promise<void>
+  isSavedPost(postID: string, user: User): Promise<boolean>
 }

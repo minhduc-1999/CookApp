@@ -9,8 +9,8 @@ import { IPostRepository } from "modules/user/interfaces/repositories/post.inter
 import { MediaType } from "enums/mediaType.enum";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { User } from "domains/social/user.domain";
 import _ = require("lodash");
+import { User } from "@sentry/node";
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
@@ -19,6 +19,36 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     @Inject("INeo4jService")
     private neo4jService: INeo4jService) {
     super()
+  }
+  async deleteSavedPost(postID: string, user: User): Promise<void> {
+    await this.neo4jService.write(`
+          MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})
+          DETACH DELETE r
+      `,
+      this.tx,
+      {
+        postID,
+        userID: user.id,
+      })
+  }
+  async isSavedPost(postID: string, user: User): Promise<boolean> {
+    const res = await this.neo4jService.read(`
+          MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})
+          WITH count(r) as count
+          CALL apoc.when (count > 0,
+            "RETURN true AS bool",
+            "RETURN false AS bool",
+            {count:count}
+          ) YIELD value
+          return value.bool as result
+       `,
+      {
+        postID,
+        userID: user.id
+      })
+    if (res.records.length === 0)
+      throw new InternalServerErrorException(ResponseDTO.fail("Something went wrong"))
+    return res.records[0].get("result") as boolean
   }
   async savePost(postID: string, user: User): Promise<void> {
     await this.neo4jService.write(`

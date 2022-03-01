@@ -24,6 +24,7 @@ import { PostService } from "./services/post.service";
 import { ReactionService } from "./services/reaction.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
+import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
 import { FollowCommandHandler } from "./useCases/follow";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
@@ -49,7 +50,8 @@ const commandHandlers = [
   FollowCommandHandler,
   UnfolllowCommandHandler,
   UpdateProfileCommandHandler,
-  SavePostCommandHandler
+  SavePostCommandHandler,
+  DeleteSavedPostCommandHandler
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
