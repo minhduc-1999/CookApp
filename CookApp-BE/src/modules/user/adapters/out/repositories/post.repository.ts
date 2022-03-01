@@ -1,8 +1,8 @@
 import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { BaseRepository } from "base/repository.base";
-import { PostEntity } from "entities/social/post.entity";
+import { PostEntity, SavedPostEntity } from "entities/social/post.entity";
 import { ReactionEntity } from "entities/social/reaction.entity";
-import { Post } from "domains/social/post.domain";
+import { Post, SavedPost } from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
@@ -23,10 +23,10 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     super()
   }
 
-  async getSavedPosts(user: User, queryOpt: PageOptionsDto): Promise<Post[]> {
+  async getSavedPosts(user: User, queryOpt: PageOptionsDto): Promise<SavedPost[]> {
     const res = await this.neo4jService.read(`
         MATCH (u:User{id: $userID})-[r:SAVE]->(p:Post)
-        WITH p, u 
+        WITH p, u, r 
         ORDER BY r.createdAt DESC
         SKIP $skip
         LIMIT $limit
@@ -45,7 +45,8 @@ export class PostRepository extends BaseRepository implements IPostRepository {
           totalComment, 
           totalReaction, 
           u AS author,
-          [(post)-[:CONTAIN]->(m:Media) | m.key] AS images
+          [(post)-[:CONTAIN]->(m:Media) | m.key] AS images,
+          r as relationship
       `,
       {
         userID: user.id,
@@ -59,13 +60,14 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       const totalReaction = parseInt(record.get("totalReaction"))
       const author = record.get("author")
       const images: string[] = record.get("images")
-      return PostEntity.toDomain(postNode, author, images, totalComment, totalReaction)
+      const relationship = record.get("relationship")
+      return SavedPostEntity.toDomain(postNode,relationship, author, images, totalComment, totalReaction)
     })
   }
 
   async getTotalSavedPost(user: User): Promise<number> {
     const res = await this.neo4jService.read(`
-        MATCH (:User{id: $userID})-[r:SAVE]->(:Post) RETURN count(r) AS totalPost
+        MATCH (:User{id: $userID})-[r:${SavedPostEntity.relationship.from.user.SAVE}]->(:Post) RETURN count(r) AS totalPost
       `,
       {
         userID: user.id
@@ -78,7 +80,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
 
   async deleteSavedPost(postID: string, user: User): Promise<void> {
     await this.neo4jService.write(`
-          MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})
+          MATCH (:Post{id: $postID})<-[r:${SavedPostEntity.relationship.from.user.SAVE}]-(:User{id: $userID})
           DETACH DELETE r
       `,
       this.tx,
@@ -89,7 +91,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   }
   async isSavedPost(postID: string, user: User): Promise<boolean> {
     const res = await this.neo4jService.read(`
-          MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})
+          MATCH (:Post{id: $postID})<-[r:${SavedPostEntity.relationship.from.user.SAVE}]-(:User{id: $userID})
           WITH count(r) as count
           CALL apoc.when (count > 0,
             "RETURN true AS bool",
@@ -106,22 +108,24 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       throw new InternalServerErrorException(ResponseDTO.fail("Something went wrong"))
     return res.records[0].get("result") as boolean
   }
-  async savePost(postID: string, user: User): Promise<void> {
+
+  async savePost(post: SavedPost, user: User): Promise<void> {
     await this.neo4jService.write(`
             MATCH (p:Post),
               (u:User) 
             WHERE p.id = $postID AND 
               u.id = $userID
-            CREATE (u)-[s:SAVE]->(p)
-            SET s.createdAt = $createdAt
+            CREATE (u)-[s:${SavedPostEntity.relationship.from.user.SAVE}]->(p)
+            SET s += $relProps
       `,
       this.tx,
       {
-        postID,
+        postID: post.id,
         userID: user.id,
-        createdAt: _.now()
+        relProps: SavedPostEntity.getRelationshipProps(post)
       })
   }
+
   async isExisted(postID: string): Promise<boolean> {
     const res = await this.neo4jService.read(`
           MATCH (:Post{id: $postID})
@@ -140,6 +144,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       throw new InternalServerErrorException(ResponseDTO.fail("Something went wrong"))
     return res.records[0].get("result") as boolean
   }
+
   async createPost(post: Post): Promise<Post> {
     const res = await this.neo4jService.write(`
             MATCH (u:User) WHERE u.id = $authorID

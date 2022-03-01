@@ -7,8 +7,7 @@ import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { isImageKey } from "utils";
-import { GetPostResponse } from "../getPostById/getPostResponse";
-import { GetSavedPostsResponse } from "./getSavedPostsResponse";
+import { SavedPostDTO, GetSavedPostsResponse } from "./getSavedPostsResponse";
 export class GetSavedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
   constructor(user: User, queryOptions?: PageOptionsDto) {
@@ -51,7 +50,7 @@ export class GetSavedPostsQueryHandler
 
     const postsRes = await Promise.all(
       posts.map(async (post) => {
-        const temp = new GetPostResponse(post);
+        const temp = new SavedPostDTO(post);
         const reaction = await this._postRepo.getReactionByUserId(
           user.id,
           post.id

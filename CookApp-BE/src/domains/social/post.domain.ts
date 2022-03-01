@@ -1,5 +1,6 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { Audit } from "domains/audit.domain";
+import _ = require("lodash");
 import { User } from "./user.domain";
 
 export class Post extends Audit {
@@ -29,5 +30,16 @@ export class Post extends Audit {
     this.author = post?.author
     this.numOfComment = post?.numOfComment
     this.numOfReaction = post?.numOfReaction
+  }
+}
+
+
+export class SavedPost extends Post {
+  @ApiResponseProperty({ type: Number})
+  savedAt: number
+
+  constructor(post: Partial<SavedPost>) {
+    super(post)
+    this.savedAt = post.savedAt ?? _.now()
   }
 }
