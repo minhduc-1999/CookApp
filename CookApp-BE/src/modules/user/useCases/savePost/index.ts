@@ -3,7 +3,7 @@ import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { User } from "domains/social/user.domain";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { Transaction } from "neo4j-driver";
 import { SavePostRequest } from "./savePostRequest"
@@ -27,12 +27,12 @@ export class SavePostCommandHandler implements ICommandHandler<SavePostCommand> 
 
     const isExisted = await this._postRepo.isExisted(savePostDto.postID)
     if (!isExisted) {
-      throw new NotFoundException(ResponseDTO.fail("Post not found", ErrorCode.POST_NOT_FOUND))
+      throw new NotFoundException(ResponseDTO.fail("Post not found", UserErrorCode.POST_NOT_FOUND))
     }
 
     const isSaved = await this._postRepo.isSavedPost(savePostDto.postID, user)
-    if (!isSaved) {
-      throw new ConflictException(ResponseDTO.fail("Post have been saved already", ErrorCode.POST_SAVED_ALREADY))
+    if (isSaved) {
+      throw new ConflictException(ResponseDTO.fail("Post have been saved already", UserErrorCode.POST_SAVED_ALREADY))
     }
 
     await this._postRepo.setTransaction(tx).savePost(savePostDto.postID, user)

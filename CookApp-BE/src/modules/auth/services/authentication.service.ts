@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import * as bcrypt from "bcrypt";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { isEmail } from "class-validator";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { JwtService } from "@nestjs/jwt";
@@ -68,7 +68,7 @@ class AuthenticationService implements IAuthentication {
       throw new BadRequestException(
         ResponseDTO.fail(
           "Wrong credentials provided",
-          ErrorCode.INVALID_CREDENTIAL
+          UserErrorCode.INVALID_CREDENTIAL
         )
       );
     }
@@ -87,7 +87,7 @@ class AuthenticationService implements IAuthentication {
       throw new BadRequestException(
         ResponseDTO.fail(
           "Wrong credentials provided",
-          ErrorCode.INVALID_CREDENTIAL
+          UserErrorCode.INVALID_CREDENTIAL
         )
       );
     await this.verifyPassword(password, user.password);

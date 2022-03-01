@@ -1,4 +1,5 @@
 import { User } from "@sentry/node";
+import { PageOptionsDto } from "base/pageOptions.base";
 import { Post } from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
@@ -17,4 +18,6 @@ export interface IPostRepository {
   savePost(postID: string, user: User): Promise<void>
   deleteSavedPost(postID: string, user: User): Promise<void>
   isSavedPost(postID: string, user: User): Promise<boolean>
+  getSavedPosts(user: User, pageOptionDto: PageOptionsDto): Promise<Post[]>
+  getTotalSavedPost(user: User): Promise<number>
 }

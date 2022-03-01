@@ -31,6 +31,7 @@ import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
 import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
 import { GetProfileQueryHandler } from "./useCases/getProfile";
+import { GetSavedPostsQueryHandler } from "./useCases/getSavedPosts";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
@@ -61,6 +62,7 @@ const queryHandlers = [
   GetPostCommentsQueryHandler,
   GetWallQueryHandler,
   GetUsersQueryHandler,
+  GetSavedPostsQueryHandler
 ];
 const services = [
   {

@@ -6,7 +6,7 @@ import {
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
 import { User } from "domains/social/user.domain";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { ExternalProvider } from "enums/externalProvider.enum";
 import { OAuth2Client, TokenPayload } from "google-auth-library";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
@@ -70,7 +70,7 @@ export class GoogleSignInCommandHandler
       })
       .catch(() => {
         throw new UnauthorizedException({
-          errorCode: ErrorCode.INVALID_TOKEN,
+          errorCode: UserErrorCode.INVALID_TOKEN,
           message: "Google ID Token is not valid",
         });
       });

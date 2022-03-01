@@ -11,6 +11,8 @@ import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest"
 import { ResponseDTO } from "base/dtos/response.dto";
 import _ = require("lodash");
 import { User } from "@sentry/node";
+import { PageOptionsDto } from "base/pageOptions.base";
+import { int } from "neo4j-driver";
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
@@ -20,6 +22,60 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     private neo4jService: INeo4jService) {
     super()
   }
+
+  async getSavedPosts(user: User, queryOpt: PageOptionsDto): Promise<Post[]> {
+    const res = await this.neo4jService.read(`
+        MATCH (u:User{id: $userID})-[r:SAVE]->(p:Post)
+        WITH p, u 
+        ORDER BY r.createdAt DESC
+        SKIP $skip
+        LIMIT $limit
+        UNWIND p AS post
+        CALL {
+          WITH post
+          MATCH (c:Comment)-[*]->(post) 
+          RETURN count(c) AS totalComment
+        }
+        CALL {
+          WITH post
+          MATCH (post)<-[r:REACT]-(:User)
+          RETURN count(r) AS totalReaction
+        }
+        RETURN post, 
+          totalComment, 
+          totalReaction, 
+          u AS author,
+          [(post)-[:CONTAIN]->(m:Media) | m.key] AS images
+      `,
+      {
+        userID: user.id,
+        skip: int(queryOpt.offset * queryOpt.limit),
+        limit: int(queryOpt.limit)
+      })
+    if (res.records.length === 0) return []
+    return res.records.map(record => {
+      const postNode = record.get("post")
+      const totalComment = parseInt(record.get("totalComment"))
+      const totalReaction = parseInt(record.get("totalReaction"))
+      const author = record.get("author")
+      const images: string[] = record.get("images")
+      return PostEntity.toDomain(postNode, author, images, totalComment, totalReaction)
+    })
+  }
+
+  async getTotalSavedPost(user: User): Promise<number> {
+    const res = await this.neo4jService.read(`
+        MATCH (:User{id: $userID})-[r:SAVE]->(:Post) RETURN count(r) AS totalPost
+      `,
+      {
+        userID: user.id
+      }
+    )
+    if (res.records.length === 0)
+      return 0
+    return parseInt(res.records[0].get("totalPost"))
+  }
+
   async deleteSavedPost(postID: string, user: User): Promise<void> {
     await this.neo4jService.write(`
           MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})

@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { MetaDTO } from "./responseMeta.dto";
 
 export class ResponseDTO<T> {
@@ -18,7 +18,7 @@ export class ResponseDTO<T> {
     return new ResponseDTO(new MetaDTO(true, message), data);
   }
 
-  public static fail(message: string, errorCode?: ErrorCode) {
+  public static fail(message: string, errorCode?: UserErrorCode) {
     return new ResponseDTO(new MetaDTO(false, message, errorCode))
   }
 }

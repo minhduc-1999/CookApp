@@ -9,7 +9,7 @@ import { VerifyEmailRequest } from "./verifyEmailRequest";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "nestjs-config";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { Transaction } from "neo4j-driver";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 
@@ -62,7 +62,7 @@ export class VerifyEmailCommandHandler
     }
 
     throw new UnauthorizedException(
-      ResponseDTO.fail("Invalid ID", ErrorCode.INVALID_TOKEN)
+      ResponseDTO.fail("Invalid ID", UserErrorCode.INVALID_TOKEN)
     );
   }
 }

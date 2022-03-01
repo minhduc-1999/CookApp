@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { Post } from "../../../domains/social/post.domain";
 import { IPostRepository } from "../interfaces/repositories/post.interface";
 
@@ -29,7 +29,7 @@ export class PostService implements IPostService {
 
     if (!post)
       throw new NotFoundException(
-        ResponseDTO.fail("Post not found", ErrorCode.POST_NOT_FOUND)
+        ResponseDTO.fail("Post not found", UserErrorCode.POST_NOT_FOUND)
       );
 
     // if (option?.attachAuthor) {

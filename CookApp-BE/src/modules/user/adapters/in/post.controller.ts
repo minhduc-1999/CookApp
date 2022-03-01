@@ -1,10 +1,12 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiConflictResponse, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
+import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
+  ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
 import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
@@ -21,9 +23,12 @@ import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest"
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
 import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
 import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
+import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
+import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";
 import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
 import { Transaction } from "neo4j-driver";
+import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
 
 @Controller("users/posts")
 @ApiTags("User/Post")
@@ -45,11 +50,11 @@ export class PostController {
     return Result.ok(createdPost, { messages: ["Create post successfully"] });
   }
 
-  @Get(":postId")
+  @Get(":postId/detail")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
-  @ApiNotFoundResponse({description: "Post not found"})
+  @ApiNotFoundResponse({ description: "Post not found" })
   async getPostById(
     @Param("postId", ParseUUIDPipe) postId: string,
     @UserReq() user: User
@@ -63,7 +68,7 @@ export class PostController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
   @RequestTransaction()
-  @ApiNotFoundResponse({description: "Post not found"})
+  @ApiNotFoundResponse({ description: "Post not found" })
   async editPost(
     @Body() post: EditPostRequest,
     @UserReq() user: User,
@@ -80,8 +85,8 @@ export class PostController {
   @RequestTransaction()
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Save post successfully")
-  @ApiConflictResponse({description: "Post have been saved already"})
-  @ApiNotFoundResponse({description: "Post not found"})
+  @ApiConflictResponse({ description: "Post have been saved already" })
+  @ApiNotFoundResponse({ description: "Post not found" })
   async savePost(
     @UserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
@@ -95,12 +100,13 @@ export class PostController {
     });
   }
 
+
   @Delete(":postId/save")
   @RequestTransaction()
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Delete saved post successfully")
-  @ApiConflictResponse({description: "Post have not been saved yet"})
-  @ApiNotFoundResponse({description: "Post not found"})
+  @ApiConflictResponse({ description: "Post have not been saved yet" })
+  @ApiNotFoundResponse({ description: "Post not found" })
   async deleteSavedPost(
     @UserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
@@ -111,6 +117,23 @@ export class PostController {
     await this._commandBus.execute(deleteSavedPostCommand);
     return Result.ok(null, {
       messages: ["Delete saved post successfully"],
+    });
+  }
+
+  @Get('save')
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(
+    GetSavedPostsResponse,
+    "Get saved posts successfully"
+  )
+  async getSavedPosts(
+    @Query(ParsePaginationPipe) query: PageOptionsDto,
+    @UserReq() user: User
+  ): Promise<Result<GetSavedPostsResponse>> {
+    const savedPostsQuery = new GetSavedPostsQuery(user, query);
+    const result = await this._queryBus.execute(savedPostsQuery);
+    return Result.ok(result, {
+      messages: ["Get saved posts successfully"],
     });
   }
 }

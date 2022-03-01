@@ -2,7 +2,7 @@ import { BadRequestException, Inject, Injectable } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { takeField } from "utils";
 import { IUserRepository } from "../interfaces/repositories/user.interface";
 
@@ -28,7 +28,7 @@ class UserService implements IUserService {
     const user = await this._userRepo.getUserById(userId);
     if (!user)
       throw new BadRequestException(
-        ResponseDTO.fail("User not found", ErrorCode.USER_NOT_FOUND)
+        ResponseDTO.fail("User not found", UserErrorCode.USER_NOT_FOUND)
       );
     return takeField(user, ["displayName", "id", "avatar"]);
   }
@@ -36,7 +36,7 @@ class UserService implements IUserService {
     const user = await this._userRepo.getUserById(userId);
     if (!user)
       throw new BadRequestException(
-        ResponseDTO.fail("User not found", ErrorCode.USER_NOT_FOUND)
+        ResponseDTO.fail("User not found", UserErrorCode.USER_NOT_FOUND)
       );
     return user;
   }

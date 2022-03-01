@@ -1,6 +1,6 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { Comment } from "../../../domains/social/comment.domain";
 import { ICommentRepository } from "../interfaces/repositories/comment.interface";
 
@@ -18,7 +18,7 @@ export class CommentService implements ICommentService {
     const comment = await this._commentRepo.getCommentById(commentId);
     if (!comment)
       throw new NotFoundException(
-        ResponseDTO.fail("Comment not found", ErrorCode.INVALID_ID)
+        ResponseDTO.fail("Comment not found", UserErrorCode.INVALID_ID)
       );
     return comment;
   }
