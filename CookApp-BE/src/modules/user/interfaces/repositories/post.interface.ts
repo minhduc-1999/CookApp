@@ -1,3 +1,4 @@
+import { User } from "@sentry/node";
 import { Post } from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
@@ -12,4 +13,6 @@ export interface IPostRepository {
   deleteReact(reaction: Reaction): Promise<boolean>;
   getReactionByUserId(userId: string, postId: string): Promise<Reaction>;
   setTransaction(tx: Transaction): IPostRepository
+  isExisted(postID: string): Promise<boolean>
+  savePost(postID: string, user: User): Promise<void>
 }

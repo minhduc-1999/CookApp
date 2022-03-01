@@ -5,6 +5,7 @@ import { Result } from "base/result.base";
 import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
+  ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
 import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
 import { UserReq } from "decorators/user.decorator";
@@ -18,9 +19,8 @@ import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest"
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
 import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
 import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
-import { ReactCommand } from "modules/user/useCases/react";
-import { ReactRequest } from "modules/user/useCases/react/reactRequest";
-import { ReactResponse } from "modules/user/useCases/react/reactResponse";
+import { SavePostCommand } from "modules/user/useCases/savePost";
+import { SavePostRequest } from "modules/user/useCases/savePost/savePostReponse";
 import { Transaction } from "neo4j-driver";
 
 @Controller("users/posts")
@@ -72,21 +72,20 @@ export class PostController {
     return Result.ok(updatedPost, { messages: ["Edit post successfully"] });
   }
 
-  // @PostHttp(":postId/react")
-  // @RequestTransaction()
-  // @ApiFailResponseCustom()
-  // @ApiCreatedResponseCustom(ReactResponse, "Update react status successfully")
-  // async reactPost(
-  //   @UserReq() user: User,
-  //   @Body() body: ReactRequest,
-  //   @Param("postId", ParseUUIDPipe) postId: string,
-  //   @ParamTransaction() tx: Transaction
-  // ): Promise<Result<ReactResponse>> {
-  //   body.postId = postId;
-  //   const reactCommand = new ReactCommand(tx, user, body);
-  //   const result = await this._commandBus.execute(reactCommand);
-  //   return Result.ok(result, {
-  //     messages: ["Update react status successfully"],
-  //   });
-  // }
+  @PostHttp(":postId/save")
+  @RequestTransaction()
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Save post successfully")
+  async reactPost(
+    @UserReq() user: User,
+    @Param("postId", ParseUUIDPipe) postID: string,
+    @ParamTransaction() tx: Transaction
+  ): Promise<Result<void>> {
+    const savePostReq = new SavePostRequest(postID)
+    const savePostCommand = new SavePostCommand(savePostReq, user, tx);
+    await this._commandBus.execute(savePostCommand);
+    return Result.ok(null, {
+      messages: ["Save post successfully"],
+    });
+  }
 }

@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { BaseRepository } from "base/repository.base";
 import { PostEntity } from "entities/social/post.entity";
 import { ReactionEntity } from "entities/social/reaction.entity";
@@ -8,6 +8,9 @@ import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { MediaType } from "enums/mediaType.enum";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
+import { ResponseDTO } from "base/dtos/response.dto";
+import { User } from "domains/social/user.domain";
+import _ = require("lodash");
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
@@ -16,6 +19,40 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     @Inject("INeo4jService")
     private neo4jService: INeo4jService) {
     super()
+  }
+  async savePost(postID: string, user: User): Promise<void> {
+    await this.neo4jService.write(`
+            MATCH (p:Post),
+              (u:User) 
+            WHERE p.id = $postID AND 
+              u.id = $userID
+            CREATE (u)-[s:SAVE]->(p)
+            SET s.createdAt = $createdAt
+      `,
+      this.tx,
+      {
+        postID,
+        userID: user.id,
+        createdAt: _.now()
+      })
+  }
+  async isExisted(postID: string): Promise<boolean> {
+    const res = await this.neo4jService.read(`
+          MATCH (:Post{id: $postID})
+          WITH count(*) as count
+          CALL apoc.when (count > 0,
+            "RETURN true AS bool",
+            "RETURN false AS bool",
+            {count:count}
+          ) YIELD value
+          return value.bool as result
+       `,
+      {
+        postID
+      })
+    if (res.records.length === 0)
+      throw new InternalServerErrorException(ResponseDTO.fail("Something went wrong"))
+    return res.records[0].get("result") as boolean
   }
   async createPost(post: Post): Promise<Post> {
     const res = await this.neo4jService.write(`

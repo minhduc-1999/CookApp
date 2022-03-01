@@ -34,6 +34,7 @@ import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
 import { ReactCommandHandler } from "./useCases/react";
+import { SavePostCommandHandler } from "./useCases/savePost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 
@@ -48,6 +49,7 @@ const commandHandlers = [
   FollowCommandHandler,
   UnfolllowCommandHandler,
   UpdateProfileCommandHandler,
+  SavePostCommandHandler
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
