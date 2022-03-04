@@ -13,9 +13,16 @@ export abstract class PostBase extends Audit {
     this.numOfComment = post?.numOfComment
     this.numOfReaction = post?.numOfReaction
   }
+
+  abstract canCreate(): boolean
 }
 
 export class Moment extends PostBase {
+  canCreate(): boolean {
+    if (!this.content)
+      return false
+    return true
+  }
   content: string
   images?: string[]
   videos?: string[]
@@ -30,6 +37,11 @@ export class Moment extends PostBase {
 }
 
 export class Album extends PostBase {
+  canCreate(): boolean {
+    if (!this.name)
+      return false
+    return true
+  }
   name: string
   images?: string[]
   videos?: string[]
