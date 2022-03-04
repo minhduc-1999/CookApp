@@ -1,21 +1,26 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
+import { PostResponse } from "base/dtos/response.dto";
 import { SavedPost } from "domains/social/post.domain";
-import { GetPostResponse } from "../getPostById/getPostResponse";
 
-export class SavedPostDTO extends GetPostResponse {
-  @ApiResponseProperty({ type: Number})
+export class SavedPostDTO {
+  @ApiResponseProperty({ type: Number })
   savedAt: number
-  constructor(post: SavedPost) {
-    super(post)
-    this.savedAt = post.savedAt
+
+  @ApiResponseProperty({ type: PostResponse })
+  post: PostResponse
+
+  constructor(savedPost: SavedPost) {
+    this.savedAt = savedPost.savedAt
+    this.post = new PostResponse(savedPost.post)
   }
 }
 
 export class GetSavedPostsResponse {
-  @ApiResponseProperty({ type: [GetPostResponse] })
+  @ApiResponseProperty({ type: [PostResponse] })
   posts: SavedPostDTO[];
 
+  @ApiResponseProperty({ type: PageMetadata })
   metadata: PageMetadata;
 
   constructor(posts: SavedPostDTO[], meta: PageMetadata) {

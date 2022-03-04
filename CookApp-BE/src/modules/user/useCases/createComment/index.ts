@@ -62,6 +62,6 @@ export class CreateCommentCommandHandler
     }
     
     this._eventBus.publish(new CommentPostEvent(post, user));
-    return createdComment;
+    return new CreateCommentResponse(createdComment);
   }
 }

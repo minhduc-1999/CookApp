@@ -4,8 +4,8 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostService } from "modules/user/services/post.service";
-import { GetPostResponse } from "./getPostResponse";
 import { isImageKey } from "utils";
+import { GetPostResponse } from "./getPostResponse";
 
 export class GetPostDetailQuery extends BaseQuery {
   postId: string;

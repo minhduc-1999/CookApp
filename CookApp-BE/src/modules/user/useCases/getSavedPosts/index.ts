@@ -24,12 +24,13 @@ export class GetSavedPostsQueryHandler
     @Inject("IStorageService") private _storageService: IStorageService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-  ) {}
+  ) { }
   async execute(query: GetSavedPostsQuery): Promise<GetSavedPostsResponse> {
     const { queryOptions, user } = query;
     const posts = await this._postRepo.getSavedPosts(user, queryOptions);
 
-    for (let post of posts) {
+    for (let item of posts) {
+      const { post } = item
       post.images = await this._storageService.getDownloadUrls(post.images);
       if (post.author?.avatar && isImageKey(post.author?.avatar)) {
         post.author.avatar = (
@@ -49,14 +50,14 @@ export class GetSavedPostsQueryHandler
     }
 
     const postsRes = await Promise.all(
-      posts.map(async (post) => {
-        const temp = new SavedPostDTO(post);
+      posts.map(async (item) => {
+        const temp = new SavedPostDTO(item);
         const reaction = await this._postRepo.getReactionByUserId(
           user.id,
-          post.id
+          item.post.id
         );
         if (reaction) {
-          temp.reaction = reaction.type;
+          temp.post.reaction = reaction.type;
         }
         return temp;
       })

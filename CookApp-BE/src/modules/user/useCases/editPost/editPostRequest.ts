@@ -5,7 +5,6 @@ import {
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
-import { Post } from "domains/social/post.domain";
 
 export class EditPostRequest {
   @IsNotEmpty()
@@ -32,8 +31,11 @@ export class EditPostRequest {
 
   id: string
 
-  toUpdateDomain(post: Post): Post {
-    post.content = this.content
-    return post
-  }
+  @ApiProperty({
+    description: "Album's name",
+    type: String
+  })
+  @IsMeaningfulString(1)
+  @IsString()
+  name: string
 }

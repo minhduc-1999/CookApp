@@ -1,4 +1,3 @@
-import { Comment } from "domains/social/comment.domain";
+import { CommentResponse } from "base/dtos/response.dto";
 
-export class CreateCommentResponse extends Comment {
-}
+export class CreateCommentResponse extends CommentResponse {}

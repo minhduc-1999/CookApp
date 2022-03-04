@@ -2,14 +2,13 @@ import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestj
 import { BaseRepository } from "base/repository.base";
 import { PostEntity, SavedPostEntity } from "entities/social/post.entity";
 import { ReactionEntity } from "entities/social/reaction.entity";
-import { Post, SavedPost } from "domains/social/post.domain";
+import { PostBase, SavedPost, Post} from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { MediaType } from "enums/mediaType.enum";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 import { ResponseDTO } from "base/dtos/response.dto";
-import _ = require("lodash");
 import { User } from "@sentry/node";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { int } from "neo4j-driver";
@@ -67,7 +66,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
 
   async getTotalSavedPost(user: User): Promise<number> {
     const res = await this.neo4jService.read(`
-        MATCH (:User{id: $userID})-[r:${SavedPostEntity.relationship.from.user.SAVE}]->(:Post) RETURN count(r) AS totalPost
+        MATCH (:User{id: $userID})-[r:SAVE]->(:Post) RETURN count(r) AS totalPost
       `,
       {
         userID: user.id
@@ -80,7 +79,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
 
   async deleteSavedPost(postID: string, user: User): Promise<void> {
     await this.neo4jService.write(`
-          MATCH (:Post{id: $postID})<-[r:${SavedPostEntity.relationship.from.user.SAVE}]-(:User{id: $userID})
+          MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})
           DETACH DELETE r
       `,
       this.tx,
@@ -91,7 +90,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   }
   async isSavedPost(postID: string, user: User): Promise<boolean> {
     const res = await this.neo4jService.read(`
-          MATCH (:Post{id: $postID})<-[r:${SavedPostEntity.relationship.from.user.SAVE}]-(:User{id: $userID})
+          MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})
           WITH count(r) as count
           CALL apoc.when (count > 0,
             "RETURN true AS bool",
@@ -109,20 +108,20 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     return res.records[0].get("result") as boolean
   }
 
-  async savePost(post: SavedPost, user: User): Promise<void> {
+  async savePost(item: SavedPost): Promise<void> {
     await this.neo4jService.write(`
             MATCH (p:Post),
               (u:User) 
             WHERE p.id = $postID AND 
               u.id = $userID
-            CREATE (u)-[s:${SavedPostEntity.relationship.from.user.SAVE}]->(p)
+            CREATE (u)-[s:SAVE]->(p)
             SET s += $relProps
       `,
       this.tx,
       {
-        postID: post.id,
-        userID: user.id,
-        relProps: SavedPostEntity.getRelationshipProps(post)
+        postID: item.post.id,
+        userID: item.saver.id,
+        relProps: SavedPostEntity.fromDomain(item)
       })
   }
 
@@ -248,7 +247,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       return PostEntity.toDomain(postNode, authorID, images, totalComment, totalReaction)
     })
   }
-  async updatePost(updatingPost: Partial<Post>, editPostDto: EditPostRequest): Promise<void> {
+  async updatePost(updatingPost: Post, editPostDto: EditPostRequest): Promise<void> {
     await this.neo4jService.write(`
             MATCH (p:Post{id: $postID})
             SET p += $newUpdate
@@ -281,7 +280,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   }
 
   async reactPost(reaction: Reaction): Promise<boolean> {
-    if (reaction.target instanceof Post) {
+    if (reaction.target instanceof PostBase) {
       const res = await this.neo4jService.write(`
         MATCH (u:User{id: $userID})
         MATCH (p:Post{id: $postID})
@@ -304,7 +303,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   }
 
   async deleteReact(reaction: Reaction): Promise<boolean> {
-    if (reaction.target instanceof Post) {
+    if (reaction.target instanceof PostBase) {
       const res = await this.neo4jService.write(`
         MATCH (u:User{id: $userID})-[r:REACT]->(p:Post{id: $postID})
         DELETE r

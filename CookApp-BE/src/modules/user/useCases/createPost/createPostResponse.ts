@@ -1,59 +1,25 @@
-import { ApiResponseProperty, PickType } from "@nestjs/swagger";
+import { PickType } from "@nestjs/swagger";
+import { PostResponse } from "base/dtos/response.dto";
 import { Post } from "domains/social/post.domain";
-import { User } from "domains/social/user.domain";
-import { ReactionType } from "enums/reaction.enum";
 
-class Author extends PickType(User, ["id", "avatar", "displayName"]) { }
-
-export class CreatePostResponse {  
-  constructor(post: Post) {
-    this.id = post.id
-    this.createdAt = post.createdAt
-    this.updatedAt = post.updatedAt
-    this.updatedBy = post.updatedBy
-    this.content = post.content;
-    this.images = post.images;
-    this.videos = post.videos;
-    this.author = {
-      avatar: post.author?.avatar,
-      id: post.author?.id,
-      displayName: post.author?.displayName,
-    };
-    this.numOfComment = post.numOfComment;
-    this.numOfReaction = post.numOfReaction;
-  }
-
-  @ApiResponseProperty({ type: String })
-  id: string
-
-  @ApiResponseProperty({ type: Number})
-  createdAt: number
-
-  @ApiResponseProperty({ type: Number})
-  updatedAt?: number
-
-  @ApiResponseProperty({ type: String})
-  updatedBy?: string
-
-  @ApiResponseProperty({ type: String })
-  content: string;
-
-  @ApiResponseProperty({ type: [String] })
-  images: string[];
-
-  @ApiResponseProperty({ type: [String] })
-  videos: string[];
-
-  @ApiResponseProperty({ type: Author })
-  author: Author
-
-  @ApiResponseProperty({ type: Number })
-  numOfReaction: number;
-
-  @ApiResponseProperty({ type: Number })
-  numOfComment: number;
-
-  @ApiResponseProperty({ enum: ReactionType })
-  reaction?: ReactionType;
-
+export class CreatePostResponse extends PickType(
+  PostResponse, ["id", "createdAt", "content", "videos", "images", "name", "kind"]) {
+    constructor(post: Post) {
+      super(post)
+      this.id = post?.id
+      this.kind = post?.kind
+      this.createdAt = post?.createdAt
+      switch (post.kind) {
+        case "Album":
+          this.name = post?.name
+          this.images = post?.images
+          this.videos = post?.videos
+          break;
+      case "Moment":
+          this.content = post?.content
+          this.images = post?.images
+          this.videos = post?.videos
+          break;
+      }
+    }
 }

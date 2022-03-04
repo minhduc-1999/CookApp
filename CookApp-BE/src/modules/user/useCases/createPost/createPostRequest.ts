@@ -1,14 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
+import { PostType } from "enums/mediaType.enum";
 
 export class CreatePostRequest {
   @IsNotEmpty()
-  @ApiProperty({ type: String })
+  @ApiPropertyOptional({ type: String, description: "Moment's content" })
   @IsString()
   @IsMeaningfulString(1)
-  content: string;
+  @IsOptional()
+  content?: string;
 
   @ApiPropertyOptional({ type: [String] })
   @IsArray()
@@ -23,4 +25,15 @@ export class CreatePostRequest {
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
   videos?: string[];
+
+  @IsEnum(PostType)
+  @ApiProperty({ enum: PostType })
+  kind: "Album" | "Moment"
+
+  @IsOptional()
+  @IsMeaningfulString(1)
+  @ApiPropertyOptional({ type: String, description: "Album's name" })
+  @IsOptional()
+  name?: string
 }
+

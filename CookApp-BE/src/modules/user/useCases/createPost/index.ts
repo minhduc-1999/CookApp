@@ -2,7 +2,7 @@ import { Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { Post } from "domains/social/post.domain";
+import { Album, Moment } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
@@ -12,10 +12,10 @@ import { IPostRepository } from "modules/user/interfaces/repositories/post.inter
 import { NewPostEvent } from "modules/notification/events/NewPostNotification";
 
 export class CreatePostCommand extends BaseCommand {
-  post: CreatePostRequest;
+  req: CreatePostRequest;
   constructor(user: User, post: CreatePostRequest, tx: Transaction) {
     super(tx, user);
-    this.post = post;
+    this.req = post;
   }
 }
 
@@ -31,21 +31,40 @@ export class CreatePostCommandHandler
     private _eventBus: EventBus,
   ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
-    const { post, user, tx } = command;
-    if (post.images?.length > 0) {
-      post.images = await this._storageService.makePublic(
-        post.images,
+    const { req, user, tx } = command;
+    if (req.images?.length > 0) {
+      req.images = await this._storageService.makePublic(
+        req.images,
         MediaType.POST_IMAGE
       );
     }
-    
-    const creatingPost = new Post({
-      ...post,
-      author: user,
-    });
-    const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
-    result.images = await this._storageService.getDownloadUrls(result.images)
-    this._eventBus.publish(new NewPostEvent(result, user))
-    return new CreatePostResponse(result);
+
+    switch (req.kind) {
+      case "Album": {
+        const post = new Album({
+          author: user,
+          name: req.name,
+          images: req.images,
+          videos: req.videos
+        })
+        break;
+      }
+      case "Moment": {
+        const creatingPost = new Moment({
+          author: user,
+          content: req.content,
+          images: req.images,
+          videos: req.videos
+        });
+        const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
+        result.images = await this._storageService.getDownloadUrls(result.images)
+        this._eventBus.publish(new NewPostEvent(result, user))
+        return new CreatePostResponse(result);
+      }
+      default: {
+        break;
+      }
+    }
+
   }
 }

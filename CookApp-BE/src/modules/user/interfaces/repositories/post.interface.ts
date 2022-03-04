@@ -9,13 +9,13 @@ export interface IPostRepository {
   createPost(post: Post): Promise<Post>;
   getPostById(postId: string): Promise<Post>;
   getPostByIds(postId: string[]): Promise<Post[]>;
-  updatePost(post: Partial<Post>, editPostDto: EditPostRequest): Promise<void>;
+  updatePost(post: Post, editPostDto: EditPostRequest): Promise<void>;
   reactPost(reaction: Reaction): Promise<boolean>;
   deleteReact(reaction: Reaction): Promise<boolean>;
   getReactionByUserId(userId: string, postId: string): Promise<Reaction>;
   setTransaction(tx: Transaction): IPostRepository
   isExisted(postID: string): Promise<boolean>
-  savePost(post: SavedPost, user: User): Promise<void>
+  savePost(savedPost: SavedPost): Promise<void>
   deleteSavedPost(postID: string, user: User): Promise<void>
   isSavedPost(postID: string, user: User): Promise<boolean>
   getSavedPosts(user: User, pageOptionDto: PageOptionsDto): Promise<SavedPost[]>

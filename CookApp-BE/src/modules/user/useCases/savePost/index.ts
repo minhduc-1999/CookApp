@@ -1,4 +1,4 @@
-import { ConflictException, Inject, NotFoundException } from "@nestjs/common";
+import { ConflictException, Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ResponseDTO } from "base/dtos/response.dto";
@@ -36,8 +36,11 @@ export class SavePostCommandHandler implements ICommandHandler<SavePostCommand> 
       throw new ConflictException(ResponseDTO.fail("Post have been saved already", UserErrorCode.POST_SAVED_ALREADY))
     }
 
-    const savedPost = new SavedPost(existedPost)
+    const savedPost = new SavedPost({
+      post: existedPost,
+      saver: user
+    })
 
-    await this._postRepo.setTransaction(tx).savePost(savedPost, user)
+    await this._postRepo.setTransaction(tx).savePost(savedPost)
   }
 }

@@ -1,20 +1,10 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
+import { AuthorResponse } from "base/dtos/response.dto";
 import { Wall } from "domains/social/wall.domain";
 
-class User {
-  @ApiResponseProperty({ type: String })
-  avatar: string;
-  @ApiResponseProperty({ type: String })
-  displayName: string;
-  @ApiResponseProperty({ type: String })
-  id: string;
-}
-
 export class GetWallResponse {
-  @Type(() => User)
-  @ApiResponseProperty({ type: User })
-  user: User;
+  @ApiResponseProperty({ type: AuthorResponse })
+  user: AuthorResponse;
 
   @ApiResponseProperty({ type: Number })
   numberOfPost: number;
@@ -29,11 +19,7 @@ export class GetWallResponse {
   isFollowed?: boolean;
 
   constructor(wall: Wall, isFollowed: boolean = null) {
-    this.user = {
-      avatar: wall.user.avatar,
-      id: wall.user.id,
-      displayName: wall.user.displayName,
-    };
+    this.user = new AuthorResponse(wall.user)
     this.numberOfFollower = wall.numberOfFollower;
     this.numberOfFollowing = wall.numberOfFollowing;
     this.numberOfPost = wall.numberOfPost;

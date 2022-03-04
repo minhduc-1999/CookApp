@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { Media } from "domains/social/media.domain";
-import { Post } from "domains/social/post.domain";
+import { PostBase } from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { Transaction } from "neo4j-driver";
 import { IMediaRepository } from "../interfaces/repositories/media.interface";
@@ -20,7 +20,7 @@ export class ReactionService implements IReactionService {
     private _mediaRepo: IMediaRepository
   ) { }
   async unreact(reaction: Reaction, tx: Transaction): Promise<void> {
-    if (reaction.target instanceof Post) {
+    if (reaction.target instanceof PostBase) {
       await this._postRepo.setTransaction(tx).deleteReact(reaction)
       return
     }
@@ -31,7 +31,7 @@ export class ReactionService implements IReactionService {
   }
 
   async react(reaction: Reaction, tx: Transaction): Promise<void> {
-    if (reaction.target instanceof Post) {
+    if (reaction.target instanceof PostBase) {
       await this._postRepo.setTransaction(tx).reactPost(reaction)
       return
     }

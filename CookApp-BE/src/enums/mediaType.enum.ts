@@ -3,3 +3,7 @@ export enum MediaType {
   AVATAR = "AVATAR",
   POST_VIDEO = "POST_VIDEO"
 }
+
+export enum PostType {
+  Album, Moment
+}

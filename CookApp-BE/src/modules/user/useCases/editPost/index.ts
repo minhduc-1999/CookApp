@@ -13,11 +13,12 @@ import { IPostRepository } from "modules/user/interfaces/repositories/post.inter
 import { ConfigService } from "nestjs-config";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { MediaType } from "enums/mediaType.enum";
+import { Album, Moment, Post } from "domains/social/post.domain";
 export class EditPostCommand extends BaseCommand {
-  editPostDto: EditPostRequest;
+  req: EditPostRequest;
   constructor(tx: Transaction, user: User, post: EditPostRequest) {
     super(tx, user);
-    this.editPostDto = Object.assign(new EditPostRequest(), post);
+    this.req = Object.assign(new EditPostRequest(), post);
   }
 }
 
@@ -34,8 +35,8 @@ export class EditPostCommandHandler
     private _storageService: IStorageService,
   ) { }
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
-    const { user, tx, editPostDto } = command;
-    const existedPost = await this._postService.getPostDetail(editPostDto.id);
+    const { user, tx, req } = command;
+    const existedPost = await this._postService.getPostDetail(req.id);
 
     if (existedPost.author.id !== user.id)
       throw new ForbiddenException(
@@ -46,7 +47,7 @@ export class EditPostCommandHandler
       );
 
     // Convert delete image urls to image key
-    const deleteImageKeys = editPostDto.deleteImages ? editPostDto.deleteImages.map(url => {
+    const deleteImageKeys = req.deleteImages ? req.deleteImages.map(url => {
       return retrieveObjectNameFromUrl(
         url,
         this._configService.get("storage.publicUrl")
@@ -54,23 +55,39 @@ export class EditPostCommandHandler
     }) : []
 
     // Delete images
-    if (editPostDto.deleteImages && editPostDto.deleteImages.length > 0) {
+    if (req.deleteImages && req.deleteImages.length > 0) {
       // await this._mediaRepository.setTransaction(tx).deleteMedias(deleteImageKeys)
       await this._storageService.deleteFiles(deleteImageKeys);
-      editPostDto.deleteImages = deleteImageKeys
+      req.deleteImages = deleteImageKeys
     }
 
     // Add new images
-    if (editPostDto.addImages && editPostDto.addImages.length > 0) {
+    if (req.addImages && req.addImages.length > 0) {
       const keys = await this._storageService.makePublic(
-        command.editPostDto.addImages,
+        command.req.addImages,
         MediaType.POST_IMAGE
       );
-      editPostDto.addImages = keys
+      req.addImages = keys
       // await this._mediaRepository.setTransaction(tx).addMedias(keys, MediaType.POST_IMAGE)
     }
 
-     await this._postRepo.setTransaction(tx).updatePost(editPostDto.toUpdateDomain(existedPost), editPostDto);
+    let updateData: Post;
+    switch (existedPost.kind) {
+      case "Album":
+        updateData = new Album({
+          id: req.id,
+          name: req.name
+        })
+        break;
+      case "Moment":
+        updateData = new Moment({
+          id: req.id,
+          content: req.content
+        })
+        break;
+    }
+
+    await this._postRepo.setTransaction(tx).updatePost(updateData, req);
     return new EditPostResponse();
   }
 }
