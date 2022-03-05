@@ -18,9 +18,7 @@ import {
 } from "modules/user/useCases/getPostComments";
 import { GetPostCommentsResponse } from "modules/user/useCases/getPostComments/getPostCommentsResponse";
 import { Transaction } from "neo4j-driver";
-import {
-  ParseCommentPaginationPipe,
-} from "pipes/parsePagination.pipe";
+import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/posts/:postId")
 @ApiTags("User/Comment")
@@ -53,7 +51,7 @@ export class CommentController {
     "Get post's comments successfully"
   )
   async getPostCommentsPosts(
-    @Query(ParseCommentPaginationPipe) query: CommentPageOption,
+    @Query(new ParseRequestPipe<typeof CommentPageOption>()) query: CommentPageOption,
     @UserReq() user: User,
     @Param("postId", ParseUUIDPipe) postId: string
   ): Promise<Result<GetPostCommentsResponse>> {

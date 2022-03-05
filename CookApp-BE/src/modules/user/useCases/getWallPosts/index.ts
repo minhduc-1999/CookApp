@@ -2,17 +2,17 @@ import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
-import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
+import { GetWallPostsRequest } from "./getWallPostsRequest";
 import { GetWallPostsResponse } from "./getWallPostsResponse";
 export class GetWallPostsQuery extends BaseQuery {
-  queryOptions: PageOptionsDto;
+  queryReq: GetWallPostsRequest;
   targetId: string;
-  constructor(user: User, targetId: string, queryOptions?: PageOptionsDto) {
+  constructor(user: User, targetId: string, queryOptions?: GetWallPostsRequest) {
     super(user);
-    this.queryOptions = queryOptions;
+    this.queryReq = queryOptions;
     this.targetId = targetId;
   }
 }
@@ -27,17 +27,17 @@ export class GetWallPostsQueryHandler
     @Inject("IStorageService") private _storageService: IStorageService
   ) { }
   async execute(query: GetWallPostsQuery): Promise<GetWallPostsResponse> {
-    const { queryOptions, targetId } = query;
-    const posts = await this._wallRepo.getPosts(targetId, queryOptions);
+    const { queryReq, targetId } = query;
+    const posts = await this._wallRepo.getPosts(targetId, queryReq);
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
     }
-    const totalCount = await this._wallRepo.getTotalPosts(targetId);
+    const totalCount = await this._wallRepo.getTotalPosts(targetId, queryReq);
     let meta: PageMetadata;
     if (posts.length > 0) {
       meta = new PageMetadata(
-        queryOptions.offset,
-        queryOptions.limit,
+        queryReq.offset,
+        queryReq.limit,
         totalCount
       );
     }

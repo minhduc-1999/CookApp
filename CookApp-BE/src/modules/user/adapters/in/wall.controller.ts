@@ -9,7 +9,6 @@ import {
 } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
@@ -23,22 +22,23 @@ import { FollowResponse } from "modules/user/useCases/follow/followResponse";
 import { GetWallQuery } from "modules/user/useCases/getWall";
 import { GetWallResponse } from "modules/user/useCases/getWall/getWallResponse";
 import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";
+import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallPostsRequest";
 import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWallPostsResponse";
 import { UnfolllowCommand } from "modules/user/useCases/unfollow";
 import { Transaction } from "neo4j-driver";
-import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
+import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/:id/walls")
 @ApiTags("User/Wall")
 @ApiBearerAuth()
 export class WallController {
-  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
+  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
 
   @Get("posts")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetWallPostsResponse, "Get wall's posts successfully")
   async getWallPosts(
-    @Query(ParsePaginationPipe) query: PageOptionsDto,
+    @Query(new ParseRequestPipe<typeof GetWallPostsRequest>()) query: GetWallPostsRequest,
     @UserReq() user: User,
     @Param("id", ParseUUIDPipe) targetId: string
   ): Promise<Result<GetWallPostsResponse>> {

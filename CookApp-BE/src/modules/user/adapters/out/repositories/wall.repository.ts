@@ -1,5 +1,4 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { PostEntity } from "entities/social/post.entity";
 import { WallEntity } from "entities/social/wall.entity";
@@ -8,6 +7,7 @@ import { Wall } from "domains/social/wall.domain";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 import { int } from "neo4j-driver";
+import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallPostsRequest";
 
 @Injectable()
 export class WallRepository extends BaseRepository implements IWallRepository {
@@ -17,18 +17,37 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     super()
   }
 
-  async getPosts(userID: string, query: PageOptionsDto): Promise<Post[]> {
-    const res = await this.neo4jService.read(`
-        MATCH (:User{id: $userID})-[:OWN]->(p:Post) 
-        RETURN p
-        ORDER BY p.createdAd DESC
-        SKIP $skip
-        LIMIT $limit
-      `,
+  async getPosts(userID: string, query: GetWallPostsRequest): Promise<Post[]> {
+    let queryStr: string
+    switch (query.kind) {
+      case "Album":
+      case "Moment":
+        queryStr = `
+          MATCH (:User{id: $userID})-[:OWN]->(p:Post) 
+          WHERE p.kind = $kind 
+          RETURN p
+          ORDER BY p.createdAd DESC
+          SKIP $skip
+          LIMIT $limit
+        `
+        break;
+      default:
+        queryStr = `
+          MATCH (:User{id: $userID})-[:OWN]->(p:Post) 
+          RETURN p
+          ORDER BY p.createdAd DESC
+          SKIP $skip
+          LIMIT $limit
+        `
+        break;
+    }
+    const res = await this.neo4jService.read(
+      queryStr,
       {
         userID,
         skip: int(query.offset * query.limit),
-        limit: int(query.limit)
+        limit: int(query.limit),
+        kind: query.kind
       }
     )
     if (res.records.length === 0)
@@ -36,12 +55,27 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     return res.records.map(record => PostEntity.toDomain(record.get("p")))
   }
 
-  async getTotalPosts(userID: string): Promise<number> {
-    const res = await this.neo4jService.read(`
-        MATCH (:User{id: $userID})-[r:OWN]->(:Post) RETURN count(r) AS totalPost
-      `,
+  async getTotalPosts(userID: string, query: GetWallPostsRequest): Promise<number> {
+    let queryStr: string
+    switch (query.kind) {
+      case "Album":
+      case "Moment":
+        queryStr = `
+          MATCH (:User{id: $userID})-[r:OWN]->(p:Post) 
+          WHERE p.kind = $kind
+          RETURN count(r) AS totalPost
+        `
+        break;
+      default:
+        queryStr = `
+          MATCH (:User{id: $userID})-[r:OWN]->(:Post) RETURN count(r) AS totalPost
+        `
+        break;
+    }
+    const res = await this.neo4jService.read(queryStr,
       {
-        userID
+        userID,
+        kind: query.kind
       }
     )
     if (res.records.length === 0)

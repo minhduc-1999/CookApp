@@ -28,7 +28,7 @@ import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSa
 import { SavePostCommand } from "modules/user/useCases/savePost";
 import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
 import { Transaction } from "neo4j-driver";
-import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
+import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/posts")
 @ApiTags("User/Post")
@@ -127,7 +127,7 @@ export class PostController {
     "Get saved posts successfully"
   )
   async getSavedPosts(
-    @Query(ParsePaginationPipe) query: PageOptionsDto,
+    @Query(new ParseRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
     @UserReq() user: User
   ): Promise<Result<GetSavedPostsResponse>> {
     const savedPostsQuery = new GetSavedPostsQuery(user, query);

@@ -18,7 +18,7 @@ import { GetUsersResponse } from "modules/user/useCases/getUsers/getUsersRespons
 import { UpdateProfileCommand } from "modules/user/useCases/updateProfile";
 import { UpdateProfileRequest } from "modules/user/useCases/updateProfile/updateProfileRequest";
 import { Transaction } from "neo4j-driver";
-import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
+import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users")
 @ApiTags("Users")
@@ -32,7 +32,7 @@ export class UserController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetUsersResponse, "Get users successfully")
   async findUsers(
-    @Query(ParsePaginationPipe) query: PageOptionsDto,
+    @Query(new ParseRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
     @UserReq() user: User
   ): Promise<Result<GetUsersResponse>> {
     const queryOp = new GetUsersQuery(user, query);
