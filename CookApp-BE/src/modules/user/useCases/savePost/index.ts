@@ -29,7 +29,7 @@ export class SavePostCommandHandler implements ICommandHandler<SavePostCommand> 
   async execute(command: SavePostCommand): Promise<void> {
     const { savePostDto, tx, user } = command
 
-    const existedPost = await this._postService.getPostDetail(savePostDto.postID)
+    const [ existedPost ] = await this._postService.getPostDetail(savePostDto.postID)
 
     const isSaved = await this._postRepo.isSavedPost(savePostDto.postID, user)
     if (isSaved) {

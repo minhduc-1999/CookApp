@@ -26,7 +26,7 @@ export class GetPostDetailQueryHandler
     private _storageService: IStorageService
   ) {}
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
-    const post = await this._postService.getPostDetail(query.postId);
+    const [post, reaction] = await this._postService.getPostDetail(query.postId, query.user.id);
     post.images = await this._storageService.getDownloadUrls(post.images);
     if (post.author?.avatar && isImageKey(post.author.avatar)) {
       post.author.avatar = (
@@ -35,13 +35,8 @@ export class GetPostDetailQueryHandler
     }
     const result = new GetPostResponse(post);
 
-    // const reaction = await this._postRepo.getReactionByUserId(
-    //   query.user.id,
-    //   post.id
-    // );
-    // if (reaction) {
-    //   result.reaction = reaction.type;
-    // }
+    result.reaction = reaction && reaction.type 
+
     return result;
   }
 }

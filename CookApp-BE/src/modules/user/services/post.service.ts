@@ -1,29 +1,22 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { Reaction } from "domains/social/reaction.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { Post } from "../../../domains/social/post.domain";
 import { IPostRepository } from "../interfaces/repositories/post.interface";
 
 export interface IPostService {
-  getPostDetail(postId: string, option?: PostOption): Promise<Post>;
+  getPostDetail(postId: string, userID?: string): Promise<[Post, Reaction]>;
 }
 
-type PostOption = {
-  attachAuthor: boolean;
-};
 
 @Injectable()
 export class PostService implements IPostService {
   constructor(
     @Inject("IPostRepository") private _postRepo: IPostRepository,
-  ) {}
+  ) { }
 
-  async getPostDetail(postId: string, option?: PostOption): Promise<Post> {
-    const defaultOpt: PostOption = {
-      attachAuthor: true,
-    };
-
-    option = option ? { ...defaultOpt, ...option } : defaultOpt;
+  async getPostDetail(postId: string, userID?: string): Promise<[Post, Reaction]> {
 
     const post = await this._postRepo.getPostById(postId);
 
@@ -32,12 +25,15 @@ export class PostService implements IPostService {
         ResponseDTO.fail("Post not found", UserErrorCode.POST_NOT_FOUND)
       );
 
-    // if (option?.attachAuthor) {
-    //   post.author = await this._userService.getUserPublicInfo(post.author.id);
-    // } else {
-    //   delete post.author;
-    // }
+    let reaction: Reaction;
 
-    return post;
+    if (userID) {
+       reaction = await this._postRepo.getReactionByUserId(
+        userID,
+        post.id
+      );
+    }
+
+    return [post, reaction];
   }
 }

@@ -54,7 +54,7 @@ export class ReactCommandHandler
 
     switch (reactReq.targetType) {
       case ReactionTargetType.POST:
-        const post = await this._postService.getPostDetail(reactReq.targetKeyOrID);
+        const [ post ] = await this._postService.getPostDetail(reactReq.targetKeyOrID);
         reaction.setTarget(post)
         existedReaction = await this._postRepo.getReactionByUserId(
           user.id,

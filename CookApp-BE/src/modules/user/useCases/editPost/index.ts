@@ -36,7 +36,7 @@ export class EditPostCommandHandler
   ) { }
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
     const { user, tx, req } = command;
-    const existedPost = await this._postService.getPostDetail(req.id);
+    const [existedPost] = await this._postService.getPostDetail(req.id);
 
     if (existedPost.author.id !== user.id)
       throw new ForbiddenException(

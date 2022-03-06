@@ -38,7 +38,7 @@ export class CreateCommentCommandHandler
   ) { }
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
     const { commentReq, user, tx } = command;
-    const post = await this._postService.getPostDetail(commentReq.postId);
+    const [post] = await this._postService.getPostDetail(commentReq.postId);
     const comment = new Comment({
       content: commentReq.content,
       user,
@@ -57,10 +57,10 @@ export class CreateCommentCommandHandler
         .createComment(comment);
     }
 
-    if(!createdComment) {
-      throw new InternalServerErrorException() 
+    if (!createdComment) {
+      throw new InternalServerErrorException()
     }
-    
+
     this._eventBus.publish(new CommentPostEvent(post, user));
     return new CreateCommentResponse(createdComment);
   }

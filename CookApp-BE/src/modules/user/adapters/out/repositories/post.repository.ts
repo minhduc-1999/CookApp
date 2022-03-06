@@ -331,7 +331,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       },
     )
     if (res.records.length === 0)
-      return null
+      return undefined
     return ReactionEntity.toDomain(res.records[0].get('path'))
   }
 }
