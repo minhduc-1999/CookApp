@@ -1,19 +1,17 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
-import { Type } from "class-transformer";
-import { FoodDTO } from "domains/core/food.dto";
+import { FoodResponse } from "base/dtos/response.dto";
+import { Food } from "domains/core/food.domain";
 
 export class GetFoodsResponse {
-  @ApiResponseProperty({ type: [FoodDTO] })
-  @Type(() => FoodDTO)
-  foods: FoodDTO[];
+  @ApiResponseProperty({ type: [FoodResponse] })
+  foods: FoodResponse[];
 
   @ApiResponseProperty({ type: PageMetadata })
-  @Type(() => PageMetadata)
   metadata: PageMetadata;
 
-  constructor(foods: FoodDTO[], meta: PageMetadata) {
-    this.foods = foods;
+  constructor(foods: Food[], meta: PageMetadata) {
+    this.foods = foods.map(food => new FoodResponse(food));
     this.metadata = meta;
   }
 }

@@ -2,21 +2,22 @@ import { Prop } from "@nestjs/mongoose";
 import { Audit } from "domains/audit.domain";
 
 export abstract class AbstractSchema {
-  id: string;
+  @Prop()
+  _id: string;
 
-  @Prop({ schemaName: "updated_at", required: true })
+  @Prop()
   updatedAt: number;
 
-  @Prop({ schemaName: "created_at", required: true })
+  @Prop({required: true })
   createdAt: number;
 
-  @Prop({ schemaName: "updated_by", required: true })
+  @Prop()
   updatedBy: string;
 
-  @Prop({ schemaName: "deleted_at" })
+  @Prop()
   deletedAt: number;
 
-  @Prop({ schemaName: "deleted_by" })
+  @Prop()
   deletedBy: string;
 
   constructor(audit: Partial<Audit>) {

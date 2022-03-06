@@ -14,21 +14,11 @@ export class Audit {
   deletedBy?: string;
 
   constructor(audit: Partial<Audit>) {
-    this.createdAt = audit.createdAt ?? _.now()
-    this.id = audit.id
-    this.updatedAt = audit.updatedAt
-    this.updatedBy = audit.updatedBy
-    this.deletedAt = audit.deletedAt
-    this.deletedBy = audit.deletedBy
-  }
-
-  update(userId: string) {
-    this.updatedBy = userId;
-    this.updatedAt = _.now();
-  }
-
-  delete(userId: string) {
-    this.deletedAt = _.now();
-    this.deletedBy = userId;
+    this.createdAt = audit?.createdAt ?? _.now()
+    this.id = audit?.id
+    this.updatedAt = audit?.updatedAt
+    this.updatedBy = audit?.updatedBy
+    this.deletedAt = audit?.deletedAt
+    this.deletedBy = audit?.deletedBy
   }
 }
