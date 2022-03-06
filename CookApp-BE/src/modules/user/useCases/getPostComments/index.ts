@@ -69,7 +69,6 @@ export class GetPostCommentsQueryHandler
     }
 
     for (let comment of comments) {
-      comment.user = await this._userService.getUserPublicInfo(comment.user.id);
       comment.numberOfReply = await this._commentRepo.getAmountOfReply(comment.id);
       if (comment.user.avatar && isImageKey(comment.user.avatar)) {
         comment.user.avatar = (

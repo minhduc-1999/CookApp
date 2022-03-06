@@ -59,7 +59,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     const res = await this.neo4jService.read(
       `MATCH (u:User{id: $id}) RETURN u LIMIT 1`,
       {
-        id: id
+        id
       }
     )
     if (res.records.length === 0)

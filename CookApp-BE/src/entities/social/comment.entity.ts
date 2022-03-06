@@ -4,15 +4,14 @@ import { Node } from 'neo4j-driver'
 import { AuditEntity } from '../base.entity';
 
 export class CommentEntity {
-  static toDomain(node: Node, numReply?: number): Comment {
-    const { properties } = node
-    const audit = AuditEntity.toDomain(node)
+  static toDomain(commentNode: Node, userNode: Node, numReply?: number): Comment {
+    const { properties: commentProps } = commentNode
+    const {properties: userProps } = userNode
+    const audit = AuditEntity.toDomain(commentNode)
     const comment = new Comment({
       ...audit,
-      content: properties.content,
-      user : new User({
-        id: properties.authorID
-      }),
+      content: commentProps.content,
+      user : new User(userProps),
       numberOfReply: numReply ?? 0
     })
     return comment
@@ -22,7 +21,6 @@ export class CommentEntity {
     const { user, target, replies, parent, numberOfReply, ...remain } = comment
     return {
       ...remain,
-      authorID: user.id
     }
   }
 }
