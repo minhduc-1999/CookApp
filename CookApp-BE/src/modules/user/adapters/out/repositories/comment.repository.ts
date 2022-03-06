@@ -21,9 +21,9 @@ export class CommentRepository
 
   async createReply(comment: Comment): Promise<Comment> {
     const res = await this.neo4jService.write(`
-        MATCH (u:User)-[c:COMMENT]->(p:Post)
+        MATCH (u:User)-[c:COMMENT]->(target)
         WHERE c.id = $parentID
-        CREATE (u)-[r:COMMENT]->(p)
+        CREATE (u)-[r:COMMENT]->(target)
         SET r += $properties, r.id = randomUUID(), r.replyFor = $parentID
         RETURN r AS reply, u AS user
         `,
@@ -40,10 +40,11 @@ export class CommentRepository
   }
 
   async createComment(comment: Comment): Promise<Comment> {
+    const nodeType = CommentEntity.getNodeType(comment)
     const res = await this.neo4jService.write(`
-        MATCH (p:Post{id: $postID}),
-          (u:User{id: $userID})
-        CREATE (u)-[c:COMMENT]->(p)
+        MERGE (target:${nodeType}{id: $targetID})
+        MERGE (u:User{id: $userID})
+        CREATE (u)-[c:COMMENT]->(target)
         SET c += $properties, c.id = randomUUID()
         RETURN c AS comment, u AS user
         `,
@@ -52,7 +53,7 @@ export class CommentRepository
         properties: {
           ...(CommentEntity.fromDomain(comment))
         },
-        postID: comment.target.id,
+        targetID: comment.target.id,
         userID: comment.user.id
       })
     if (res.records.length === 0)
@@ -62,7 +63,7 @@ export class CommentRepository
 
   async getCommentById(commentID: string): Promise<Comment> {
     const res = await this.neo4jService.read(`
-        MATCH (u:User)-[c:COMMENT{id: $commentID}]->(:Post) 
+        MATCH (u:User)-[c:COMMENT{id: $commentID}]->(n) 
         RETURN c AS comment, u AS user
         LIMIT 1
       `,

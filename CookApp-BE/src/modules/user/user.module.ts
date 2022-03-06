@@ -27,9 +27,9 @@ import { CreatePostCommandHandler } from "./useCases/createPost";
 import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
 import { FollowCommandHandler } from "./useCases/follow";
+import { GetCommentsQueryHandler } from "./useCases/getComments";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
-import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
 import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { GetSavedPostsQueryHandler } from "./useCases/getSavedPosts";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
@@ -59,7 +59,7 @@ const queryHandlers = [
   GetProfileQueryHandler,
   GetWallPostsQueryHandler,
   GetFeedPostsQueryHandler,
-  GetPostCommentsQueryHandler,
+  GetCommentsQueryHandler,
   GetWallQueryHandler,
   GetUsersQueryHandler,
   GetSavedPostsQueryHandler

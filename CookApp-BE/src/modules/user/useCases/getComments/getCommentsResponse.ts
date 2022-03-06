@@ -3,7 +3,7 @@ import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { CommentResponse } from "base/dtos/response.dto";
 import { Comment } from "domains/social/comment.domain";
 
-export class GetPostCommentsResponse {
+export class GetCommentsResponse {
   @ApiResponseProperty({ type: [CommentResponse] })
   comments: CommentResponse[];
 

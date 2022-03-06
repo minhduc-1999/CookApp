@@ -7,12 +7,12 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { IsOptional, IsUUID } from "class-validator";
 import { Comment } from "domains/social/comment.domain";
 import { User } from "domains/social/user.domain";
-import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { IPostService } from "modules/user/services/post.service";
 import { isImageKey } from "utils";
-import { GetPostCommentsResponse } from "./getPostCommentsResponse";
+import { GetCommentsRequest } from "./getCommentsRequest";
+import { GetCommentsResponse } from "./getCommentsResponse";
 
 export class CommentPageOption extends PageOptionsDto {
   @IsUUID()
@@ -21,19 +21,17 @@ export class CommentPageOption extends PageOptionsDto {
   parent: string;
 }
 
-export class GetPostCommentsQuery extends BaseQuery {
-  queryOptions: CommentPageOption;
-  postId: string;
-  constructor(user: User, postId: string, queryOptions?: CommentPageOption) {
+export class GetCommentsQuery extends BaseQuery {
+  request: GetCommentsRequest;
+  constructor(user: User, request?: GetCommentsRequest) {
     super(user);
-    this.queryOptions = queryOptions;
-    this.postId = postId;
+    this.request = request;
   }
 }
 
-@QueryHandler(GetPostCommentsQuery)
-export class GetPostCommentsQueryHandler
-  implements IQueryHandler<GetPostCommentsQuery>
+@QueryHandler(GetCommentsQuery)
+export class GetCommentsQueryHandler
+  implements IQueryHandler<GetCommentsQuery>
 {
   constructor(
     @Inject("ICommentRepository")
@@ -41,30 +39,29 @@ export class GetPostCommentsQueryHandler
     @Inject("IPostService")
     private _postService: IPostService,
     @Inject("IStorageService") private _storageService: IStorageService,
-    @Inject("IUserService") private _userService: IUserService
   ) { }
-  async execute(query: GetPostCommentsQuery): Promise<GetPostCommentsResponse> {
-    const { queryOptions, postId } = query;
-    await this._postService.getPostDetail(postId);
+  async execute(query: GetCommentsQuery): Promise<GetCommentsResponse> {
+    const { request } = query;
+    await this._postService.getPostDetail(request.targetKeyOrID);
 
     let comments: Comment[] = []
     let totalCount: number = 0
 
-    if (queryOptions.parent) {
+    if (request.parent) {
       comments = await this._commentRepo.getReplies(
-        queryOptions.parent,
-        queryOptions
+        request.parent,
+        request
       );
       totalCount = await this._commentRepo.getAmountOfReply(
-        query.queryOptions.parent
+        query.request.parent
       );
     } else {
       comments = await this._commentRepo.getPostComments(
-        postId,
-        queryOptions
+        request.targetKeyOrID,
+        request
       );
       totalCount = await this._commentRepo.getAmountOfComment(
-        postId
+        request.targetKeyOrID
       );
     }
 
@@ -80,11 +77,11 @@ export class GetPostCommentsQueryHandler
     let meta: PageMetadata;
     if (comments.length > 0) {
       meta = new PageMetadata(
-        queryOptions.offset,
-        queryOptions.limit,
+        request.offset,
+        request.limit,
         totalCount
       );
     }
-    return new GetPostCommentsResponse(comments, meta);
+    return new GetCommentsResponse(comments, meta);
   }
 }

@@ -1,17 +1,18 @@
+import { RecipeStep } from 'domains/core/recipeStep.domain';
 import { Comment } from 'domains/social/comment.domain';
-import { User } from 'domains/social/user.domain';
-import { Node } from 'neo4j-driver'
+import { PostBase } from 'domains/social/post.domain';
+import { Node, Relationship } from 'neo4j-driver'
 import { AuditEntity } from '../base.entity';
+import { UserEntity } from './user.entity';
 
 export class CommentEntity {
-  static toDomain(commentNode: Node, userNode: Node, numReply?: number): Comment {
-    const { properties: commentProps } = commentNode
-    const {properties: userProps } = userNode
-    const audit = AuditEntity.toDomain(commentNode)
+  static toDomain(commentRelationship: Relationship, userNode: Node, numReply?: number): Comment {
+    const { properties: commentProps } = commentRelationship
+    const audit = AuditEntity.toDomain(commentRelationship)
     const comment = new Comment({
       ...audit,
       content: commentProps.content,
-      user : new User(userProps),
+      user: UserEntity.toDomain(userNode),
       numberOfReply: numReply ?? 0
     })
     return comment
@@ -21,6 +22,18 @@ export class CommentEntity {
     const { user, target, replies, parent, numberOfReply, ...remain } = comment
     return {
       ...remain,
+    }
+  }
+
+  static getNodeType(comment: Comment): "Post" | "RecipeStep" {
+    if (comment.target instanceof PostBase) {
+      return "Post"
+    }
+    else if (comment.target instanceof RecipeStep) {
+      return "RecipeStep"
+    }
+    else {
+      throw new Error("No target found")
     }
   }
 }

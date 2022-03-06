@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
@@ -12,50 +12,45 @@ import { User } from "domains/social/user.domain";
 import { CreateCommentCommand } from "modules/user/useCases/createComment";
 import { CreateCommentRequest } from "modules/user/useCases/createComment/createCommentRequest";
 import { CreateCommentResponse } from "modules/user/useCases/createComment/createCommentResponse";
-import {
-  CommentPageOption,
-  GetPostCommentsQuery,
-} from "modules/user/useCases/getPostComments";
-import { GetPostCommentsResponse } from "modules/user/useCases/getPostComments/getPostCommentsResponse";
+import { GetCommentsQuery } from "modules/user/useCases/getComments";
+import { GetCommentsRequest } from "modules/user/useCases/getComments/getCommentsRequest";
+import { GetCommentsResponse } from "modules/user/useCases/getComments/getCommentsResponse";
 import { Transaction } from "neo4j-driver";
 import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
-@Controller("users/posts/:postId")
+@Controller("users/comments")
 @ApiTags("User/Comment")
 @ApiBearerAuth()
 export class CommentController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
 
-  @Post("comments")
+  @Post()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(CreateCommentResponse, "Create comment successfully")
   @RequestTransaction()
   async createComment(
-    @Param("postId", ParseUUIDPipe) postId: string,
     @Body() body: CreateCommentRequest,
     @UserReq() user: User,
     @ParamTransaction() tx: Transaction
   ): Promise<Result<CreateCommentResponse>> {
-    body.postId = postId;
     const commentsQuery = new CreateCommentCommand(user, body, tx);
     const result = await this._commandBus.execute(commentsQuery);
     return Result.ok(result, {
-      messages: ["Get comment's comments successfully"],
+      messages: ["Create comments successfully"],
     });
   }
 
-  @Get("comments")
+  @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(
-    GetPostCommentsResponse,
+    GetCommentsResponse,
     "Get post's comments successfully"
   )
   async getPostCommentsPosts(
-    @Query(new ParseRequestPipe<typeof CommentPageOption>()) query: CommentPageOption,
+    @Query(new ParseRequestPipe<typeof GetCommentsRequest>()) query: GetCommentsRequest,
     @UserReq() user: User,
-    @Param("postId", ParseUUIDPipe) postId: string
-  ): Promise<Result<GetPostCommentsResponse>> {
-    const getCommentsQuery = new GetPostCommentsQuery(user, postId, query);
+  ): Promise<Result<GetCommentsResponse>> {
+    const getCommentsQuery = new GetCommentsQuery(user, query);
     const result = await this._queryBus.execute(getCommentsQuery);
     return Result.ok(result, {
       messages: ["Get post's comments successfully"],

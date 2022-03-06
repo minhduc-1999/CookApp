@@ -10,16 +10,17 @@ import { IPostService } from "modules/user/services/post.service";
 import { Transaction } from "neo4j-driver";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { CommentPostEvent } from "modules/notification/events/CommentNotification";
+import { RecipeStep } from "domains/core/recipeStep.domain";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
   constructor(
     user: User,
-    comment: CreateCommentRequest,
+    request: CreateCommentRequest,
     tx: Transaction
   ) {
     super(tx, user);
-    this.commentReq = comment;
+    this.commentReq = request;
   }
 }
 
@@ -38,15 +39,34 @@ export class CreateCommentCommandHandler
   ) { }
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
     const { commentReq, user, tx } = command;
-    const [post] = await this._postService.getPostDetail(commentReq.postId);
-    const comment = new Comment({
-      content: commentReq.content,
-      user,
-      target: post
-    })
-    let createdComment: Comment = null
-    if (commentReq.parentId) {
-      const parentComment = await this._commentService.getComment(commentReq.parentId)
+
+    let comment: Comment
+    let createdComment: Comment
+
+    switch (commentReq.targetType) {
+      case "Post":
+        const [post] = await this._postService.getPostDetail(commentReq.targetKeyOrID);
+        comment = new Comment({
+          content: commentReq.content,
+          user,
+          target: post
+        })
+        this._eventBus.publish(new CommentPostEvent(post, user));
+        break;
+      case "RecipeStep":
+        comment = new Comment({
+          content: commentReq.content,
+          user,
+          target: new RecipeStep({ id: commentReq.targetKeyOrID })
+        })
+        break;
+      default:
+        console.log("default")
+        break;
+    }
+
+    if (commentReq.replyFor) {
+      const parentComment = await this._commentService.getComment(commentReq.replyFor)
       comment.parent = parentComment
       createdComment = await this._commentRepo
         .setTransaction(tx)
@@ -61,7 +81,6 @@ export class CreateCommentCommandHandler
       throw new InternalServerErrorException()
     }
 
-    this._eventBus.publish(new CommentPostEvent(post, user));
     return new CreateCommentResponse(createdComment);
   }
 }

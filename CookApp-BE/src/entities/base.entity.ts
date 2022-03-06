@@ -1,9 +1,9 @@
 import { Audit } from "domains/audit.domain"
-import { Node } from "neo4j-driver"
+import { Node, Relationship } from "neo4j-driver"
 
 export abstract class AuditEntity {
-  static toDomain(node: Node): Audit {
-    const { properties } = node
+  static toDomain(nodeOrRelationship: Node | Relationship): Audit {
+    const { properties } = nodeOrRelationship
     const audit = new Audit({
       id: properties["id"],
       createdAt: properties["createdAt"],
