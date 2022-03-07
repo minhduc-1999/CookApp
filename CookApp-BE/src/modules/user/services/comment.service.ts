@@ -5,7 +5,7 @@ import { Comment } from "../../../domains/social/comment.domain";
 import { ICommentRepository } from "../interfaces/repositories/comment.interface";
 
 export interface ICommentService {
-  getComment(commentId: string): Promise<Comment>;
+  getCommentBy(commentId: string): Promise<Comment>;
 }
 
 @Injectable()
@@ -14,11 +14,11 @@ export class CommentService implements ICommentService {
     @Inject("ICommentRepository") private _commentRepo: ICommentRepository
   ) {}
 
-  async getComment(commentId: string): Promise<Comment> {
+  async getCommentBy(commentId: string): Promise<Comment> {
     const comment = await this._commentRepo.getCommentById(commentId);
     if (!comment)
       throw new NotFoundException(
-        ResponseDTO.fail("Comment not found", UserErrorCode.INVALID_ID)
+        ResponseDTO.fail("Comment not found", UserErrorCode.COMMENT_NOT_FOUND)
       );
     return comment;
   }

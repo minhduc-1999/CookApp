@@ -9,4 +9,5 @@ export enum UserErrorCode {
   POST_NOT_FOUND = "post_not_found",
   POST_NOT_SAVED = "post_not_saved",
   POST_SAVED_ALREADY = "post_saved_already",
+  COMMENT_NOT_FOUND = "comment_not_found" 
 }

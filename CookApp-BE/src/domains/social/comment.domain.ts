@@ -3,10 +3,11 @@ import { RecipeStep } from "domains/core/recipeStep.domain";
 import { Post } from "./post.domain";
 import { User } from "./user.domain";
 
+export type CommentTarget = Post | RecipeStep
 export class Comment extends Audit {
   user: User;
 
-  target: Post | RecipeStep
+  target: CommentTarget
 
   content: string;
 

@@ -1,4 +1,4 @@
-import { Inject, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, Inject, InternalServerErrorException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
@@ -11,6 +11,7 @@ import { Transaction } from "neo4j-driver";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { CommentPostEvent } from "modules/notification/events/CommentNotification";
 import { RecipeStep } from "domains/core/recipeStep.domain";
+import { ResponseDTO } from "base/dtos/response.dto";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
@@ -61,12 +62,11 @@ export class CreateCommentCommandHandler
         })
         break;
       default:
-        console.log("default")
-        break;
+        throw new BadRequestException(ResponseDTO.fail("Target type not found"))
     }
 
     if (commentReq.replyFor) {
-      const parentComment = await this._commentService.getComment(commentReq.replyFor)
+      const parentComment = await this._commentService.getCommentBy(commentReq.replyFor)
       comment.parent = parentComment
       createdComment = await this._commentRepo
         .setTransaction(tx)

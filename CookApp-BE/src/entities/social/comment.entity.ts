@@ -1,5 +1,5 @@
 import { RecipeStep } from 'domains/core/recipeStep.domain';
-import { Comment } from 'domains/social/comment.domain';
+import { Comment, CommentTarget } from 'domains/social/comment.domain';
 import { PostBase } from 'domains/social/post.domain';
 import { Node, Relationship } from 'neo4j-driver'
 import { AuditEntity } from '../base.entity';
@@ -25,11 +25,11 @@ export class CommentEntity {
     }
   }
 
-  static getNodeType(comment: Comment): "Post" | "RecipeStep" {
-    if (comment.target instanceof PostBase) {
+  static getNodeType(target: CommentTarget): "Post" | "RecipeStep" {
+    if (target instanceof PostBase) {
       return "Post"
     }
-    else if (comment.target instanceof RecipeStep) {
+    else if (target instanceof RecipeStep) {
       return "RecipeStep"
     }
     else {

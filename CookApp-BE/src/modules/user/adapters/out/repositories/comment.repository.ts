@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { Comment } from "domains/social/comment.domain";
+import { Comment, CommentTarget } from "domains/social/comment.domain";
 import { BaseRepository } from "base/repository.base";
 import { int } from "neo4j-driver";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
@@ -7,6 +7,7 @@ import { CommentEntity } from "entities/social/comment.entity";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { parseInt } from "lodash";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
+import { CommentTargetType } from "enums/comment.enum";
 
 
 @Injectable()
@@ -40,7 +41,7 @@ export class CommentRepository
   }
 
   async createComment(comment: Comment): Promise<Comment> {
-    const nodeType = CommentEntity.getNodeType(comment)
+    const nodeType = CommentEntity.getNodeType(comment.target)
     const res = await this.neo4jService.write(`
         MERGE (target:${nodeType}{id: $targetID})
         MERGE (u:User{id: $userID})
@@ -76,25 +77,26 @@ export class CommentRepository
     return CommentEntity.toDomain(res.records[0].get("comment"), res.records[0].get("user"))
   }
 
-  async getPostComments(postID: string, query: PageOptionsDto): Promise<Comment[]> {
+  async getComments(target: CommentTarget, query: PageOptionsDto): Promise<Comment[]> {
+    const nodeType = CommentEntity.getNodeType(target)
     const res = await this.neo4jService.read(`
-       MATCH (p:Post{id: $postID})<-[c:COMMENT]-(u:User)
+       MATCH (target:${nodeType}{id: $targetID})<-[c:COMMENT]-(u:User)
        WHERE c.replyFor IS NULL
-       WITH c AS comments, p AS post, u AS user
+       WITH c AS comments, target, u AS user
        ORDER BY comments.createdAt DESC
        SKIP $skip
        LIMIT $limit
        UNWIND comments AS comment
        CALL {
-         WITH comment, post
-         MATCH (post)<-[r:COMMENT]-(:User)
+         WITH comment, target
+         MATCH (target)<-[r:COMMENT]-(:User)
          WHERE r.replyFor = comment.id
          RETURN count(r) AS numOfReply
        }
        RETURN comment, numOfReply, user
        `,
       {
-        postID,
+        targetID: target.id,
         skip: int(query.offset * query.limit),
         limit: int(query.limit)
       }
@@ -109,28 +111,28 @@ export class CommentRepository
     })
   }
 
-  async getReplies(parentID: string, query: PageOptionsDto): Promise<Comment[]> {
+  async getReplies(target: CommentTarget, replyOf: string, query: PageOptionsDto): Promise<Comment[]> {
+    const nodeType = CommentEntity.getNodeType(target)
     const res = await this.neo4jService.read(`
-       MATCH (p:Post)<-[c:COMMENT]-(u:User)
+       MATCH (target:${nodeType})<-[c:COMMENT]-(u:User)
        WHERE c.replyFor = $parentID 
-       WITH c AS comments, p AS post, u AS user
+       WITH c AS comments, target, u AS user
        ORDER BY comments.createdAt DESC
        SKIP $skip
        LIMIT $limit
        UNWIND comments AS comment
        CALL {
-         WITH comment, post
-         MATCH (post)<-[r:COMMENT]-(u)
+         WITH comment, target
+         MATCH (target)<-[r:COMMENT]-(u)
          WHERE r.replyFor = comment.id
          RETURN count(r) AS numOfReply
        }
        RETURN comment, numOfReply, user
        `,
       {
-        commentID: parentID,
         skip: int(query.offset * query.limit),
         limit: int(query.limit),
-        parentID
+        parentID: replyOf
       }
     )
     if (res.records.length === 0)
@@ -145,7 +147,7 @@ export class CommentRepository
 
   async getAmountOfReply(parentID: string): Promise<number> {
     const res = await this.neo4jService.read(`
-          MATCH (:Post)<-[r:COMMENT]-(:User)
+          MATCH ()<-[r:COMMENT]-(:User)
           WHERE r.replyFor = $parentID
           RETURN count(r) AS totalReply
         `,
@@ -158,12 +160,13 @@ export class CommentRepository
     return parseInt(res.records[0].get("totalReply"))
   }
 
-  async getTotalPostComments(postID: string): Promise<number> {
+  async getTotalComments(target: CommentTarget): Promise<number> {
+    const nodeType = CommentEntity.getNodeType(target)
     const res = await this.neo4jService.read(`
-       MATCH (:User)-[c:COMMENT]->(:Post{id: $postID}) RETURN count(c) AS totalComment
+       MATCH (:User)-[c:COMMENT]->(:${nodeType}{id: $id}) RETURN count(c) AS totalComment
        `,
       {
-        postID
+        id: target.id
       }
     )
     if (res.records.length === 0)
@@ -171,14 +174,15 @@ export class CommentRepository
     return parseInt(res.records[0].get("totalComment"))
   }
 
-  async getAmountOfComment(postID: string): Promise<number> {
+  async getAmountOfComment(target: CommentTarget): Promise<number> {
+    const nodeType = CommentEntity.getNodeType(target)
     const res = await this.neo4jService.read(`
-       MATCH (:User)-[r:COMMENT]->(:Post{id: $postID})
+       MATCH (:User)-[r:COMMENT]->(:${nodeType}{id: $id})
        WHERE r.replyFor IS NULL
        RETURN count(r) AS amountOfComment
        `,
       {
-        postID
+        id: target.id
       }
     )
     if (res.records.length === 0)

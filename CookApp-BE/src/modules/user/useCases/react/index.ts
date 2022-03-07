@@ -9,10 +9,10 @@ import { Reaction } from "domains/social/reaction.domain";
 import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { IReactionService } from "modules/user/services/reaction.service";
-import { ReactionTargetType } from "enums/reactionTarget.enum";
 import { IMediaRepository } from "modules/user/interfaces/repositories/media.interface";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ReactPostEvent } from "modules/notification/events/ReactNotification";
+import { ReactionTargetType } from "enums/reaction.enum";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(

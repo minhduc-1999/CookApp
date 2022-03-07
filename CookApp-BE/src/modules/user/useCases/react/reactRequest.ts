@@ -1,7 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsEnum, IsString } from "class-validator";
-import { ReactionType } from "enums/reaction.enum";
-import { ReactionTargetType } from "enums/reactionTarget.enum";
+import { ReactionTargetType, ReactionType } from "enums/reaction.enum";
 
 export class ReactRequest {
   @ApiProperty({type: String})
