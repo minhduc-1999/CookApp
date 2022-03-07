@@ -6,7 +6,7 @@ const url = process.env.DB_CONNECTION; //change this connectionString
 const client = new MongoClient(url);
 
 // Config here
-const dbName = 'cookapp'
+const dbName = 'tastify-db'
 const pair = [
   {
     colName: 'foods',
