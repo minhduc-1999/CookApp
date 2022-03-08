@@ -25,7 +25,7 @@ async function bootstrap() {
     new ExpressAdapter(),
     {
       cors: {
-        origin: [],
+        origin: ["http://localhost:8080"],
         credentials: true,
       },
     }

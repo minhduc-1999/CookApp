@@ -2,7 +2,7 @@ import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { CqrsModule } from "@nestjs/cqrs";
-import { JwtModule } from "@nestjs/jwt";
+import { JwtModule, JwtService } from "@nestjs/jwt";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { EmailVerificationGuard } from "guards/emailVerification.guard";
@@ -79,6 +79,6 @@ const globalGuards = [
     ...handlers,
     ...globalGuards,
   ],
-  exports: ["IUserService"],
+  exports: ["IUserService", JwtModule],
 })
 export class AuthModule { }
