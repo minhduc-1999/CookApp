@@ -25,7 +25,8 @@ export class WallRepository extends BaseRepository implements IWallRepository {
         queryStr = `
           MATCH (:User{id: $userID})-[:OWN]->(p:Post) 
           WHERE p.kind = $kind 
-          RETURN p
+          RETURN p,
+            [(p)-[:CONTAIN]->(m:Media) | m.key] AS images
           ORDER BY p.createdAd DESC
           SKIP $skip
           LIMIT $limit
@@ -34,7 +35,8 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       default:
         queryStr = `
           MATCH (:User{id: $userID})-[:OWN]->(p:Post) 
-          RETURN p
+          RETURN p,
+            [(p)-[:CONTAIN]->(m:Media) | m.key] AS images
           ORDER BY p.createdAd DESC
           SKIP $skip
           LIMIT $limit
@@ -52,7 +54,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     )
     if (res.records.length === 0)
       return []
-    return res.records.map(record => PostEntity.toDomain(record.get("p")))
+    return res.records.map(record => PostEntity.toDomain(record.get("p"), null, record.get("images")))
   }
 
   async getTotalPosts(userID: string, query: GetWallPostsRequest): Promise<number> {
