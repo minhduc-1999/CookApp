@@ -7,4 +7,5 @@ export default {
   googleUserInfoUrl: UtilsService.getConfig("GOOGLE_USER_INFO_URL"),
   googleClientID: UtilsService.getConfig("GOOGLE_CLIENT_ID"),
   googleClientSecret: UtilsService.getConfig("GOOGLE_CLIENT_SECRET"),
+  googleCallbackUrl: UtilsService.getConfig("GOOGLE_CALLBACK_URL", "")
 };

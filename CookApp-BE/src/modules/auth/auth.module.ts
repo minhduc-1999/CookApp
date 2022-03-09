@@ -2,7 +2,7 @@ import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { CqrsModule } from "@nestjs/cqrs";
-import { JwtModule, JwtService } from "@nestjs/jwt";
+import { JwtModule } from "@nestjs/jwt";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { EmailVerificationGuard } from "guards/emailVerification.guard";
@@ -15,9 +15,9 @@ import { UserRepository } from "./adapters/out/repositories/user.repository";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
+import { GoogleStrategy } from "./strategies/google.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { LoginCommandHandler } from "./useCases/login";
-import { GoogleSignInCommandHandler } from "./useCases/loginWithGoogle";
 import { RegisterCommandHandler } from "./useCases/register";
 import { ResendEmailVerificationCommandHandler } from "./useCases/resendEmailVerification";
 import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
@@ -25,7 +25,6 @@ import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
 const handlers = [
   RegisterCommandHandler,
   LoginCommandHandler,
-  GoogleSignInCommandHandler,
   VerifyEmailCommandHandler,
   ResendEmailVerificationCommandHandler,
 ];
@@ -76,6 +75,7 @@ const globalGuards = [
     },
     BasicAuthStrategy,
     JwtStrategy,
+    GoogleStrategy,
     ...handlers,
     ...globalGuards,
   ],

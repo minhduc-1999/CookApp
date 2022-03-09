@@ -24,3 +24,8 @@ export class JwtAuthGuard extends NestAuthGuard('jwt') {
     return super.canActivate(context);
   }
 }
+
+
+@Injectable()
+export class GoogleAuthGuard extends NestAuthGuard("google") {
+}

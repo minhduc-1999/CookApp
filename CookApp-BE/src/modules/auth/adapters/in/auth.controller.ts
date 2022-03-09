@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import {
   ApiBearerAuth,
@@ -24,9 +24,6 @@ import { RegisterRequest } from "modules/auth/useCases/register/registerRequest"
 import { User } from "domains/social/user.domain";
 import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
 import { UserReq } from "decorators/user.decorator";
-import { GoogleSignInRequest } from "modules/auth/useCases/loginWithGoogle/googleSignInRequest";
-import { GoogleSignInCommand } from "modules/auth/useCases/loginWithGoogle";
-import { GoogleSignInResponse } from "modules/auth/useCases/loginWithGoogle/googleSignInResponse";
 import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmailRequest";
 import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
 import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
@@ -34,6 +31,7 @@ import { ResendEmailVerificationCommand } from "modules/auth/useCases/resendEmai
 import { Transaction } from "neo4j-driver";
 import { NotRequireEmailVerification } from "decorators/notRequireEmailVerification.decorator";
 import { BasicAuthGuard } from "guards/basicAuth.guard";
+import { GoogleAuthGuard } from "guards/jwtAuth.guard";
 
 @Controller()
 @ApiTags("Authentication")
@@ -75,19 +73,24 @@ export class AuthController {
     return Result.ok(result, { messages: ["Login successfully"] });
   }
 
-  @Post("google/callback")
-  @HttpCode(200)
+  @Get("google")
   @Public()
   @NotRequireEmailVerification()
-  @ApiOKResponseCustom(GoogleSignInResponse, "Authenticate successfully")
-  @RequestTransaction()
-  async loginWithGoogleCallback(
-    @Body() body: GoogleSignInRequest,
-    @ParamTransaction() tx: Transaction
-  ): Promise<Result<GoogleSignInResponse>> {
-    let command = new GoogleSignInCommand(tx, body);
-    const jwt = await this._commandBus.execute(command);
-    return Result.ok(jwt, { messages: ["Authenticate successfully"] });
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth() { }
+
+  @Get("google/redirect")
+  @UseGuards(GoogleAuthGuard)
+  @Public()
+  @NotRequireEmailVerification()
+  async googleAuthRedirect(
+    @UserReq() user: User,
+    @Query("code") code: string
+  ) {
+    console.log("code", code)
+    const loginCommand = new LoginCommand(null, user);
+    const result = await this._commandBus.execute(loginCommand);
+    return Result.ok(result, { messages: ["Login successfully"] });
   }
 
   @Post("email-verification/callback")
