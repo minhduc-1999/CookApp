@@ -1,8 +1,9 @@
-import { UseGuards } from "@nestjs/common";
+import { Inject, UseGuards } from "@nestjs/common";
+import { CommandBus } from "@nestjs/cqrs";
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { WebSocketAuthGuard } from "guards/websocketAuth.guard";
-import { Socket } from "socket.io";
-import { Server } from "ws";
+import { Socket, Server } from "socket.io";
+import { IWsMiddlewareFactory } from "../out/wsMiddlewareFactory.service";
 
 @WebSocketGateway({
   namespace: "chat",
@@ -12,8 +13,17 @@ import { Server } from "ws";
   } 
 })
 
-// @UseGuards(WebSocketAuthGuard)
-export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+@UseGuards(WebSocketAuthGuard)
+export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit {
+  constructor(
+    @Inject("IWsMiddlewareFactory")
+    private _wsMiddlewareFactory: IWsMiddlewareFactory,
+    private _commandBus: CommandBus
+  ) {}
+
+  afterInit(server: Server) {
+    server.use(this._wsMiddlewareFactory.useAuth())
+  }
   @WebSocketServer()
   server: Server
 
@@ -25,7 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log("Connect: ", client.id)
   }
 
-  @SubscribeMessage("message")
+  @SubscribeMessage("chat:send")
   async handleMessage(
     @MessageBody() body: any,
     @ConnectedSocket() socket : Socket
