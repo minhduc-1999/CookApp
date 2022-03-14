@@ -4,10 +4,11 @@ import { BaseCommand } from "base/cqrs/command.base";
 import { User } from "domains/social/user.domain";
 import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { clean, createUpdatingObject, isImageKey } from "utils";
+import { clean, createUpdatingObject } from "utils";
 import { UpdateProfileRequest } from "./updateProfileRequest";
 import { Transaction } from "neo4j-driver";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
+import { Image } from "domains/social/media.domain";
 
 export class UpdateProfileCommand extends BaseCommand {
   updateProfileReq: UpdateProfileRequest;
@@ -45,14 +46,22 @@ export class UpdateProfileCommandHandler
 
     const profile = createUpdatingObject(
       clean(command.updateProfileReq),
-      user.id
+      user.id,
     );
+
+
+    const updatingUserProfile = new User({
+        ...profile,
+        avatar: new Image({
+          key: profile.avatar,
+        })
+    })
 
     const updatedUser = await this._userRepo
       .setTransaction(command.tx)
-      .updateUserProfile(user.id, profile);
+      .updateUserProfile(user.id, updatingUserProfile);
 
-    if (updatedUser.avatar && isImageKey(updatedUser.avatar)) {
+    if (updatedUser.avatar && updatedUser.avatar.isValidKey()) {
       updatedUser.avatar = (
         await this._storageService.getDownloadUrls([updatedUser.avatar])
       )[0];

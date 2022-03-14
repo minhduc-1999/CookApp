@@ -1,5 +1,6 @@
 import { Audit } from "domains/audit.domain";
 import _ = require("lodash");
+import { Media } from "./media.domain";
 import { User } from "./user.domain";
 
 export abstract class PostBase extends Audit {
@@ -24,8 +25,8 @@ export class Moment extends PostBase {
     return true
   }
   content: string
-  images?: string[]
-  videos?: string[]
+  images?: Media[]
+  videos?: Media[]
   kind: "Moment"
   constructor(post: Partial<Moment>) {
     super(post)
@@ -43,8 +44,8 @@ export class Album extends PostBase {
     return true
   }
   name: string
-  images?: string[]
-  videos?: string[]
+  images?: Media[]
+  videos?: Media[]
   kind: "Album"
   constructor(post: Partial<Album>) {
     super(post)
@@ -68,3 +69,4 @@ export class SavedPost {
     this.post = item.post
   }
 }
+

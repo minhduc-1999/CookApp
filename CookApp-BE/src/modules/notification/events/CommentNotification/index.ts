@@ -48,7 +48,7 @@ export class CommentPostEventHandler
       body: template.body.replace("$user", actor.displayName),
       title: template.title,
       templateId: template.id,
-      image: actor.avatar,
+      image: actor.avatar.url,
       targets: [post.author.id],
       data: {
         postID: post.id,

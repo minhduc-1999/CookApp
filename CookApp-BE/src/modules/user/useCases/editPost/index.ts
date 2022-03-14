@@ -4,16 +4,15 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { User } from "domains/social/user.domain";
 import { IPostService } from "modules/user/services/post.service";
-import { retrieveObjectNameFromUrl } from "utils";
 import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { ConfigService } from "nestjs-config";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { MediaType } from "enums/mediaType.enum";
 import { Album, Moment, Post } from "domains/social/post.domain";
+import { Image } from "domains/social/media.domain";
 export class EditPostCommand extends BaseCommand {
   req: EditPostRequest;
   constructor(tx: Transaction, user: User, post: EditPostRequest) {
@@ -30,7 +29,6 @@ export class EditPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-    private _configService: ConfigService,
     @Inject("IStorageService")
     private _storageService: IStorageService,
   ) { }
@@ -46,19 +44,10 @@ export class EditPostCommandHandler
         )
       );
 
-    // Convert delete image urls to image key
-    const deleteImageKeys = req.deleteImages ? req.deleteImages.map(url => {
-      return retrieveObjectNameFromUrl(
-        url,
-        this._configService.get("storage.publicUrl")
-      )
-    }) : []
-
     // Delete images
     if (req.deleteImages && req.deleteImages.length > 0) {
       // await this._mediaRepository.setTransaction(tx).deleteMedias(deleteImageKeys)
-      await this._storageService.deleteFiles(deleteImageKeys);
-      req.deleteImages = deleteImageKeys
+      req.deleteImages = await this._storageService.deleteFiles(req.deleteImages);
     }
 
     // Add new images
@@ -76,13 +65,15 @@ export class EditPostCommandHandler
       case "Album":
         updateData = new Album({
           id: req.id,
-          name: req.name
+          name: req.name,
+          images: req.addImages.map(image => new Image({ key: image }))
         })
         break;
       case "Moment":
         updateData = new Moment({
           id: req.id,
-          content: req.content
+          content: req.content,
+          images: req.addImages.map(image => new Image({ key: image }))
         })
         break;
     }

@@ -7,6 +7,7 @@ import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { GetFoodsResponse } from "./getFoodsResponse";
+import { Image } from "domains/social/media.domain";
 export class GetFoodsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
   constructor(user: User, queryOptions?: PageOptionsDto) {
@@ -26,13 +27,13 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
     const { queryOptions } = query;
     const foods = await this._foodRepo.getFoods(queryOptions);
     for (let food of foods) {
-      food.photos = await this._storageService.getDownloadUrls(food.photos);
+      food.photos = (await this._storageService.getDownloadUrls(food.photos)) as Image[];
       if (food.steps.length > 0) {
         food.steps = await Promise.all(
           food.steps.map(async (step) => {
             return {
               ...step,
-              photos: await this._storageService.getDownloadUrls(step.photos),
+              photos: (await this._storageService.getDownloadUrls(step.photos)) as Image[],
             };
           })
         );

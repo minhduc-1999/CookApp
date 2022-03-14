@@ -4,7 +4,6 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { User } from "domains/social/user.domain";
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { isImageKey } from "utils";
 import { GetProfileResponse } from "./getProfileResponse";
 
 export class GetProfileQuery extends BaseQuery {
@@ -24,7 +23,7 @@ export class GetProfileQueryHandler implements IQueryHandler<GetProfileQuery> {
   async execute(query: GetProfileQuery): Promise<GetProfileResponse> {
     const user = await this._userService.getUserById(query.user.id);
 
-    if (user.avatar && isImageKey(user.avatar)) {
+    if (user.avatar && user.avatar.isValidKey()) {
       user.avatar = (
         await this._storageService.getDownloadUrls([user.avatar])
       )[0];

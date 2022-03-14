@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { Media } from "domains/social/media.domain";
+import { Media, MediaBase } from "domains/social/media.domain";
 import { PostBase } from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { Transaction } from "neo4j-driver";
@@ -24,7 +24,7 @@ export class ReactionService implements IReactionService {
       await this._postRepo.setTransaction(tx).deleteReact(reaction)
       return
     }
-    if (reaction.target instanceof Media) {
+    if (reaction.target instanceof MediaBase) {
       await this._mediaRepo.setTransaction(tx).deleteReaction(reaction)
       return
     }
@@ -35,7 +35,7 @@ export class ReactionService implements IReactionService {
       await this._postRepo.setTransaction(tx).reactPost(reaction)
       return
     }
-    if (reaction.target instanceof Media) {
+    if (reaction.target instanceof MediaBase) {
       await this._mediaRepo.setTransaction(tx).reactMedia(reaction)
       return
     }

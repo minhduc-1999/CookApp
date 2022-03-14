@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { BaseRepository } from "base/repository.base";
-import { Media } from "domains/social/media.domain";
+import { Media, MediaBase } from "domains/social/media.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { MediaEntity } from "entities/social/media.entity";
 import { ReactionEntity } from "entities/social/reaction.entity";
@@ -16,7 +16,7 @@ export class MediaRepository extends BaseRepository implements IMediaRepository 
     super()
   }
   async reactMedia(reaction: Reaction): Promise<void> {
-    if (reaction.target instanceof Media) {
+    if (reaction.target instanceof MediaBase) {
       await this.neo4jService.write(`
         MATCH (u:User{id: $userID})
         MATCH (p:Media{key: $key})
@@ -35,7 +35,7 @@ export class MediaRepository extends BaseRepository implements IMediaRepository 
     }
   }
   async deleteReaction(reaction: Reaction): Promise<void> {
-    if (reaction.target instanceof Media) {
+    if (reaction.target instanceof MediaBase) {
       await this.neo4jService.write(`
         MATCH (u:User{id: $userID})-[r:REACT]->(p:Media{key: $key})
         DELETE r

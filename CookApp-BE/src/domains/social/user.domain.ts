@@ -1,5 +1,6 @@
 import { Audit } from "domains/audit.domain";
 import { ExternalProvider } from "enums/externalProvider.enum";
+import { Media } from "./media.domain";
 import { Profile } from "./profile.domain";
 
 class Provider {
@@ -16,7 +17,7 @@ export class User extends Audit {
 
   phone?: string;
 
-  avatar?: string;
+  avatar?: Media;
 
   profile?: Profile;
 

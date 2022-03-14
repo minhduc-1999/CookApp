@@ -6,12 +6,12 @@ import { PostBase, SavedPost, Post} from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { MediaType } from "enums/mediaType.enum";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { User } from "@sentry/node";
 import { PageOptionsDto } from "base/pageOptions.base";
-import { int } from "neo4j-driver";
+import { int, Node, Relationship } from "neo4j-driver";
+import { MediaEntity } from "entities/social/media.entity";
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
@@ -44,7 +44,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
           totalComment, 
           totalReaction, 
           u AS author,
-          [(post)-[:CONTAIN]->(m:Media) | m.key] AS images,
+          [(post)-[:CONTAIN]->(m:Media) | m] AS medias,
           r as relationship
       `,
       {
@@ -54,13 +54,13 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       })
     if (res.records.length === 0) return []
     return res.records.map(record => {
-      const postNode = record.get("post")
-      const totalComment = parseInt(record.get("totalComment"))
-      const totalReaction = parseInt(record.get("totalReaction"))
-      const author = record.get("author")
-      const images: string[] = record.get("images")
-      const relationship = record.get("relationship")
-      return SavedPostEntity.toDomain(postNode,relationship, author, images, totalComment, totalReaction)
+      const postNode: Node = record.get("post")
+      const totalComment: number = parseInt(record.get("totalComment"))
+      const totalReaction: number = parseInt(record.get("totalReaction"))
+      const author: Node = record.get("author")
+      const mediaNodes: Node[] = record.get("medias")
+      const relationship: Relationship = record.get("relationship")
+      return SavedPostEntity.toDomain(postNode,relationship, author, mediaNodes, totalComment, totalReaction)
     })
   }
 
@@ -153,31 +153,27 @@ export class PostRepository extends BaseRepository implements IPostRepository {
             WITH p, u
             CALL {
                 WITH p
-                UNWIND $images AS image
-                CREATE (p)-[:CONTAIN]->(m:Media {type: $imageType, key: image})
-              UNION
-                WITH p
-                UNWIND $videos AS video
-                CREATE (p)-[:CONTAIN]->(n:Media {type: $videoType, key: video})
+                UNWIND $medias AS media
+                CREATE (p)-[:CONTAIN]->(m:Media)
+                SET m = media
             }
-            RETURN p AS post, u AS author
+            RETURN 
+              p AS post,
+              u AS author,
+              [(p)-[:CONTAIN]->(m:Media) | m] AS medias
       `,
       this.tx,
       {
-        properties: {
-          ...(PostEntity.fromDomain(post))
-        },
+        properties: PostEntity.fromDomain(post),
         authorID: post.author.id,
-        images: post.images,
-        videos: post.videos,
-        imageType: MediaType.POST_IMAGE,
-        videoType: MediaType.POST_VIDEO
+        medias: post.images.concat(post.videos).map(image => MediaEntity.fromDomain(image)),
       })
     if (res.records.length === 0)
       return null
     const postNode = res.records[0].get("post")
     const authorNode = res.records[0].get("author")
-    return PostEntity.toDomain(postNode, authorNode, post.images)
+    const mediaNodes: Node[] = res.records[0].get("medias")
+    return PostEntity.toDomain(postNode, authorNode, mediaNodes)
   }
   async getPostById(postID: string): Promise<Post> {
     const res = await this.neo4jService.read(`
@@ -195,7 +191,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         RETURN 
           post, 
           u AS author, 
-          [(post)-[:CONTAIN]->(m:Media) | m.key] AS images, 
+          [(post)-[:CONTAIN]->(m:Media) | m] AS medias, 
           totalComment,
           totalReaction
       `,
@@ -207,10 +203,10 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       return null
     const postNode = res.records[0].get("post")
     const author = res.records[0].get("author")
-    const images: string[] = res.records[0].get("images")
+    const mediaNodes: Node[] = res.records[0].get("medias")
     const totalComment = parseInt(res.records[0].get("totalComment"))
     const totalReaction = parseInt(res.records[0].get("totalReaction"))
-    return PostEntity.toDomain(postNode, author, images, totalComment, totalReaction)
+    return PostEntity.toDomain(postNode, author, mediaNodes, totalComment, totalReaction)
   }
   async getPostByIds(postIDs: string[]): Promise<Post[]> {
     const res = await this.neo4jService.read(`
@@ -228,7 +224,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         RETURN 
           post, 
           u.id AS authorID, 
-          [(post)-[:CONTAIN]->(m:Media) | m.key] as images, 
+          [(post)-[:CONTAIN]->(m:Media) | m] as medias, 
           totalComment,
           totalReaction
       `,
@@ -241,10 +237,10 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     return res.records.map(record => {
       const postNode = record[0].get("post")
       const authorID = record[0].get("authorID")
-      const images: string[] = record[0].get("images")
+      const mediaNodes: Node[] = record[0].get("medias")
       const totalComment = parseInt(record[0].get("totalComment"))
       const totalReaction = parseInt(record[0].get("totalReaction"))
-      return PostEntity.toDomain(postNode, authorID, images, totalComment, totalReaction)
+      return PostEntity.toDomain(postNode, authorID, mediaNodes, totalComment, totalReaction)
     })
   }
   async updatePost(updatingPost: Post, editPostDto: EditPostRequest): Promise<void> {
@@ -256,7 +252,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
                 WITH p
                 UNWIND $addedImages AS addImage
                 CREATE (p)-[:CONTAIN]->(m:Media)
-                SET m.key = addImage, m.type = $postImageType
+                SET m = addImage
             }
             CALL {
                 WITH p
@@ -272,9 +268,8 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         newUpdate: {
           ...(PostEntity.fromDomain(updatingPost))
         },
-        addedImages: editPostDto.addImages ?? [],
+        addedImages: updatingPost.images.map(image => MediaEntity.fromDomain(image)) ?? [],
         deletedImages: editPostDto.deleteImages ?? [],
-        postImageType: MediaType.POST_IMAGE
       },
     )
   }

@@ -10,6 +10,7 @@ import {
   getNameFromPath,
 } from "utils";
 import { IStorageProvider } from "./provider.service";
+import { Media } from "domains/social/media.domain";
 
 export interface IStorageService {
   getUploadSignedLink(fileName: string): Promise<PreSignedLinkResponse>;
@@ -19,10 +20,10 @@ export interface IStorageService {
     userId: string
   ): Promise<PreSignedLinkResponse[]>;
   makePublic(objectNames: string[], mediaType: MediaType): Promise<string[]>;
-  getDownloadUrls(objectNames: string[]): Promise<string[]>;
+  getDownloadUrls(mediaArr: Media[]): Promise<Media[]>;
   replaceFiles(
-    oldObjects: string[],
-    newObjects: string[],
+    oldMediaArr: Media[],
+    newKeys: string[],
     mediaType: MediaType
   ): Promise<string[]>;
   deleteFiles(urls: string[]): Promise<string[]>;
@@ -75,7 +76,7 @@ export class FireBaseService implements IStorageService {
   }
 
   async replaceFiles(
-    oldObjects: string[],
+    oldMediaArr: Media[],
     newObjects: string[],
     mediaType: MediaType
   ): Promise<string[]> {
@@ -91,9 +92,9 @@ export class FireBaseService implements IStorageService {
         break;
     }
     const moveTasks: Promise<string>[] = [];
-    oldObjects.forEach(async (oldObj) => {
-      if (!oldObj) return;
-      const oldFile = this.bucket.file(oldObj);
+    oldMediaArr.forEach(async (oldMedia) => {
+      if (!oldMedia) return;
+      const oldFile = this.bucket.file(oldMedia.key);
       oldFile
         .delete({ ignoreNotFound: true })
         .catch((err) => this.logger.error(err));
@@ -122,10 +123,13 @@ export class FireBaseService implements IStorageService {
     });
   }
 
-  async getDownloadUrls(objectNames: string[]): Promise<string[]> {
-    if (!objectNames) return []
-    return objectNames.map(
-      (objName) => this._configService.get("storage.publicUrl") + objName
+  async getDownloadUrls(mediaArr: Media[]): Promise<Media[]> {
+    if (!mediaArr) return []
+    return mediaArr.map(
+      (media) => {
+        media.url = this._configService.get("storage.publicUrl") + media.key
+        return media
+      }
     );
   }
 

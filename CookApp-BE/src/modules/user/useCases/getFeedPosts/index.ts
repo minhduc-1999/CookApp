@@ -7,7 +7,6 @@ import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { isImageKey } from "utils";
 import { GetPostResponse } from "../getPostById/getPostResponse";
 import { GetFeedPostsResponse } from "./getFeedPostsResponse";
 export class GetFeedPostsQuery extends BaseQuery {
@@ -35,7 +34,7 @@ export class GetFeedPostsQueryHandler
 
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
-      if (post.author?.avatar && isImageKey(post.author?.avatar)) {
+      if (post.author?.avatar && post.author?.avatar.isValidKey()) {
         post.author.avatar = (
           await this._storageService.getDownloadUrls([post.author.avatar])
         )[0];

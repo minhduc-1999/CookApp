@@ -5,7 +5,6 @@ import { User } from "domains/social/user.domain";
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
-import { isImageKey } from "utils";
 import { GetWallResponse } from "./getWallResponse";
 export class GetWallQuery extends BaseQuery {
   targetId: string;
@@ -32,7 +31,7 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
       query.user.id,
       query.targetId
     );
-    if (wall.user.avatar && isImageKey(wall.user.avatar)) {
+    if (wall.user.avatar && wall.user.avatar.isValidKey()) {
       wall.user.avatar = (
         await this._storageService.getDownloadUrls([wall.user.avatar])
       )[0];

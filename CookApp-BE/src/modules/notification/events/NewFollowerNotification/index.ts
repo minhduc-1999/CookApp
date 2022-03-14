@@ -43,7 +43,7 @@ export class NewFollowerEventHandler
       body: template.body.replace("$user", event.follower.displayName),
       title: template.title,
       templateId: template.id,
-      image: follower.avatar,
+      image: follower.avatar.url,
       targets: [target.id],
       data: {
         followerID: follower.id,

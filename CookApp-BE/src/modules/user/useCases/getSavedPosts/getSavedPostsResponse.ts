@@ -17,7 +17,7 @@ export class SavedPostDTO {
 }
 
 export class GetSavedPostsResponse {
-  @ApiResponseProperty({ type: [PostResponse] })
+  @ApiResponseProperty({ type: [SavedPostDTO] })
   posts: SavedPostDTO[];
 
   @ApiResponseProperty({ type: PageMetadata })

@@ -11,6 +11,7 @@ import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { NewPostEvent } from "modules/notification/events/NewPostNotification";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { Image, Video } from "domains/social/media.domain";
 
 export class CreatePostCommand extends BaseCommand {
   req: CreatePostRequest;
@@ -47,8 +48,8 @@ export class CreatePostCommandHandler
         creatingPost = new Album({
           author: user,
           name: req.name,
-          images: req.images,
-          videos: req.videos
+          images: req.images?.map(image => new Image({key: image})),
+          videos: req.videos?.map(video => new Video({key: video}))
         })
         break;
       }
@@ -56,8 +57,8 @@ export class CreatePostCommandHandler
         creatingPost = new Moment({
           author: user,
           content: req.content,
-          images: req.images,
-          videos: req.videos
+          images: req.images?.map(image => new Image({key: image})),
+          videos: req.videos?.map(video => new Video({key: video}))
         });
       }
       default: {

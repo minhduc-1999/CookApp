@@ -7,7 +7,7 @@ import { User } from "domains/social/user.domain";
 import { parseInt } from "lodash";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
-import { int, Integer } from "neo4j-driver";
+import { int, Node } from "neo4j-driver";
 
 @Injectable()
 export class FeedRepository extends BaseRepository implements IFeedRepository {
@@ -52,7 +52,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
           totalComment, 
           totalReaction, 
           u AS author,
-          [(post)-[:CONTAIN]->(m:Media) | m.key] AS images
+          [(post)-[:CONTAIN]->(m:Media) | m] AS medias
       `,
       {
         userID: user.id,
@@ -65,8 +65,8 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       const totalComment = parseInt(record.get("totalComment"))
       const totalReaction = parseInt(record.get("totalReaction"))
       const author = record.get("author")
-      const images: string[] = record.get("images")
-      return PostEntity.toDomain(postNode, author, images, totalComment, totalReaction)
+      const mediaNodes: Node[] = record.get("medias")
+      return PostEntity.toDomain(postNode, author, mediaNodes, totalComment, totalReaction)
     })
   }
 

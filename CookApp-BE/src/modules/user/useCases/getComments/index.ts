@@ -10,7 +10,6 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { ICommentService } from "modules/user/services/comment.service";
 import { IPostService } from "modules/user/services/post.service";
-import { isImageKey } from "utils";
 import { GetCommentsRequest } from "./getCommentsRequest";
 import { GetCommentsResponse } from "./getCommentsResponse";
 
@@ -77,7 +76,7 @@ export class GetCommentsQueryHandler
 
     for (let comment of comments) {
       comment.numberOfReply = await this._commentRepo.getAmountOfReply(comment.id);
-      if (comment.user.avatar && isImageKey(comment.user.avatar)) {
+      if (comment.user.avatar && comment.user.avatar.isValidKey()) {
         comment.user.avatar = (
           await this._storageService.getDownloadUrls([comment.user.avatar])
         )[0];

@@ -1,5 +1,5 @@
 import { Audit } from "domains/audit.domain";
-import { Ingredient } from "./ingredient.domain";
+import { Image } from "domains/social/media.domain";
 import { RecipeStep } from "./recipeStep.domain";
 
 
@@ -10,7 +10,7 @@ export class Food extends Audit {
 
   description: string;
 
-  photos: string[];
+  photos: Image[];
 
   totalTime: number;
 

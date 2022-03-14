@@ -6,7 +6,6 @@ import { User } from "domains/social/user.domain";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { int } from "neo4j-driver";
-import { MediaType } from "enums/mediaType.enum";
 
 @Injectable()
 export class UserRepository extends BaseRepository implements IUserRepository {

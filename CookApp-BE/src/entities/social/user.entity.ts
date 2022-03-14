@@ -1,3 +1,4 @@
+import { Image } from 'domains/social/media.domain';
 import { Profile } from 'domains/social/profile.domain';
 import { User } from 'domains/social/user.domain';
 import { Node } from 'neo4j-driver'
@@ -24,7 +25,7 @@ export class UserEntity {
       email: properties.email,
       password: properties.password,
       phone: properties.phone,
-      avatar: properties.avatar,
+      avatar: new Image({ key: properties.avatar }),
       emailVerified: properties.emailVerified,
     })
     return user

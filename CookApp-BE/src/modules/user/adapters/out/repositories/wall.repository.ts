@@ -6,7 +6,7 @@ import { Post } from "domains/social/post.domain";
 import { Wall } from "domains/social/wall.domain";
 import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
-import { int } from "neo4j-driver";
+import { int, Node } from "neo4j-driver";
 import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallPostsRequest";
 
 @Injectable()
@@ -25,7 +25,8 @@ export class WallRepository extends BaseRepository implements IWallRepository {
         queryStr = `
           MATCH (:User{id: $userID})-[:OWN]->(p:Post) 
           WHERE p.kind = $kind 
-          RETURN p
+          RETURN p,
+            [(p)-[:CONTAIN]->(m:Media) | m] AS medias
           ORDER BY p.createdAd DESC
           SKIP $skip
           LIMIT $limit
@@ -34,7 +35,8 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       default:
         queryStr = `
           MATCH (:User{id: $userID})-[:OWN]->(p:Post) 
-          RETURN p
+          RETURN p,
+            [(p)-[:CONTAIN]->(m:Media) | m] AS medias
           ORDER BY p.createdAd DESC
           SKIP $skip
           LIMIT $limit
@@ -52,7 +54,11 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     )
     if (res.records.length === 0)
       return []
-    return res.records.map(record => PostEntity.toDomain(record.get("p")))
+    return res.records.map(record => {
+      const mediaNodes: Node[] = record.get("medias")
+      const postNode: Node = record.get("p")
+      return PostEntity.toDomain(postNode, null, mediaNodes)
+    })
   }
 
   async getTotalPosts(userID: string, query: GetWallPostsRequest): Promise<number> {

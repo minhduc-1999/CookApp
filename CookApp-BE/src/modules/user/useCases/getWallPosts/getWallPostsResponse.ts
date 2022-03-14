@@ -1,6 +1,6 @@
 import { ApiExtraModels, ApiProperty, ApiResponseProperty, getSchemaPath, PickType } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
-import { AlbumResponse, MomentResponse } from "base/dtos/response.dto";
+import { AlbumResponse, MediaResponse, MomentResponse } from "base/dtos/response.dto";
 import { Post } from "domains/social/post.domain";
 
 class MomentResponse1 extends PickType(MomentResponse, ["id", "content", "images", "videos", "createdAt", "kind"]) { }
@@ -31,8 +31,8 @@ export class GetWallPostsResponse {
         case "Moment":
           return {
             id: post.id,
-            images: post.images,
-            videos: post.videos,
+            images: post.images.map(image => new MediaResponse(image)),
+            videos: post.videos.map(video => new MediaResponse(video)),
             createdAt: post.createdAt,
             content: post.content,
             kind: "Moment"
@@ -40,8 +40,8 @@ export class GetWallPostsResponse {
         case "Album":
           return {
             id: post.id,
-            images: post.images,
-            videos: post.videos,
+            images: post.images.map(image => new MediaResponse(image)),
+            videos: post.videos.map(video => new MediaResponse(video)),
             createdAt: post.createdAt,
             name: post.name,
             kind: "Album"

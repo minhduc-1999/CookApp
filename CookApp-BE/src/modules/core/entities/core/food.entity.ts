@@ -3,6 +3,7 @@ import { AbstractSchema } from "base/schemas/schema.base";
 import { Type } from "class-transformer";
 import { Food } from "domains/core/food.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
+import { Image } from "domains/social/media.domain";
 
 class IngredientModel {
   unit: string;
@@ -24,7 +25,9 @@ class RecipeStepModel extends AbstractSchema {
     return new RecipeStep({
       id: step._id,
       content: step.content,
-      photos: step.photos
+      photos: step.photos.map(photo => new Image({
+        key: photo
+      }))
     })
   }
 }
@@ -59,7 +62,7 @@ export class FoodModel extends AbstractSchema {
   steps: RecipeStepModel[];
 
   @Type(() => IngredientModel)
-  @Prop({ type: [{}]})
+  @Prop({ type: [{}] })
   ingredients: IngredientModel[];
 
   @Prop()
@@ -74,7 +77,7 @@ export class FoodModel extends AbstractSchema {
       createdAt: food.createdAt,
       totalTime: food.totalTime,
       steps: food.steps.map(step => RecipeStepModel.toDomain(step)),
-      photos: food.photos,
+      photos: food.photos.map(food => new Image({ key: food })),
       ingredients: food.ingredients,
       cookingMethod: food.cookingMethod,
       origin: food.origin,

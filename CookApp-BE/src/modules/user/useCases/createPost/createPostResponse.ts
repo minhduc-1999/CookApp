@@ -1,5 +1,5 @@
 import { PickType } from "@nestjs/swagger";
-import { PostResponse } from "base/dtos/response.dto";
+import { MediaResponse, PostResponse } from "base/dtos/response.dto";
 import { Post } from "domains/social/post.domain";
 
 export class CreatePostResponse extends PickType(
@@ -12,13 +12,16 @@ export class CreatePostResponse extends PickType(
       switch (post.kind) {
         case "Album":
           this.name = post?.name
-          this.images = post?.images
-          this.videos = post?.videos
+          this.images = post?.images.map(image => new MediaResponse(image))
+          this.videos = post?.videos.map(video => new MediaResponse(video))
+
           break;
       case "Moment":
           this.content = post?.content
-          this.images = post?.images
-          this.videos = post?.videos
+          this.images = post?.images.map(image => new MediaResponse(image))
+
+          this.videos = post?.videos.map(video => new MediaResponse(video))
+
           break;
       }
     }

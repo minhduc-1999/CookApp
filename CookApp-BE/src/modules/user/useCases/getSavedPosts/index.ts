@@ -6,7 +6,6 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { isImageKey } from "utils";
 import { SavedPostDTO, GetSavedPostsResponse } from "./getSavedPostsResponse";
 export class GetSavedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -32,7 +31,7 @@ export class GetSavedPostsQueryHandler
     for (let item of posts) {
       const { post } = item
       post.images = await this._storageService.getDownloadUrls(post.images);
-      if (post.author?.avatar && isImageKey(post.author?.avatar)) {
+      if (post.author?.avatar && post.author?.avatar.isValidKey()) {
         post.author.avatar = (
           await this._storageService.getDownloadUrls([post.author.avatar])
         )[0];
