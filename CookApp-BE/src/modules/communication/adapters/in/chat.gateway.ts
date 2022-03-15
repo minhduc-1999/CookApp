@@ -10,7 +10,7 @@ import { IWsMiddlewareFactory } from "../out/wsMiddlewareFactory.service";
   cors: {
     origins: ["locahost:8080"],
     credentials: true,
-  } 
+  }
 })
 
 @UseGuards(WebSocketAuthGuard)
@@ -19,7 +19,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     @Inject("IWsMiddlewareFactory")
     private _wsMiddlewareFactory: IWsMiddlewareFactory,
     private _commandBus: CommandBus
-  ) {}
+  ) { }
 
   afterInit(server: Server) {
     server.use(this._wsMiddlewareFactory.useAuth())
@@ -38,9 +38,22 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   @SubscribeMessage("chat:send")
   async handleMessage(
     @MessageBody() body: any,
-    @ConnectedSocket() socket : Socket
+    @ConnectedSocket() socket: Socket
   ): Promise<void> {
     console.log("received message: ", body)
-    socket.emit("message", "response " + body)
+    if (body.room)
+      socket.broadcast.to(body.room).emit("chat:message", body.message)
+    else
+      socket.broadcast.emit("chat:message", body.message)
+  }
+
+  @SubscribeMessage("chat:join")
+  async joinConversation(
+    @MessageBody() body: any,
+    @ConnectedSocket() socket: Socket
+  ): Promise<string> {
+    console.log("join: ", body)
+    socket.join(body)
+    return "join room success"
   }
 }
