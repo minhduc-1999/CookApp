@@ -1,7 +1,12 @@
 import { Inject, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
+import { WsParamTransaction, WsRequestTransaction } from "decorators/transaction.decorator";
+import { User } from "domains/social/user.domain";
 import { WebSocketAuthGuard } from "guards/websocketAuth.guard";
+import { ChatConnectCommand } from "modules/communication/usecases/chatConnect";
+import { ChatDiconnectCommand } from "modules/communication/usecases/chatDisconnect";
+import { Transaction } from "neo4j-driver";
 import { Socket, Server } from "socket.io";
 import { IWsMiddlewareFactory } from "../out/wsMiddlewareFactory.service";
 
@@ -29,18 +34,28 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
 
   async handleDisconnect(client: Socket) {
     console.log("disconneted: ", client.id)
+    const user = client.handshake.auth.user as User
+    const command = new ChatDiconnectCommand(user, null)
+    this._commandBus.execute(command)
   }
 
-  async handleConnection(client: Socket, ...args: any[]) {
-    console.log("Connect: ", client.id)
+
+  async handleConnection(client: Socket,
+  ) {
+    console.log("connect", client.id)
+    const user = client.handshake.auth.user as User
+    const command = new ChatConnectCommand(user, client.id, null)
+    this._commandBus.execute(command)
   }
 
+  @WsRequestTransaction()
   @SubscribeMessage("chat:send")
   async handleMessage(
     @MessageBody() body: any,
-    @ConnectedSocket() socket: Socket
+    @ConnectedSocket() socket: Socket,
+    @WsParamTransaction() tx: Transaction
   ): Promise<void> {
-    console.log("received message: ", body)
+    console.log("received message: ", body, tx)
     if (body.room)
       socket.broadcast.to(body.room).emit("chat:message", body.message)
     else

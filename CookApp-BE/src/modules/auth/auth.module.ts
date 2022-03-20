@@ -79,6 +79,6 @@ const globalGuards = [
     ...handlers,
     ...globalGuards,
   ],
-  exports: ["IUserService", JwtModule],
+  exports: ["IUserService", JwtModule, "IUserRepository"],
 })
 export class AuthModule { }

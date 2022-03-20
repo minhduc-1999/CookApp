@@ -5,10 +5,14 @@ import { AuthModule } from "modules/auth/auth.module";
 import { ChatGateway } from "./adapters/in/chat.gateway";
 import { WsMiddlewareFactory } from "./adapters/out/wsMiddlewareFactory.service";
 import { ConversationModelDefinition, MessageBucketDefinition } from "./entities/chat.entity";
+import { ChatConnectCommandHandler } from "./usecases/chatConnect";
+import { ChatDisconnectCommandHandler } from "./usecases/chatDisconnect";
 import { SendMessageCommandHandler } from "./usecases/sendMessages";
 
 const commandHandlers = [
-  SendMessageCommandHandler
+  SendMessageCommandHandler,
+  ChatConnectCommandHandler,
+  ChatDisconnectCommandHandler
 ]
 
 @Module({

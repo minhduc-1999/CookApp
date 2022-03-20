@@ -85,9 +85,7 @@ export class AuthController {
   @NotRequireEmailVerification()
   async googleAuthRedirect(
     @UserReq() user: User,
-    @Query("code") code: string
   ) {
-    console.log("code", code)
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
     return Result.ok(result, { messages: ["Login successfully"] });

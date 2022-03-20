@@ -14,6 +14,28 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     private neo4jService: INeo4jService) {
     super()
   }
+  async updateStatus(user: User, statusID: string = ""): Promise<void> {
+    if (statusID) {
+      await this.neo4jService.write(`
+            MATCH (u:User {id: $userID})
+            SET u.status = $statusID
+      `,
+        this.tx,
+        {
+          userID: user.id,
+          statusID
+        })
+    } else {
+      await this.neo4jService.write(`
+            MATCH (u:User {id: $userID})
+            REMOVE u.status
+      `,
+        this.tx,
+        {
+          userID: user.id,
+        })
+    }
+  }
   async createUser(userData: User): Promise<User> {
     const res = await this.neo4jService.write(`
             CREATE (u:User)
@@ -110,7 +132,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     )
     if (res.records.length === 0)
       return 0
-    return res.records[0].get("numOfResult").toNumber() 
+    return res.records[0].get("numOfResult").toNumber()
   }
 }
 

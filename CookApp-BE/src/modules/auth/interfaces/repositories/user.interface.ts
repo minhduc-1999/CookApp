@@ -14,4 +14,5 @@ export interface IUserRepository {
   setTransaction(tx: Transaction): IUserRepository
   getUsers(query: PageOptionsDto): Promise<User[]>;
   countUsers(query: PageOptionsDto): Promise<number>;
+  updateStatus(user: User, statusID?: string): Promise<void>
 }
