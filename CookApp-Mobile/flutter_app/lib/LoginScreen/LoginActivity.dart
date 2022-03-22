@@ -231,6 +231,9 @@ class _LoginActivityState extends State<LoginActivity> {
                           ),
                           onPressed: () {
                             Navigator.of(context).pop();
+                            setState(() {
+                              isAPIcallProcess = false;
+                            });
                           },
                         )
                       ],
@@ -251,9 +254,9 @@ class _LoginActivityState extends State<LoginActivity> {
           child: LoginButton(
             text: "Log in by Google",
             press: () async {
-              String idToken = await _signInWithGoogle();
+              String authCode = await _signInWithGoogle();
               var response = await APIService.loginByGoogle(
-                  LoginByGoogleRequestModel(idToken: idToken));
+                  LoginByGoogleRequestModel(code: authCode));
               if (response) {
                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
                   builder: (context) {

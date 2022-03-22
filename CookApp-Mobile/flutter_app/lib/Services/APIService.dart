@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
+import 'package:tastify/Model/EditPostRequestModel.dart';
 import 'package:tastify/Model/EditProfileRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
@@ -183,8 +184,8 @@ class APIService {
     return newFeedRespondModel(respone.body);
   }
 
-  static Future<bool> react(String postID, ReactRequestModel model) async {
-    var url = Uri.parse(Config.apiURL + Config.postDetails + postID + "/react");
+  static Future<bool> react(ReactRequestModel model) async {
+    var url = Uri.parse(Config.apiURL + Config.reactAPI);
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.post(url,
@@ -200,9 +201,9 @@ class APIService {
     }
   }
 
-  static Future<bool> comment(String postID, CommentRequestModel model) async {
+  static Future<bool> comment(CommentRequestModel model) async {
     var url =
-        Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
+        Uri.parse(Config.apiURL + Config.commentAPI);
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.post(url,
@@ -219,18 +220,24 @@ class APIService {
   }
 
   static Future<CommentRespondModel> getComment(
-      String postID, String parentID) async {
+      String targetKeyOrID, String targetType, String replyOf) async {
     var url =
-        Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
-    if (parentID != "") {
+        Uri.parse(Config.apiURL + Config.commentAPI);
+    if (replyOf != "" && replyOf != null) {
       url = url.replace(queryParameters: <String, String>{
         'offset': '0',
         'limit': '10',
-        'parent': parentID
+        'targetKeyOrID': targetKeyOrID,
+        'targetType': targetType,
+        'replyOf': replyOf
       });
-    } else if (parentID == "" || parentID == null) {
-      url = url.replace(
-          queryParameters: <String, String>{'offset': '0', 'limit': '10'});
+    } else{
+      url = url.replace(queryParameters: <String, String>{
+        'offset': '0',
+        'limit': '10',
+        'targetKeyOrID': targetKeyOrID,
+        'targetType': targetType,
+      });
     }
 
     print("url: " + url.toString());
@@ -239,9 +246,8 @@ class APIService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
-    print("code: " + respone.body);
-    var respondModel = commentRespondModel(respone.body);
-    print("respond: " + respondModel.data.comments.length.toString());
+
+
     return commentRespondModel(respone.body);
   }
 
@@ -296,6 +302,18 @@ class APIService {
     return editProfileRespondJson(respone.body);
   }
 
+  static Future<bool> editPost(EditPostRequestModel model, String postId) async {
+    var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.patch(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+    return respone.statusCode == 200;
+  }
   static Future<FoodRespondModel> getFood(int offset) async {
     var url = Uri.parse(Config.apiURL + Config.foodAPI)
         .replace(queryParameters: <String, String>{

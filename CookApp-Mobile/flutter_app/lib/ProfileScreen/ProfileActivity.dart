@@ -291,6 +291,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
                   style: TextStyle(fontSize: 16),
                 ),
                 onTap: () async {
+                  Navigator.of(context).pop();
                   setState(() {
                     isAPIcallProcess = true;
                   });

@@ -7,13 +7,14 @@ import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:tastify/UploadScreen/UploadActivity.dart';
 
 import 'ProfileScreen/EditProfileActivity.dart';
 import 'Services/Auth.dart';
 import 'Services/SharedService.dart';
 String currentUserId;
 Widget _defaultHome = LoginActivity(auth: Auth(),);
-
+//Widget _defaultHome = UploadActivity();
 const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // title

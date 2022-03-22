@@ -4,11 +4,16 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:tastify/CommentScreen/CommentActivity.dart';
+import 'package:tastify/EditPostScreen/EditPostActivity.dart';
+import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tastify/config.dart';
+import 'package:tastify/constants.dart';
+import 'package:tastify/main.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 class Post extends StatefulWidget {
@@ -59,7 +64,7 @@ class Post extends StatefulWidget {
   final String location;
   final String displayName;
   final String avatar;
-  final List<String> images;
+  final List<Images> images;
   final int numOfReaction;
   final int numOfComment;
   final DateTime dateTime;
@@ -84,7 +89,7 @@ class _Post extends State<Post> {
   final String userId;
   final String content;
   final String location;
-  final List<String> images;
+  final List<Images> images;
   final String displayName;
   final String avatar;
   final DateTime dateTime;
@@ -146,7 +151,7 @@ class _Post extends State<Post> {
               ? Container(
                   margin: EdgeInsets.only(bottom: 10),
                   child: ClipRRect(
-                    child: Image.network(images[0],
+                    child: Image.network(images[0].url,
                         fit: BoxFit.cover,
                         width: 1000.0,
                         height: height * 0.55),
@@ -161,7 +166,7 @@ class _Post extends State<Post> {
                                     child: ClipRRect(
                                         child: Stack(
                                       children: <Widget>[
-                                        Image.network(item,
+                                        Image.network(item.url,
                                             fit: BoxFit.cover, width: 1000.0),
                                       ],
                                     )),
@@ -223,32 +228,119 @@ class _Post extends State<Post> {
   }
 
   Widget buildPostHeader() {
-    return ListTile(
-      leading: (avatar != null)
-          ? CircleAvatar(
-              backgroundColor: Colors.grey,
-              backgroundImage: NetworkImage(avatar),
-            )
-          : CircleAvatar(
-              /*child: Image.asset("assets/images/default_avatar.png",
-                                    width: size.width * 0.20,
-                                    height: size.width * 0.20,
-                                    fit: BoxFit.fill),*/
-              backgroundColor: Colors.grey,
-              backgroundImage: AssetImage('assets/images/default_avatar.png')),
-      title: GestureDetector(
-        child: displayName != null
-            ? Text(displayName, style: boldStyle)
-            : Text("user", style: boldStyle),
-        onTap: () {
-          openProfile(context, userId);
-        },
+    final double width = MediaQuery.of(context).size.width;
+    return Padding(
+      padding: const EdgeInsets.only(left: 15, right: 0, top: 3, bottom: 3),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          (avatar != null)
+              ? CircleAvatar(
+                  radius: 15,
+                  backgroundColor: Colors.grey,
+                  backgroundImage: NetworkImage(avatar),
+                )
+              : CircleAvatar(
+                  /*child: Image.asset("assets/images/default_avatar.png",
+                                      width: size.width * 0.20,
+                                      height: size.width * 0.20,
+                                      fit: BoxFit.fill),*/
+                  radius: 15,
+                  backgroundColor: Colors.grey,
+                  backgroundImage:
+                      AssetImage('assets/images/default_avatar.png')),
+          SizedBox(
+            width: width * 0.04,
+          ),
+          GestureDetector(
+            child: displayName != null
+                ? Text(displayName, style: boldStyle)
+                : Text("user", style: boldStyle),
+            onTap: () {
+              openProfile(context, userId);
+            },
+          ),
+          userId == currentUserId
+              ? Expanded(
+                  child: Container(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                      onPressed: () {
+                        /*return showModalBottomSheet(
+                      context: context,
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                      builder: (context) => buildMoreVert());*/
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => EditPostActivity(
+                                    id: this.id,
+                                    images: this.images,
+                                    content: this.content,
+                                    avatar: this.avatar,
+                                    displayName: this.displayName,
+                                  )),
+                        );
+                      },
+                      icon: Icon(Icons.edit_outlined),
+                      color: Colors.black.withOpacity(0.7),
+                    ),
+                  ),
+                )
+              : Container()
+        ],
       ),
-
-      trailing: const Icon(Icons.more_vert),
     );
   }
 
+  /*Widget buildMoreVert() {
+    return DraggableScrollableSheet(
+      maxChildSize: 0.5,
+      minChildSize: 0.3,
+      initialChildSize: 0.5,
+      builder: (_, controller) => Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+        ),
+        padding: EdgeInsets.only(top: 10, left: 5,bottom: 10,right: 5),
+        child: ListView(
+          controller: controller,
+          children: [
+            ListTile(
+              leading: Icon(
+                Icons.edit_outlined,
+                color: Colors.black,
+              ),
+              title: Text(
+                "Edit post",
+                style: TextStyle(fontSize: 16),
+              ),
+              onTap: (){
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => EditPostActivity(id: this.id,images: this.images,content: this.content,avatar: this.avatar,displayName: this.displayName,)),
+                );
+              },
+            ),
+            ListTile(
+              leading: Icon(
+                Icons.save_outlined,
+                color: Colors.black,
+              ),
+              title: Text(
+                "Save post",
+                style: TextStyle(fontSize: 16),
+              ),
+            ),
+
+          ],
+        ),
+      ),
+    );
+  }*/
   Container loadingPlaceHolder = Container(
     height: 400.0,
     child: Center(child: CircularProgressIndicator()),
@@ -282,12 +374,22 @@ class _Post extends State<Post> {
                   return showModalBottomSheet(
                     context: context,
                     builder: (BuildContext context) {
-                      return CommentActivity(postId: id);
+                      return CommentActivity(
+                        targetKeyOrID: id,
+                        targetType: Config.postCommentsType,
+                        stepName: " ",
+                      );
                     },
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
                   );
                 }),
+            Expanded(
+                child: Container(
+              margin: EdgeInsets.only(right: 15),
+              alignment: Alignment.centerRight,
+              child: Icon(FontAwesomeIcons.solidSave, color: Colors.black,),
+            ))
           ],
         ),
         Row(
@@ -342,24 +444,15 @@ class _Post extends State<Post> {
       ],
     );
   }
-
-  void goToComments({BuildContext context, String postId}) {
-    Navigator.of(context)
-        .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-      return CommentActivity(postId: postId);
-    }));
-  }
-
   void _likePost(String postId2) async {
-    await APIService.react(id, ReactRequestModel(react: 'LOVE'));
+    await APIService.react(ReactRequestModel(react: 'LOVE', targetKeyOrID: id,targetType:Config.postReactType));
     if (liked) {
       setState(() {
         liked = false;
         numOfReaction--;
       });
     }
-    print("l");
-    if (!liked) {
+    else {
       setState(() {
         liked = true;
         showHeart = true;
@@ -371,6 +464,7 @@ class _Post extends State<Post> {
         });
       });
     }
+
     print("l");
   }
 

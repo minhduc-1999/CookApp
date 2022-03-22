@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'dart:ffi';
 FoodRespondModel foodRespondModel(String str) =>
     FoodRespondModel.fromJson(json.decode(str));
 class FoodRespondModel {
@@ -53,7 +51,7 @@ class Data {
 
   Data.fromJson(Map<String, dynamic> json) {
     if (json['foods'] != null) {
-      foods = new List<Foods>();
+      foods = <Foods>[];
       json['foods'].forEach((v) {
         foods.add(new Foods.fromJson(v));
       });
@@ -76,18 +74,21 @@ class Data {
 }
 
 class Foods {
+  int createdAt;
   String id;
   int servings;
   String name;
   String description;
-  List<String> photos;
+  List<Photos> photos;
   int totalTime;
   List<String> cookingMethod;
   List<Steps> steps;
   List<Ingredients> ingredients;
   String videoUrl;
+
   Foods(
-      {this.id,
+      {this.createdAt,
+        this.id,
         this.servings,
         this.name,
         this.description,
@@ -96,38 +97,47 @@ class Foods {
         this.cookingMethod,
         this.steps,
         this.ingredients,
-      this.videoUrl});
+        this.videoUrl});
 
   Foods.fromJson(Map<String, dynamic> json) {
+    createdAt = json['createdAt'];
     id = json['id'];
     servings = json['servings'];
     name = json['name'];
     description = json['description'];
-    photos = json['photos'].cast<String>();
+    if (json['photos'] != null) {
+      photos = <Photos>[];
+      json['photos'].forEach((v) {
+        photos.add(new Photos.fromJson(v));
+      });
+    }
     totalTime = json['totalTime'];
     cookingMethod = json['cookingMethod'].cast<String>();
     if (json['steps'] != null) {
-      steps = new List<Steps>();
+      steps = <Steps>[];
       json['steps'].forEach((v) {
         steps.add(new Steps.fromJson(v));
       });
     }
     if (json['ingredients'] != null) {
-      ingredients = new List<Ingredients>();
+      ingredients = <Ingredients>[];
       json['ingredients'].forEach((v) {
         ingredients.add(new Ingredients.fromJson(v));
       });
     }
-    videoUrl = json['videoUrl'] != null ? json['videoUrl'] : null;
+    videoUrl = json['videoUrl'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['createdAt'] = this.createdAt;
     data['id'] = this.id;
     data['servings'] = this.servings;
     data['name'] = this.name;
     data['description'] = this.description;
-    data['photos'] = this.photos;
+    if (this.photos != null) {
+      data['photos'] = this.photos.map((v) => v.toJson()).toList();
+    }
     data['totalTime'] = this.totalTime;
     data['cookingMethod'] = this.cookingMethod;
     if (this.steps != null) {
@@ -136,68 +146,99 @@ class Foods {
     if (this.ingredients != null) {
       data['ingredients'] = this.ingredients.map((v) => v.toJson()).toList();
     }
+    data['videoUrl'] = this.videoUrl;
+    return data;
+  }
+}
+
+class Photos {
+  String key;
+  String url;
+
+  Photos({this.key, this.url});
+
+  Photos.fromJson(Map<String, dynamic> json) {
+    key = json['key'];
+    url = json['url'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['key'] = this.key;
+    data['url'] = this.url;
     return data;
   }
 }
 
 class Steps {
   String content;
-  List<String> photos;
+  List<StepsPhoto> photos;
+  String id;
 
-  Steps({this.content, this.photos});
+  Steps({this.content, this.photos, this.id});
 
   Steps.fromJson(Map<String, dynamic> json) {
     content = json['content'];
-    photos = json['photos'].cast<String>();
+    if (json['photos'] != null) {
+      photos = <StepsPhoto>[];
+      json['photos'].forEach((v) {
+        photos.add(new StepsPhoto.fromJson(v));
+      });
+    }
+    id = json['id'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['content'] = this.content;
-    data['photos'] = this.photos;
+    if (this.photos != null) {
+      data['photos'] = this.photos.map((v) => v.toJson()).toList();
+    }
+    data['id'] = this.id;
+    return data;
+  }
+}
+
+class StepsPhoto {
+  String key;
+  String url;
+  String type;
+
+  StepsPhoto({this.key, this.url, this.type});
+
+  StepsPhoto.fromJson(Map<String, dynamic> json) {
+    key = json['key'];
+    url = json['url'];
+    type = json['type'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['key'] = this.key;
+    data['url'] = this.url;
+    data['type'] = this.type;
     return data;
   }
 }
 
 class Ingredients {
-  Unit unit;
   String name;
-  int quantity;
+  String quantity;
+  String unit;
 
-  Ingredients({this.unit, this.name, this.quantity});
+  Ingredients({this.name, this.quantity, this.unit});
 
   Ingredients.fromJson(Map<String, dynamic> json) {
-    unit = json['unit'] != null ? new Unit.fromJson(json['unit']) : null;
-    name = json['name'] != null ? json['name'] : null;
-    quantity = json['quantity'] != null ? json['quantity'].toInt() : null;
+    name = json['name'];
+    quantity = json['quantity'].toString();
+    unit = json['unit'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.unit != null) {
-      data['unit'] = this.unit.toJson();
-    }
     data['name'] = this.name;
     data['quantity'] = this.quantity;
-    return data;
-  }
-}
-
-class Unit {
-  String unit;
-  int value;
-
-  Unit({this.unit, this.value});
-
-  Unit.fromJson(Map<String, dynamic> json) {
-    unit = json['unit'] != null ? json['unit'] : null;
-    value = json['value'] != null ? json['value'] : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
     data['unit'] = this.unit;
-    data['value'] = this.value;
     return data;
   }
 }

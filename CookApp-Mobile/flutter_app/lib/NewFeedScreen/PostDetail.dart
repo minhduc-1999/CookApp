@@ -58,7 +58,7 @@ class _PostDetailState extends State<PostDetail> {
       userId: res.data.author.id,
       location: "Quang Binh",
       content: res.data.content,
-      images: res.data.images,
+      //images: res.data.images,
       avatar: res.data.author.avatar,
       displayName: res.data.author.displayName,
       dateTime: DateTime.fromMillisecondsSinceEpoch(res.data.createdAt),

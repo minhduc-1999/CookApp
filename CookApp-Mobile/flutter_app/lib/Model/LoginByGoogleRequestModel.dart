@@ -1,15 +1,15 @@
 class LoginByGoogleRequestModel {
-  String idToken;
+  String code;
 
-  LoginByGoogleRequestModel({this.idToken});
+  LoginByGoogleRequestModel({this.code});
 
   LoginByGoogleRequestModel.fromJson(Map<String, dynamic> json) {
-    idToken = json['idToken'];
+    code = json['code'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['idToken'] = this.idToken;
+    data['code'] = this.code;
     return data;
   }
 }

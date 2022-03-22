@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tastify/EditPostScreen/EditPostActivity.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/NewFeedScreen/SearchUserDelegate.dart';
 import 'Post.dart';
@@ -131,7 +132,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
           location: "Quang Binh",
           content: i.content,
           images: i.images,
-          avatar: i.author.avatar,
+          avatar: i.author.avatar.url,
           displayName: i.author.displayName,
           numOfReaction: i.numOfReaction,
           numOfComment: i.numOfComment,
@@ -159,7 +160,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
           location: "Quang Binh",
           content: i.content,
           images: i.images,
-          avatar: i.author.avatar,
+          avatar: i.author.avatar.url,
           displayName: i.author.displayName,
           numOfReaction: i.numOfReaction,
           numOfComment: i.numOfComment,
@@ -171,4 +172,5 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
       offset++;
     });
   }
+
 }

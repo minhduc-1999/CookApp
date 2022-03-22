@@ -14,8 +14,7 @@ class Auth implements AuthBase {
 
   @override
   Future<void> signInFirebaseWithToken(String token) async {
-    await _firebaseAuth.signInAnonymously();
-
+    await _firebaseAuth.signInWithCustomToken(token);
   }
   @override
   Future<String> signInWithGoogle() async {
@@ -29,13 +28,14 @@ class Auth implements AuthBase {
     final googleUser = await googleSignIn.signIn();
     if (googleUser != null) {
       final googleAuth = await googleUser.authentication;
-      if (googleAuth.idToken != null) {
+      return googleUser.serverAuthCode;
+      /*if (googleAuth.idToken != null) {
         print("idToken: " + googleAuth.idToken);
         print("accessToken: " + googleAuth.accessToken);
         return googleAuth.idToken.toString();
       } else {
         throw FirebaseAuthException(message: 'Missing Google ID Token');
-      }
+      }*/
     } else {
       throw FirebaseAuthException(message: 'Sign in aborted by user');
     }
@@ -59,5 +59,6 @@ class Auth implements AuthBase {
     if (await googleSignIn.isSignedIn()) {
       await googleSignIn.signOut();
     }
+    await _firebaseAuth.signOut();
   }
 }
