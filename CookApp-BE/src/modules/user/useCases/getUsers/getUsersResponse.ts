@@ -1,19 +1,19 @@
-import { ApiResponseProperty } from "@nestjs/swagger";
+import { ApiResponseProperty, } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
-import { Type } from "class-transformer";
-import { UserDTO } from "dtos/social/user.dto";
+import { AuthorResponse } from "base/dtos/response.dto";
+import { User } from "domains/social/user.domain";
 
 export class GetUsersResponse {
-  @ApiResponseProperty({ type: [UserDTO] })
-  @Type(() => UserDTO)
-  users: UserDTO[];
+  @ApiResponseProperty({ type: [AuthorResponse] })
+  users: AuthorResponse[];
 
   @ApiResponseProperty({ type: PageMetadata })
-  @Type(() => PageMetadata)
   metadata: PageMetadata;
 
-  constructor(users: UserDTO[], meta: PageMetadata) {
-    this.users = users;
+  constructor(users: User[], meta: PageMetadata) {
+    this.users = users.map(user => {
+      return new AuthorResponse(user)
+    })
     this.metadata = meta;
   }
 }

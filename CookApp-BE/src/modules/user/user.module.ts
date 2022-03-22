@@ -1,56 +1,68 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
-import { MongooseModule } from "@nestjs/mongoose";
-import { CommentModel } from "domains/schemas/social/comment.schema";
-import { FeedModel } from "domains/schemas/social/feed.schema";
-import { PostModel } from "domains/schemas/social/post.schema";
-import { UserModel } from "domains/schemas/social/user.schema";
-import { WallModel } from "domains/schemas/social/wall.schema";
 import "dotenv/config";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
+import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { AuthModule } from "modules/auth/auth.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
 import { CommentController } from "./adapters/in/comment.controller";
 import { FeedController } from "./adapters/in/feed.controller";
 import { PostController } from "./adapters/in/post.controller";
+import { ReactionController } from "./adapters/in/reaction.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
+import { MediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
+import { NewPostEventHandler } from "./events/propagateNewPost";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
+import { ReactionService } from "./services/reaction.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
+import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
 import { FollowCommandHandler } from "./useCases/follow";
+import { GetCommentsQueryHandler } from "./useCases/getComments";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostById";
-import { GetPostCommentsQueryHandler } from "./useCases/getPostComments";
+import { GetProfileQueryHandler } from "./useCases/getProfile";
+import { GetSavedPostsQueryHandler } from "./useCases/getSavedPosts";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
-import { ReactPostCommandHandler } from "./useCases/reactPost";
+import { ReactCommandHandler } from "./useCases/react";
+import { SavePostCommandHandler } from "./useCases/savePost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
+import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 
+const eventHandlers = [
+  NewPostEventHandler
+]
 const commandHandlers = [
   CreatePostCommandHandler,
   EditPostCommandHandler,
   CreateCommentCommandHandler,
-  ReactPostCommandHandler,
+  ReactCommandHandler,
   FollowCommandHandler,
   UnfolllowCommandHandler,
+  UpdateProfileCommandHandler,
+  SavePostCommandHandler,
+  DeleteSavedPostCommandHandler
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
+  GetProfileQueryHandler,
   GetWallPostsQueryHandler,
   GetFeedPostsQueryHandler,
-  GetPostCommentsQueryHandler,
+  GetCommentsQueryHandler,
   GetWallQueryHandler,
   GetUsersQueryHandler,
+  GetSavedPostsQueryHandler
 ];
 const services = [
   {
@@ -61,8 +73,16 @@ const services = [
     provide: "ICommentService",
     useClass: CommentService,
   },
+  {
+    provide: "IReactionService",
+    useClass: ReactionService,
+  },
 ];
 const repositories = [
+  {
+    provide: "IUserRepository",
+    useClass: UserRepository,
+  },
   {
     provide: "IPostRepository",
     useClass: PostRepository,
@@ -79,19 +99,16 @@ const repositories = [
     provide: "ICommentRepository",
     useClass: CommentRepository,
   },
+  {
+    provide: "IMediaRepository",
+    useClass: MediaRepository,
+  },
 ];
 
 @Module({
   imports: [
     ConfigModule,
     HttpModule,
-    MongooseModule.forFeature([
-      UserModel,
-      PostModel,
-      WallModel,
-      FeedModel,
-      CommentModel,
-    ]),
     CqrsModule,
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
@@ -104,12 +121,14 @@ const repositories = [
     FeedController,
     CommentController,
     UserController,
+    ReactionController,
   ],
   providers: [
     ...commandHandlers,
     ...services,
     ...repositories,
     ...queryHandlers,
+    ...eventHandlers
   ],
   exports: ["IWallRepository"],
 })

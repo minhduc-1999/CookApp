@@ -6,9 +6,21 @@ const url = process.env.DB_CONNECTION; //change this connectionString
 const client = new MongoClient(url);
 
 // Config here
-const dbName = 'cookapp'
-const collectionName = 'foods'
-const fileName = 'food_2.json'
+const dbName = 'tastify-db'
+const pair = [
+  {
+    colName: 'foods',
+    fileName: "foods.json"
+  },
+  {
+    colName: 'units',
+    fileName: "units.json"
+  },
+  {
+    colName: 'ingredients',
+    fileName: "ingredients.json"
+  },
+]
 //
 
 async function main() {
@@ -16,14 +28,14 @@ async function main() {
   await client.connect();
   console.log('Connected successfully to server');
   const db = client.db(dbName);
-  const collection = db.collection(collectionName);
-  const raw = fs.readFileSync(fileName)
+  for (const p of pair) {
+    const collection = db.collection(p.colName);
+    const raw = fs.readFileSync(p.fileName)
 
-
-  const foods = JSON.parse(raw);
-  console.log(foods)
-  const iRe = await collection.insertMany(foods)
-  console.log("insert result", iRe)
+    const objs = JSON.parse(raw);
+    const insertResult = await collection.insertMany(objs)
+    console.log("insert result", insertResult)
+  }
 
   return 'done.';
 }

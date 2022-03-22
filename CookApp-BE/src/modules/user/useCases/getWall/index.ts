@@ -1,15 +1,14 @@
 import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-import { isImageKey } from "utils";
+import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 import { GetWallResponse } from "./getWallResponse";
 export class GetWallQuery extends BaseQuery {
   targetId: string;
-  constructor(user: UserDTO, targetId: string) {
+  constructor(user: User, targetId: string) {
     super(user);
     this.targetId = targetId;
   }
@@ -32,7 +31,7 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
       query.user.id,
       query.targetId
     );
-    if (wall.user.avatar && isImageKey(wall.user.avatar)) {
+    if (wall.user.avatar && wall.user.avatar.isValidKey()) {
       wall.user.avatar = (
         await this._storageService.getDownloadUrls([wall.user.avatar])
       )[0];

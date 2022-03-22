@@ -1,9 +1,9 @@
 import { IQuery } from "@nestjs/cqrs";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 
 export class BaseQuery implements IQuery {
-  user: UserDTO;
-  constructor(author: UserDTO) {
+  user: User;
+  constructor(author: User) {
     this.user = author;
   }
 }

@@ -1,25 +1,23 @@
 import { ForbiddenException, Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { ErrorCode } from "enums/errorCode.enum";
-import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { UserDTO } from "dtos/social/user.dto";
+import { UserErrorCode } from "enums/errorCode.enum";
+import { User } from "domains/social/user.domain";
 import { IPostService } from "modules/user/services/post.service";
-import { createUpdatingObject, retrieveObjectNameFromUrl } from "utils";
 import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
+import { Transaction } from "neo4j-driver";
+import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { ConfigService } from "nestjs-config";
 import { MediaType } from "enums/mediaType.enum";
+import { Album, Moment, Post } from "domains/social/post.domain";
+import { Image } from "domains/social/media.domain";
 export class EditPostCommand extends BaseCommand {
-  postDto: EditPostRequest;
-  constructor(session: ClientSession, user: UserDTO, post: EditPostRequest) {
-    super(session, user);
-    this.postDto = post;
+  req: EditPostRequest;
+  constructor(tx: Transaction, user: User, post: EditPostRequest) {
+    super(tx, user);
+    this.req = Object.assign(new EditPostRequest(), post);
   }
 }
 
@@ -31,55 +29,56 @@ export class EditPostCommandHandler
     private _postService: IPostService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
     @Inject("IStorageService")
     private _storageService: IStorageService,
-    private _configService: ConfigService
-  ) {}
+  ) { }
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
-    const { user, postDto } = command;
-    const existedPost = await this._postService.getPostDetail(postDto.id);
+    const { user, tx, req } = command;
+    const [existedPost] = await this._postService.getPostDetail(req.id);
 
     if (existedPost.author.id !== user.id)
       throw new ForbiddenException(
         ResponseDTO.fail(
           "You have no permission to edit post",
-          ErrorCode.INVALID_OWNER
+          UserErrorCode.INVALID_OWNER
         )
       );
 
-    // const deletedResult = await this._storageService.deleteFiles([
-    //   "images\\posts\\61a1c2f8493ba21f434f7a71_1638036969077_salad.png",
-    //   "temp\\619b6fc1c99dd48c2aec7ac6_1637592003945_salad.png",
-    // ]);
-    // const addResult = await this._storageService.makePublic(
-    //   command.postDto.addImages,
-    //   MediaType.POST_IMAGES
-    // );
+    // Delete images
+    if (req.deleteImages && req.deleteImages.length > 0) {
+      // await this._mediaRepository.setTransaction(tx).deleteMedias(deleteImageKeys)
+      req.deleteImages = await this._storageService.deleteFiles(req.deleteImages);
+    }
 
-    // await Promise.all([
-    //   this._postRepo.deleteImages(command.postDto.id, deletedResult),
-    //   this._postRepo.pushImages(command.postDto.id, addResult),
-    // ]);
+    // Add new images
+    if (req.addImages && req.addImages.length > 0) {
+      const keys = await this._storageService.makePublic(
+        command.req.addImages,
+        MediaType.POST_IMAGE
+      );
+      req.addImages = keys
+      // await this._mediaRepository.setTransaction(tx).addMedias(keys, MediaType.POST_IMAGE)
+    }
 
-    // const images = existedPost.images.filter(
-    //   (image) => !deletedResult.includes(image)
-    // );
-    // // const images = [];
-    // images.push(...addResult);
+    let updateData: Post;
+    switch (existedPost.kind) {
+      case "Album":
+        updateData = new Album({
+          id: req.id,
+          name: req.name,
+          images: req.addImages.map(image => new Image({ key: image }))
+        })
+        break;
+      case "Moment":
+        updateData = new Moment({
+          id: req.id,
+          content: req.content,
+          images: req.addImages.map(image => new Image({ key: image }))
+        })
+        break;
+    }
 
-    delete postDto.addImages;
-    delete postDto.deleteImages;
-
-    const updatePost = createUpdatingObject({ ...postDto }, user.id);
-    const updatedResult = await this._postRepo.updatePost(updatePost);
-    await Promise.all([
-      this._wallRepo.updatePostInWall(updatedResult, user),
-      this._feedRepo.updatePostInFeed(updatedResult, user),
-    ]);
-    return updatedResult;
+    await this._postRepo.setTransaction(tx).updatePost(updateData, req);
+    return new EditPostResponse();
   }
 }

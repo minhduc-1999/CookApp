@@ -1,8 +1,6 @@
 import {
   Injectable,
   NestMiddleware,
-  HttpException,
-  HttpStatus,
   UnauthorizedException,
 } from '@nestjs/common';
 import { Request, Response } from 'express';

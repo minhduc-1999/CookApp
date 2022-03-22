@@ -1,6 +1,6 @@
-import { PickType } from "@nestjs/swagger";
-import { UserDTO } from "dtos/social/user.dto";
+import { ApiResponseProperty } from "@nestjs/swagger";
 
-export class RegisterResponse extends PickType(UserDTO, ['id']) {
-  
+export class RegisterResponse {
+  @ApiResponseProperty({ type: String })
+  id: string
 }

@@ -36,5 +36,11 @@ heroku config:set -a tastify-be STAGING_URL=$STAGING_URL
 heroku config:set -a tastify-be ONESIGNAL_APP_ID=$ONESIGNAL_APP_ID
 heroku config:set -a tastify-be ONESIGNAL_REST_API_KEY=$ONESIGNAL_REST_API_KEY
 heroku config:set -a tastify-be ONESIGNAL_API_BASE_URL=$ONESIGNAL_API_BASE_URL
+heroku config:set -a tastify-be NEO4J_SCHEME=$NEO4J_SCHEME
+heroku config:set -a tastify-be NEO4J_HOST=$NEO4J_HOST
+heroku config:set -a tastify-be NEO4J_PORT=$NEO4J_PORT
+heroku config:set -a tastify-be NEO4J_USERNAME=$NEO4J_USERNAME
+heroku config:set -a tastify-be NEO4J_PASSWORD=$NEO4J_PASSWORD
+heroku config:set -a tastify-be NEO4J_DATABASE=$NEO4J_DATABASE
 
 heroku buildpacks:add -a tastify-be heroku/nodejs

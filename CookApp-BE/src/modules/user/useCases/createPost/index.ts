@@ -1,23 +1,23 @@
-import { Inject } from "@nestjs/common";
+import { BadRequestException, Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { MediaType } from "enums/mediaType.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { PostDTO } from "dtos/social/post.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { Album, Moment, Post } from "domains/social/post.domain";
+import { User } from "domains/social/user.domain";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
-import { NewPostEvent } from "modules/notification/usecases/NewPostNotification";
+import { Transaction } from "neo4j-driver";
+import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { NewPostEvent } from "modules/notification/events/NewPostNotification";
+import { ResponseDTO } from "base/dtos/response.dto";
+import { Image, Video } from "domains/social/media.domain";
 
 export class CreatePostCommand extends BaseCommand {
-  postDto: CreatePostRequest;
-  constructor(user: UserDTO, post: CreatePostRequest, session?: ClientSession) {
-    super(session, user);
-    this.postDto = post;
+  req: CreatePostRequest;
+  constructor(user: User, post: CreatePostRequest, tx: Transaction) {
+    super(tx, user);
+    this.req = post;
   }
 }
 
@@ -30,44 +30,51 @@ export class CreatePostCommandHandler
     private _postRepo: IPostRepository,
     @Inject("IStorageService")
     private _storageService: IStorageService,
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
-    private _eventBus: EventBus
-  ) {}
+    private _eventBus: EventBus,
+  ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
-    const { postDto, user } = command;
-
-    if (postDto.images?.length > 0) {
-      postDto.images = await this._storageService.makePublic(
-        postDto.images,
-        MediaType.POST_IMAGES
+    const { req, user, tx } = command;
+    if (req.images?.length > 0) {
+      req.images = await this._storageService.makePublic(
+        req.images,
+        MediaType.POST_IMAGE
       );
     }
-    const tasks = [];
-    const creatingPost = PostDTO.create({
-      ...postDto,
-      author: user,
-    });
-    const result = await this._postRepo.createPost(creatingPost);
 
-    tasks.push(
-      this._feedRepo.pushNewPost(result, user.id),
-      this._wallRepo.pushNewPost(result, user)
-    );
+    let creatingPost: Post
 
-    // push posts to followers
-    const followers = await this._wallRepo.getFollowers(user.id);
-    followers.forEach(async (follower) => {
-      tasks.push(this._feedRepo.pushNewPost(result, follower));
-    });
+    switch (req.kind) {
+      case "Album": {
+        creatingPost = new Album({
+          author: user,
+          name: req.name,
+          images: req.images?.map(image => new Image({key: image})),
+          videos: req.videos?.map(video => new Video({key: video}))
+        })
+        break;
+      }
+      case "Moment": {
+        creatingPost = new Moment({
+          author: user,
+          content: req.content,
+          images: req.images?.map(image => new Image({key: image})),
+          videos: req.videos?.map(video => new Video({key: video}))
+        });
+      }
+      default: {
+        break;
+      }
+    }
 
-    // waiting for all tasks
-    await Promise.all(tasks);
+    if (!creatingPost.canCreate()) {
+      throw new BadRequestException(ResponseDTO.fail("Not enough data to create the post"))
+    }
 
-    result.images = await this._storageService.getDownloadUrls(result.images);
-    this._eventBus.publish(new NewPostEvent(result, user))
-    return result;
+    const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
+    result.images = await this._storageService.getDownloadUrls(result.images)
+    if (req.kind === "Moment") {
+      this._eventBus.publish(new NewPostEvent(result, user))
+    }
+    return new CreatePostResponse(result);
   }
 }

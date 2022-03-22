@@ -1,4 +1,3 @@
-import { url } from "inspector";
 import _ = require("lodash");
 const randomWords = require("random-words");
 
@@ -59,8 +58,8 @@ export function getNameFromPath(filePath: string): string {
   return filePath.slice(filePath.lastIndexOf("/") + 1);
 }
 
-export function clean(obj) {
-  if (obj === null || obj === undefined) return null;
+export function clean<T>(obj: T): T {
+  if (obj === null || obj === undefined) return undefined;
   for (const propName of Object.keys(obj)) {
     if (typeof obj[propName] === "object") {
       obj[propName] = clean(obj[propName]);
@@ -91,8 +90,7 @@ export function generateDisplayName() {
   );
 }
 
-export function retrieveObjectNameFromUrl(
-  url: string,
+function retrieveObjectNameFromUrl( url: string,
   eliminatedSeed: string
 ): string {
   const a = url.slice(url.indexOf(eliminatedSeed) + eliminatedSeed.length);
@@ -107,13 +105,9 @@ export function retrieveUsernameFromEmail(emailAddress: string): string {
   return emailAddress.slice(0, emailAddress.indexOf("@"));
 }
 
-export function sleep(ms) {
+export function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-export function isImageKey(sample: string) {
-  const regex = /^(\w{1,256}\/){0,256}\w{1,256}\.(png|jpg|jpeg|PNG|JPG|JPEG)$/;
-  return regex.test(sample);
-}

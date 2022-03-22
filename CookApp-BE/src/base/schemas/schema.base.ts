@@ -1,29 +1,26 @@
 import { Prop } from "@nestjs/mongoose";
-import { AuditDTO } from "base/dtos/audit.dto";
+import { Audit } from "domains/audit.domain";
 
 export abstract class AbstractSchema {
-  id: string;
+  @Prop()
+  _id: string;
 
-  @Prop({ schemaName: "created_by", required: true })
-  createdBy: string;
-
-  @Prop({ schemaName: "updated_at", required: true })
+  @Prop()
   updatedAt: number;
 
-  @Prop({ schemaName: "created_at", required: true })
+  @Prop({required: true })
   createdAt: number;
 
-  @Prop({ schemaName: "updated_by", required: true })
+  @Prop()
   updatedBy: string;
 
-  @Prop({ schemaName: "deleted_at" })
+  @Prop()
   deletedAt: number;
 
-  @Prop({ schemaName: "deleted_by" })
+  @Prop()
   deletedBy: string;
 
-  constructor(audit: Partial<AuditDTO>) {
-    this.createdBy = audit?.createdBy;
+  constructor(audit: Partial<Audit>) {
     this.updatedAt = audit?.updatedAt;
     this.createdAt = audit?.createdAt;
     this.updatedBy = audit?.updatedBy;

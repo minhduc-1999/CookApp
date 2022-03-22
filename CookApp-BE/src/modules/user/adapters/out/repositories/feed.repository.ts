@@ -1,105 +1,85 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { plainToClass } from "class-transformer";
-import { Feed, FeedDocument } from "domains/schemas/social/feed.schema";
-import { PostDTO } from "dtos/social/post.dto";
-import { UserDTO } from "dtos/social/user.dto";
-import { ClientSession, Model } from "mongoose";
-
-export interface IFeedRepository {
-  pushNewPost(post: PostDTO, userId: string): Promise<void>;
-  updatePostInFeed(post: Partial<PostDTO>, user: UserDTO): Promise<void>;
-  getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]>;
-  getTotalPosts(userId: UserDTO): Promise<number>;
-  updateNumReaction(postId: string, delta: number): Promise<void>;
-  updateNumComment(postId: string, delta: number): Promise<void>;
-  setSession(session: ClientSession): IFeedRepository;
-}
+import { PostEntity } from "entities/social/post.entity";
+import { Post } from "domains/social/post.domain";
+import { User } from "domains/social/user.domain";
+import { parseInt } from "lodash";
+import { INeo4jService } from "modules/neo4j/services/neo4j.service";
+import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
+import { int, Node } from "neo4j-driver";
 
 @Injectable()
 export class FeedRepository extends BaseRepository implements IFeedRepository {
   private logger: Logger = new Logger(FeedRepository.name);
-  constructor(@InjectModel(Feed.name) private _feedModel: Model<FeedDocument>) {
-    super();
+  constructor(
+    @Inject("INeo4jService")
+    private neo4jService: INeo4jService) {
+    super()
   }
-  async updateNumComment(postId: string, delta: number): Promise<void> {
-    await this._feedModel.updateMany(
+  async pushNewPost(post: Post, followerIDs: string[]): Promise<void> {
+    this.neo4jService.write(`
+        MATCH (u:User) WHERE u.id IN $followerIDs
+        MATCH (p:Post{id: $postID})
+        CREATE (u)-[:SEE]->(p)
+      `,
+      this.tx,
       {
-        "posts.id": postId,
-      },
-      {
-        $inc: { "posts.$.numOfComment": delta },
-      },
-      {
-        session: this.session,
-      }
-    );
-  }
-  async updateNumReaction(postId: string, delta: number): Promise<void> {
-    await this._feedModel.updateMany(
-      {
-        "posts.id": postId,
-      },
-      {
-        $inc: { "posts.$.numOfReaction": delta },
-      },
-      {
-        session: this.session,
-      }
-    );
-  }
-
-  async getTotalPosts(user: UserDTO): Promise<number> {
-    const feedDocs = await this._feedModel
-      .findOne({ "user.id": user.id }, "numberOfPost")
-      .exec();
-    return feedDocs.numberOfPost;
-  }
-
-  async getPosts(user: UserDTO, query: PageOptionsDto): Promise<PostDTO[]> {
-    const postDocs = await this._feedModel.aggregate([
-      { $match: { "user.id": user.id } },
-      { $unwind: "$posts" },
-      { $sort: { "posts.createdAt": -1 } },
-      { $skip: query.offset * query.limit },
-      { $limit: query.limit },
-      { $group: { _id: "$_id", posts: { $push: "$posts" } } },
-    ]);
-    if (postDocs.length < 1) return [];
-    return postDocs[0].posts.map((post) =>
-      plainToClass(PostDTO, post, {
-        excludeExtraneousValues: true,
+        followerIDs: followerIDs,
+        postID: post.id
       })
-    );
   }
 
-  async pushNewPost(post: PostDTO, userId: string): Promise<void> {
-    await this._feedModel.updateOne(
+  async getPosts(user: User, query: PageOptionsDto): Promise<Post[]> {
+    const res = await this.neo4jService.read(`
+        MATCH (u:User{id: $userID})-[:SEE|OWN]->(p:Post)
+        WITH p, u
+        ORDER BY p.createdAt DESC
+        SKIP $skip
+        LIMIT $limit
+        UNWIND p AS post
+        CALL {
+          WITH post
+          MATCH (c:Comment)-[*]->(post) 
+          RETURN count(c) AS totalComment
+        }
+        CALL {
+          WITH post
+          MATCH (post)<-[r:REACT]-(:User)
+          RETURN count(r) AS totalReaction
+        }
+        RETURN post, 
+          totalComment, 
+          totalReaction, 
+          u AS author,
+          [(post)-[:CONTAIN]->(m:Media) | m] AS medias
+      `,
       {
-        "user.id": userId,
-      },
+        userID: user.id,
+        skip: int(query.offset * query.limit),
+        limit: int(query.limit)
+      })
+    if (res.records.length === 0) return []
+    return res.records.map(record => {
+      const postNode = record.get("post")
+      const totalComment = parseInt(record.get("totalComment"))
+      const totalReaction = parseInt(record.get("totalReaction"))
+      const author = record.get("author")
+      const mediaNodes: Node[] = record.get("medias")
+      return PostEntity.toDomain(postNode, author, mediaNodes, totalComment, totalReaction)
+    })
+  }
+
+  async getTotalPosts(user: User): Promise<number> {
+    const res = await this.neo4jService.read(`
+        MATCH (:User{id: $userID})-[r:OWN|SEE]->(:Post) RETURN count(r) AS totalPost
+      `,
       {
-        $push: { posts: Feed.generatePostItem(post) },
-        $inc: { numberOfPost: 1 },
-      },
-      {
-        session: this.session,
+        userID: user.id
       }
-    );
-  }
-
-  async updatePostInFeed(post: PostDTO, user: UserDTO): Promise<void> {
-    await this._feedModel.updateOne(
-      {
-        "user.id": user.id,
-        "posts.id": post.id,
-      },
-      {
-        $set: { "posts.$": Feed.generatePostItem(post) },
-      },
-      { session: this.session }
-    );
+    )
+    if (res.records.length === 0)
+      return 0
+    return parseInt(res.records[0].get("totalPost"))
   }
 }

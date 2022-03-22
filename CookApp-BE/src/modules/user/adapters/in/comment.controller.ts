@@ -1,65 +1,56 @@
-import { Body, Controller, Get, Param, Post, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
-import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
-import { Transaction } from "decorators/transaction.decorator";
-import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/social/user.dto";
+} from "decorators/apiSuccessResponse.decorator";
+import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
+import { UserReq } from "decorators/user.decorator";
+import { User } from "domains/social/user.domain";
 import { CreateCommentCommand } from "modules/user/useCases/createComment";
 import { CreateCommentRequest } from "modules/user/useCases/createComment/createCommentRequest";
 import { CreateCommentResponse } from "modules/user/useCases/createComment/createCommentResponse";
-import {
-  CommentPageOption,
-  GetPostCommentsQuery,
-} from "modules/user/useCases/getPostComments";
-import { GetPostCommentsResponse } from "modules/user/useCases/getPostComments/getPostCommentsResponse";
-import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
-import {
-  ParseCommentPaginationPipe,
-  ParsePaginationPipe,
-} from "pipes/parsePagination.pipe";
+import { GetCommentsQuery } from "modules/user/useCases/getComments";
+import { GetCommentsRequest } from "modules/user/useCases/getComments/getCommentsRequest";
+import { GetCommentsResponse } from "modules/user/useCases/getComments/getCommentsResponse";
+import { Transaction } from "neo4j-driver";
+import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
-@Controller("users/posts/:postId")
+@Controller("users/comments")
 @ApiTags("User/Comment")
 @ApiBearerAuth()
 export class CommentController {
-  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
+  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
 
-  @Post("comments")
+  @Post()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(CreateCommentResponse, "Create comment successfully")
-  @Transaction()
+  @RequestTransaction()
   async createComment(
-    @Param("postId", ParseObjectIdPipe) postId: string,
     @Body() body: CreateCommentRequest,
-    @User() user: UserDTO
+    @UserReq() user: User,
+    @ParamTransaction() tx: Transaction
   ): Promise<Result<CreateCommentResponse>> {
-    body.postId = postId;
-    const commentsQuery = new CreateCommentCommand(user, body);
+    const commentsQuery = new CreateCommentCommand(user, body, tx);
     const result = await this._commandBus.execute(commentsQuery);
     return Result.ok(result, {
-      messages: ["Get comment's comments successfully"],
+      messages: ["Create comments successfully"],
     });
   }
 
-  @Get("comments")
+  @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(
-    GetPostCommentsResponse,
+    GetCommentsResponse,
     "Get post's comments successfully"
   )
   async getPostCommentsPosts(
-    @Query(ParseCommentPaginationPipe) query: CommentPageOption,
-    @User() user: UserDTO,
-    @Param("postId", ParseObjectIdPipe) postId: string
-  ): Promise<Result<GetPostCommentsResponse>> {
-    if (!query.parent) query.parent = postId;
-    const getCommentsQuery = new GetPostCommentsQuery(user, postId, query);
+    @Query(new ParseRequestPipe<typeof GetCommentsRequest>()) query: GetCommentsRequest,
+    @UserReq() user: User,
+  ): Promise<Result<GetCommentsResponse>> {
+    const getCommentsQuery = new GetCommentsQuery(user, query);
     const result = await this._queryBus.execute(getCommentsQuery);
     return Result.ok(result, {
       messages: ["Get post's comments successfully"],

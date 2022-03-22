@@ -1,5 +1,2 @@
-import { PostDTO } from "dtos/social/post.dto";
-
-export class EditPostResponse extends PostDTO {
-  
+export class EditPostResponse {
 }

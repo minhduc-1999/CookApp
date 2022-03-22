@@ -1,150 +1,332 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
 import { BaseRepository } from "base/repository.base";
-import { plainToClass } from "class-transformer";
-import { Post, PostDocument } from "domains/schemas/social/post.schema";
-import { PostDTO } from "dtos/social/post.dto";
-import { ReactionDTO } from "dtos/social/reaction.dto";
-import { ClientSession, Model } from "mongoose";
-
-export interface IPostRepository {
-  createPost(post: PostDTO): Promise<PostDTO>;
-  getPostById(postId: string): Promise<PostDTO>;
-  getPostByIds(postId: string[]): Promise<PostDTO[]>;
-  updatePost(post: Partial<PostDTO>): Promise<PostDTO>;
-  reactPost(react: ReactionDTO, userId: string): Promise<boolean>;
-  deleteReact(userId: string, postId: string): Promise<boolean>;
-  getReactionByUserId(userId: string, postId: string): Promise<ReactionDTO>;
-  setSession(session: ClientSession): IPostRepository;
-  updateNumComment(postId: string, delta: number): Promise<void>;
-  deleteImages(postId: string, changedImages: string[]): Promise<PostDTO>;
-  pushImages(postId: string, changedImages: string[]): Promise<PostDTO>;
-}
+import { PostEntity, SavedPostEntity } from "entities/social/post.entity";
+import { ReactionEntity } from "entities/social/reaction.entity";
+import { PostBase, SavedPost, Post} from "domains/social/post.domain";
+import { Reaction } from "domains/social/reaction.domain";
+import { INeo4jService } from "modules/neo4j/services/neo4j.service";
+import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
+import { ResponseDTO } from "base/dtos/response.dto";
+import { User } from "@sentry/node";
+import { PageOptionsDto } from "base/pageOptions.base";
+import { int, Node, Relationship } from "neo4j-driver";
+import { MediaEntity } from "entities/social/media.entity";
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
   private logger: Logger = new Logger(PostRepository.name);
-  constructor(@InjectModel(Post.name) private _postModel: Model<PostDocument>) {
-    super();
+  constructor(
+    @Inject("INeo4jService")
+    private neo4jService: INeo4jService) {
+    super()
   }
-  async getPostByIds(postId: string[]): Promise<PostDTO[]> {
-    const posts = await this._postModel.find({
-      id: { $in: postId },
-    });
-    return plainToClass(PostDTO, posts, { excludeExtraneousValues: true });
-  }
-  async pushImages(postId: string, changedImages: string[]): Promise<PostDTO> {
-    const updatedPost = await this._postModel.findOneAndUpdate(
-      { _id: postId },
-      { $push: { images: changedImages } },
-      { new: true, session: this.session }
-    );
-    return plainToClass(PostDTO, updatedPost, {
-      excludeExtraneousValues: true,
-    });
-  }
-  async deleteImages(
-    postId: string,
-    changedImages: string[]
-  ): Promise<PostDTO> {
-    const updatedPost = await this._postModel.findOneAndUpdate(
-      { _id: postId },
-      { $pullAll: { images: changedImages } },
-      { new: true, session: this.session }
-    );
-    return plainToClass(PostDTO, updatedPost, {
-      excludeExtraneousValues: true,
-    });
-  }
-  async updateNumComment(postId: string, delta: number): Promise<void> {
-    await this._postModel.updateOne(
+
+  async getSavedPosts(user: User, queryOpt: PageOptionsDto): Promise<SavedPost[]> {
+    const res = await this.neo4jService.read(`
+        MATCH (u:User{id: $userID})-[r:SAVE]->(p:Post)
+        WITH p, u, r 
+        ORDER BY r.createdAt DESC
+        SKIP $skip
+        LIMIT $limit
+        UNWIND p AS post
+        CALL {
+          WITH post
+          MATCH (c:Comment)-[*]->(post) 
+          RETURN count(c) AS totalComment
+        }
+        CALL {
+          WITH post
+          MATCH (post)<-[r:REACT]-(:User)
+          RETURN count(r) AS totalReaction
+        }
+        RETURN post, 
+          totalComment, 
+          totalReaction, 
+          u AS author,
+          [(post)-[:CONTAIN]->(m:Media) | m] AS medias,
+          r as relationship
+      `,
       {
-        id: postId,
-      },
+        userID: user.id,
+        skip: int(queryOpt.offset * queryOpt.limit),
+        limit: int(queryOpt.limit)
+      })
+    if (res.records.length === 0) return []
+    return res.records.map(record => {
+      const postNode: Node = record.get("post")
+      const totalComment: number = parseInt(record.get("totalComment"))
+      const totalReaction: number = parseInt(record.get("totalReaction"))
+      const author: Node = record.get("author")
+      const mediaNodes: Node[] = record.get("medias")
+      const relationship: Relationship = record.get("relationship")
+      return SavedPostEntity.toDomain(postNode,relationship, author, mediaNodes, totalComment, totalReaction)
+    })
+  }
+
+  async getTotalSavedPost(user: User): Promise<number> {
+    const res = await this.neo4jService.read(`
+        MATCH (:User{id: $userID})-[r:SAVE]->(:Post) RETURN count(r) AS totalPost
+      `,
       {
-        $inc: { numOfComment: delta },
-      },
-      {
-        session: this.session,
+        userID: user.id
       }
-    );
+    )
+    if (res.records.length === 0)
+      return 0
+    return parseInt(res.records[0].get("totalPost"))
   }
 
-  async updatePost(post: Partial<PostDTO>): Promise<PostDTO> {
-    const updatedPost = await this._postModel.findOneAndUpdate(
-      { _id: post.id },
-      { $set: post },
-      { new: true, session: this.session }
-    );
-    return plainToClass(PostDTO, updatedPost, {
-      excludeExtraneousValues: true,
-    });
+  async deleteSavedPost(postID: string, user: User): Promise<void> {
+    await this.neo4jService.write(`
+          MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})
+          DETACH DELETE r
+      `,
+      this.tx,
+      {
+        postID,
+        userID: user.id,
+      })
   }
-  async getPostById(postId: string): Promise<PostDTO> {
-    const postDoc = await this._postModel.findById(postId);
-    if (!postDoc) return null;
-    return plainToClass(PostDTO, postDoc, {
-      excludeExtraneousValues: true,
-      groups: ["post"],
-    });
+  async isSavedPost(postID: string, user: User): Promise<boolean> {
+    const res = await this.neo4jService.read(`
+          MATCH (:Post{id: $postID})<-[r:SAVE]-(:User{id: $userID})
+          WITH count(r) as count
+          CALL apoc.when (count > 0,
+            "RETURN true AS bool",
+            "RETURN false AS bool",
+            {count:count}
+          ) YIELD value
+          return value.bool as result
+       `,
+      {
+        postID,
+        userID: user.id
+      })
+    if (res.records.length === 0)
+      throw new InternalServerErrorException(ResponseDTO.fail("Something went wrong"))
+    return res.records[0].get("result") as boolean
   }
 
-  async createPost(post: PostDTO): Promise<PostDTO> {
-    const creatingPost = new this._postModel(new Post(post));
-    const postDoc = await creatingPost.save({ session: this.session });
-    if (!postDoc) return null;
-    return plainToClass(PostDTO, postDoc, { excludeExtraneousValues: true });
+  async savePost(item: SavedPost): Promise<void> {
+    await this.neo4jService.write(`
+            MATCH (p:Post),
+              (u:User) 
+            WHERE p.id = $postID AND 
+              u.id = $userID
+            CREATE (u)-[s:SAVE]->(p)
+            SET s += $relProps
+      `,
+      this.tx,
+      {
+        postID: item.post.id,
+        userID: item.saver.id,
+        relProps: SavedPostEntity.fromDomain(item)
+      })
   }
 
-  async reactPost(react: ReactionDTO, postId: string): Promise<boolean> {
-    const result = await this._postModel.updateOne(
+  async isExisted(postID: string): Promise<boolean> {
+    const res = await this.neo4jService.read(`
+          MATCH (:Post{id: $postID})
+          WITH count(*) as count
+          CALL apoc.when (count > 0,
+            "RETURN true AS bool",
+            "RETURN false AS bool",
+            {count:count}
+          ) YIELD value
+          return value.bool as result
+       `,
       {
-        _id: postId,
-      },
+        postID
+      })
+    if (res.records.length === 0)
+      throw new InternalServerErrorException(ResponseDTO.fail("Something went wrong"))
+    return res.records[0].get("result") as boolean
+  }
+
+  async createPost(post: Post): Promise<Post> {
+    const res = await this.neo4jService.write(`
+            MATCH (u:User) WHERE u.id = $authorID
+            CREATE (p:Post)
+            SET p += $properties, p.id = randomUUID()
+            CREATE (u)-[:OWN]->(p)
+            WITH p, u
+            CALL {
+                WITH p
+                UNWIND $medias AS media
+                CREATE (p)-[:CONTAIN]->(m:Media)
+                SET m = media
+            }
+            RETURN 
+              p AS post,
+              u AS author,
+              [(p)-[:CONTAIN]->(m:Media) | m] AS medias
+      `,
+      this.tx,
       {
-        $push: { reactions: react },
-        $inc: { numOfReaction: 1 },
-      },
+        properties: PostEntity.fromDomain(post),
+        authorID: post.author.id,
+        medias: post.images.concat(post.videos).map(image => MediaEntity.fromDomain(image)),
+      })
+    if (res.records.length === 0)
+      return null
+    const postNode = res.records[0].get("post")
+    const authorNode = res.records[0].get("author")
+    const mediaNodes: Node[] = res.records[0].get("medias")
+    return PostEntity.toDomain(postNode, authorNode, mediaNodes)
+  }
+  async getPostById(postID: string): Promise<Post> {
+    const res = await this.neo4jService.read(`
+        MATCH (post:Post{id: $postID})<-[:OWN]-(u:User)
+        CALL {
+          WITH post
+          MATCH (c:Comment)-[*]->(post) 
+          RETURN count(c) AS totalComment
+        }
+        CALL {
+          WITH post
+          MATCH (post)<-[r:REACT]-(:User)
+          RETURN count(r) AS totalReaction
+        }
+        RETURN 
+          post, 
+          u AS author, 
+          [(post)-[:CONTAIN]->(m:Media) | m] AS medias, 
+          totalComment,
+          totalReaction
+      `,
       {
-        session: this.session,
+        postID
       }
-    );
-    return result.modifiedCount === 1;
+    )
+    if (res.records.length === 0)
+      return null
+    const postNode = res.records[0].get("post")
+    const author = res.records[0].get("author")
+    const mediaNodes: Node[] = res.records[0].get("medias")
+    const totalComment = parseInt(res.records[0].get("totalComment"))
+    const totalReaction = parseInt(res.records[0].get("totalReaction"))
+    return PostEntity.toDomain(postNode, author, mediaNodes, totalComment, totalReaction)
   }
-
-  async deleteReact(userId: string, postId: any): Promise<boolean> {
-    const result = await this._postModel.updateOne(
+  async getPostByIds(postIDs: string[]): Promise<Post[]> {
+    const res = await this.neo4jService.read(`
+        MATCH (post:Post{id: $postID})<-[:OWN]-(u:User)
+        CALL {
+          WITH post
+          MATCH (c:Comment)-[*]->(post) 
+          RETURN count(c) AS totalComment
+        }
+        CALL {
+          WITH post
+          MATCH (post)<-[r:REACT]-(:User)
+          RETURN count(r) AS totalReaction
+        }
+        RETURN 
+          post, 
+          u.id AS authorID, 
+          [(post)-[:CONTAIN]->(m:Media) | m] as medias, 
+          totalComment,
+          totalReaction
+      `,
       {
-        _id: postId,
-        "reactions.userId": userId,
-      },
-      {
-        $pull: { reactions: { userId: userId } },
-        $inc: { numOfReaction: -1 },
-      },
-      {
-        session: this.session,
+        postIDs
       }
-    );
-    return result.modifiedCount !== 0;
+    )
+    if (res.records.length === 0)
+      return null
+    return res.records.map(record => {
+      const postNode = record[0].get("post")
+      const authorID = record[0].get("authorID")
+      const mediaNodes: Node[] = record[0].get("medias")
+      const totalComment = parseInt(record[0].get("totalComment"))
+      const totalReaction = parseInt(record[0].get("totalReaction"))
+      return PostEntity.toDomain(postNode, authorID, mediaNodes, totalComment, totalReaction)
+    })
   }
-
-  async getReactionByUserId(
-    userId: string,
-    postId: string
-  ): Promise<ReactionDTO> {
-    const result = await this._postModel
-      .findOne(
-        {
-          _id: postId,
-          "reactions.userId": userId,
+  async updatePost(updatingPost: Post, editPostDto: EditPostRequest): Promise<void> {
+    await this.neo4jService.write(`
+            MATCH (p:Post{id: $postID})
+            SET p += $newUpdate
+            WITH p
+            CALL {
+                WITH p
+                UNWIND $addedImages AS addImage
+                CREATE (p)-[:CONTAIN]->(m:Media)
+                SET m = addImage
+            }
+            CALL {
+                WITH p
+                UNWIND $deletedImages AS deleteImage
+                MATCH (m:Media)
+                WHERE m.key = deleteImage
+                DETACH DELETE m
+            }
+      `,
+      this.tx,
+      {
+        postID: updatingPost.id,
+        newUpdate: {
+          ...(PostEntity.fromDomain(updatingPost))
         },
-        { "reactions.$": 1 }
+        addedImages: updatingPost.images.map(image => MediaEntity.fromDomain(image)) ?? [],
+        deletedImages: editPostDto.deleteImages ?? [],
+      },
+    )
+  }
+
+  async reactPost(reaction: Reaction): Promise<boolean> {
+    if (reaction.target instanceof PostBase) {
+      const res = await this.neo4jService.write(`
+        MATCH (u:User{id: $userID})
+        MATCH (p:Post{id: $postID})
+        CREATE (u)-[r:REACT]->(p) SET r += $properties 
+        RETURN r
+      `,
+        this.tx,
+        {
+          postID: reaction.target.id,
+          userID: reaction.reactor.id,
+          properties: {
+            type: reaction.type
+          }
+        },
       )
-      .exec();
-    if (!result) return null;
-    return plainToClass(ReactionDTO, result.reactions[0], {
-      excludeExtraneousValues: true,
-    });
+      if (res.records.length === 0)
+        return false
+      return true
+    }
+  }
+
+  async deleteReact(reaction: Reaction): Promise<boolean> {
+    if (reaction.target instanceof PostBase) {
+      const res = await this.neo4jService.write(`
+        MATCH (u:User{id: $userID})-[r:REACT]->(p:Post{id: $postID})
+        DELETE r
+      `,
+        this.tx,
+        {
+          postID: reaction.target.id,
+          userID: reaction.reactor.id
+        },
+      )
+      if (res.records.length === 0)
+        return false
+      return true
+    }
+  }
+
+  async getReactionByUserId(userID: string, postID: string): Promise<Reaction> {
+    const res = await this.neo4jService.read(`
+        MATCH path = (u:User{id: $userID})-[r:REACT]->(p:Post{id: $postID})
+        RETURN path
+      `,
+      {
+        postID,
+        userID,
+      },
+    )
+    if (res.records.length === 0)
+      return undefined
+    return ReactionEntity.toDomain(res.records[0].get('path'))
   }
 }

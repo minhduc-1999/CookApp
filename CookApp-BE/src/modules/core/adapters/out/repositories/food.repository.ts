@@ -2,21 +2,21 @@ import { Injectable, Logger } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { plainToClass } from "class-transformer";
-import { Food, FoodDocument } from "domains/schemas/core/food.schema";
-import { FoodDTO } from "dtos/core/food.dto";
-import { ClientSession, Model } from "mongoose";
+import { Model } from "mongoose";
+import { Transaction } from "neo4j-driver";
+import { Food } from "domains/core/food.domain";
+import { FoodDocument, FoodModel } from "modules/core/entities/core/food.entity";
 
 export interface IFoodRepository {
-  getFoods(query: PageOptionsDto): Promise<FoodDTO[]>;
+  getFoods(query: PageOptionsDto): Promise<Food[]>;
   getTotalFoods(query: PageOptionsDto): Promise<number>;
-  setSession(session: ClientSession): IFoodRepository;
+  setTransaction(tx: Transaction): IFoodRepository
 }
 
 @Injectable()
 export class FoodRepository extends BaseRepository implements IFoodRepository {
   private logger: Logger = new Logger(FoodRepository.name);
-  constructor(@InjectModel(Food.name) private _foodModel: Model<FoodDocument>) {
+  constructor(@InjectModel(FoodModel.name) private _foodModel: Model<FoodDocument>) {
     super();
   }
 
@@ -27,7 +27,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     return this._foodModel.count(textSearch).exec();
   }
 
-  async getFoods(query: PageOptionsDto): Promise<FoodDTO[]> {
+  async getFoods(query: PageOptionsDto): Promise<Food[]> {
     let textSearch = {};
     if (query.q == "") textSearch = {};
     else textSearch = { $text: { $search: query.q } };
@@ -36,10 +36,9 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
       .skip(query.limit * query.offset)
       .limit(query.limit);
     if (foods.length < 1) return [];
-    return foods.map((food) =>
-      plainToClass(FoodDTO, food, {
-        excludeExtraneousValues: true,
-      })
-    );
+
+    return foods.map((food) => {
+      return FoodModel.toDomain(food)
+    });
   }
 }

@@ -1,4 +1,4 @@
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { ResponseDTO } from "./dtos/response.dto";
 import { MetaDTO } from "./dtos/responseMeta.dto";
 
@@ -7,7 +7,7 @@ export class Result<T> {
   private _errorMessage: string;
   private _data: any | T;
   private _meta: MetaDTO;
-  private _errorCode: ErrorCode;
+  private _errorCode: UserErrorCode;
 
   constructor(
     isError = false,
@@ -64,7 +64,7 @@ export class Result<T> {
     return this._errorCode;
   }
 
-  public setErrorCode(errorCode: ErrorCode) {
+  public setErrorCode(errorCode: UserErrorCode) {
     this._errorCode = errorCode;
   }
 
@@ -76,7 +76,7 @@ export class Result<T> {
     return new Result<U>(false, "", { items: data }, meta, null);
   }
 
-  public static fail<U>(errorMessage: string, errorCode: ErrorCode) {
+  public static fail<U>(errorMessage: string, errorCode: UserErrorCode) {
     return new Result<U>(true, errorMessage, null, null, errorCode);
   }
 
