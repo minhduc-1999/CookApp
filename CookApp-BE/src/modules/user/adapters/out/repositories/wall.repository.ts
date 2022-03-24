@@ -2,7 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BaseRepository } from "base/repository.base";
 import { Post } from "domains/social/post.domain";
-import { Wall } from "domains/social/wall.domain";
+import { User } from "domains/social/user.domain";
 import { PostEntity } from "entities/social/post.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
@@ -51,8 +51,12 @@ export class WallRepository extends BaseRepository implements IWallRepository {
     throw new Error("Method not implemented.");
   }
 
-  getWall(userId: string): Promise<Wall> {
-    throw new Error("Method not implemented.");
+  async getWall(userId: string): Promise<User> {
+    const entity = await this._userRepo
+      .createQueryBuilder("user")
+      .where("user.id = :userId", { userId })
+      .getOne()
+    return entity.toDomain()
   }
 
 }

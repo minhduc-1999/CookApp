@@ -24,11 +24,11 @@ export class User extends Audit {
 
   sex?: Sex;
 
-  followers?: number
+  nFollowers?: number
 
-  followees?: number
+  nFollowees?: number
 
-  posts?: number
+  nPosts?: number
 
   account?: Account
 
@@ -44,8 +44,8 @@ export class User extends Audit {
     this.firstName = user?.firstName
     this.lastName = user?.lastName
     this.sex = user?.sex
-    this.posts = user?.posts
-    this.followees = user?.followees
-    this.followers = user?.followers
+    this.nPosts = user?.nPosts
+    this.nFollowees = user?.nFollowees
+    this.nFollowers = user?.nFollowers
   }
 }

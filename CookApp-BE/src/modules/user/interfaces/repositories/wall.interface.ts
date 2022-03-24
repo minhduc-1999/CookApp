@@ -1,6 +1,6 @@
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { Post } from "domains/social/post.domain";
-import { Wall } from "domains/social/wall.domain";
+import { User } from "domains/social/user.domain";
 import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallPostsRequest";
 
 export interface IWallRepository {
@@ -17,5 +17,5 @@ export interface IWallRepository {
   isFollowed(sourceId: string, targetId: string): Promise<boolean>;
   getFollowers(userId: string): Promise<string[]>;
   getFollowing(userId: string): Promise<string[]>;
-  getWall(userId: string): Promise<Wall>;
+  getWall(userId: string): Promise<User>;
 }

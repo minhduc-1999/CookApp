@@ -33,14 +33,14 @@ export class UserEntity extends AbstractEntity {
   })
   sex: Sex
 
-  @Column({ name: "followers", default: 0 })
-  followers: number
+  @Column({ name: "n_followers", default: 0 })
+  nFollowers: number
 
-  @Column({ name: "followees", default: 0 })
-  followees: number
+  @Column({ name: "n_followees", default: 0 })
+  nFollowees: number
 
-  @Column({ name: "posts", default: 0 })
-  posts: number
+  @Column({ name: "n_posts", default: 0 })
+  nPosts: number
 
   @Column({ name: 'avatar', default: "images/avatar-default.jpg" })
   avatar: string;
@@ -59,9 +59,9 @@ export class UserEntity extends AbstractEntity {
     this.firstName = user?.firstName
     this.lastName = user?.lastName
     this.sex = user?.sex
-    this.posts = user?.posts
-    this.followees = user?.followees
-    this.followers = user?.followers
+    this.nPosts = user?.nPosts
+    this.nFollowees = user?.nFollowees
+    this.nFollowers = user?.nFollowers
     this.avatar = user?.avatar?.key
     this.displayName = user?.displayName
     this.account = user?.account && new AccountEntity(user.account)
@@ -77,7 +77,7 @@ export class UserEntity extends AbstractEntity {
   }
 
   getPartialUpdateObject() : Partial<UserEntity>{
-    const {account, posts, followees, followers, ...remain } = this
+    const {account, nPosts, nFollowees, nFollowers, ...remain } = this
     return {
       ...remain
     }
