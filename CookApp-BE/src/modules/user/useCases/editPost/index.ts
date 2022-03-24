@@ -12,7 +12,7 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { Album, Moment, Post } from "domains/social/post.domain";
 import { Image } from "domains/social/media.domain";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
-import { MediaType } from "enums/social.enum";
+import { MediaType, PostType } from "enums/social.enum";
 export class EditPostCommand extends BaseCommand {
   req: EditPostRequest;
   constructor(tx: ITransaction, user: User, post: EditPostRequest) {
@@ -62,14 +62,14 @@ export class EditPostCommandHandler
 
     let updateData: Post;
     switch (existedPost.kind) {
-      case "Album":
+      case PostType.ALBUM:
         updateData = new Album({
           id: req.id,
           name: req.name,
           images: req.addImages.map(image => new Image({ key: image }))
         })
         break;
-      case "Moment":
+      case PostType.MOMENT:
         updateData = new Moment({
           id: req.id,
           content: req.content,

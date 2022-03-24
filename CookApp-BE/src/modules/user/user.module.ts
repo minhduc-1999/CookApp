@@ -4,6 +4,8 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AccountEntity } from "entities/social/account.entity";
+import { InteractionEntity } from "entities/social/interaction.entity";
+import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
@@ -119,7 +121,10 @@ const repositories = [
     AuthModule,
     TypeOrmModule.forFeature([
       UserEntity,
-      AccountEntity
+      AccountEntity,
+      PostEntity,
+      InteractionEntity,
+      PostMediaEntity
     ])
   ],
   controllers: [

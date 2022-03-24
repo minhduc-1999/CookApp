@@ -49,7 +49,8 @@ export class CreatePostCommandHandler
           author: user,
           name: req.name,
           images: req.images?.map(image => new Image({key: image})),
-          videos: req.videos?.map(video => new Video({key: video}))
+          videos: req.videos?.map(video => new Video({key: video})),
+          location: req.location
         })
         break;
       }
@@ -58,7 +59,8 @@ export class CreatePostCommandHandler
           author: user,
           content: req.content,
           images: req.images?.map(image => new Image({key: image})),
-          videos: req.videos?.map(video => new Video({key: video}))
+          videos: req.videos?.map(video => new Video({key: video})),
+          location: req.location,
         });
       }
       default: {
@@ -72,9 +74,9 @@ export class CreatePostCommandHandler
 
     const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
     result.images = await this._storageService.getDownloadUrls(result.images)
-    if (req.kind === "MOMENT") {
-      this._eventBus.publish(new NewPostEvent(result, user))
-    }
+    // if (req.kind === "MOMENT") {
+    //   this._eventBus.publish(new NewPostEvent(result, user))
+    // }
     return new CreatePostResponse(result);
   }
 }

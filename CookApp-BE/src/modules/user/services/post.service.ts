@@ -27,12 +27,12 @@ export class PostService implements IPostService {
 
     let reaction: Reaction;
 
-    if (userID) {
-       reaction = await this._postRepo.getReactionByUserId(
-        userID,
-        post.id
-      );
-    }
+    // if (userID) {
+    //    reaction = await this._postRepo.getReactionByUserId(
+    //     userID,
+    //     post.id
+    //   );
+    // }
 
     return [post, reaction];
   }

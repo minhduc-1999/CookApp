@@ -12,7 +12,7 @@ import { IMediaRepository } from "modules/user/interfaces/repositories/media.int
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ReactPostEvent } from "modules/notification/events/ReactNotification";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
-import { ReactionTargetType } from "enums/social.enum";
+import { InteractiveTargetType } from "enums/social.enum";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(
@@ -53,7 +53,7 @@ export class ReactCommandHandler
     let eventCallback: () => void
 
     switch (reactReq.targetType) {
-      case ReactionTargetType.POST:
+      case InteractiveTargetType.POST:
         const [ post ] = await this._postService.getPostDetail(reactReq.targetKeyOrID);
         reaction.setTarget(post)
         existedReaction = await this._postRepo.getReactionByUserId(
@@ -64,7 +64,7 @@ export class ReactCommandHandler
           this._eventBus.publish(new ReactPostEvent(post, user));
         }
         break;
-      case ReactionTargetType.MEDIA:
+      case InteractiveTargetType.MEDIA:
         const media = await this._mediaRepository.getMedia(reactReq.targetKeyOrID)
         if (!media) {
           throw new NotFoundException(

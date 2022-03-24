@@ -1,7 +1,11 @@
+import { MediaType } from "../../enums/social.enum"
+
 export abstract class MediaBase {
   key: string
 
   url: string
+
+  type: MediaType
 
   constructor(media: Partial<MediaBase>) {
     this.key = media?.key
@@ -12,11 +16,10 @@ export abstract class MediaBase {
 }
 
 export class Image extends MediaBase {
-  type: "IMAGE"
 
   constructor(image: Partial<Image>) {
     super(image)
-    this.type = "IMAGE"
+    this.type = MediaType.IMAGE
   }
 
   isValidKey() : boolean {
@@ -26,11 +29,10 @@ export class Image extends MediaBase {
 }
 
 export class Video extends MediaBase {
-  type: "VIDEO"
 
   constructor(video: Partial<Video>) {
     super(video)
-    this.type = "VIDEO"
+    this.type = MediaType.VIDEO
   }
 
   isValidKey(): boolean {

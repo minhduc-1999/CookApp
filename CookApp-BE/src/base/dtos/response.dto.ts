@@ -6,7 +6,7 @@ import { MetaDTO } from "./responseMeta.dto";
 import { Comment } from "domains/social/comment.domain"
 import { Food } from "domains/core/food.domain";
 import { Media } from "domains/social/media.domain";
-import { ReactionType, Sex } from "enums/social.enum";
+import { PostType, ReactionType, Sex } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 
 export class ResponseDTO<T> {
@@ -72,7 +72,7 @@ export class AuthorResponse {
 
   constructor(user: User) {
     this.id = user?.id
-    this.avatar = new MediaResponse(user?.avatar) 
+    this.avatar = new MediaResponse(user?.avatar)
     this.displayName = user?.displayName
   }
 }
@@ -102,8 +102,11 @@ export class PostResponse extends AuditResponse {
   @ApiResponseProperty({ enum: ReactionType })
   reaction?: ReactionType;
 
-  @ApiResponseProperty({ enum: ["Album", "Moment"] })
-  kind: "Album" | "Moment"
+  @ApiResponseProperty({ enum: PostType })
+  kind: PostType
+
+  @ApiResponseProperty({ type: String })
+  location: string
 
   constructor(post: Post) {
     super(post)
@@ -111,19 +114,20 @@ export class PostResponse extends AuditResponse {
     this.numOfComment = post?.numOfComment;
     this.numOfReaction = post?.numOfReaction;
     this.kind = post?.kind
+    this.location = post?.location
     switch (post?.kind) {
-      case "Album":
-        this.name = post?.name
-        this.images = post?.images.map(image => new MediaResponse(image));
-        this.videos = post?.videos.map(video => new MediaResponse(video));
-;
+      case PostType.ALBUM:
+        const album = post as Album
+        this.name = album?.name
+        this.images = album?.images.map(image => new MediaResponse(image));
+        this.videos = album?.videos.map(video => new MediaResponse(video));
+        ;
         break;
-      case "Moment":
-        this.content = post?.content
-        this.images = post?.images.map(image => new MediaResponse(image));
-;
-        this.videos = post?.videos.map(video => new MediaResponse(video));
-;
+      case PostType.MOMENT:
+        const moment = post as Moment
+        this.content = moment?.content
+        this.images = moment?.images.map(image => new MediaResponse(image));
+        this.videos = moment?.videos.map(video => new MediaResponse(video));
         break;
     }
   }
@@ -177,7 +181,7 @@ export class ProfileResponse {
   }
 }
 
-export class MomentResponse extends AuditResponse{
+export class MomentResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   content: string
 
@@ -218,7 +222,7 @@ export class MomentResponse extends AuditResponse{
   }
 }
 
-export class AlbumResponse extends AuditResponse{
+export class AlbumResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string
 
@@ -259,7 +263,7 @@ export class IngredientResponse {
   name: string
 
   @ApiResponseProperty({
-   type: "string | number" 
+    type: "string | number"
   })
   quantity: string | number
 

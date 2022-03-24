@@ -12,12 +12,22 @@ export class InteractionEntity extends AbstractEntity {
   type: InteractiveTargetType
 
   @Column({
-    name: "comments"
+    name: "comments",
+    default: 0
   })
   numberOfComment: number
 
   @Column({
-    name: "reactions"
+    name: "reactions",
+    default: 0
   })
   numberOfReaction: number
+
+  constructor(data: Partial<InteractionEntity>) {
+    super(data)
+    this.type = data?.type
+    this.numberOfReaction = data?.numberOfReaction
+    this.numberOfComment = data?.numberOfComment
+    this.numberOfReaction = data?.numberOfReaction
+  }
 }
