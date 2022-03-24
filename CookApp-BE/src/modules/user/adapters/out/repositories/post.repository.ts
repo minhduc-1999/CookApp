@@ -30,12 +30,12 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   }
   async getPostById(postId: string): Promise<Post> {
     const postEntity = await this._postRepo
-    .createQueryBuilder("post")
-    .innerJoinAndSelect("post.interaction", "interaction")
-    .innerJoinAndSelect("post.author", "author")
-    .where("post.id = :id", {id: postId})
-    .select(["post", "interaction", "author"])
-    .getOne()
+      .createQueryBuilder("post")
+      .innerJoinAndSelect("post.interaction", "interaction")
+      .innerJoinAndSelect("post.author", "author")
+      .where("post.id = :id", { id: postId })
+      .select(["post", "interaction", "author"])
+      .getOne()
     return postEntity?.toDomain()
   }
   async getPostByIds(postIds: string[]): Promise<Post[]> {

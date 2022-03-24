@@ -4,8 +4,7 @@ import { Wall } from "domains/social/wall.domain";
 import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallPostsRequest";
 
 export interface IWallRepository {
-  getPosts(userId: string, query: GetWallPostsRequest): Promise<Post[]>;
-  getTotalPosts(userId: string, query: GetWallPostsRequest): Promise<number>;
+  getPosts(userId: string, query: GetWallPostsRequest): Promise<[Post[], number]>;
   setTransaction(tx: ITransaction): IWallRepository
   createFollower(
     userId: string,
