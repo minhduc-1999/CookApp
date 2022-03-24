@@ -18,7 +18,7 @@ export class AccountRepository extends BaseRepository implements IAccountReposit
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       try {
-        user = await queryRunner.manager.save<AccountEntity>(acc)
+        await queryRunner.manager.save<AccountEntity>(acc)
       } catch (err) {
         if (err instanceof QueryFailedError)
           throw new TypeormException(err)

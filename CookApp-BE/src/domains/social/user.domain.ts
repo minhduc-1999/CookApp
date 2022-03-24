@@ -3,6 +3,7 @@ import { Sex } from "../../enums/social.enum";
 import { Media } from "./media.domain";
 import { Account } from "./account.domain";
 import { generateDisplayName } from "../../utils";
+import { Follow } from "./follow.domain";
 
 
 export class User extends Audit {
@@ -47,5 +48,12 @@ export class User extends Audit {
     this.nPosts = user?.nPosts
     this.nFollowees = user?.nFollowees
     this.nFollowers = user?.nFollowers
+  }
+
+  follow(followee: User): Follow {
+    return new Follow({
+      follower: this,
+      followee
+    })
   }
 }

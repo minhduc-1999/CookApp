@@ -6,16 +6,5 @@ import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallP
 export interface IWallRepository {
   getPosts(userId: string, query: GetWallPostsRequest): Promise<[Post[], number]>;
   setTransaction(tx: ITransaction): IWallRepository
-  createFollower(
-    userId: string,
-    targetId: string,
-  ): Promise<void>;
-  deleteFollower(
-    userId: string,
-    targetId: string,
-  ): Promise<void>;
-  isFollowed(sourceId: string, targetId: string): Promise<boolean>;
-  getFollowers(userId: string): Promise<string[]>;
-  getFollowing(userId: string): Promise<string[]>;
   getWall(userId: string): Promise<User>;
 }

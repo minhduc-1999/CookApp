@@ -1,9 +1,10 @@
-import { Column, OneToOne, Entity } from 'typeorm';
+import { Column, OneToOne, Entity, OneToMany } from 'typeorm';
 import { AccountEntity } from './account.entity';
 import { User } from '../../domains/social/user.domain';
 import { Image } from '../../domains/social/media.domain';
 import { Sex } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
+import { FollowEntity } from './follow.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends AbstractEntity {
@@ -50,6 +51,12 @@ export class UserEntity extends AbstractEntity {
 
   @OneToOne(() => AccountEntity, account => account.user)
   account: AccountEntity
+
+  @OneToMany(() => FollowEntity, follow => follow.followee)
+  followees: FollowEntity[]
+
+  @OneToMany(() => FollowEntity, follow => follow.follower)
+  followers: FollowEntity[]
 
   constructor(user: User) {
     super(user)

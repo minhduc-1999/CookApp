@@ -4,6 +4,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AccountEntity } from "entities/social/account.entity";
+import { FollowEntity } from "entities/social/follow.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
 import { UserEntity } from "entities/social/user.entity";
@@ -20,6 +21,7 @@ import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
+import { FollowRepository } from "./adapters/out/repositories/follow.repository";
 import { MediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
@@ -89,6 +91,10 @@ const repositories = [
     useClass: UserRepository,
   },
   {
+    provide: "IFollowRepository",
+    useClass: FollowRepository,
+  },
+  {
     provide: "IPostRepository",
     useClass: PostRepository,
   },
@@ -124,7 +130,8 @@ const repositories = [
       AccountEntity,
       PostEntity,
       InteractionEntity,
-      PostMediaEntity
+      PostMediaEntity,
+      FollowEntity
     ])
   ],
   controllers: [
@@ -142,6 +149,6 @@ const repositories = [
     ...queryHandlers,
     ...eventHandlers
   ],
-  exports: ["IWallRepository"],
+  exports: ["IFollowRepository"],
 })
 export class UserModule {}

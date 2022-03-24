@@ -7,6 +7,7 @@ import { NotificationTemplateEnum } from "enums/notification.enum";
 import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
 import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
+import { IFollowRepository } from "modules/user/interfaces/repositories/follow.interface";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 export class NewPostEvent {
   post: Post;
@@ -22,19 +23,20 @@ export class NewPostEventHandler implements IEventHandler<NewPostEvent> {
   constructor(
     @Inject("INotiRepository")
     private _notiRepository: INotiRepository,
-    @Inject("IWallRepository")
-    private _wallRepository: IWallRepository,
     @Inject("INotificationService")
     private _notiService: INotificationService,
     @Inject("IConfigurationService")
-    private _configurationService: IConfigurationService
+    private _configurationService: IConfigurationService,
+    @Inject("IFollowRepository")
+    private _followRepo: IFollowRepository,
   ) { }
 
   async handle(event: NewPostEvent): Promise<void> {
-    const followers = await this._wallRepository.getFollowers(event.author.id);
+    const [followers, _] = await this._followRepo.getFollowers(event.author.id);
     if (followers.length === 0) return
 
-    const followerNotiConfigs = await this._configurationService.getNotificationConfigs(followers)
+    const followerNotiConfigs = await this._configurationService
+      .getNotificationConfigs(followers.map(follwer => follwer.id))
     const endFollowers = followerNotiConfigs
       .filter(config => config.newPost)
       .map(config => config.userID)
