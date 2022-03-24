@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Patch, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiConflictResponse, ApiTags } from "@nestjs/swagger";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
@@ -8,7 +9,7 @@ import {
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
-import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
+import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { UserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetProfileQuery } from "modules/user/useCases/getProfile";
@@ -17,7 +18,6 @@ import { GetUsersQuery } from "modules/user/useCases/getUsers";
 import { GetUsersResponse } from "modules/user/useCases/getUsers/getUsersResponse";
 import { UpdateProfileCommand } from "modules/user/useCases/updateProfile";
 import { UpdateProfileRequest } from "modules/user/useCases/updateProfile/updateProfileRequest";
-import { Transaction } from "neo4j-driver";
 import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users")
@@ -55,11 +55,11 @@ export class UserController {
   @ApiFailResponseCustom()
   @ApiConflictResponse()
   @ApiOKResponseCustomWithoutData("Updating profile successfully")
-  @RequestTransaction()
+  @HttpRequestTransaction()
   async updateProfile(
     @UserReq() user: User,
     @Body() body: UpdateProfileRequest,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {
     const command = new UpdateProfileCommand(tx, user, body);
     await this._commandBus.execute(command);

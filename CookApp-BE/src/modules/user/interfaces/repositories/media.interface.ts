@@ -1,10 +1,10 @@
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { Media } from "domains/social/media.domain";
 import { Reaction } from "domains/social/reaction.domain";
-import { MediaType } from "enums/mediaType.enum";
-import { Transaction } from "neo4j-driver";
+import { MediaType } from "enums/social.enum";
 
 export interface IMediaRepository {
-  setTransaction(tx: Transaction): IMediaRepository
+  setTransaction(tx: ITransaction): IMediaRepository
   addMedia(media: Media): Promise<void>
   deleteMedia(object: string): Promise<void>
   deleteMedias(keys: string[]): Promise<void>

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, HttpCode, Post, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import {
   ApiBearerAuth,
@@ -22,16 +22,16 @@ import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
 import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
 import { User } from "domains/social/user.domain";
-import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
+import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { UserReq } from "decorators/user.decorator";
 import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmailRequest";
 import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
 import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
 import { ResendEmailVerificationCommand } from "modules/auth/useCases/resendEmailVerification";
-import { Transaction } from "neo4j-driver";
 import { NotRequireEmailVerification } from "decorators/notRequireEmailVerification.decorator";
 import { BasicAuthGuard } from "guards/basicAuth.guard";
 import { GoogleAuthGuard } from "guards/jwtAuth.guard";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 @Controller()
 @ApiTags("Authentication")
@@ -44,15 +44,15 @@ export class AuthController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(RegisterResponse, "Register successfully")
   @ApiConflictResponse()
-  @RequestTransaction()
+  @HttpRequestTransaction()
   async register(
     @Body() body: RegisterRequest,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<RegisterResponse>> {
     const registerCommand = new RegisterCommand(body, tx);
     const user = (await this._commandBus.execute(registerCommand)) as User;
     return Result.ok(
-      { id: user.id, username: user.username },
+      { id: user.id },
       { messages: ["Register successfully"] }
     );
   }
@@ -95,10 +95,10 @@ export class AuthController {
   @Public()
   @NotRequireEmailVerification()
   @ApiOkResponse({ description: "Confirm email successfully" })
-  @RequestTransaction()
+  @HttpRequestTransaction()
   async verifyEmailCallback(
     @Body() body: VerifyEmailRequest,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<string> {
     let command = new VerifyEmailCommand(body, tx);
     await this._commandBus.execute(command);

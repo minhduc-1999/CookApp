@@ -2,7 +2,7 @@ import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
-import { PostType } from "enums/mediaType.enum";
+import { PostType } from "enums/social.enum";
 
 export class CreatePostRequest {
   @IsNotEmpty()
@@ -28,7 +28,7 @@ export class CreatePostRequest {
 
   @IsEnum(PostType)
   @ApiProperty({ enum: PostType })
-  kind: "Album" | "Moment"
+  kind: "ALBUM" | "MOMENT"
 
   @IsOptional()
   @IsMeaningfulString(1)

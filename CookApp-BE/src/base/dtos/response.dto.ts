@@ -2,13 +2,12 @@ import { ApiProperty, ApiPropertyOptional, ApiResponseProperty } from "@nestjs/s
 import { Album, Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
-import { ReactionType } from "enums/reaction.enum";
 import { MetaDTO } from "./responseMeta.dto";
 import { Comment } from "domains/social/comment.domain"
-import { Sex } from "enums/sex.enum";
-import { Profile } from "domains/social/profile.domain";
 import { Food } from "domains/core/food.domain";
-import { Image, Media } from "domains/social/media.domain";
+import { Media } from "domains/social/media.domain";
+import { ReactionType, Sex } from "enums/social.enum";
+import { Audit } from "domains/audit.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -41,14 +40,10 @@ export class AuditResponse {
   @ApiResponseProperty({ type: Number })
   updatedAt?: number;
 
-  @ApiResponseProperty({ type: String })
-  updatedBy?: string;
-
-  constructor(audit: Partial<AuditResponse>) {
-    this.createdAt = audit?.createdAt
+  constructor(audit: Audit) {
+    this.createdAt = audit?.createdAt.getTime()
     this.id = audit?.id
-    this.updatedAt = audit?.updatedAt
-    this.updatedBy = audit?.updatedBy
+    this.updatedAt = audit?.updatedAt.getTime()
   }
 }
 
@@ -172,17 +167,17 @@ export class ProfileResponse {
   @ApiResponseProperty({ enum: Sex })
   sex?: Sex;
 
-  constructor(profile: Profile) {
+  constructor(profile: User) {
     this.height = profile?.height
     this.weight = profile?.weight
-    this.birthDate = profile?.birthDate
+    this.birthDate = profile?.birthDate?.getTime()
     this.firstName = profile?.firstName
     this.lastName = profile?.lastName
     this.sex = profile?.sex
   }
 }
 
-export class MomentResponse {
+export class MomentResponse extends AuditResponse{
   @ApiResponseProperty({ type: String })
   content: string
 
@@ -211,6 +206,7 @@ export class MomentResponse {
   createdAt: number
 
   constructor(post: Moment) {
+    super(post)
     this.content = post?.content
     this.images = post?.images.map(image => new MediaResponse(image));
 
@@ -219,12 +215,10 @@ export class MomentResponse {
     this.author = new AuthorResponse(post?.author)
     this.numOfReaction = post?.numOfReaction
     this.numOfComment = post?.numOfComment
-    this.id = post?.id
-    this.createdAt = post?.createdAt
   }
 }
 
-export class AlbumResponse {
+export class AlbumResponse extends AuditResponse{
   @ApiResponseProperty({ type: String })
   name: string
 
@@ -246,13 +240,8 @@ export class AlbumResponse {
   @ApiResponseProperty({ type: Number })
   numOfComment: number;
 
-  @ApiResponseProperty({ type: String })
-  id: string
-
-  @ApiResponseProperty({ type: Number })
-  createdAt: number
-
   constructor(post: Album) {
+    super(post)
     this.name = post?.name
     this.images = post?.images.map(image => new MediaResponse(image));
 
@@ -261,8 +250,6 @@ export class AlbumResponse {
     this.author = new AuthorResponse(post?.author)
     this.numOfReaction = post?.numOfReaction
     this.numOfComment = post?.numOfComment
-    this.id = post?.id
-    this.createdAt = post?.createdAt
   }
 }
 

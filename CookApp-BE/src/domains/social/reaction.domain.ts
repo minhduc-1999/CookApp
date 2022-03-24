@@ -1,4 +1,4 @@
-import { ReactionType } from "enums/reaction.enum";
+import { ReactionType } from "enums/social.enum";
 import { Media } from "./media.domain";
 import { Post } from "./post.domain";
 import { User } from "./user.domain";

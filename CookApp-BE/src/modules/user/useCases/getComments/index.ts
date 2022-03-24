@@ -43,10 +43,10 @@ export class GetCommentsQueryHandler
     let target: CommentTarget;
 
     switch (request.targetType) {
-      case "Post":
+      case "POST":
         target = (await this._postService.getPostDetail(request.targetKeyOrID))[0];
         break;
-      case "RecipeStep":
+      case "RECIPE_STEP":
         // Check step's existence
         target = new RecipeStep({id: request.targetKeyOrID})
         break;

@@ -7,18 +7,18 @@ import { CreateCommentResponse } from "./createCommentResponse";
 import { Comment } from "domains/social/comment.domain";
 import { ICommentService } from "modules/user/services/comment.service";
 import { IPostService } from "modules/user/services/post.service";
-import { Transaction } from "neo4j-driver";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { CommentPostEvent } from "modules/notification/events/CommentNotification";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
   constructor(
     user: User,
     request: CreateCommentRequest,
-    tx: Transaction
+    tx: ITransaction
   ) {
     super(tx, user);
     this.commentReq = request;
@@ -45,7 +45,7 @@ export class CreateCommentCommandHandler
     let createdComment: Comment
 
     switch (commentReq.targetType) {
-      case "Post":
+      case "POST":
         const [post] = await this._postService.getPostDetail(commentReq.targetKeyOrID);
         comment = new Comment({
           content: commentReq.content,
@@ -54,7 +54,7 @@ export class CreateCommentCommandHandler
         })
         this._eventBus.publish(new CommentPostEvent(post, user));
         break;
-      case "RecipeStep":
+      case "RECIPE_STEP":
         comment = new Comment({
           content: commentReq.content,
           user,

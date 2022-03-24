@@ -1,42 +1,51 @@
-import { Audit } from "domains/audit.domain";
-import { ExternalProvider } from "enums/externalProvider.enum";
+import { Audit } from "../../domains/audit.domain";
+import { Sex } from "../../enums/social.enum";
 import { Media } from "./media.domain";
-import { Profile } from "./profile.domain";
+import { Account } from "./account.domain";
+import { generateDisplayName } from "../../utils";
 
-class Provider {
-  type: ExternalProvider;
-  id: string;
-}
 
 export class User extends Audit {
-  username: string;
-
-  password?: string;
-
-  email: string;
-
-  phone?: string;
+  id: string 
 
   avatar?: Media;
 
-  profile?: Profile;
-
   displayName?: string;
 
-  externalProvider?: Provider;
+  height?: number;
 
-  emailVerified: boolean;
+  weight?: number;
 
-  constructor(user?: Partial<User>) {
+  birthDate?: Date;
+
+  firstName?: string;
+
+  lastName?: string;
+
+  sex?: Sex;
+
+  followers?: number
+
+  followees?: number
+
+  posts?: number
+
+  account?: Account
+
+  constructor(user: Partial<User>) {
     super(user)
-    this.username = user?.username
-    this.email = user?.email 
-    this.phone = user?.phone
+    this.id = user?.id
+    this.account = user?.account
+    this.displayName = user?.displayName ?? generateDisplayName()
+    this.birthDate = user?.birthDate
     this.avatar = user?.avatar
-    this.profile = user?.profile
-    this.password = user?.password
-    this.displayName = user?.displayName
-    this.externalProvider = user?.externalProvider
-    this.emailVerified = user?.emailVerified
+    this.height = user?.height
+    this.weight = user?.weight
+    this.firstName = user?.firstName
+    this.lastName = user?.lastName
+    this.sex = user?.sex
+    this.posts = user?.posts
+    this.followees = user?.followees
+    this.followers = user?.followers
   }
 }

@@ -1,5 +1,4 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { MediaType } from "enums/mediaType.enum";
 import _ = require("lodash");
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
 import { ConfigService } from "nestjs-config";
@@ -11,6 +10,7 @@ import {
 } from "utils";
 import { IStorageProvider } from "./provider.service";
 import { Media } from "domains/social/media.domain";
+import { MediaType } from "enums/social.enum";
 
 export interface IStorageService {
   getUploadSignedLink(fileName: string): Promise<PreSignedLinkResponse>;
@@ -39,8 +39,9 @@ export class FireBaseService implements IStorageService {
   private logger: Logger = new Logger(FireBaseService.name);
 
   private readonly storageTree = {
-    postImages: "images/posts/",
-    avatars: "images/avatars/",
+    image: "images/",
+    video: "videos/",
+    audio: "audios/",
     temp: "temp/",
   };
   private bucket: Bucket
@@ -49,7 +50,7 @@ export class FireBaseService implements IStorageService {
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
   ) {
-    this.bucket = _provider.getBucket()
+    this.bucket = this._provider.getBucket()
   }
   async deleteFiles(objectKeys: string[]): Promise<string[]> {
     const deleteTasks: Promise<string>[] = [];
@@ -82,23 +83,26 @@ export class FireBaseService implements IStorageService {
   ): Promise<string[]> {
     let basePath: string;
     switch (mediaType) {
-      case MediaType.POST_IMAGE:
-        basePath = this.storageTree.postImages;
+      case MediaType.IMAGE:
+        basePath = this.storageTree.image;
         break;
-      case MediaType.AVATAR:
-        basePath = this.storageTree.avatars;
+      case MediaType.VIDEO:
+        basePath = this.storageTree.video;
+        break;
+      case MediaType.AUDIO:
+        basePath = this.storageTree.audio;
         break;
       default:
         break;
     }
     const moveTasks: Promise<string>[] = [];
-    oldMediaArr.forEach(async (oldMedia) => {
-      if (!oldMedia) return;
-      const oldFile = this.bucket.file(oldMedia.key);
-      oldFile
-        .delete({ ignoreNotFound: true })
-        .catch((err) => this.logger.error(err));
-    });
+    // oldMediaArr.forEach(async (oldMedia) => {
+    //   if (!oldMedia) return;
+    //   const oldFile = this.bucket.file(oldMedia.key);
+    //   oldFile
+    //     .delete({ ignoreNotFound: true })
+    //     .catch((err) => this.logger.error(err));
+    // });
     for (let newObj of newObjects) {
       const newFile = this.bucket.file(newObj);
       if ((await newFile.exists())[0]) {
@@ -127,6 +131,7 @@ export class FireBaseService implements IStorageService {
     if (!mediaArr) return []
     return mediaArr.map(
       (media) => {
+        if (!media.key) return null
         media.url = this._configService.get("storage.publicUrl") + media.key
         return media
       }
@@ -146,11 +151,14 @@ export class FireBaseService implements IStorageService {
       if (fileExited) {
         let basePath = "";
         switch (mediaType) {
-          case MediaType.POST_IMAGE:
-            basePath = this.storageTree.postImages;
+          case MediaType.IMAGE:
+            basePath = this.storageTree.image;
             break;
-          case MediaType.AVATAR:
-            basePath = this.storageTree.avatars;
+          case MediaType.VIDEO:
+            basePath = this.storageTree.video;
+            break;
+          case MediaType.AUDIO:
+            basePath = this.storageTree.audio;
             break;
           default:
             break;

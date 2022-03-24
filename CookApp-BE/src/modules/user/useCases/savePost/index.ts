@@ -1,5 +1,6 @@
 import { ConflictException, Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { SavedPost } from "domains/social/post.domain";
@@ -7,12 +8,11 @@ import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { IPostService } from "modules/user/services/post.service";
-import { Transaction } from "neo4j-driver";
 import { SavePostRequest } from "./savePostRequest"
 
 export class SavePostCommand extends BaseCommand {
   savePostDto: SavePostRequest
-  constructor(savePostDto: SavePostRequest, user: User, tx: Transaction) {
+  constructor(savePostDto: SavePostRequest, user: User, tx: ITransaction) {
     super(tx, user)
     this.savePostDto = savePostDto
   }

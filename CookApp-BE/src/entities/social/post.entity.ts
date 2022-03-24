@@ -1,80 +1,50 @@
-import { InternalServerErrorException } from '@nestjs/common';
-import { Album, Moment, Post, SavedPost } from 'domains/social/post.domain';
-import { Node, Relationship } from 'neo4j-driver'
-import { AuditEntity } from '../base.entity';
-import { MediaEntity } from './media.entity';
 import { UserEntity } from './user.entity';
+import { OneToMany, OneToOne, ManyToOne, Column, Entity, JoinColumn } from 'typeorm';
+import { InteractionEntity } from './interaction.entity';
+import { MediaType } from '../../enums/social.enum';
 
+@Entity({ name: 'posts' })
 export class PostEntity {
 
-  static toDomain(postNode: Node, authorNode?: Node, mediaArr?: Node[], numOfComment?: number, numOfReaction?: number): Post {
-    const { properties } = postNode
-    const audit = AuditEntity.toDomain(postNode)
-    let post: Post
-    switch (properties.kind) {
-      case "Moment":
-        post = new Moment({
-          ...audit,
-          content: properties.content,
-          numOfComment: numOfComment,
-          numOfReaction: numOfReaction,
-          images: mediaArr?.filter(mediaNode => mediaNode.properties.type === "IMAGE").map(mediaNode => MediaEntity.toDomain(mediaNode)),
-          videos: mediaArr?.filter(mediaNode => mediaNode.properties.type === "VIDEO").map(mediaNode => MediaEntity.toDomain(mediaNode)),
-        })
-        break;
-      case "Album":
-        post = new Album({
-          ...audit,
-          name: properties.name,
-          numOfComment: numOfComment,
-          numOfReaction: numOfReaction,
-          images: mediaArr?.filter(mediaNode => mediaNode.properties.type === "IMAGE").map(mediaNode => MediaEntity.toDomain(mediaNode)),
-          videos: mediaArr?.filter(mediaNode => mediaNode.properties.type === "VIDEO").map(mediaNode => MediaEntity.toDomain(mediaNode)),
-        })
-        break;
-      default:
-        throw new InternalServerErrorException()
-    }
-    if (authorNode) {
-      post.author = UserEntity.toDomain(authorNode)
-    }
-    return post
+  @OneToOne(() => InteractionEntity, { primary: true })
+  @JoinColumn({ name: "id", referencedColumnName: "id" })
+  interaction: InteractionEntity
 
-  }
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: "author_id" })
+  author: UserEntity;
 
-  static fromDomain(post: Post): Record<string, any> {
-    switch (post.kind) {
-      case "Moment":
-        return {
-          content: post.content,
-          createdAt: post.createdAt,
-          kind: post.kind
-        }
-      case "Album":
-        return {
-          name: post.name,
-          createdAt: post.createdAt,
-          kind: post.kind
-        }
-    }
-  }
+  @Column({ name: 'location' })
+  location: string;
+
+  @Column({ name: 'status' })
+  status: string
+
+  @Column({ name: 'content' })
+  content: string
+
+  @OneToMany(() => PostMediaEntity, media => media.post)
+  medias: PostMediaEntity[]
 }
 
+@Entity({ name: 'post_medias' })
+export class PostMediaEntity {
 
-export class SavedPostEntity {
-  static toDomain(postNode: Node, relationship: Relationship, authorNode?: Node, mediaNode?: Node[], numOfComment?: number, numOfReaction?: number): SavedPost {
-    const { properties: relProps } = relationship
-    const post = PostEntity.toDomain(postNode, authorNode, mediaNode, numOfComment, numOfReaction)
-    const savedItem = new SavedPost({
-      post,
-      savedAt: relProps.createdAt
-    })
-    return savedItem
-  }
+  @OneToOne(() => InteractionEntity, { primary: true })
+  @JoinColumn({ name: "id", referencedColumnName: "id" })
+  interaction: InteractionEntity
 
-  static fromDomain(item: Partial<SavedPost>): Record<string, any> {
-    return {
-      createdAt: item.savedAt
-    }
-  }
+  @ManyToOne(() => PostEntity)
+  @JoinColumn({ name: "post_id" })
+  post: PostEntity;
+
+  @Column({
+    name: 'type',
+    type: "enum",
+    enum: MediaType
+  })
+  type: MediaType;
+
+  @Column({ name: 'key' })
+  key: string
 }

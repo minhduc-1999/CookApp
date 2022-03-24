@@ -1,42 +1,85 @@
-import { Image } from 'domains/social/media.domain';
-import { Profile } from 'domains/social/profile.domain';
-import { User } from 'domains/social/user.domain';
-import { Node } from 'neo4j-driver'
-import { AuditEntity } from '../base.entity';
+import { Column, OneToOne, Entity } from 'typeorm';
+import { AccountEntity } from './account.entity';
+import { User } from '../../domains/social/user.domain';
+import { Image } from '../../domains/social/media.domain';
+import { Sex } from '../../enums/social.enum';
+import { AbstractEntity } from '../../base/entities/base.entity';
 
-export class UserEntity {
+@Entity({ name: 'users' })
+export class UserEntity extends AbstractEntity {
 
-  static toDomain(node: Node): User {
-    const { properties } = node
-    const profile = new Profile({
-      height: properties.height,
-      weight: properties.weight,
-      firstName: properties.firstName,
-      lastName: properties.lastName,
-      birthDate: properties.birthDate,
-      sex: properties.sex
-    })
-    const audit = AuditEntity.toDomain(node)
-    const user = new User({
-      profile,
-      ...audit,
-      username: properties.username,
-      displayName: properties.displayName,
-      email: properties.email,
-      password: properties.password,
-      phone: properties.phone,
-      avatar: new Image({ key: properties.avatar }),
-      emailVerified: properties.emailVerified,
-    })
-    return user
+  @Column({ name: 'height', nullable: true })
+  height?: number
 
+  @Column({ name: 'weight', nullable: true })
+  weight?: number;
+
+  @Column({
+    name: 'birth_date',
+    nullable: true
+  })
+  birthDate?: Date;
+
+  @Column({ name: "first_name", nullable: true })
+  firstName: string
+
+  @Column({ name: "last_name", nullable: true })
+  lastName: string
+
+  @Column({
+    type: "enum",
+    enum: Sex,
+    nullable: true
+  })
+  sex: Sex
+
+  @Column({ name: "followers", default: 0 })
+  followers: number
+
+  @Column({ name: "followees", default: 0 })
+  followees: number
+
+  @Column({ name: "posts", default: 0 })
+  posts: number
+
+  @Column({ name: 'avatar', default: "images/avatar-default.jpg" })
+  avatar: string;
+
+  @Column({ name: 'display_name' })
+  displayName: string;
+
+  @OneToOne(() => AccountEntity, account => account.user)
+  account: AccountEntity
+
+  constructor(user: User) {
+    super(user)
+    this.birthDate = user?.birthDate
+    this.height = user?.height
+    this.weight = user?.weight
+    this.firstName = user?.firstName
+    this.lastName = user?.lastName
+    this.sex = user?.sex
+    this.posts = user?.posts
+    this.followees = user?.followees
+    this.followers = user?.followers
+    this.avatar = user?.avatar?.key
+    this.displayName = user?.displayName
+    this.account = user?.account && new AccountEntity(user.account)
   }
 
-  static fromDomain(user: Partial<User>): Record<string, any> {
-    const { profile, externalProvider, ...remain } = user
+  toDomain(): User {
+    const data = this
+    return new User({
+      ...data,
+      avatar: new Image({ key: data.avatar }),
+      account: data.account?.toDomain()
+    })
+  }
+
+  getPartialUpdateObject() : Partial<UserEntity>{
+    const {account, posts, followees, followers, ...remain } = this
     return {
-      ...remain,
-      ...profile
+      ...remain
     }
   }
 }

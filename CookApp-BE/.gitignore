@@ -4,6 +4,7 @@ dist/
 .env.staging
 neo4j-db/
 stack/
+data/
 *.env
 attachments/
 .docker.env

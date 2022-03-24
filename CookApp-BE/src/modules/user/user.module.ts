@@ -1,7 +1,10 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
+import { AccountEntity } from "entities/social/account.entity";
+import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { AuthModule } from "modules/auth/auth.module";
@@ -114,6 +117,10 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
     AuthModule,
+    TypeOrmModule.forFeature([
+      UserEntity,
+      AccountEntity
+    ])
   ],
   controllers: [
     PostController,

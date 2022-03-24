@@ -24,7 +24,6 @@ export function createUpdatingNestedObject<T, R>(
 
 export function createUpdatingObject<T>(
   updateObj: T,
-  updateBy: string
 ): Partial<T> {
   const keys = Object.keys(updateObj).filter(
     (key) => updateObj[key] !== null && updateObj[key] !== undefined
@@ -33,9 +32,6 @@ export function createUpdatingObject<T>(
   keys.forEach((key) => {
     updatingObj[key] = updateObj[key];
   });
-  updatingObj["updatedAt"] = _.now();
-  updatingObj["updatedBy"] = updateBy;
-
   return updatingObj;
 }
 

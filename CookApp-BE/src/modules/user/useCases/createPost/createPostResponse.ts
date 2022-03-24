@@ -8,7 +8,7 @@ export class CreatePostResponse extends PickType(
       super(post)
       this.id = post?.id
       this.kind = post?.kind
-      this.createdAt = post?.createdAt
+      this.createdAt = post?.createdAt.getTime()
       switch (post.kind) {
         case "Album":
           this.name = post?.name

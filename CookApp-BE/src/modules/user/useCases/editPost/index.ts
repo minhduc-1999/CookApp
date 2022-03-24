@@ -7,15 +7,15 @@ import { IPostService } from "modules/user/services/post.service";
 import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { MediaType } from "enums/mediaType.enum";
 import { Album, Moment, Post } from "domains/social/post.domain";
 import { Image } from "domains/social/media.domain";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { MediaType } from "enums/social.enum";
 export class EditPostCommand extends BaseCommand {
   req: EditPostRequest;
-  constructor(tx: Transaction, user: User, post: EditPostRequest) {
+  constructor(tx: ITransaction, user: User, post: EditPostRequest) {
     super(tx, user);
     this.req = Object.assign(new EditPostRequest(), post);
   }
@@ -54,7 +54,7 @@ export class EditPostCommandHandler
     if (req.addImages && req.addImages.length > 0) {
       const keys = await this._storageService.makePublic(
         command.req.addImages,
-        MediaType.POST_IMAGE
+        MediaType.IMAGE
       );
       req.addImages = keys
       // await this._mediaRepository.setTransaction(tx).addMedias(keys, MediaType.POST_IMAGE)

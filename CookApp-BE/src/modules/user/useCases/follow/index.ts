@@ -5,13 +5,13 @@ import { FollowResponse } from "./followResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { IUserService } from "modules/auth/services/user.service";
-import { Transaction } from "neo4j-driver";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 import { NewFollowerEvent } from "modules/notification/events/NewFollowerNotification";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 export class FollowCommand extends BaseCommand {
   targetId: string;
-  constructor(user: User, targetId: string, tx: Transaction) {
+  constructor(user: User, targetId: string, tx: ITransaction) {
     super(tx, user);
     this.targetId = targetId;
   }

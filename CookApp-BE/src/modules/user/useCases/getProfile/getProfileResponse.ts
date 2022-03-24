@@ -16,6 +16,6 @@ export class GetProfileResponse {
   constructor(user: User) {
     this.displayName = user.displayName
     this.avatar = new MediaResponse(user.avatar)
-    this.profile = new ProfileResponse(user.profile)
+    this.profile = new ProfileResponse(user)
   }
 }

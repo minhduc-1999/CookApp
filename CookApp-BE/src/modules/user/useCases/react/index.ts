@@ -6,17 +6,17 @@ import { ReactRequest } from "./reactRequest";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ReactResponse } from "./reactResponse";
 import { Reaction } from "domains/social/reaction.domain";
-import { Transaction } from "neo4j-driver";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { IReactionService } from "modules/user/services/reaction.service";
 import { IMediaRepository } from "modules/user/interfaces/repositories/media.interface";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ReactPostEvent } from "modules/notification/events/ReactNotification";
-import { ReactionTargetType } from "enums/reaction.enum";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { ReactionTargetType } from "enums/social.enum";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(
-    tx: Transaction,
+    tx: ITransaction,
     user: User,
     reactReq: ReactRequest
   ) {

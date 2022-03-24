@@ -1,9 +1,9 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { IsNotEmpty, IsOptional, IsString, Length } from "class-validator";
+import { IsEnum, IsNotEmpty, IsOptional, IsString, Length, Min } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsValidDisplayName } from "decorators/isValidDisplayName.decorator";
-import { Profile } from "domains/social/profile.domain";
+import { Sex } from "enums/social.enum";
+import _ = require("lodash");
 
 export class UpdateProfileRequest {
   @IsString()
@@ -21,8 +21,40 @@ export class UpdateProfileRequest {
   @IsOptional()
   avatar: string;
 
-  @Type(() => Profile)
   @IsOptional()
-  @ApiPropertyOptional({ type: Profile })
-  profile: Profile;
+  @ApiPropertyOptional({ type: Number })
+  @Min(0)
+  height?: number;
+
+  @IsOptional()
+  @ApiPropertyOptional({ type: Number })
+  @Min(0)
+  weight?: number;
+
+  @IsOptional()
+  @ApiPropertyOptional({ type: Number, default: _.now()})
+  @Min(0)
+  birthDate?: number;
+
+  @IsString()
+  @IsValidDisplayName()
+  @IsOptional()
+  @IsNotEmpty()
+  @Length(2, 16)
+  @ApiPropertyOptional({ type: String })
+  firstName?: string;
+
+  @IsString()
+  @IsValidDisplayName()
+  @IsOptional()
+  @IsNotEmpty()
+  @Length(2, 16)
+  @ApiPropertyOptional({ type: String })
+  lastName?: string;
+
+  @ApiPropertyOptional({ enum: Sex })
+  @IsEnum(Sex)
+  @IsOptional()
+  sex?: Sex;
+
 }

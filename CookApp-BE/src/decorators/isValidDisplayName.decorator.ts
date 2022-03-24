@@ -11,7 +11,7 @@ export class IsValidDisplayNameConstrain
   implements ValidatorConstraintInterface {
   private chars: string[];
   validate(text: string, args: ValidationArguments) {
-    const regex = /[a-zA-Z0-9_.]/g;
+    const regex = /[a-zA-Z0-9_. ÀÁÂÃÈÉÊÌÍÒÓÔÕÙÚĂĐĨŨƠàáâãèéêìíòóôõùúăđĩũơƯĂẠẢẤẦẨẪẬẮẰẲẴẶẸẺẼỀỀỂưăạảấầẩẫậắằẳẵặẹẻẽềềểỄỆỈỊỌỎỐỒỔỖỘỚỜỞỠỢỤỦỨỪễếệỉịọỏốồổỗộớờởỡợụủứừỬỮỰỲỴÝỶỸửữựỳỵỷỹ]/g;
     const test = text.match(regex).length;
     return test === text.length;
   }

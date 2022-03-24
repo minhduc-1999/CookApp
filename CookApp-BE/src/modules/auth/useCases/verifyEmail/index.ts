@@ -10,12 +10,12 @@ import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "nestjs-config";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { UserErrorCode } from "enums/errorCode.enum";
-import { Transaction } from "neo4j-driver";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 export class VerifyEmailCommand extends BaseCommand {
   requestDto: VerifyEmailRequest;
-  constructor(requestDto: VerifyEmailRequest, tx: Transaction) {
+  constructor(requestDto: VerifyEmailRequest, tx: ITransaction) {
     super(tx);
     this.requestDto = requestDto;
   }
@@ -32,14 +32,15 @@ export class VerifyEmailCommandHandler
   async execute(command: VerifyEmailCommand): Promise<void> {
     const email = this.decodeVerificationToken(command.requestDto.token);
     const user = await this._userRepo.getUserByEmail(email);
-    if (user.emailVerified) {
+    if (user.account.emailVerified) {
       throw new BadRequestException(
         ResponseDTO.fail("Email has already been verified")
       );
     }
-    await this._userRepo.setTransaction(command.tx).updateUserProfile(user.id, {
-      emailVerified: true,
-    });
+    // TODO: update account
+    // await this._userRepo.setTransaction(command.tx).updateUserProfile({
+    //   emailVerified: true,
+    // });
     return;
   }
 

@@ -1,16 +1,16 @@
 import { ConflictException, Inject, NotFoundException } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { Transaction } from "neo4j-driver";
 import { DeleteSavedPostRequest } from "./deleteSavedPostRequest";
 
 export class DeleteSavedPostCommand extends BaseCommand {
   deleteSavedPostDto: DeleteSavedPostRequest
-  constructor(dto: DeleteSavedPostRequest, user: User, tx: Transaction) {
+  constructor(dto: DeleteSavedPostRequest, user: User, tx: ITransaction) {
     super(tx, user)
     this.deleteSavedPostDto = dto
   }

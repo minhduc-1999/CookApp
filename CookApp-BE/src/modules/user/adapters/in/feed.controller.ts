@@ -3,7 +3,7 @@ import {
   Get,
   Query,
 } from "@nestjs/common";
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
@@ -21,7 +21,7 @@ import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 @ApiTags("User/Feed")
 @ApiBearerAuth()
 export class FeedController {
-  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
+  constructor(private _queryBus: QueryBus) {}
 
   @Get('posts')
   @ApiFailResponseCustom()

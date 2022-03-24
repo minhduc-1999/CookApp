@@ -1,25 +1,25 @@
-import { Reaction } from 'domains/social/reaction.domain';
-import { User } from 'domains/social/user.domain';
-import { Path } from 'neo4j-driver'
+import { AbstractEntity } from '../../base/entities/base.entity';
+import { UserEntity } from './user.entity';
+import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
+import { InteractionEntity } from './interaction.entity';
+import { ReactionType } from '../../enums/social.enum';
 
-export class ReactionEntity {
+@Entity({ name: 'reactions' })
+export class ReactionEntity extends AbstractEntity {
 
-  static toDomain(path: Path): Reaction {
-    const [segment] = path.segments
-    const reaction = new Reaction({
-      type: segment.relationship.properties.type,
-      reactor: new User({
-        id: segment.start.properties.id
-      }) 
-    })
-    return reaction
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: "user_id", referencedColumnName: "id" })
+  user: UserEntity
 
-  }
+  @ManyToOne(() => InteractionEntity)
+  @JoinColumn({ name: 'target_id'})
+  target: InteractionEntity;
 
-  static fromDomain(reaction: Partial<Reaction>): Record<string, any> {
-    const { ...remain } = reaction
-    return {
-      ...remain,
-    }
-  }
+  @Column({
+    name: 'type',
+    type: "enum",
+    enum: ReactionType
+  })
+  type: ReactionType;
 }
+

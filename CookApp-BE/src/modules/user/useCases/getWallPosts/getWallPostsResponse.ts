@@ -33,7 +33,7 @@ export class GetWallPostsResponse {
             id: post.id,
             images: post.images.map(image => new MediaResponse(image)),
             videos: post.videos.map(video => new MediaResponse(video)),
-            createdAt: post.createdAt,
+            createdAt: post.createdAt.getTime(),
             content: post.content,
             kind: "Moment"
           }
@@ -42,7 +42,7 @@ export class GetWallPostsResponse {
             id: post.id,
             images: post.images.map(image => new MediaResponse(image)),
             videos: post.videos.map(video => new MediaResponse(video)),
-            createdAt: post.createdAt,
+            createdAt: post.createdAt.getTime(),
             name: post.name,
             kind: "Album"
           }

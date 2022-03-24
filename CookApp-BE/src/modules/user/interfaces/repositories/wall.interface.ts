@@ -1,12 +1,12 @@
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { Post } from "domains/social/post.domain";
 import { Wall } from "domains/social/wall.domain";
 import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallPostsRequest";
-import { Transaction } from "neo4j-driver";
 
 export interface IWallRepository {
   getPosts(userId: string, query: GetWallPostsRequest): Promise<Post[]>;
   getTotalPosts(userId: string, query: GetWallPostsRequest): Promise<number>;
-  setTransaction(tx: Transaction): IWallRepository
+  setTransaction(tx: ITransaction): IWallRepository
   createFollower(
     userId: string,
     targetId: string,

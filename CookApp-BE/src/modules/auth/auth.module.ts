@@ -3,7 +3,11 @@ import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { CqrsModule } from "@nestjs/cqrs";
 import { JwtModule } from "@nestjs/jwt";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
+import { AccountEntity } from "entities/social/account.entity";
+import { ProviderEntity } from "entities/social/provider.entity";
+import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { EmailVerificationGuard } from "guards/emailVerification.guard";
 import { JwtAuthGuard } from "guards/jwtAuth.guard";
@@ -11,6 +15,7 @@ import { ConfigurationModule } from "modules/configuration/configuration.module"
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule, ConfigService } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
+import { AccountRepository } from "./adapters/out/repositories/account.repository";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
@@ -57,7 +62,12 @@ const globalGuards = [
     ShareModule.register({
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
-    ConfigurationModule
+    ConfigurationModule,
+    TypeOrmModule.forFeature([
+      UserEntity,
+      AccountEntity,
+      ProviderEntity
+    ])
   ],
   controllers: [AuthController],
   providers: [
@@ -68,6 +78,10 @@ const globalGuards = [
     {
       provide: "IUserRepository",
       useClass: UserRepository,
+    },
+    {
+      provide: "IAccountRepository",
+      useClass: AccountRepository,
     },
     {
       provide: "IAuthentication",

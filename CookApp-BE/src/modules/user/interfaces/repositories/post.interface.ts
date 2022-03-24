@@ -1,9 +1,9 @@
 import { User } from "@sentry/node";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Post, SavedPost } from "domains/social/post.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
-import { Transaction } from "neo4j-driver";
 
 export interface IPostRepository {
   createPost(post: Post): Promise<Post>;
@@ -13,7 +13,7 @@ export interface IPostRepository {
   reactPost(reaction: Reaction): Promise<boolean>;
   deleteReact(reaction: Reaction): Promise<boolean>;
   getReactionByUserId(userId: string, postId: string): Promise<Reaction>;
-  setTransaction(tx: Transaction): IPostRepository
+  setTransaction(tx: ITransaction): IPostRepository
   isExisted(postID: string): Promise<boolean>
   savePost(savedPost: SavedPost): Promise<void>
   deleteSavedPost(postID: string, user: User): Promise<void>

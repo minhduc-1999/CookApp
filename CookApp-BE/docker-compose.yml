@@ -32,5 +32,16 @@ services:
       - ./neo4j-db/conf:/conf
       - ./neo4j-db/plugins:/plugins
     env_file: .neo4j.env
+
+  postgres:
+    image: postgres:latest
+    restart: always
+    volumes:
+      - pg-tastify:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file: 
+      - .postgres.env
 volumes:
   tastify-db:
+  pg-tastify:
