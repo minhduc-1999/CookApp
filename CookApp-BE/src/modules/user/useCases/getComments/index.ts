@@ -76,7 +76,7 @@ export class GetCommentsQueryHandler
 
     for (let comment of comments) {
       comment.numberOfReply = await this._commentRepo.getAmountOfReply(comment.id);
-      if (comment.user.avatar && comment.user.avatar.isValidKey()) {
+      if (comment.user.avatar) {
         comment.user.avatar = (
           await this._storageService.getDownloadUrls([comment.user.avatar])
         )[0];

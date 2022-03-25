@@ -4,6 +4,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AccountEntity } from "entities/social/account.entity";
+import { FeedEntity } from "entities/social/feed.entity";
 import { FollowEntity } from "entities/social/follow.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
@@ -140,7 +141,8 @@ const repositories = [
       PostMediaEntity,
       FollowEntity,
       ReactionEntity,
-      SavedPostEntity
+      SavedPostEntity,
+      FeedEntity
     ])
   ],
   controllers: [

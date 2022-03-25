@@ -2,7 +2,7 @@ import { Audit } from "../../domains/audit.domain"
 import { IInteractable } from "../../domains/interfaces/IInteractable.interface"
 import { MediaType } from "../../enums/social.enum"
 
-export abstract class MediaBase extends Audit implements IInteractable{
+export abstract class MediaBase extends Audit implements IInteractable {
   key: string
 
   url: string
@@ -21,7 +21,7 @@ export abstract class MediaBase extends Audit implements IInteractable{
     this.nReactions = media?.nReactions
   }
 
-  abstract isValidKey(): boolean 
+  abstract isValidKey(): boolean
 }
 
 export class Image extends MediaBase {
@@ -31,7 +31,7 @@ export class Image extends MediaBase {
     this.type = MediaType.IMAGE
   }
 
-  isValidKey() : boolean {
+  isValidKey(): boolean {
     const regex = /^(\w{1,256}\/){0,256}\w{1,256}\.(png|jpg|jpeg|PNG|JPG|JPEG)$/;
     return regex.test(this.key);
   }

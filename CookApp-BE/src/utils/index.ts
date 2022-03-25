@@ -86,7 +86,7 @@ export function generateDisplayName() {
   );
 }
 
-function retrieveObjectNameFromUrl( url: string,
+export function retrieveObjectNameFromUrl( url: string,
   eliminatedSeed: string
 ): string {
   const a = url.slice(url.indexOf(eliminatedSeed) + eliminatedSeed.length);
@@ -107,3 +107,7 @@ export function sleep(ms: number) {
   });
 }
 
+export function inspect(obj: any) {
+    const util = require('util')
+    console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }))
+}

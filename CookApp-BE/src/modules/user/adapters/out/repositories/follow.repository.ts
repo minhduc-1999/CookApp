@@ -27,13 +27,6 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       await queryRunner.manager.softDelete(FollowEntity, follow.id)
-      // await queryRunner.manager
-      //   .createQueryBuilder(queryRunner)
-      //   .softDelete()
-      //   .from(FollowEntity, "follow")
-      //   .where("follow.follower_id = :followerId", { followerId })
-      //   .andWhere("follow.followee_id = :followeeId", { followeeId })
-      //   .execute()
     }
   }
   async getFollow(followerId: string, followeeId: string): Promise<Follow> {
@@ -46,25 +39,50 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
   }
 
   async getFollowers(userId: string, query?: PageOptionsDto): Promise<[User[], number]> {
-    const [entities, total] = await this._followRepo
-      .createQueryBuilder("follow")
-      .innerJoinAndSelect("follow.followee", "followee")
-      .where("followee.id = :userId", { userId })
-      .skip(query.limit * query.offset)
-      .limit(query.limit)
-      .getManyAndCount()
-    return [entities.map(entity => entity.follower.toDomain()), total]
+    let entities: FollowEntity[]
+    let total: number
+    [entities, total] = await this._followRepo.findAndCount({ followee: { id: userId } })
+    if (query) {
+      [entities, total] = await this._followRepo
+        .createQueryBuilder("follow")
+        .innerJoinAndSelect("follow.follower", "follower")
+        .where("follow.followee_id = :userId", { userId })
+        .select(["follow", "follower"])
+        .skip(query.limit * query.offset)
+        .limit(query.limit)
+        .getManyAndCount()
+    } else {
+      [entities, total] = await this._followRepo
+        .createQueryBuilder("follow")
+        .innerJoinAndSelect("follow.follower", "follower")
+        .where("follow.followee_id = :userId", { userId })
+        .select(["follow", "follower"])
+        .getManyAndCount()
+    }
+    return [entities.map(entity => entity?.follower?.toDomain()), total]
   }
 
   async getFollowees(userId: string, query?: PageOptionsDto): Promise<[User[], number]> {
-    const [entities, total] = await this._followRepo
-      .createQueryBuilder("follow")
-      .innerJoinAndSelect("follow.follower", "follower")
-      .where("follower.id = :userId", { userId })
-      .skip(query.limit * query.offset)
-      .limit(query.limit)
-      .getManyAndCount()
-    return [entities.map(entity => entity.followee.toDomain()), total]
+    let entities: FollowEntity[]
+    let total: number
+    if (query) {
+      [entities, total] = await this._followRepo
+        .createQueryBuilder("follow")
+        .innerJoinAndSelect("follow.followee", "followee")
+        .where("follow.follower_id = :userId", { userId })
+        .select(["follow", "followee"])
+        .skip(query.limit * query.offset)
+        .limit(query.limit)
+        .getManyAndCount()
+    } else {
+      [entities, total] = await this._followRepo
+        .createQueryBuilder("follow")
+        .innerJoinAndSelect("follow.followee", "followee")
+        .where("follow.follower_id = :userId", { userId })
+        .select(["follow", "followee"])
+        .getManyAndCount()
+    }
+    return [entities.map(entity => entity?.followee?.toDomain()), total]
   }
 
 }

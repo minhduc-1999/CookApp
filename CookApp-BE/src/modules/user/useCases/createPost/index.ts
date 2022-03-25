@@ -74,9 +74,9 @@ export class CreatePostCommandHandler
 
     const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
     result.images = await this._storageService.getDownloadUrls(result.images)
-    // if (req.kind === "MOMENT") {
-    //   this._eventBus.publish(new NewPostEvent(result, user))
-    // }
+    if (req.kind === "MOMENT") {
+      this._eventBus.publish(new NewPostEvent(result, user))
+    }
     return new CreatePostResponse(result);
   }
 }

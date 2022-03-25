@@ -1,5 +1,4 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
-import { Notification } from "domains/social/notification.domain";
+import { Inject, Injectable } from "@nestjs/common";
 import { NotificationConfiguration } from "domains/social/notificationConfiguration.domain";
 import { User } from "domains/social/user.domain";
 import { IStorageProvider } from "modules/share/adapters/out/services/provider.service";
@@ -16,7 +15,6 @@ const collections = {
 
 @Injectable()
 export class ConfigurationService implements IConfigurationService {
-  private _logger = new Logger(Notification.name);
   private firestore: FirebaseFirestore.Firestore;
   constructor(
     @Inject("IStorageProvider")
@@ -28,7 +26,7 @@ export class ConfigurationService implements IConfigurationService {
     const notiConfigsRef = this.firestore.collection(collections.notificationConfig)
     const snapshot = await notiConfigsRef.where('userID', "in", users).get()
     if (snapshot.empty)
-      return
+      return null
 
     return snapshot.docs.map(doc => doc.data() as NotificationConfiguration)
   }

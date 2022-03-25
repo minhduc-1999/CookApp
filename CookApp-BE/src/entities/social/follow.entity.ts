@@ -6,11 +6,11 @@ import { Follow } from '../../domains/social/follow.domain';
 @Entity({ name: 'follows' })
 export class FollowEntity extends AbstractEntity {
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, user => user.followers)
   @JoinColumn({ name: "follower_id" })
   follower: UserEntity
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, user => user.followees)
   @JoinColumn({ name: "followee_id" })
   followee: UserEntity
 

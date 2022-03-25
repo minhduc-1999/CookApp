@@ -27,27 +27,26 @@ export class GetFeedPostsQueryHandler
     @Inject("IStorageService") private _storageService: IStorageService,
     @Inject("IReactionRepository")
     private _reactionRepo: IReactionRepository,
-  ) {}
+  ) { }
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
-    const posts = await this._feedRepo.getPosts(user, queryOptions);
+    const [posts, total] = await this._feedRepo.getPosts(user, queryOptions);
 
     for (let post of posts) {
       post.images = await this._storageService.getDownloadUrls(post.images);
-      if (post.author?.avatar && post.author?.avatar.isValidKey()) {
+      if (post.author?.avatar) {
         post.author.avatar = (
           await this._storageService.getDownloadUrls([post.author.avatar])
         )[0];
       }
     }
 
-    const totalCount = await this._feedRepo.getTotalPosts(user);
     let meta: PageMetadata;
     if (posts.length > 0) {
       meta = new PageMetadata(
         queryOptions.offset,
         queryOptions.limit,
-        totalCount
+        total
       );
     }
 

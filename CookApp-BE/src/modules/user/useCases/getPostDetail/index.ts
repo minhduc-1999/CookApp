@@ -27,7 +27,7 @@ export class GetPostDetailQueryHandler
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
     const [post, reaction] = await this._postService.getPostDetail(query.postId, query.user.id);
     post.images = await this._storageService.getDownloadUrls(post.images);
-    if (post.author?.avatar && post.author.avatar.isValidKey()) {
+    if (post.author?.avatar) {
       post.author.avatar = (
         await this._storageService.getDownloadUrls([post.author.avatar])
       )[0];

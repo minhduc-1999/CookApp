@@ -37,7 +37,6 @@ export class User extends Audit {
 
   constructor(user: Partial<User>) {
     super(user)
-    this.id = user?.id
     this.account = user?.account
     this.displayName = user?.displayName ?? generateDisplayName()
     this.birthDate = user?.birthDate
