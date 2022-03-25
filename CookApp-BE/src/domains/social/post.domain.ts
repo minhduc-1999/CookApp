@@ -39,12 +39,10 @@ export class Moment extends PostBase {
     return true
   }
 
-  images?: Media[]
-  videos?: Media[]
+  medias?: Media[]
   constructor(post: Partial<Moment>) {
     super(post)
-    this.images = post.images ?? []
-    this.videos = post.videos ?? []
+    this.medias = post.medias ?? []
     this.type = PostType.MOMENT
   }
 }
@@ -56,14 +54,12 @@ export class Album extends PostBase {
     return true
   }
   name: string
-  images?: Media[]
-  videos?: Media[]
+  medias?: Media[]
 
   constructor(post: Partial<Album>) {
     super(post)
     this.name = post.name
-    this.images = post.images ?? []
-    this.videos = post.videos ?? []
+    this.medias = post.medias ?? []
     this.type = PostType.ALBUM
   }
 }

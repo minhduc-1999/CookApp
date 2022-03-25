@@ -36,7 +36,7 @@ export class GetFeedPostsQueryHandler
     const [posts, total] = await this._feedRepo.getPosts(user, queryOptions);
 
     for (let post of posts) {
-      post.images = await this._storageService.getDownloadUrls(post.images);
+      post.medias = await this._storageService.getDownloadUrls(post.medias);
       if (post.author?.avatar) {
         post.author.avatar = (
           await this._storageService.getDownloadUrls([post.author.avatar])

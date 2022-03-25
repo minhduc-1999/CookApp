@@ -4,9 +4,9 @@ import { AlbumResponse, MediaResponse, MomentResponse } from "base/dtos/response
 import { Album, Post } from "domains/social/post.domain";
 import { PostType } from "enums/social.enum";
 
-class MomentResponse1 extends PickType(MomentResponse, ["id", "content", "images", "videos", "createdAt", "kind"]) { }
+class MomentResponse1 extends PickType(MomentResponse, ["id", "content", "medias", "createdAt", "kind"]) { }
 
-class AlbumResponse1 extends PickType(AlbumResponse, ["id", "name", "images", "videos", "createdAt", "kind"]) { }
+class AlbumResponse1 extends PickType(AlbumResponse, ["id", "name", "medias", "createdAt", "kind"]) { }
 
 type PostResponse = AlbumResponse1 | MomentResponse1
 
@@ -32,8 +32,7 @@ export class GetWallPostsResponse {
         case PostType.MOMENT:
           return {
             id: post.id,
-            images: post.images.map(image => new MediaResponse(image)),
-            videos: post.videos.map(video => new MediaResponse(video)),
+            medias: post.medias.map(image => new MediaResponse(image)),
             createdAt: post.createdAt.getTime(),
             content: post.content,
             kind: "Moment"
@@ -42,8 +41,7 @@ export class GetWallPostsResponse {
           const album = post as Album
           return {
             id: album.id,
-            images: album.images.map(image => new MediaResponse(image)),
-            videos: album.videos.map(video => new MediaResponse(video)),
+            medias: album.medias.map(image => new MediaResponse(image)),
             createdAt: album.createdAt.getTime(),
             name: album.name,
             kind: "Album"

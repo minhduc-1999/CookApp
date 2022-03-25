@@ -43,13 +43,15 @@ export class CreatePostCommandHandler
 
     let creatingPost: Post
 
+    const medias = req.images?.map(image => new Image({ key: image }))
+            .concat(req.videos?.map(video => new Video({ key: video })))
+
     switch (req.kind) {
       case "ALBUM": {
         creatingPost = new Album({
           author: user,
           name: req.name,
-          images: req.images?.map(image => new Image({key: image})),
-          videos: req.videos?.map(video => new Video({key: video})),
+          medias,
           location: req.location
         })
         break;
@@ -58,8 +60,7 @@ export class CreatePostCommandHandler
         creatingPost = new Moment({
           author: user,
           content: req.content,
-          images: req.images?.map(image => new Image({key: image})),
-          videos: req.videos?.map(video => new Video({key: video})),
+          medias,
           location: req.location,
         });
       }
@@ -73,7 +74,7 @@ export class CreatePostCommandHandler
     }
 
     const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
-    result.images = await this._storageService.getDownloadUrls(result.images)
+    result.medias = await this._storageService.getDownloadUrls(result.medias)
     if (req.kind === "MOMENT") {
       this._eventBus.publish(new NewPostEvent(result, user))
     }

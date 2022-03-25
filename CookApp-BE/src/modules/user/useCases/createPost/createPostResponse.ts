@@ -4,7 +4,7 @@ import { Album, Post } from "domains/social/post.domain";
 import { PostType } from "enums/social.enum";
 
 export class CreatePostResponse extends PickType(
-  PostResponse, ["id", "createdAt", "content", "videos", "images", "name", "kind", "location"]) {
+  PostResponse, ["id", "createdAt", "content", "medias", "name", "kind", "location"]) {
     constructor(post: Post) {
       super(post)
       this.id = post?.id
@@ -14,14 +14,12 @@ export class CreatePostResponse extends PickType(
         case PostType.ALBUM:
           const album = post as Album
           this.name = album?.name
-          this.images = album?.images.map(image => new MediaResponse(image))
-          this.videos = album?.videos.map(video => new MediaResponse(video))
+          this.medias = album?.medias.map(image => new MediaResponse(image))
           this.location = album?.location
           break;
       case PostType.MOMENT:
           this.content = post?.content
-          this.images = post?.images.map(image => new MediaResponse(image))
-          this.videos = post?.videos.map(video => new MediaResponse(video))
+          this.medias = post?.medias.map(image => new MediaResponse(image))
           this.location = post?.location
           break;
       }

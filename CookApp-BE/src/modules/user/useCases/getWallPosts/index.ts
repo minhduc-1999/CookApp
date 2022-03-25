@@ -30,7 +30,7 @@ export class GetWallPostsQueryHandler
     const { queryReq, targetId } = query;
     const [posts, total] = await this._wallRepo.getPosts(targetId, queryReq);
     for (let post of posts) {
-      post.images = await this._storageService.getDownloadUrls(post.images);
+      post.medias = await this._storageService.getDownloadUrls(post.medias);
     }
     let meta: PageMetadata;
     if (posts.length > 0) {

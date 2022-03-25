@@ -39,9 +39,7 @@ export class PostEntity {
     this.author = new UserEntity(post?.author)
     this.content = post?.content
     this.kind = post?.type
-    const images = post?.images.map(image => new PostMediaEntity(image))
-    const videos = post?.videos.map(video => new PostMediaEntity(video))
-    this.medias = images?.concat(videos)
+    this.medias = post?.medias.map(image => new PostMediaEntity(image))
     this.location = post?.location
   }
 
@@ -52,8 +50,7 @@ export class PostEntity {
         return new Moment({
           ...audit,
           content: this.content,
-          images: this.medias?.filter(media => media.type === MediaType.IMAGE).map(image => image.toDomain()),
-          videos: this.medias?.filter(media => media.type === MediaType.VIDEO).map(video => video.toDomain()),
+          medias: this.medias?.map(image => image.toDomain()),
           author: this.author.toDomain(),
           location: this.location
         })

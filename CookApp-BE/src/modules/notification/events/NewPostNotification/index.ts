@@ -50,7 +50,7 @@ export class NewPostEventHandler implements IEventHandler<NewPostEvent> {
       body: template.body.replace("$user", event.author.displayName),
       title: template.title,
       templateId: template.id,
-      image: event.post.images.length > 0 ? event.post.images[0].url : "",
+      image: event.post.medias.length > 0 ? event.post.medias[0].url : "",
       targets: endFollowers,
       data: {
         postID: event.post.id,

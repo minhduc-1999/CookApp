@@ -66,14 +66,14 @@ export class EditPostCommandHandler
         updateData = new Album({
           id: req.id,
           name: req.name,
-          images: req.addImages.map(image => new Image({ key: image }))
+          medias: req.addImages.map(image => new Image({ key: image }))
         })
         break;
       case PostType.MOMENT:
         updateData = new Moment({
           id: req.id,
           content: req.content,
-          images: req.addImages.map(image => new Image({ key: image }))
+          medias: req.addImages.map(image => new Image({ key: image }))
         })
         break;
     }
