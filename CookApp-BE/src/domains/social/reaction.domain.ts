@@ -1,15 +1,14 @@
 import { Audit } from "../../domains/audit.domain";
 import { ReactionType } from "enums/social.enum";
-import { Media } from "./media.domain";
-import { Post } from "./post.domain";
 import { User } from "./user.domain";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
 
 export class Reaction extends Audit{
   type: ReactionType;
 
   reactor: User;
 
-  target: Post | Media
+  target: IInteractable
 
   constructor(reaction: Partial<Reaction>) {
     super(reaction)

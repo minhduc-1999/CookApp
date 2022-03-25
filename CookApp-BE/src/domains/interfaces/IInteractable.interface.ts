@@ -1,4 +1,5 @@
 export interface IInteractable {
+  id: string
 
   nReactions: number
   
