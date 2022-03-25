@@ -28,7 +28,7 @@ export class GetWallPostsResponse {
 
   constructor(posts: Post[], meta: PageMetadata) {
     this.posts = posts.map(post => {
-      switch (post.kind) {
+      switch (post.type) {
         case PostType.MOMENT:
           return {
             id: post.id,

@@ -1,9 +1,11 @@
 import { Audit } from "../../domains/audit.domain";
-import { Sex } from "../../enums/social.enum";
+import { ReactionType, Sex } from "../../enums/social.enum";
 import { Media } from "./media.domain";
 import { Account } from "./account.domain";
 import { generateDisplayName } from "../../utils";
 import { Follow } from "./follow.domain";
+import { Post } from "./post.domain";
+import { Reaction } from "./reaction.domain";
 
 
 export class User extends Audit {
@@ -54,6 +56,14 @@ export class User extends Audit {
     return new Follow({
       follower: this,
       followee
+    })
+  }
+
+  react(target: Post | Media, type: ReactionType ): Reaction {
+    return new Reaction({
+      reactor: this,
+      target: target,
+      type
     })
   }
 }

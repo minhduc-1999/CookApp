@@ -1,15 +1,24 @@
+import { Audit } from "domains/audit.domain"
+import { IInteractable } from "domains/interfaces/IInteractable.interface"
 import { MediaType } from "../../enums/social.enum"
 
-export abstract class MediaBase {
+export abstract class MediaBase extends Audit implements IInteractable{
   key: string
 
   url: string
 
   type: MediaType
 
+  nReactions: number
+
+  nComments: number
+
   constructor(media: Partial<MediaBase>) {
+    super(media)
     this.key = media?.key
     this.url = media?.url
+    this.nComments = media?.nComments
+    this.nReactions = media?.nReactions
   }
 
   abstract isValidKey(): boolean 

@@ -4,6 +4,7 @@ import { Reaction } from "domains/social/reaction.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { Post } from "../../../domains/social/post.domain";
 import { IPostRepository } from "../interfaces/repositories/post.interface";
+import { IReactionRepository } from "../interfaces/repositories/reaction.interface";
 
 export interface IPostService {
   getPostDetail(postId: string, userID?: string): Promise<[Post, Reaction]>;
@@ -13,7 +14,8 @@ export interface IPostService {
 @Injectable()
 export class PostService implements IPostService {
   constructor(
-    @Inject("IPostRepository") private _postRepo: IPostRepository,
+    @Inject( "IPostRepository") private _postRepo: IPostRepository,
+    @Inject( "IReactionRepository") private _reactionRepo: IReactionRepository,
   ) { }
 
   async getPostDetail(postId: string, userID?: string): Promise<[Post, Reaction]> {
@@ -27,12 +29,12 @@ export class PostService implements IPostService {
 
     let reaction: Reaction;
 
-    // if (userID) {
-    //    reaction = await this._postRepo.getReactionByUserId(
-    //     userID,
-    //     post.id
-    //   );
-    // }
+    if (userID) {
+       reaction = await this._reactionRepo.findById(
+        userID,
+        post.id
+      );
+    }
 
     return [post, reaction];
   }

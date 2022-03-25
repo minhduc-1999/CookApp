@@ -8,9 +8,9 @@ export class CreatePostResponse extends PickType(
     constructor(post: Post) {
       super(post)
       this.id = post?.id
-      this.kind = post?.kind
+      this.kind = post?.type
       this.createdAt = post?.createdAt?.getTime()
-      switch (post.kind) {
+      switch (post.type) {
         case PostType.ALBUM:
           const album = post as Album
           this.name = album?.name

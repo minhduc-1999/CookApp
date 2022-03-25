@@ -111,11 +111,11 @@ export class PostResponse extends AuditResponse {
   constructor(post: Post) {
     super(post)
     this.author = new AuthorResponse(post?.author)
-    this.numOfComment = post?.numOfComment;
-    this.numOfReaction = post?.numOfReaction;
-    this.kind = post?.kind
+    this.numOfComment = post?.nComments;
+    this.numOfReaction = post?.nReactions;
+    this.kind = post?.type
     this.location = post?.location
-    switch (post?.kind) {
+    switch (post?.type) {
       case PostType.ALBUM:
         const album = post as Album
         this.name = album?.name
@@ -217,8 +217,8 @@ export class MomentResponse extends AuditResponse {
     this.videos = post?.videos.map(video => new MediaResponse(video));
 
     this.author = new AuthorResponse(post?.author)
-    this.numOfReaction = post?.numOfReaction
-    this.numOfComment = post?.numOfComment
+    this.numOfReaction = post?.nReactions
+    this.numOfComment = post?.nComments
   }
 }
 
@@ -252,8 +252,8 @@ export class AlbumResponse extends AuditResponse {
     this.videos = post?.videos.map(video => new MediaResponse(video));
 
     this.author = new AuthorResponse(post?.author)
-    this.numOfReaction = post?.numOfReaction
-    this.numOfComment = post?.numOfComment
+    this.numOfReaction = post?.nReactions
+    this.numOfComment = post?.nComments
   }
 }
 

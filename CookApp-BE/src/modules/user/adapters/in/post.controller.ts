@@ -22,8 +22,8 @@ import { DeleteSavedPostRequest } from "modules/user/useCases/deleteSavedPost/de
 import { EditPostCommand } from "modules/user/useCases/editPost";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
-import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
-import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
+import { GetPostDetailQuery } from "modules/user/useCases/getPostDetail";
+import { GetPostResponse } from "modules/user/useCases/getPostDetail/getPostResponse";
 import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
 import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";

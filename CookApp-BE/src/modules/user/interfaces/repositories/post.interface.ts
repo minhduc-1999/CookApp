@@ -2,7 +2,6 @@ import { User } from "@sentry/node";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Post, SavedPost } from "domains/social/post.domain";
-import { Reaction } from "domains/social/reaction.domain";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 
 export interface IPostRepository {
@@ -10,9 +9,6 @@ export interface IPostRepository {
   getPostById(postId: string): Promise<Post>;
   getPostByIds(postId: string[]): Promise<Post[]>;
   updatePost(post: Post, editPostDto: EditPostRequest): Promise<void>;
-  reactPost(reaction: Reaction): Promise<boolean>;
-  deleteReact(reaction: Reaction): Promise<boolean>;
-  getReactionByUserId(userId: string, postId: string): Promise<Reaction>;
   setTransaction(tx: ITransaction): IPostRepository
   isExisted(postID: string): Promise<boolean>
   savePost(savedPost: SavedPost): Promise<void>

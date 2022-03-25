@@ -61,7 +61,7 @@ export class EditPostCommandHandler
     }
 
     let updateData: Post;
-    switch (existedPost.kind) {
+    switch (existedPost.type) {
       case PostType.ALBUM:
         updateData = new Album({
           id: req.id,

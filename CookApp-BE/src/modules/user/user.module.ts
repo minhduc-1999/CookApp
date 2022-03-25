@@ -7,6 +7,7 @@ import { AccountEntity } from "entities/social/account.entity";
 import { FollowEntity } from "entities/social/follow.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
+import { ReactionEntity } from "entities/social/reaction.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
@@ -24,11 +25,11 @@ import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { FollowRepository } from "./adapters/out/repositories/follow.repository";
 import { MediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
+import { ReactionRepository } from "./adapters/out/repositories/reaction.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { NewPostEventHandler } from "./events/propagateNewPost";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
-import { ReactionService } from "./services/reaction.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
@@ -36,7 +37,7 @@ import { EditPostCommandHandler } from "./useCases/editPost";
 import { FollowCommandHandler } from "./useCases/follow";
 import { GetCommentsQueryHandler } from "./useCases/getComments";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
-import { GetPostDetailQueryHandler } from "./useCases/getPostById";
+import { GetPostDetailQueryHandler } from "./useCases/getPostDetail";
 import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { GetSavedPostsQueryHandler } from "./useCases/getSavedPosts";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
@@ -80,10 +81,6 @@ const services = [
     provide: "ICommentService",
     useClass: CommentService,
   },
-  {
-    provide: "IReactionService",
-    useClass: ReactionService,
-  },
 ];
 const repositories = [
   {
@@ -114,6 +111,10 @@ const repositories = [
     provide: "IMediaRepository",
     useClass: MediaRepository,
   },
+  {
+    provide: "IReactionRepository",
+    useClass: ReactionRepository,
+  },
 ];
 
 @Module({
@@ -131,7 +132,8 @@ const repositories = [
       PostEntity,
       InteractionEntity,
       PostMediaEntity,
-      FollowEntity
+      FollowEntity,
+      ReactionEntity
     ])
   ],
   controllers: [

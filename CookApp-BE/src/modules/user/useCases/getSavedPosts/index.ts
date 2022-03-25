@@ -6,6 +6,7 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { SavedPostDTO, GetSavedPostsResponse } from "./getSavedPostsResponse";
 export class GetSavedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -23,6 +24,8 @@ export class GetSavedPostsQueryHandler
     @Inject("IStorageService") private _storageService: IStorageService,
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
+    @Inject("IReactionRepository")
+    private _reactionRepo: IReactionRepository,
   ) { }
   async execute(query: GetSavedPostsQuery): Promise<GetSavedPostsResponse> {
     const { queryOptions, user } = query;
@@ -51,7 +54,7 @@ export class GetSavedPostsQueryHandler
     const postsRes = await Promise.all(
       posts.map(async (item) => {
         const temp = new SavedPostDTO(item);
-        const reaction = await this._postRepo.getReactionByUserId(
+        const reaction = await this._reactionRepo.findById(
           user.id,
           item.post.id
         );

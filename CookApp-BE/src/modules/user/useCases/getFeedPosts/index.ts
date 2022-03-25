@@ -6,8 +6,8 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
-import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { GetPostResponse } from "../getPostById/getPostResponse";
+import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
+import { GetPostResponse } from "../getPostDetail/getPostResponse";
 import { GetFeedPostsResponse } from "./getFeedPostsResponse";
 export class GetFeedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -25,8 +25,8 @@ export class GetFeedPostsQueryHandler
     @Inject("IFeedRepository")
     private _feedRepo: IFeedRepository,
     @Inject("IStorageService") private _storageService: IStorageService,
-    @Inject("IPostRepository")
-    private _postRepo: IPostRepository,
+    @Inject("IReactionRepository")
+    private _reactionRepo: IReactionRepository,
   ) {}
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
@@ -54,7 +54,7 @@ export class GetFeedPostsQueryHandler
     const postsRes = await Promise.all(
       posts.map(async (post) => {
         const temp = new GetPostResponse(post);
-        const reaction = await this._postRepo.getReactionByUserId(
+        const reaction = await this._reactionRepo.findById(
           user.id,
           post.id
         );

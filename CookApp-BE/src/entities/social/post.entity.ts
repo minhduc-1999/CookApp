@@ -38,7 +38,7 @@ export class PostEntity {
     this.interaction = interaction
     this.author = new UserEntity(post?.author)
     this.content = post?.content
-    this.kind = post?.kind
+    this.kind = post?.type
     const images = post?.images.map(image => new PostMediaEntity(image))
     const videos = post?.videos.map(video => new PostMediaEntity(video))
     this.medias = images?.concat(videos)

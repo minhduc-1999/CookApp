@@ -1,6 +1,6 @@
 import { Audit } from "../../domains/audit.domain";
 import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
-import { InteractiveTargetType, PostType } from "../../enums/social.enum";
+import { PostType } from "../../enums/social.enum";
 import _ = require("lodash");
 import { Media } from "./media.domain";
 import { User } from "./user.domain";
@@ -9,26 +9,22 @@ export abstract class PostBase extends Audit implements IInteractable{
 
   constructor(post: Partial<PostBase>) {
     super(post)
-    this.type = post?.type
-    this.numOfComment = post?.numOfComment
-    this.numOfReaction = post?.numOfReaction
+    this.nComments = post?.nComments
+    this.nReactions = post?.nReactions
     this.author = post?.author
     this.content = post?.content
     this.location = post?.location
-    this.type = InteractiveTargetType.POST
   }
 
-  type: InteractiveTargetType;
+  nReactions: number;
 
-  numOfReaction: number;
-
-  numOfComment: number;
+  nComments: number;
 
   author: User;
 
   content: string
 
-  kind: PostType
+  type: PostType
 
   location: string
 
@@ -49,7 +45,7 @@ export class Moment extends PostBase {
     super(post)
     this.images = post.images ?? []
     this.videos = post.videos ?? []
-    this.kind = PostType.MOMENT
+    this.type = PostType.MOMENT
   }
 }
 
@@ -68,7 +64,7 @@ export class Album extends PostBase {
     this.name = post.name
     this.images = post.images ?? []
     this.videos = post.videos ?? []
-    this.kind = PostType.ALBUM
+    this.type = PostType.ALBUM
   }
 }
 
