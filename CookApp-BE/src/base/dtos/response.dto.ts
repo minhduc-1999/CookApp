@@ -41,9 +41,9 @@ export class AuditResponse {
   updatedAt?: number;
 
   constructor(audit: Audit) {
-    this.createdAt = audit?.createdAt.getTime()
+    this.createdAt = audit?.createdAt?.getTime()
     this.id = audit?.id
-    this.updatedAt = audit?.updatedAt.getTime()
+    this.updatedAt = audit?.updatedAt?.getTime()
   }
 }
 

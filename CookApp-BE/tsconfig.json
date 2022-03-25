@@ -14,7 +14,7 @@
       "outDir": "./dist",
       "baseUrl": "./src",
       "allowUnreachableCode": false,
-      "alwaysStrict": true
+      "alwaysStrict": true,
   },
   "include": [
       "src/**/*"

@@ -6,6 +6,7 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { ISavedPostRepository } from "modules/user/interfaces/repositories/savedPost.interface";
 import { DeleteSavedPostRequest } from "./deleteSavedPostRequest";
 
 export class DeleteSavedPostCommand extends BaseCommand {
@@ -20,20 +21,22 @@ export class DeleteSavedPostCommand extends BaseCommand {
 export class DeleteSavedPostCommandHandler implements ICommandHandler<DeleteSavedPostCommand> {
   constructor(
     @Inject("IPostRepository")
-    private _postRepo: IPostRepository
+    private _postRepo: IPostRepository,
+    @Inject("ISavedPostRepository")
+    private _savedPostRepo: ISavedPostRepository
   ) { }
   async execute(command: DeleteSavedPostCommand): Promise<void> {
     const { deleteSavedPostDto, tx, user } = command
 
-    const isExisted = await this._postRepo.isExisted(deleteSavedPostDto.postID)
-    if (!isExisted) {
+    const post = await this._postRepo.getPostById(deleteSavedPostDto.postID)
+    if (!post) {
       throw new NotFoundException(ResponseDTO.fail("Post not found", UserErrorCode.POST_NOT_FOUND))
     }
 
-    const isSaved = await this._postRepo.isSavedPost(deleteSavedPostDto.postID, user)
-    if (!isSaved) {
+    const savedPost = await this._savedPostRepo.find(deleteSavedPostDto.postID, user.id)
+    if (!savedPost) {
       throw new ConflictException(ResponseDTO.fail("Post have not been saved yet", UserErrorCode.POST_NOT_SAVED))
     }
-    await this._postRepo.setTransaction(tx).deleteSavedPost(deleteSavedPostDto.postID, user)
+    await this._savedPostRepo.setTransaction(tx).deleteSavedPost(savedPost)
   }
 }

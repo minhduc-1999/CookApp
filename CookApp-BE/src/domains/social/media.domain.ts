@@ -1,5 +1,5 @@
-import { Audit } from "domains/audit.domain"
-import { IInteractable } from "domains/interfaces/IInteractable.interface"
+import { Audit } from "../../domains/audit.domain"
+import { IInteractable } from "../../domains/interfaces/IInteractable.interface"
 import { MediaType } from "../../enums/social.enum"
 
 export abstract class MediaBase extends Audit implements IInteractable{

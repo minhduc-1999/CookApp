@@ -11,7 +11,7 @@ export class SavedPostDTO {
   post: PostResponse
 
   constructor(savedPost: SavedPost) {
-    this.savedAt = savedPost.savedAt
+    this.savedAt = savedPost.createdAt.getTime()
     this.post = new PostResponse(savedPost.post)
   }
 }

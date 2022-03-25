@@ -4,7 +4,7 @@ import { Media } from "./media.domain";
 import { Account } from "./account.domain";
 import { generateDisplayName } from "../../utils";
 import { Follow } from "./follow.domain";
-import { Post } from "./post.domain";
+import { Post, SavedPost } from "./post.domain";
 import { Reaction } from "./reaction.domain";
 
 
@@ -64,6 +64,13 @@ export class User extends Audit {
       reactor: this,
       target: target,
       type
+    })
+  }
+
+  savePost(target: Post): SavedPost{
+    return new SavedPost({
+      saver: this,
+      post: target
     })
   }
 }

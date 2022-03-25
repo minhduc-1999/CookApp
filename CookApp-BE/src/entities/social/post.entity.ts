@@ -34,7 +34,7 @@ export class PostEntity {
   })
   kind: PostType
 
-  constructor(post: Post, interaction?: InteractionEntity) {
+  constructor(post: Post, interaction: InteractionEntity) {
     this.interaction = interaction
     this.author = new UserEntity(post?.author)
     this.content = post?.content

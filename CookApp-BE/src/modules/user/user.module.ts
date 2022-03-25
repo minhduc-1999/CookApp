@@ -8,6 +8,7 @@ import { FollowEntity } from "entities/social/follow.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
 import { ReactionEntity } from "entities/social/reaction.entity";
+import { SavedPostEntity } from "entities/social/savedPost.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
@@ -26,6 +27,7 @@ import { FollowRepository } from "./adapters/out/repositories/follow.repository"
 import { MediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { ReactionRepository } from "./adapters/out/repositories/reaction.repository";
+import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { NewPostEventHandler } from "./events/propagateNewPost";
 import { CommentService } from "./services/comment.service";
@@ -115,6 +117,10 @@ const repositories = [
     provide: "IReactionRepository",
     useClass: ReactionRepository,
   },
+  {
+    provide: "ISavedPostRepository",
+    useClass: SavedPostRepository,
+  },
 ];
 
 @Module({
@@ -133,7 +139,8 @@ const repositories = [
       InteractionEntity,
       PostMediaEntity,
       FollowEntity,
-      ReactionEntity
+      ReactionEntity,
+      SavedPostEntity
     ])
   ],
   controllers: [

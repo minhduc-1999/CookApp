@@ -1,4 +1,4 @@
-import { Audit } from "domains/audit.domain";
+import { Audit } from "../../domains/audit.domain";
 import { ReactionType } from "enums/social.enum";
 import { Media } from "./media.domain";
 import { Post } from "./post.domain";

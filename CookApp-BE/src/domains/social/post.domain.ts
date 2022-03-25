@@ -70,15 +70,14 @@ export class Album extends PostBase {
 
 export type Post = Album | Moment
 
-export class SavedPost {
-  savedAt: number
+export class SavedPost extends Audit {
   saver: User
   post: Post
 
   constructor(item: Partial<SavedPost>) {
-    this.savedAt = item.savedAt ?? _.now()
-    this.saver = item.saver
-    this.post = item.post
+    super(item)
+    this.saver = item?.saver
+    this.post = item?.post
   }
 }
 
