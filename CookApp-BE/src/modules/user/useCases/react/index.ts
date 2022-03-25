@@ -6,12 +6,12 @@ import { ReactRequest } from "./reactRequest";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ReactResponse } from "./reactResponse";
 import { Reaction } from "domains/social/reaction.domain";
-import { IMediaRepository } from "modules/user/interfaces/repositories/media.interface";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ReactPostEvent } from "modules/notification/events/ReactNotification";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
-import { InteractiveTargetType, ReactionType } from "enums/social.enum";
+import { InteractiveTargetType } from "enums/social.enum";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
+import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(
@@ -31,8 +31,8 @@ export class ReactCommandHandler
   constructor(
     @Inject("IPostService")
     private _postService: IPostService,
-    @Inject("IMediaRepository")
-    private _mediaRepository: IMediaRepository,
+    @Inject("IPostMediaRepository")
+    private _postMediaRepo: IPostMediaRepository,
     private _eventBus: EventBus,
     @Inject("IReactionRepository")
     private _reactionRepo: IReactionRepository
@@ -58,7 +58,7 @@ export class ReactCommandHandler
         }
         break;
       case InteractiveTargetType.MEDIA:
-        const media = await this._mediaRepository.getMedia(reactReq.targetKeyOrID)
+        const media = await this._postMediaRepo.getMedia(reactReq.targetKeyOrID)
         if (!media) {
           throw new NotFoundException(
             ResponseDTO.fail("Media not found")

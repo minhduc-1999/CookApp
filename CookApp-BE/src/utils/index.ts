@@ -107,7 +107,7 @@ export function sleep(ms: number) {
   });
 }
 
-export function inspect(obj: any) {
+export function inspectObj(obj: any) {
     const util = require('util')
     console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }))
 }

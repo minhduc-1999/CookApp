@@ -26,7 +26,7 @@ import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { FollowRepository } from "./adapters/out/repositories/follow.repository";
-import { MediaRepository } from "./adapters/out/repositories/media.repository";
+import { PostMediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { ReactionRepository } from "./adapters/out/repositories/reaction.repository";
 import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
@@ -112,8 +112,8 @@ const repositories = [
     useClass: CommentRepository,
   },
   {
-    provide: "IMediaRepository",
-    useClass: MediaRepository,
+    provide: "PostMediaRepository",
+    useClass: PostMediaRepository,
   },
   {
     provide: "IReactionRepository",
@@ -122,6 +122,10 @@ const repositories = [
   {
     provide: "ISavedPostRepository",
     useClass: SavedPostRepository,
+  },
+  {
+    provide: "IPostMediaRepository",
+    useClass: PostMediaRepository,
   },
 ];
 

@@ -17,7 +17,7 @@ export class PostEntity {
   @JoinColumn({ name: "author_id" })
   author: UserEntity;
 
-  @Column({ name: 'location' })
+  @Column({ name: 'location', nullable: true})
   location: string;
 
   @Column({ name: 'content' })
@@ -34,12 +34,11 @@ export class PostEntity {
   })
   kind: PostType
 
-  constructor(post: Post, interaction: InteractionEntity) {
-    this.interaction = interaction
+  constructor(post: Post, interaction?: InteractionEntity) {
+    this.interaction = interaction ? interaction : new InteractionEntity(post)
     this.author = new UserEntity(post?.author)
     this.content = post?.content
     this.kind = post?.type
-    this.medias = post?.medias.map(image => new PostMediaEntity(image))
     this.location = post?.location
   }
 
@@ -50,7 +49,7 @@ export class PostEntity {
         return new Moment({
           ...audit,
           content: this.content,
-          medias: this.medias?.map(image => image.toDomain()),
+          medias: this.medias?.map(media => media.toDomain()),
           author: this.author.toDomain(),
           location: this.location
         })
@@ -80,9 +79,10 @@ export class PostMediaEntity {
   @Column({ name: 'key', nullable: false })
   key: string
 
-  constructor(media: Media) {
+  constructor(media: Media, interaction?: InteractionEntity) {
     this.key = media?.key
     this.type = media?.type
+    this.interaction = interaction ? interaction : new InteractionEntity(media)
   }
 
   toDomain(): Media {

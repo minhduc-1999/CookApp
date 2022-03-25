@@ -1,17 +1,16 @@
 import { BadRequestException, Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { Album, Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { NewPostEvent } from "modules/notification/events/NewPostNotification";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { Image, Video } from "domains/social/media.domain";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
-import { MediaType } from "enums/social.enum";
+import _ = require("lodash");
+import { IPostService } from "modules/user/services/post.service";
+import { NewPostEvent } from "modules/notification/events/NewPostNotification";
 
 export class CreatePostCommand extends BaseCommand {
   req: CreatePostRequest;
@@ -26,25 +25,26 @@ export class CreatePostCommandHandler
   implements ICommandHandler<CreatePostCommand>
 {
   constructor(
-    @Inject("IPostRepository")
-    private _postRepo: IPostRepository,
-    @Inject("IStorageService")
-    private _storageService: IStorageService,
+    @Inject("IPostService")
+    private _postService: IPostService,
     private _eventBus: EventBus,
   ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { req, user, tx } = command;
-    if (req.images?.length > 0) {
-      req.images = await this._storageService.makePublic(
-        req.images,
-        MediaType.IMAGE
-      );
-    }
+    // if (req.images?.length > 0) {
+    //   req.images = await this._storageService.makePublic(
+    //     req.images,
+    //     MediaType.IMAGE
+    //   );
+    // }
 
     let creatingPost: Post
 
-    const medias = req.images?.map(image => new Image({ key: image }))
-            .concat(req.videos?.map(video => new Video({ key: video })))
+    const medias = _.unionBy(
+      req.images?.map(image => new Image({ key: image })),
+      req.videos?.map(video => new Video({ key: video })),
+      'key'
+    )
 
     switch (req.kind) {
       case "ALBUM": {
@@ -73,8 +73,7 @@ export class CreatePostCommandHandler
       throw new BadRequestException(ResponseDTO.fail("Not enough data to create the post"))
     }
 
-    const result = await this._postRepo.setTransaction(tx).createPost(creatingPost);
-    result.medias = await this._storageService.getDownloadUrls(result.medias)
+    const result = await this._postService.createPost(creatingPost, tx);
     if (req.kind === "MOMENT") {
       this._eventBus.publish(new NewPostEvent(result, user))
     }

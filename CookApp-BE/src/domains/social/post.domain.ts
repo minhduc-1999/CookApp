@@ -64,7 +64,7 @@ export class Album extends PostBase {
   }
 }
 
-export type Post = Album | Moment
+export type Post = Moment
 
 export class SavedPost extends Audit {
   saver: User

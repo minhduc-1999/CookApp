@@ -17,10 +17,21 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     super()
   }
   async createPost(post: Post): Promise<Post> {
+    if (!post) return null
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
-      const interaction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(post))
-      const postEntity = await queryRunner.manager.save<PostEntity>(new PostEntity(post, interaction))
+      const postInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(post))
+
+      const postEntity = await queryRunner.manager.save<PostEntity>(new PostEntity(post, postInteraction))
+      // const mediaEntities = []
+      // for (let media of post.medias) {
+      //   const mediaInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(media))
+      //   const temp = new PostMediaEntity(media, mediaInteraction)
+      //   temp.post = postEntity
+      //   const mediaEntity = await queryRunner.manager.save<PostMediaEntity>(temp)
+      //   mediaEntities.push(mediaEntity)
+      // }
+      // postEntity.medias = mediaEntities
       return postEntity.toDomain()
     }
     return null

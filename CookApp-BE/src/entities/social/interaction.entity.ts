@@ -1,5 +1,6 @@
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { Column, Entity } from 'typeorm';
+import { IInteractable } from 'domains/interfaces/IInteractable.interface';
 
 @Entity({ name: 'interactions' })
 export class InteractionEntity extends AbstractEntity {
@@ -16,7 +17,7 @@ export class InteractionEntity extends AbstractEntity {
   })
   nReactions: number
 
-  constructor(data: Partial<InteractionEntity>) {
+  constructor(data: IInteractable) {
     super(data)
     this.nReactions = data?.nReactions
     this.nComments = data?.nComments
