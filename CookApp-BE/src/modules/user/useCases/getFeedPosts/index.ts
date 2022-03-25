@@ -7,6 +7,7 @@ import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
+import { ISavedPostRepository } from "modules/user/interfaces/repositories/savedPost.interface";
 import { GetPostResponse } from "../getPostDetail/getPostResponse";
 import { GetFeedPostsResponse } from "./getFeedPostsResponse";
 export class GetFeedPostsQuery extends BaseQuery {
@@ -27,6 +28,8 @@ export class GetFeedPostsQueryHandler
     @Inject("IStorageService") private _storageService: IStorageService,
     @Inject("IReactionRepository")
     private _reactionRepo: IReactionRepository,
+    @Inject("ISavedPostRepository")
+    private _savedRepo: ISavedPostRepository
   ) { }
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
@@ -57,9 +60,9 @@ export class GetFeedPostsQueryHandler
           user.id,
           post.id
         );
-        if (reaction) {
-          temp.reaction = reaction.type;
-        }
+        const saved = await this._savedRepo.find(post.id, user.id)
+        temp.reaction = reaction?.type;
+        temp.saved = saved ? true : false
         return temp;
       })
     );

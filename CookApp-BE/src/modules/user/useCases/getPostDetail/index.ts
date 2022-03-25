@@ -22,10 +22,10 @@ export class GetPostDetailQueryHandler
     @Inject("IPostService")
     private _postService: IPostService,
     @Inject("IStorageService")
-    private _storageService: IStorageService
+    private _storageService: IStorageService,
   ) {}
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
-    const [post, reaction] = await this._postService.getPostDetail(query.postId, query.user.id);
+    const [post, reaction, saved] = await this._postService.getPostDetail(query.postId, query.user.id);
     post.images = await this._storageService.getDownloadUrls(post.images);
     if (post.author?.avatar) {
       post.author.avatar = (
@@ -35,6 +35,7 @@ export class GetPostDetailQueryHandler
     const result = new GetPostResponse(post);
 
     result.reaction = reaction && reaction.type 
+    result.saved = saved ? true : false
 
     return result;
   }

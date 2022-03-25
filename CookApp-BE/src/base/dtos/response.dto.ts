@@ -108,7 +108,10 @@ export class PostResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   location: string
 
-  constructor(post: Post) {
+  @ApiResponseProperty({ type: Boolean })
+  saved?: boolean
+
+  constructor(post: Post ) {
     super(post)
     this.author = new AuthorResponse(post?.author)
     this.numOfComment = post?.nComments;

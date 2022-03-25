@@ -18,7 +18,6 @@ export class SavedPostRepository extends BaseRepository implements ISavedPostRep
   }
 
   async savePost(savedPost: SavedPost): Promise<void> {
-    console.log(savedPost)
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       await queryRunner.manager.save<SavedPostEntity>(new SavedPostEntity(savedPost))
@@ -35,10 +34,8 @@ export class SavedPostRepository extends BaseRepository implements ISavedPostRep
   async find(postId: string, userId: string): Promise<SavedPost> {
     const entity = await this._savedPostRepo
       .createQueryBuilder("saved")
-      .innerJoin("saved.post", "post")
-      .innerJoin("saved.user", "user")
-      .where("user.id = :userId", { userId })
-      .andWhere("post.id = :postId", { postId })
+      .where("saved.user_id = :userId", { userId })
+      .andWhere("saved.post_id = :postId", { postId })
       .select(["saved"])
       .getOne()
     return entity?.toDomain()
