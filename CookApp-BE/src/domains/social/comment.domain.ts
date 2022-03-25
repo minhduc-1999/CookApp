@@ -1,13 +1,12 @@
-import { Audit } from "domains/audit.domain";
-import { RecipeStep } from "domains/core/recipeStep.domain";
-import { Post } from "./post.domain";
+import { Audit } from "../../domains/audit.domain";
+import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
+import { Media } from "./media.domain";
 import { User } from "./user.domain";
 
-export type CommentTarget = Post | RecipeStep
 export class Comment extends Audit {
   user: User;
 
-  target: CommentTarget
+  target: IInteractable
 
   content: string;
 
@@ -15,15 +14,17 @@ export class Comment extends Audit {
 
   parent?: Comment;
 
-  numberOfReply: number
+  medias: Media[]
 
+  nReplies: number
   constructor(comment?: Partial<Comment>) {
     super(comment)
     this.user = comment?.user
     this.target = comment?.target
     this.content = comment?.content
     this.replies = comment?.replies
-    this.numberOfReply = comment?.numberOfReply
     this.parent = comment?.parent
+    this.medias = comment?.medias
+    this.nReplies = comment?.nReplies
   }
 }

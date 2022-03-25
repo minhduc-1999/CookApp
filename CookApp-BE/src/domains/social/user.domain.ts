@@ -6,6 +6,8 @@ import { generateDisplayName } from "../../utils";
 import { Follow } from "./follow.domain";
 import { Post, SavedPost } from "./post.domain";
 import { Reaction } from "./reaction.domain";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { Comment } from "./comment.domain";
 
 
 export class User extends Audit {
@@ -58,7 +60,7 @@ export class User extends Audit {
     })
   }
 
-  react(target: Post | Media, type: ReactionType ): Reaction {
+  react(target: IInteractable, type: ReactionType ): Reaction {
     return new Reaction({
       reactor: this,
       target: target,
@@ -72,4 +74,14 @@ export class User extends Audit {
       post: target
     })
   }
+
+  comment(target: IInteractable, content: string, medias?: Media[], replyFor?: Comment): Comment {
+    return new Comment({
+      target: target,
+      parent: replyFor,
+      content,
+      medias,
+      user: this
+    })
+  } 
 }

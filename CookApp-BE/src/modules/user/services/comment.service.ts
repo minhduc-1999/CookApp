@@ -15,6 +15,7 @@ export class CommentService implements ICommentService {
   ) {}
 
   async getCommentBy(commentId: string): Promise<Comment> {
+    if (!commentId) return null
     const comment = await this._commentRepo.getCommentById(commentId);
     if (!comment)
       throw new NotFoundException(

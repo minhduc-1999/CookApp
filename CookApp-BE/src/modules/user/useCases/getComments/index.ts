@@ -4,7 +4,8 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { RecipeStep } from "domains/core/recipeStep.domain";
-import { Comment, CommentTarget } from "domains/social/comment.domain";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { Comment } from "domains/social/comment.domain";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
@@ -40,42 +41,29 @@ export class GetCommentsQueryHandler
     let comments: Comment[] = []
     let totalCount: number = 0
 
-    let target: CommentTarget;
+    let target: IInteractable;
 
-    switch (request.targetType) {
-      case "POST":
-        target = (await this._postService.getPostDetail(request.targetKeyOrID))[0];
-        break;
-      case "RECIPE_STEP":
-        // Check step's existence
-        target = new RecipeStep({id: request.targetKeyOrID})
-        break;
-      default:
-        throw new BadRequestException(ResponseDTO.fail("Target type not found"))
-    }
 
     if (request.replyOf) {
-      await this._commentService.getCommentBy(request.replyOf)
-      comments = await this._commentRepo.getReplies(
-        target,
-        request.replyOf,
-        request
-      );
-      totalCount = await this._commentRepo.getAmountOfReply(
-        query.request.replyOf
-      );
+      const parent = await this._commentService.getCommentBy(request.replyOf);
+      [comments, totalCount] = await this._commentRepo.getReplies(parent, request);
     } else {
-      comments = await this._commentRepo.getComments(
-        target,
-        request
-      );
-      totalCount = await this._commentRepo.getAmountOfComment(
-        target
-      );
+      switch (request.targetType) {
+        case "POST":
+          target = (await this._postService.getPostDetail(request.targetKeyOrID))[0];
+          break;
+        case "RECIPE_STEP":
+          //TODO Check step's existence
+          target = new RecipeStep({ id: request.targetKeyOrID })
+          break;
+        default:
+          throw new BadRequestException(ResponseDTO.fail("Target type not found"))
+      }
+      [comments, totalCount] = await this._commentRepo.getComments(target, request);
     }
 
     for (let comment of comments) {
-      comment.numberOfReply = await this._commentRepo.getAmountOfReply(comment.id);
+      comment.nReplies = await this._commentRepo.countReply(comment.id);
       if (comment.user.avatar) {
         comment.user.avatar = (
           await this._storageService.getDownloadUrls([comment.user.avatar])

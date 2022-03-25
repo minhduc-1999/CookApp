@@ -148,7 +148,7 @@ export class CommentResponse extends AuditResponse {
     this.id = comment?.id
     this.user = new AuthorResponse(comment?.user)
     this.content = comment?.content
-    this.numberOfReply = comment?.numberOfReply
+    this.numberOfReply = comment?.nReplies
   }
 }
 

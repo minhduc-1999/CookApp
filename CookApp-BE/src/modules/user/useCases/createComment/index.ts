@@ -12,6 +12,8 @@ import { CommentPostEvent } from "modules/notification/events/CommentNotificatio
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { Post } from "domains/social/post.domain";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
@@ -41,41 +43,25 @@ export class CreateCommentCommandHandler
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
     const { commentReq, user, tx } = command;
 
-    let comment: Comment
-    let createdComment: Comment
+    let target: IInteractable
 
     switch (commentReq.targetType) {
       case "POST":
-        const [post] = await this._postService.getPostDetail(commentReq.targetKeyOrID);
-        comment = new Comment({
-          content: commentReq.content,
-          user,
-          target: post
-        })
-        this._eventBus.publish(new CommentPostEvent(post, user));
+        [target] = await this._postService.getPostDetail(commentReq.targetKeyOrID);
+        this._eventBus.publish(new CommentPostEvent(target as Post, user));
         break;
       case "RECIPE_STEP":
-        comment = new Comment({
-          content: commentReq.content,
-          user,
-          target: new RecipeStep({ id: commentReq.targetKeyOrID })
-        })
+        target = new RecipeStep({ id: commentReq.targetKeyOrID })
         break;
       default:
         throw new BadRequestException(ResponseDTO.fail("Target type not found"))
     }
 
-    if (commentReq.replyFor) {
-      const parentComment = await this._commentService.getCommentBy(commentReq.replyFor)
-      comment.parent = parentComment
-      createdComment = await this._commentRepo
-        .setTransaction(tx)
-        .createReply(comment);
-    } else {
-      createdComment = await this._commentRepo
-        .setTransaction(tx)
-        .createComment(comment);
-    }
+    const parentComment = await this._commentService.getCommentBy(commentReq.replyFor)
+    let comment = user.comment(target, commentReq.content, null, parentComment)
+    let createdComment = await this._commentRepo
+      .setTransaction(tx)
+      .createComment(comment);
 
     if (!createdComment) {
       throw new InternalServerErrorException()
