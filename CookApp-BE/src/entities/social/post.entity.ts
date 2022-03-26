@@ -9,7 +9,7 @@ import { Audit } from '../../domains/audit.domain';
 @Entity({ name: 'posts' })
 export class PostEntity {
 
-  @OneToOne(() => InteractionEntity, { primary: true })
+  @OneToOne(() => InteractionEntity, it => it.post, { primary: true, cascade: ["update"]})
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 
@@ -17,7 +17,7 @@ export class PostEntity {
   @JoinColumn({ name: "author_id" })
   author: UserEntity;
 
-  @Column({ name: 'location', nullable: true})
+  @Column({ name: 'location', nullable: true })
   location: string;
 
   @Column({ name: 'content' })
@@ -55,6 +55,13 @@ export class PostEntity {
         })
     }
   }
+
+  update(data: Partial<Post>): Partial<PostEntity> {
+    return {
+      content: data.content ?? this.content,
+      location: data.location ?? this.location,
+    }
+  }
 }
 
 @Entity({ name: 'post_medias' })
@@ -89,11 +96,13 @@ export class PostMediaEntity {
     switch (this.type) {
       case MediaType.IMAGE:
         return new Image({
-          key: this.key
+          key: this.key,
+          id: this.interaction && this.interaction.id
         })
       case MediaType.VIDEO:
         return new Video({
-          key: this.key
+          key: this.key,
+          id: this.interaction && this.interaction.id
         })
     }
   }

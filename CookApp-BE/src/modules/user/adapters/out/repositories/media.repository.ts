@@ -7,7 +7,6 @@ import { InteractionEntity } from "entities/social/interaction.entity";
 import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
 import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 import { QueryRunner, Repository } from "typeorm";
-import { inspectObj } from "utils";
 
 @Injectable()
 export class PostMediaRepository extends BaseRepository implements IPostMediaRepository {
@@ -17,11 +16,21 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
   ) {
     super()
   }
+  async getMedias(keys: string[]): Promise<Media[]> {
+    const entities = await this._postMediaRepo
+      .createQueryBuilder("media")
+      .innerJoinAndSelect("media.interaction", "interaction")
+      .where("media.key IN (:...keys)", { keys })
+      .select(["media", "interaction"])
+      .getMany()
+    return entities.map(entity => entity.toDomain())
+  }
   async getMedia(key: string): Promise<Media> {
     const entity = await this._postMediaRepo
       .createQueryBuilder("media")
+      .innerJoinAndSelect("media.interaction", "interaction")
       .where("media.key = :key", { key })
-      .select("media")
+      .select(["media", "interaction"])
       .getOne()
     return entity.toDomain()
   }
@@ -38,12 +47,20 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     return null
   }
 
-  async deleteMedia(object: string): Promise<void> {
-    throw new Error("Method not implemented.");
+  async deleteMedia(media: Media): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.softDelete(InteractionEntity, media.id)
+    }
   }
 
-  async deleteMedias(keys: string[]): Promise<void> {
-    throw new Error("Method not implemented.");
+  async deleteMedias(medias: Media[]): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      for (let media of medias) {
+        await queryRunner.manager.softDelete(InteractionEntity, media.id)
+      }
+    }
   }
 
   async addMedias(medias: Media[], post: Post): Promise<Media[]> {

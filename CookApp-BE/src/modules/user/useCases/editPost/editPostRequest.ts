@@ -13,6 +13,13 @@ export class EditPostRequest {
   @IsOptional()
   content: string;
 
+  @IsNotEmpty()
+  @ApiPropertyOptional({ type: String  })
+  @IsString()
+  @IsMeaningfulString(1)
+  @IsOptional()
+  location?: string;
+
   @ApiPropertyOptional({ type: [String] })
   @IsArray()
   @IsString({ each: true })

@@ -1,11 +1,10 @@
 import { Audit } from "../../domains/audit.domain";
 import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
 import { PostType } from "../../enums/social.enum";
-import _ = require("lodash");
 import { Media } from "./media.domain";
 import { User } from "./user.domain";
 
-export abstract class PostBase extends Audit implements IInteractable{
+export abstract class PostBase extends Audit implements IInteractable {
 
   constructor(post: Partial<PostBase>) {
     super(post)
@@ -29,9 +28,19 @@ export abstract class PostBase extends Audit implements IInteractable{
   location: string
 
   abstract canCreate(): boolean
+
+  abstract update(data: Partial<PostBase>): Partial<PostBase>
 }
 
 export class Moment extends PostBase {
+
+  update(data: Partial<Moment>): Partial<Moment> {
+    return {
+      content: data.content ?? this.content,
+      location: data.location ?? this.location,
+      medias: data.medias ?? this.medias
+    }
+  }
 
   canCreate(): boolean {
     if (!this.content)
@@ -48,6 +57,10 @@ export class Moment extends PostBase {
 }
 
 export class Album extends PostBase {
+
+  update(data: Partial<PostBase>): Partial<PostBase> {
+    throw new Error("Method not implemented.");
+  }
   canCreate(): boolean {
     if (!this.name)
       return false

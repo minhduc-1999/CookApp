@@ -1,7 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { BaseRepository } from "base/repository.base";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 import { InjectRepository } from "@nestjs/typeorm";
 import { PostEntity } from "entities/social/post.entity";
 import { QueryRunner, Repository } from "typeorm";
@@ -21,17 +20,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       const postInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(post))
-
       const postEntity = await queryRunner.manager.save<PostEntity>(new PostEntity(post, postInteraction))
-      // const mediaEntities = []
-      // for (let media of post.medias) {
-      //   const mediaInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(media))
-      //   const temp = new PostMediaEntity(media, mediaInteraction)
-      //   temp.post = postEntity
-      //   const mediaEntity = await queryRunner.manager.save<PostMediaEntity>(temp)
-      //   mediaEntities.push(mediaEntity)
-      // }
-      // postEntity.medias = mediaEntities
       return postEntity.toDomain()
     }
     return null
@@ -52,7 +41,18 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     })
     return postEntities?.map(entity => entity.toDomain())
   }
-  updatePost(post: Post, editPostDto: EditPostRequest): Promise<void> {
-    throw new Error("Method not implemented.");
+  async updatePost(post: Post, data: Partial<Post>): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      const entity = new PostEntity(post)
+      const updateData = entity.update(data)
+      //TODO: interaction not udpate time
+      await queryRunner.manager.createQueryBuilder()
+        .update(InteractionEntity)
+        .set({ updatedAt: new Date() })
+        .where("id = :id", { id: post.id })
+        .execute()
+      await queryRunner.manager.update<PostEntity>(PostEntity, entity, updateData)
+    }
   }
 }

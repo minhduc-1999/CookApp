@@ -1,6 +1,7 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { ResponseDTO } from "base/dtos/response.dto";
+import { Media } from "domains/social/media.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
@@ -13,6 +14,7 @@ import { ISavedPostRepository } from "../interfaces/repositories/savedPost.inter
 export interface IPostService {
   getPostDetail(postId: string, userId?: string): Promise<[Post, Reaction, SavedPost]>;
   createPost(post: Post, tx: ITransaction): Promise<Post>
+  updatePost(post: Post, data: Partial<Post>, tx: ITransaction, deleteMediaKeys?: string[]): Promise<void>
 }
 
 
@@ -25,13 +27,27 @@ export class PostService implements IPostService {
     @Inject("IPostMediaRepository") private _postMediaRepo: IPostMediaRepository,
     @Inject("IStorageService") private _storageService: IStorageService,
   ) { }
+  async updatePost(post: Moment, data: Partial<Moment>, tx: ITransaction, deleteMediaKeys?: string[]): Promise<void> {
+    if (data.medias?.length > 0) {
+      await this._postMediaRepo.setTransaction(tx).addMedias(data.medias, post)
+    }
+    if (deleteMediaKeys?.length > 0) {
+      const deleteMedias = await this._postMediaRepo.getMedias(deleteMediaKeys)
+      if (deleteMedias.length > 0) {
+        await this._postMediaRepo.setTransaction(tx).deleteMedias(deleteMedias)
+      }
+    }
+    await this._postRepo.setTransaction(tx).updatePost(post, data)
+  }
 
   async createPost(post: Moment, tx: ITransaction): Promise<Moment> {
     const postResult = await this._postRepo.setTransaction(tx).createPost(post)
     if (post.medias.length > 0) {
       let medias = await this._postMediaRepo.setTransaction(tx).addMedias(post.medias, postResult)
-      medias = await this._storageService.getDownloadUrls(medias)
-      postResult.medias = medias
+      if (medias.length > 0) {
+        medias = await this._storageService.getDownloadUrls(medias)
+        postResult.medias = medias
+      }
     }
     return postResult
   }
