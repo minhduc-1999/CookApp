@@ -24,31 +24,14 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       .createQueryBuilder("post")
       .innerJoinAndSelect("post.interaction", "interaction")
       .innerJoinAndSelect("post.author", "author")
+      .innerJoinAndSelect("post.medias", "media")
+      .innerJoinAndSelect("media.interaction", "mediaInter")
       .where("author.id = :authorId", { authorId })
+      .select(["post", "interaction", "media", "mediaInter"])
       .skip(query.limit * query.offset)
       .limit(query.limit)
       .getManyAndCount()
     return [entities.map(entity => entity.toDomain()), total]
-  }
-
-  createFollower(userId: string, targetId: string): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-
-  deleteFollower(userId: string, targetId: string): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-
-  isFollowed(sourceId: string, targetId: string): Promise<boolean> {
-    throw new Error("Method not implemented.");
-  }
-
-  getFollowers(userId: string): Promise<string[]> {
-    throw new Error("Method not implemented.");
-  }
-
-  getFollowing(userId: string): Promise<string[]> {
-    throw new Error("Method not implemented.");
   }
 
   async getWall(userId: string): Promise<User> {

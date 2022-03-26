@@ -6,7 +6,7 @@ import { MetaDTO } from "./responseMeta.dto";
 import { Comment } from "domains/social/comment.domain"
 import { Food } from "domains/core/food.domain";
 import { Media } from "domains/social/media.domain";
-import { PostType, ReactionType, Sex } from "enums/social.enum";
+import { MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 
 export class ResponseDTO<T> {
@@ -54,9 +54,13 @@ export class MediaResponse {
   @ApiResponseProperty({ type: String })
   url: string
 
+  @ApiResponseProperty({ enum: MediaType })
+  type: MediaType
+
   constructor(media: Media) {
     this.key = media?.key
     this.url = media?.url
+    this.type = media?.type
   }
 }
 

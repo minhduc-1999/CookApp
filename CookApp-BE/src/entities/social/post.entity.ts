@@ -9,7 +9,7 @@ import { Audit } from '../../domains/audit.domain';
 @Entity({ name: 'posts' })
 export class PostEntity {
 
-  @OneToOne(() => InteractionEntity, it => it.post, { primary: true, cascade: ["update"]})
+  @OneToOne(() => InteractionEntity, it => it.post, { primary: true })
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 

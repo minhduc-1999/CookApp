@@ -33,8 +33,19 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       .innerJoinAndSelect("feed.post", "post")
       .innerJoinAndSelect("post.author", "author")
       .innerJoinAndSelect("post.interaction", "interaction")
+      .innerJoinAndSelect("post.medias", "media")
+      .innerJoinAndSelect("media.interaction", "mediaInter")
       .where("feed.user_id = :userId", { userId: user.id })
-      .select(["feed", "post", "interaction", "author.id", "author.displayName", "author.avatar"])
+      .select([
+        "feed",
+        "post",
+        "interaction", 
+        "author.id", 
+        "author.displayName", 
+        "author.avatar",
+        "media",
+        "mediaInter"
+      ])
       .skip(query.limit * query.offset)
       .limit(query.limit)
       .getManyAndCount()

@@ -30,8 +30,10 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       .createQueryBuilder("post")
       .innerJoinAndSelect("post.interaction", "interaction")
       .innerJoinAndSelect("post.author", "author")
+      .innerJoinAndSelect("post.medias", "media")
+      .innerJoinAndSelect("media.interaction", "mediaInter")
       .where("post.id = :id", { id: postId })
-      .select(["post", "interaction", "author"])
+      .select(["post", "interaction", "author", "media", "mediaInter"])
       .getOne()
     return postEntity?.toDomain()
   }
