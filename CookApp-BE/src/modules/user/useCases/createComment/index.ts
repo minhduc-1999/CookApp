@@ -50,11 +50,11 @@ export class CreateCommentCommandHandler
 
     switch (commentReq.targetType) {
       case InteractiveTargetType.POST:
-        [target] = await this._postService.getPostDetail(commentReq.targetKeyOrID);
+        [target] = await this._postService.getPostDetail(commentReq.targetId);
         this._eventBus.publish(new CommentPostEvent(target as Post, user));
         break;
       case InteractiveTargetType.POST_MEDIA:
-        target = await this._postMediaRepo.getMedia(commentReq.targetKeyOrID)
+        target = await this._postMediaRepo.getMedia(commentReq.targetId)
         if (!target) {
           throw new NotFoundException(
             ResponseDTO.fail("Media not found")
@@ -62,7 +62,7 @@ export class CreateCommentCommandHandler
         }
         break;
       case InteractiveTargetType.RECIPE_STEP:
-        target = new RecipeStep({ id: commentReq.targetKeyOrID })
+        target = new RecipeStep({ id: commentReq.targetId })
         break;
       default:
         throw new BadRequestException(ResponseDTO.fail("Target type not valid"))

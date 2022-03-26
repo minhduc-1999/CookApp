@@ -46,13 +46,13 @@ export class ReactCommandHandler
 
     switch (reactReq.targetType) {
       case InteractiveTargetType.POST:
-        [target] = await this._postService.getPostDetail(reactReq.targetKeyOrID);
+        [target] = await this._postService.getPostDetail(reactReq.targetId);
         eventCallback = () => {
           this._eventBus.publish(new ReactPostEvent(target as Post, user));
         }
         break;
       case InteractiveTargetType.POST_MEDIA:
-        target = await this._postMediaRepo.getMedia(reactReq.targetKeyOrID)
+        target = await this._postMediaRepo.getMedia(reactReq.targetId)
         if (!target) {
           throw new NotFoundException(
             ResponseDTO.fail("Media not found")

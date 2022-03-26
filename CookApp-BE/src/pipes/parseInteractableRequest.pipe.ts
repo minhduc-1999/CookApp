@@ -12,7 +12,7 @@ export class ParseInteractableRequestPipe<T extends IInteractiveRequest> impleme
     switch (obj.targetType) {
       case InteractiveTargetType.POST:
       case InteractiveTargetType.RECIPE_STEP:
-        if (!isUUID(obj.targetKeyOrID)) {
+        if (!isUUID(obj.targetId)) {
           throw new BadRequestException(ResponseDTO.fail("Target ID not valid", UserErrorCode.INVALID_ID))
         }
         break;

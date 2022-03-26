@@ -5,8 +5,8 @@ import { InteractiveTargetType } from "enums/social.enum";
 
 export class CreateCommentRequest implements IInteractiveRequest{
   @ApiProperty({type: String})
-  @IsString()
-  targetKeyOrID: string;
+  @IsUUID()
+  targetId: string;
 
   @IsString()
   @IsNotEmpty()

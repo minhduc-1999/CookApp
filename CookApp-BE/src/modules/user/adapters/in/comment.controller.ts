@@ -16,7 +16,6 @@ import { CreateCommentResponse } from "modules/user/useCases/createComment/creat
 import { GetCommentsQuery } from "modules/user/useCases/getComments";
 import { GetCommentsRequest } from "modules/user/useCases/getComments/getCommentsRequest";
 import { GetCommentsResponse } from "modules/user/useCases/getComments/getCommentsResponse";
-import { ParseInteractableRequestPipe } from "pipes/parseInteractableRequest.pipe";
 import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/comments")
@@ -30,7 +29,7 @@ export class CommentController {
   @ApiOKResponseCustom(CreateCommentResponse, "Create comment successfully")
   @HttpRequestTransaction()
   async createComment(
-    @Body(new ParseInteractableRequestPipe()) body: CreateCommentRequest,
+    @Body() body: CreateCommentRequest,
     @UserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<CreateCommentResponse>> {
@@ -48,7 +47,7 @@ export class CommentController {
     "Get post's comments successfully"
   )
   async getPostCommentsPosts(
-    @Query(new ParseRequestPipe<typeof GetCommentsRequest>(), new ParseInteractableRequestPipe()) query: GetCommentsRequest,
+    @Query(new ParseRequestPipe<typeof GetCommentsRequest>()) query: GetCommentsRequest,
     @UserReq() user: User,
   ): Promise<Result<GetCommentsResponse>> {
     const getCommentsQuery = new GetCommentsQuery(user, query);

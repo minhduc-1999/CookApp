@@ -54,14 +54,14 @@ export class GetCommentsQueryHandler
     } else {
       switch (request.targetType) {
         case InteractiveTargetType.POST:
-          [target] = await this._postService.getPostDetail(request.targetKeyOrID)
+          [target] = await this._postService.getPostDetail(request.targetId)
           break;
         case InteractiveTargetType.RECIPE_STEP:
           //TODO Check step's existence
-          target = new RecipeStep({ id: request.targetKeyOrID })
+          target = new RecipeStep({ id: request.targetId })
           break;
         case InteractiveTargetType.POST_MEDIA:
-          target = await this._postMediaRepo.getMedia(request.targetKeyOrID)
+          target = await this._postMediaRepo.getMedia(request.targetId)
           if (!target) {
             throw new NotFoundException(
               ResponseDTO.fail("Media not found")

@@ -13,7 +13,6 @@ import { User } from "domains/social/user.domain";
 import { ReactCommand } from "modules/user/useCases/react";
 import { ReactRequest } from "modules/user/useCases/react/reactRequest";
 import { ReactResponse } from "modules/user/useCases/react/reactResponse";
-import { ParseInteractableRequestPipe } from "pipes/parseInteractableRequest.pipe";
 
 @Controller("users/reaction")
 @ApiTags("User/Reaction")
@@ -27,7 +26,7 @@ export class ReactionController {
   @ApiCreatedResponseCustom(ReactResponse, "Update react status successfully")
   async reactPost(
     @UserReq() user: User,
-    @Body(new ParseInteractableRequestPipe()) body: ReactRequest,
+    @Body() body: ReactRequest,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<ReactResponse>> {
     const reactCommand = new ReactCommand(tx, user, body);

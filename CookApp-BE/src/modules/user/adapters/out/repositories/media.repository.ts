@@ -16,30 +16,22 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
   ) {
     super()
   }
-  async getMediaById(id: string, postId: string): Promise<Media> {
-    const entity = await this._postMediaRepo
-      .createQueryBuilder("media")
-      .innerJoinAndSelect("media.interaction", "interaction")
-      .where("media.id = :id", { id })
-      .andWhere("media.post_id = :postId", { postId })
-      .select(["media", "interaction"])
-      .getOne()
-    return entity?.toDomain()
-  }
-  async getMedias(keys: string[]): Promise<Media[]> {
+
+  async getMedias(ids: string[]): Promise<Media[]> {
     const entities = await this._postMediaRepo
       .createQueryBuilder("media")
       .innerJoinAndSelect("media.interaction", "interaction")
-      .where("media.key IN (:...keys)", { keys })
+      .where("media.id IN (:...ids)", { ids })
       .select(["media", "interaction"])
       .getMany()
     return entities?.map(entity => entity.toDomain())
   }
-  async getMedia(key: string): Promise<Media> {
+
+  async getMedia(id: string): Promise<Media> {
     const entity = await this._postMediaRepo
       .createQueryBuilder("media")
       .innerJoinAndSelect("media.interaction", "interaction")
-      .where("media.key = :key", { key })
+      .where("media.id = :id", { id })
       .select(["media", "interaction"])
       .getOne()
     return entity?.toDomain()
