@@ -1,10 +1,9 @@
-import { BadRequestException, Inject, InternalServerErrorException } from "@nestjs/common";
+import { BadRequestException, Inject, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
 import { CreateCommentRequest } from "./createCommentRequest";
 import { CreateCommentResponse } from "./createCommentResponse";
-import { Comment } from "domains/social/comment.domain";
 import { ICommentService } from "modules/user/services/comment.service";
 import { IPostService } from "modules/user/services/post.service";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
@@ -14,6 +13,8 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Post } from "domains/social/post.domain";
+import { InteractiveTargetType } from "enums/social.enum";
+import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
@@ -37,6 +38,8 @@ export class CreateCommentCommandHandler
     @Inject("ICommentService")
     private _commentService: ICommentService,
     private _eventBus: EventBus,
+    @Inject("IPostMediaRepository")
+    private _postMediaRepo: IPostMediaRepository,
     @Inject("IPostService")
     private _postService: IPostService
   ) { }
@@ -46,15 +49,23 @@ export class CreateCommentCommandHandler
     let target: IInteractable
 
     switch (commentReq.targetType) {
-      case "POST":
+      case InteractiveTargetType.POST:
         [target] = await this._postService.getPostDetail(commentReq.targetKeyOrID);
         this._eventBus.publish(new CommentPostEvent(target as Post, user));
         break;
-      case "RECIPE_STEP":
+      case InteractiveTargetType.POST_MEDIA:
+        target = await this._postMediaRepo.getMedia(commentReq.targetKeyOrID)
+        if (!target) {
+          throw new NotFoundException(
+            ResponseDTO.fail("Media not found")
+          );
+        }
+        break;
+      case InteractiveTargetType.RECIPE_STEP:
         target = new RecipeStep({ id: commentReq.targetKeyOrID })
         break;
       default:
-        throw new BadRequestException(ResponseDTO.fail("Target type not found"))
+        throw new BadRequestException(ResponseDTO.fail("Target type not valid"))
     }
 
     const parentComment = await this._commentService.getCommentBy(commentReq.replyFor)

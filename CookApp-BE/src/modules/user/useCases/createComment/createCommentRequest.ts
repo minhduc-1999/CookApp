@@ -19,5 +19,5 @@ export class CreateCommentRequest {
 
   @ApiProperty({ enum: InteractiveTargetType })
   @IsEnum(InteractiveTargetType)
-  targetType: "POST" | "RECIPE_STEP" | "MEDIA"
+  targetType: InteractiveTargetType 
 }

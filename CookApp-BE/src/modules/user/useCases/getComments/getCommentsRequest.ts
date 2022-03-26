@@ -4,13 +4,13 @@ import { IsEnum, IsOptional, IsString, IsUUID } from "class-validator";
 import { InteractiveTargetType } from "enums/social.enum";
 
 export class GetCommentsRequest extends PageOptionsDto {
-  @ApiProperty({type: String})
+  @ApiProperty({ type: String })
   @IsString()
   targetKeyOrID: string;
 
   @ApiProperty({ enum: InteractiveTargetType })
   @IsEnum(InteractiveTargetType)
-  targetType: "POST" | "RECIPE_STEP" | "MEDIA"
+  targetType: InteractiveTargetType
 
   @IsUUID()
   @IsOptional()

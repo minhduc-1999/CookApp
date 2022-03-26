@@ -1,7 +1,7 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { Media } from "domains/social/media.domain";
+import { isUUID } from "class-validator";
 import { Reaction } from "domains/social/reaction.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
@@ -53,6 +53,11 @@ export class PostService implements IPostService {
   }
 
   async getPostDetail(postId: string, userId?: string): Promise<[Post, Reaction, SavedPost]> {
+    if (!isUUID(postId)) {
+      throw new NotFoundException(
+        ResponseDTO.fail("Post ID not valid", UserErrorCode.INVALID_ID)
+      );
+    }
 
     const post = await this._postRepo.getPostById(postId);
 
