@@ -9,5 +9,6 @@ export interface IPostMediaRepository {
   deleteMedias(media: Media[]): Promise<void>
   addMedias(medias: Media[], post: Post): Promise<Media[]>
   getMedia(key: string): Promise<Media>
+  getMediaById(id: string, postId: string): Promise<Media>
   getMedias(keys: string[]): Promise<Media[]>
 }

@@ -19,10 +19,18 @@ export class CommentRepository
   ) {
     super()
   }
+  async countComments(target: IInteractable): Promise<number> {
+    const total = await this._commentRepo
+      .createQueryBuilder("comment")
+      .where("comment.target_id = :targetId", { targetId: target.id })
+      .getCount()
+    return total
+  }
+
   async getReplies(parent: Comment, queryOpt: PageOptionsDto): Promise<[Comment[], number]> {
     const [entities, total] = await this._commentRepo
       .createQueryBuilder("comment")
-      .where("parent_id = :parentId", { parentId: parent.id })
+      .where("comment.parent_id = :parentId", { parentId: parent.id })
       .select(["comment"])
       .skip(queryOpt.limit * queryOpt.offset)
       .limit(queryOpt.limit)
@@ -33,7 +41,7 @@ export class CommentRepository
   async countReply(commentId: string): Promise<number> {
     const total = await this._commentRepo
       .createQueryBuilder("comment")
-      .where("parent_id = :commentId", { commentId })
+      .where("comment.parent_id = :commentId", { commentId })
       .getCount()
     return total
   }

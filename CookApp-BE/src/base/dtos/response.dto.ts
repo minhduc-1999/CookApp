@@ -50,6 +50,9 @@ export class AuditResponse {
 
 export class MediaResponse {
   @ApiResponseProperty({ type: String })
+  id: string
+
+  @ApiResponseProperty({ type: String })
   key: string
 
   @ApiResponseProperty({ type: String })
@@ -58,12 +61,15 @@ export class MediaResponse {
   @ApiResponseProperty({ enum: MediaType })
   type: MediaType
 
-  @ApiResponseProperty({ enum: ReactionType }) reaction?: ReactionType
+  @ApiResponseProperty({ enum: ReactionType })
+  reaction?: ReactionType
 
-  constructor(media: Media) {
+  constructor(media: Media, reaction?: Reaction) {
     this.key = media?.key
     this.url = media?.url
     this.type = media?.type
+    this.id = media?.id
+    this.reaction = reaction?.type
   }
 }
 

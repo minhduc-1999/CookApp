@@ -12,5 +12,6 @@ export interface ICommentRepository {
     query: PageOptionsDto
   ): Promise<[Comment[], number]>;
   countReply(commentId: string): Promise<number>
+  countComments(target: IInteractable): Promise<number>
   getReplies(parent: Comment, queryOpt: PageOptionsDto): Promise<[Comment[], number]>
 }
