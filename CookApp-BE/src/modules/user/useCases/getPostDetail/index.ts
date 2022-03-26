@@ -32,10 +32,8 @@ export class GetPostDetailQueryHandler
         await this._storageService.getDownloadUrls([post.author.avatar])
       )[0];
     }
-    const result = new GetPostResponse(post);
 
-    result.reaction = reaction && reaction.type 
-    result.saved = saved ? true : false
+    const result = new GetPostResponse(post, reaction, saved ? true : false);
 
     return result;
   }

@@ -55,14 +55,12 @@ export class GetFeedPostsQueryHandler
 
     const postsRes = await Promise.all(
       posts.map(async (post) => {
-        const temp = new GetPostResponse(post);
         const reaction = await this._reactionRepo.findById(
           user.id,
           post.id
         );
         const saved = await this._savedRepo.find(post.id, user.id)
-        temp.reaction = reaction?.type;
-        temp.saved = saved ? true : false
+        const temp = new GetPostResponse(post, reaction, saved ? true : false);
         return temp;
       })
     );

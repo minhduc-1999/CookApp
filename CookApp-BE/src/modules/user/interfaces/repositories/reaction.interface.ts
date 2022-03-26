@@ -6,4 +6,5 @@ export interface IReactionRepository {
   create(reaction: Reaction): Promise<void>;
   delete(reaction: Reaction): Promise<void>;
   findById(userId: string, targetId: string): Promise<Reaction>;
+  findByIds(userId: string, targetIds: string[]): Promise<Reaction[]>;
 }

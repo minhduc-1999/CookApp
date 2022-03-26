@@ -8,6 +8,7 @@ import { Food } from "domains/core/food.domain";
 import { Media } from "domains/social/media.domain";
 import { MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
+import { Reaction } from "domains/social/reaction.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -56,6 +57,8 @@ export class MediaResponse {
 
   @ApiResponseProperty({ enum: MediaType })
   type: MediaType
+
+  @ApiResponseProperty({ enum: ReactionType }) reaction?: ReactionType
 
   constructor(media: Media) {
     this.key = media?.key
@@ -112,24 +115,25 @@ export class PostResponse extends AuditResponse {
   @ApiResponseProperty({ type: Boolean })
   saved?: boolean
 
-  constructor(post: Post ) {
+  constructor(post: Post, reaction?: Reaction, saved?: boolean) {
     super(post)
     this.author = new AuthorResponse(post?.author)
     this.numOfComment = post?.nComments;
     this.numOfReaction = post?.nReactions;
     this.kind = post?.type
     this.location = post?.location
+    this.medias = post?.medias.map(media => new MediaResponse(media));
+    this.reaction = reaction?.type
+    this.saved = saved
     switch (post?.type) {
       case PostType.ALBUM:
         const album = post as Album
         this.name = album?.name
-        this.medias = album?.medias.map(image => new MediaResponse(image));
-        ;
+          ;
         break;
       case PostType.MOMENT:
         const moment = post as Moment
         this.content = moment?.content
-        this.medias = moment?.medias.map(image => new MediaResponse(image));
         break;
     }
   }
@@ -211,7 +215,7 @@ export class MomentResponse extends AuditResponse {
   constructor(post: Moment) {
     super(post)
     this.content = post?.content
-    this.medias = post?.medias.map(image => new MediaResponse(image));
+    this.medias = post?.medias.map(media => new MediaResponse(media));
     this.author = new AuthorResponse(post?.author)
     this.numOfReaction = post?.nReactions
     this.numOfComment = post?.nComments
@@ -240,7 +244,7 @@ export class AlbumResponse extends AuditResponse {
   constructor(post: Album) {
     super(post)
     this.name = post?.name
-    this.medias = post?.medias.map(image => new MediaResponse(image));
+    this.medias = post?.medias.map(media => new MediaResponse(media));
     this.author = new AuthorResponse(post?.author)
     this.numOfReaction = post?.nReactions
     this.numOfComment = post?.nComments

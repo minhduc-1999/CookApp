@@ -41,4 +41,15 @@ export class ReactionRepository extends BaseRepository implements IReactionRepos
     return entity?.toDomain()
   }
 
+  async findByIds(userId: string, targetIds: string[]): Promise<Reaction[]> {
+    const entities = await this._reactionRepo
+      .createQueryBuilder("reaction")
+      .innerJoin("reaction.user", "user")
+      .innerJoin("reaction.target", "target")
+      .where("user.id = :userId", { userId })
+      .andWhere("target.id IN (:...targetIds)", { targetIds })
+      .select(["reaction"])
+      .getMany()
+    return entities?.map(entity => entity.toDomain())
+  }
 }
