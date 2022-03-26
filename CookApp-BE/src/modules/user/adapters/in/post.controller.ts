@@ -24,8 +24,6 @@ import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest"
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
 import { GetPostDetailQuery } from "modules/user/useCases/getPostDetail";
 import { GetPostResponse } from "modules/user/useCases/getPostDetail/getPostResponse";
-import { GetPostMediaQuery } from "modules/user/useCases/getPostMedia";
-import { GetPostMediaRequest } from "modules/user/useCases/getPostMedia/getPostMediaRequest";
 import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
 import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";
@@ -63,21 +61,6 @@ export class PostController {
     const query = new GetPostDetailQuery(user, postId);
     const post = await this._queryBus.execute(query);
     return Result.ok(post, { messages: ["Get post successfully"] });
-  }
-
-  @Get(":postId/media")
-  @ApiFailResponseCustom()
-  @ApiCreatedResponseCustom(GetPostMediaRequest, "Get post media successfully")
-  @ApiNotFoundResponse({ description: "Media not found" })
-  async getPostMedia(
-    @Query(new ParseRequestPipe<typeof GetPostMediaRequest>()) urlQuery: GetPostMediaRequest,
-    @Param("postId", ParseUUIDPipe) postId: string,
-    @UserReq() user: User
-  ): Promise<Result<GetPostResponse>> {
-    urlQuery.postId = postId
-    const query = new GetPostMediaQuery(user, urlQuery);
-    const media = await this._queryBus.execute(query);
-    return Result.ok(media, { messages: ["Get post media successfully"] });
   }
 
   @Patch(":postId")

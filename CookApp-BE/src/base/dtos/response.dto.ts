@@ -64,12 +64,16 @@ export class MediaResponse {
   @ApiResponseProperty({ enum: ReactionType })
   reaction?: ReactionType
 
-  constructor(media: Media, reaction?: Reaction) {
+  @ApiResponseProperty({ enum: Number })
+  numberOfComment?: number
+
+  constructor(media: Media, reaction?: Reaction, nComents?: number) {
     this.key = media?.key
     this.url = media?.url
     this.type = media?.type
     this.id = media?.id
     this.reaction = reaction?.type
+    this.numberOfComment = nComents
   }
 }
 
