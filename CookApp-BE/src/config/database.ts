@@ -12,4 +12,6 @@ export default {
   entities: [path.join(__dirname, '../**/**.entity{.ts,.js}')],
   synchronize: false,
   logging: UtilsService.getConfig('DB_LOGGING', 'error'),
+  ssl: UtilsService.getConfig("APP_ENV") === 'production' ||
+    UtilsService.getConfig("APP_ENV") == 'staging' ? { rejectUnauthorized: false } : false
 };

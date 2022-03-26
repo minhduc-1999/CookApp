@@ -11,6 +11,7 @@ dotenv.config({
 for (const envName of Object.keys(process.env)) {
     process.env[envName] = process.env[envName].replace(/\\n/g, '\n');
 }
+
 module.exports = {
     type: "postgres",
     host: process.env.DB_HOST,
@@ -21,4 +22,6 @@ module.exports = {
     namingStrategy: new SnakeNamingStrategy(),
     entities: ['src/**/*.entity{.ts,.js}'],
     migrations: ['src/migrations/*{.ts,.js}'],
+    ssl: process.env.APP_ENV === 'production' || 
+      process.env.APP_ENV === 'staging' ? { rejectUnauthorized: false } : false
 };
