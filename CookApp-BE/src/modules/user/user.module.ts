@@ -4,7 +4,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AccountEntity } from "entities/social/account.entity";
-import { CommentEntity } from "entities/social/comment.entity";
+import { CommentEntity, CommentMediaEntity } from "entities/social/comment.entity";
 import { FeedEntity } from "entities/social/feed.entity";
 import { FollowEntity } from "entities/social/follow.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
@@ -24,6 +24,7 @@ import { ReactionController } from "./adapters/in/reaction.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
+import { CommentMediaRepository } from "./adapters/out/repositories/commentMedia.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { FollowRepository } from "./adapters/out/repositories/follow.repository";
 import { PostMediaRepository } from "./adapters/out/repositories/media.repository";
@@ -127,6 +128,10 @@ const repositories = [
     provide: "IPostMediaRepository",
     useClass: PostMediaRepository,
   },
+  {
+    provide: "ICommentMediaRepository",
+    useClass: CommentMediaRepository,
+  },
 ];
 
 @Module({
@@ -148,7 +153,8 @@ const repositories = [
       ReactionEntity,
       SavedPostEntity,
       FeedEntity,
-      CommentEntity
+      CommentEntity,
+      CommentMediaEntity
     ])
   ],
   controllers: [

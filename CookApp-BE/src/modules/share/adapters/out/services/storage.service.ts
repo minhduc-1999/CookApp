@@ -9,7 +9,7 @@ import {
   getNameFromPath,
 } from "utils";
 import { IStorageProvider } from "./provider.service";
-import { Media } from "domains/social/media.domain";
+import { CommentMedia } from "domains/social/media.domain";
 import { MediaType } from "enums/social.enum";
 
 export interface IStorageService {
@@ -20,9 +20,9 @@ export interface IStorageService {
     userId: string
   ): Promise<PreSignedLinkResponse[]>;
   makePublic(objectNames: string[], mediaType: MediaType): Promise<string[]>;
-  getDownloadUrls(mediaArr: Media[]): Promise<Media[]>;
+  getDownloadUrls(mediaArr: CommentMedia[]): Promise<CommentMedia[]>;
   replaceFiles(
-    oldMediaArr: Media[],
+    oldMediaArr: CommentMedia[],
     newKeys: string[],
     mediaType: MediaType
   ): Promise<string[]>;
@@ -77,7 +77,7 @@ export class FireBaseService implements IStorageService {
   }
 
   async replaceFiles(
-    oldMediaArr: Media[],
+    oldMediaArr: CommentMedia[],
     newObjects: string[],
     mediaType: MediaType
   ): Promise<string[]> {
@@ -127,7 +127,7 @@ export class FireBaseService implements IStorageService {
     });
   }
 
-  async getDownloadUrls(mediaArr: Media[]): Promise<Media[]> {
+  async getDownloadUrls(mediaArr: CommentMedia[]): Promise<CommentMedia[]> {
     if (!mediaArr) return []
     return mediaArr.map(
       (media) => {

@@ -53,9 +53,6 @@ export class MediaResponse {
   id: string
 
   @ApiResponseProperty({ type: String })
-  key: string
-
-  @ApiResponseProperty({ type: String })
   url: string
 
   @ApiResponseProperty({ enum: MediaType })
@@ -68,7 +65,6 @@ export class MediaResponse {
   numberOfComment?: number
 
   constructor(media: Media, reaction?: Reaction, nComents?: number) {
-    this.key = media?.key
     this.url = media?.url
     this.type = media?.type
     this.id = media?.id
@@ -159,12 +155,16 @@ export class CommentResponse extends AuditResponse {
   @ApiResponseProperty({ type: Number })
   numberOfReply: number
 
+  @ApiResponseProperty({ type: [MediaResponse] })
+  medias: MediaResponse[]
+
   constructor(comment: Comment) {
     super(comment)
     this.id = comment?.id
     this.user = new AuthorResponse(comment?.user)
     this.content = comment?.content
     this.numberOfReply = comment?.nReplies
+    this.medias = comment.medias?.map(media => new MediaResponse(media))
   }
 }
 

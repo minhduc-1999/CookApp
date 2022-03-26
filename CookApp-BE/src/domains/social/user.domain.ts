@@ -1,6 +1,6 @@
 import { Audit } from "../../domains/audit.domain";
 import { ReactionType, Sex } from "../../enums/social.enum";
-import { Media } from "./media.domain";
+import { CommentMedia } from "./media.domain";
 import { Account } from "./account.domain";
 import { generateDisplayName } from "../../utils";
 import { Follow } from "./follow.domain";
@@ -13,7 +13,7 @@ import { Comment } from "./comment.domain";
 export class User extends Audit {
   id: string 
 
-  avatar?: Media;
+  avatar?: CommentMedia;
 
   displayName?: string;
 
@@ -75,7 +75,7 @@ export class User extends Audit {
     })
   }
 
-  comment(target: IInteractable, content: string, medias?: Media[], replyFor?: Comment): Comment {
+  comment(target: IInteractable, content: string, medias?: CommentMedia[], replyFor?: Comment): Comment {
     return new Comment({
       target: target,
       parent: replyFor,

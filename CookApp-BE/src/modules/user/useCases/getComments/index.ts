@@ -76,6 +76,7 @@ export class GetCommentsQueryHandler
 
     for (let comment of comments) {
       comment.nReplies = await this._commentRepo.countReply(comment.id);
+      comment.medias = await this._storageService.getDownloadUrls(comment.medias)
       if (comment.user.avatar) {
         comment.user.avatar = (
           await this._storageService.getDownloadUrls([comment.user.avatar])

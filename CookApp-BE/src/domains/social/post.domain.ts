@@ -1,7 +1,7 @@
 import { Audit } from "../../domains/audit.domain";
 import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
 import { PostType } from "../../enums/social.enum";
-import { Media } from "./media.domain";
+import { CommentMedia } from "./media.domain";
 import { User } from "./user.domain";
 
 export abstract class PostBase extends Audit implements IInteractable {
@@ -48,7 +48,7 @@ export class Moment extends PostBase {
     return true
   }
 
-  medias?: Media[]
+  medias?: CommentMedia[]
   constructor(post: Partial<Moment>) {
     super(post)
     this.medias = post.medias ?? []
@@ -67,7 +67,7 @@ export class Album extends PostBase {
     return true
   }
   name: string
-  medias?: Media[]
+  medias?: CommentMedia[]
 
   constructor(post: Partial<Album>) {
     super(post)

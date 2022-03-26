@@ -42,5 +42,10 @@ heroku config:set -a tastify-be NEO4J_PORT=$NEO4J_PORT
 heroku config:set -a tastify-be NEO4J_USERNAME=$NEO4J_USERNAME
 heroku config:set -a tastify-be NEO4J_PASSWORD=$NEO4J_PASSWORD
 heroku config:set -a tastify-be NEO4J_DATABASE=$NEO4J_DATABASE
+heroku config:set -a tastify-be DB_HOST=$DB_HOST
+heroku config:set -a tastify-be DB_PORT=$DB_PORT
+heroku config:set -a tastify-be DB_APP_USER=$DB_APP_USER
+heroku config:set -a tastify-be DB_APP_PASS=$DB_APP_PASS
+heroku config:set -a tastify-be DB_NAME=$DB_NAME
 
 heroku buildpacks:add -a tastify-be heroku/nodejs

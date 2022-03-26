@@ -31,6 +31,7 @@ export class CreatePostCommandHandler
   ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { req, user, tx } = command;
+
     // if (req.images?.length > 0) {
     //   req.images = await this._storageService.makePublic(
     //     req.images,

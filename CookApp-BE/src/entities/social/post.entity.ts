@@ -3,7 +3,7 @@ import { OneToMany, OneToOne, ManyToOne, Column, Entity, JoinColumn } from 'type
 import { InteractionEntity } from './interaction.entity';
 import { MediaType, PostType } from '../../enums/social.enum';
 import { Moment, Post } from '../../domains/social/post.domain';
-import { Image, Media, Video } from '../../domains/social/media.domain';
+import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
 
 @Entity({ name: 'posts' })
@@ -86,13 +86,13 @@ export class PostMediaEntity {
   @Column({ name: 'key', nullable: false })
   key: string
 
-  constructor(media: Media, interaction?: InteractionEntity) {
+  constructor(media: CommentMedia, interaction?: InteractionEntity) {
     this.key = media?.key
     this.type = media?.type
     this.interaction = interaction ? interaction : new InteractionEntity(media)
   }
 
-  toDomain(): Media {
+  toDomain(): CommentMedia {
     switch (this.type) {
       case MediaType.IMAGE:
         return new Image({

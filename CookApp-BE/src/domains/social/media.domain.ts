@@ -49,4 +49,20 @@ export class Video extends MediaBase {
   }
 }
 
-export type Media = Image | Video
+export class Audio extends MediaBase {
+
+  constructor(video: Partial<Video>) {
+    super(video)
+    this.type = MediaType.AUDIO
+  }
+
+  isValidKey(): boolean {
+    return true
+  }
+}
+
+export type CommentMedia = Image | Video
+
+export type PostMedia = Image | Video
+
+export type Media = Image | Video | Audio

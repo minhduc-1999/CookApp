@@ -6,7 +6,6 @@ import { CreateCommentRequest } from "./createCommentRequest";
 import { CreateCommentResponse } from "./createCommentResponse";
 import { ICommentService } from "modules/user/services/comment.service";
 import { IPostService } from "modules/user/services/post.service";
-import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { CommentPostEvent } from "modules/notification/events/CommentNotification";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { ResponseDTO } from "base/dtos/response.dto";
@@ -15,6 +14,7 @@ import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Post } from "domains/social/post.domain";
 import { InteractiveTargetType } from "enums/social.enum";
 import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
+import { CommentMedia, Image } from "domains/social/media.domain";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
@@ -33,8 +33,6 @@ export class CreateCommentCommandHandler
   implements ICommandHandler<CreateCommentCommand>
 {
   constructor(
-    @Inject("ICommentRepository")
-    private _commentRepo: ICommentRepository,
     @Inject("ICommentService")
     private _commentService: ICommentService,
     private _eventBus: EventBus,
@@ -45,6 +43,13 @@ export class CreateCommentCommandHandler
   ) { }
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
     const { commentReq, user, tx } = command;
+
+    // if (req.images?.length > 0) {
+    //   commentReq.images = await this._storageService.makePublic(
+    //     req.images,
+    //     MediaType.IMAGE
+    //   );
+    // }
 
     let target: IInteractable
 
@@ -67,13 +72,14 @@ export class CreateCommentCommandHandler
       default:
         throw new BadRequestException(ResponseDTO.fail("Target type not valid"))
     }
+    let medias: CommentMedia[]
+    if (commentReq.images?.length > 0) {
+      medias = [new Image({ key: commentReq.images })]
+    }
 
     const parentComment = await this._commentService.getCommentBy(commentReq.replyFor)
-    let comment = user.comment(target, commentReq.content, null, parentComment)
-    let createdComment = await this._commentRepo
-      .setTransaction(tx)
-      .createComment(comment);
-
+    let comment = user.comment(target, commentReq.content, medias, parentComment)
+    let createdComment = await this._commentService.createComment(comment, tx)
     if (!createdComment) {
       throw new InternalServerErrorException()
     }

@@ -1,7 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BaseRepository } from "base/repository.base";
-import { Media } from "domains/social/media.domain";
+import { PostMedia } from "domains/social/media.domain";
 import { Post } from "domains/social/post.domain";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
@@ -17,7 +17,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     super()
   }
 
-  async getMedias(ids: string[]): Promise<Media[]> {
+  async getMedias(ids: string[]): Promise<PostMedia[]> {
     const entities = await this._postMediaRepo
       .createQueryBuilder("media")
       .innerJoinAndSelect("media.interaction", "interaction")
@@ -27,7 +27,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     return entities?.map(entity => entity.toDomain())
   }
 
-  async getMedia(id: string): Promise<Media> {
+  async getMedia(id: string): Promise<PostMedia> {
     const entity = await this._postMediaRepo
       .createQueryBuilder("media")
       .innerJoinAndSelect("media.interaction", "interaction")
@@ -37,7 +37,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     return entity?.toDomain()
   }
 
-  async addMedia(media: Media, post: Post): Promise<Media> {
+  async addMedia(media: PostMedia, post: Post): Promise<PostMedia> {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       const mediaInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(media))
@@ -49,14 +49,14 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     return null
   }
 
-  async deleteMedia(media: Media): Promise<void> {
+  async deleteMedia(media: PostMedia): Promise<void> {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       await queryRunner.manager.softDelete(InteractionEntity, media.id)
     }
   }
 
-  async deleteMedias(medias: Media[]): Promise<void> {
+  async deleteMedias(medias: PostMedia[]): Promise<void> {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       for (let media of medias) {
@@ -65,7 +65,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     }
   }
 
-  async addMedias(medias: Media[], post: Post): Promise<Media[]> {
+  async addMedias(medias: PostMedia[], post: Post): Promise<PostMedia[]> {
     if (!post) return null
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
@@ -78,7 +78,6 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
         const mediaEntity = await queryRunner.manager.save<PostMediaEntity>(temp)
         mediaEntities.push(mediaEntity)
       }
-      postEntity.medias = mediaEntities
       return mediaEntities?.map(entity => entity.toDomain())
     }
     return null

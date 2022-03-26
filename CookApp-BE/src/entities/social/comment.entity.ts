@@ -5,7 +5,7 @@ import { InteractionEntity } from './interaction.entity';
 import { MediaType } from '../../enums/social.enum';
 import { Comment } from '../../domains/social/comment.domain';
 import { Audit } from '../../domains/audit.domain';
-import { Image, Media, Video } from '../../domains/social/media.domain';
+import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 
 @Entity({ name: 'comments' })
 export class CommentEntity extends AbstractEntity {
@@ -69,21 +69,24 @@ export class CommentMediaEntity extends AbstractEntity {
   @Column({ name: 'key' })
   key: string
 
-  constructor(media: Media) {
+  constructor(media: CommentMedia, comment?: Comment) {
     super(media)
     this.key = media?.key
     this.type = media?.type
+    this.comment = comment && new CommentEntity(comment)
   }
 
-  toDomain(): Media {
+  toDomain(): CommentMedia {
     switch (this.type) {
       case MediaType.IMAGE:
         return new Image({
-          key: this.key
+          key: this.key,
+          id: this.id
         })
       case MediaType.VIDEO:
         return new Video({
-          key: this.key
+          key: this.key,
+          id: this.id
         })
     }
   }
