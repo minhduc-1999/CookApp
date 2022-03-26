@@ -23,7 +23,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
       .where("media.key IN (:...keys)", { keys })
       .select(["media", "interaction"])
       .getMany()
-    return entities.map(entity => entity.toDomain())
+    return entities?.map(entity => entity.toDomain())
   }
   async getMedia(key: string): Promise<Media> {
     const entity = await this._postMediaRepo
@@ -32,7 +32,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
       .where("media.key = :key", { key })
       .select(["media", "interaction"])
       .getOne()
-    return entity.toDomain()
+    return entity?.toDomain()
   }
 
   async addMedia(media: Media, post: Post): Promise<Media> {
@@ -42,7 +42,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
       const temp = new PostMediaEntity(media, mediaInteraction)
       temp.post = new PostEntity(post)
       const mediaEntity = await queryRunner.manager.save<PostMediaEntity>(temp)
-      return mediaEntity.toDomain()
+      return mediaEntity?.toDomain()
     }
     return null
   }
@@ -77,7 +77,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
         mediaEntities.push(mediaEntity)
       }
       postEntity.medias = mediaEntities
-      return mediaEntities.map(entity => entity.toDomain())
+      return mediaEntities?.map(entity => entity.toDomain())
     }
     return null
   }

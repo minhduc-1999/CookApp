@@ -1,5 +1,5 @@
 export enum InteractiveTargetType {
-  POST = "POST", MEDIA = "MEDIA", RECIPE_STEP = "RECIPE_STEP"
+  POST = "POST", POST_MEDIA = "POST_MEDIA", RECIPE_STEP = "RECIPE_STEP"
 }
 
 export enum ReactionType {

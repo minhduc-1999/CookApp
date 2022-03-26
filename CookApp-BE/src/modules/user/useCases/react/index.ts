@@ -1,17 +1,18 @@
-import { Inject, NotFoundException } from "@nestjs/common";
+import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { User } from "domains/social/user.domain";
 import { IPostService } from "modules/user/services/post.service";
 import { ReactRequest } from "./reactRequest";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ReactResponse } from "./reactResponse";
-import { Reaction } from "domains/social/reaction.domain";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ReactPostEvent } from "modules/notification/events/ReactNotification";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { InteractiveTargetType } from "enums/social.enum";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { Post } from "domains/social/post.domain";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(
@@ -40,39 +41,36 @@ export class ReactCommandHandler
   async execute(command: ReactCommand): Promise<ReactResponse> {
     const { user, reactReq, tx } = command;
 
-    let newReaction: Reaction
-    let reacted: boolean;
-    let existedReaction: Reaction
     let eventCallback: () => void
+    let target: IInteractable
 
     switch (reactReq.targetType) {
       case InteractiveTargetType.POST:
-        const [ post ] = await this._postService.getPostDetail(reactReq.targetKeyOrID);
-        existedReaction = await this._reactionRepo.findById(
-          user.id,
-          post.id
-        );
-        newReaction = user.react(post, reactReq.react)
+        [target] = await this._postService.getPostDetail(reactReq.targetKeyOrID);
         eventCallback = () => {
-          this._eventBus.publish(new ReactPostEvent(post, user));
+          this._eventBus.publish(new ReactPostEvent(target as Post, user));
         }
         break;
-      case InteractiveTargetType.MEDIA:
-        const media = await this._postMediaRepo.getMedia(reactReq.targetKeyOrID)
-        if (!media) {
+      case InteractiveTargetType.POST_MEDIA:
+        target = await this._postMediaRepo.getMedia(reactReq.targetKeyOrID)
+        if (!target) {
           throw new NotFoundException(
             ResponseDTO.fail("Media not found")
           );
         }
-        existedReaction = await this._reactionRepo.findById(user.id, media.id)
-        newReaction = user.react(media, reactReq.react)
         break;
+      default:
+        throw new BadRequestException(ResponseDTO.fail("Target type not valid"))
     }
+    const existedReaction = await this._reactionRepo.findById(user.id, target.id);
+
+    let reacted: boolean;
 
     if (existedReaction && existedReaction.type === reactReq.react) {
       await this._reactionRepo.setTransaction(tx).delete(existedReaction)
       reacted = false;
     } else {
+      const newReaction = user.react(target, reactReq.react)
       await this._reactionRepo.setTransaction(tx).create(newReaction)
       reacted = true;
     }
