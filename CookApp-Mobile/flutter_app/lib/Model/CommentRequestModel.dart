@@ -1,20 +1,27 @@
 class CommentRequestModel {
+  String targetKeyOrID;
   String content;
-  String parentId;
+  String replyFor;
+  String targetType;
 
-  CommentRequestModel({this.content, this.parentId});
+  CommentRequestModel(
+      {this.targetKeyOrID, this.content, this.replyFor, this.targetType});
 
   CommentRequestModel.fromJson(Map<String, dynamic> json) {
+    targetKeyOrID = json['targetKeyOrID'];
     content = json['content'];
-    parentId = json['parentId'] != null ? json['parentId'] : null;
+    replyFor = json['replyFor'];
+    targetType = json['targetType'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['targetKeyOrID'] = this.targetKeyOrID;
     data['content'] = this.content;
-    if (parentId != ""){
-      data['parentId'] = this.parentId;
+    if(this.replyFor != "") {
+      data['replyFor'] = this.replyFor;
     }
+    data['targetType'] = this.targetType;
     return data;
   }
 }

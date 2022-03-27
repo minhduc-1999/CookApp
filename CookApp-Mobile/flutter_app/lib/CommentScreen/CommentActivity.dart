@@ -3,25 +3,29 @@ import 'package:flutter/material.dart';
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
 import 'package:tastify/Services/APIService.dart';
+import 'package:tastify/config.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../constants.dart';
 
 class CommentActivity extends StatefulWidget {
-  final String postId;
-
-  const CommentActivity({this.postId});
+  final String targetKeyOrID;
+  final String targetType;
+  final String stepName;
+  const CommentActivity({this.targetKeyOrID,this.targetType,this.stepName});
 
   @override
-  _CommentActivityState createState() => _CommentActivityState(postId);
+  _CommentActivityState createState() => _CommentActivityState(targetKeyOrID,targetType,stepName);
 }
 
 class _CommentActivityState extends State<CommentActivity> {
-  final String postId;
+  final String targetKeyOrID;
+  final String targetType;
+  final String stepName;
   List<Comment> comments;
   bool didFetchComments = false;
 
-  _CommentActivityState(this.postId);
+  _CommentActivityState(this.targetKeyOrID,this.targetType,this.stepName);
 
   final TextEditingController _commentController = TextEditingController();
 
@@ -55,7 +59,7 @@ class _CommentActivityState extends State<CommentActivity> {
                       padding: EdgeInsets.all(8),
                       child: Center(
                           child: Text(
-                        "Comments",
+                            targetType == Config.postCommentsType ? "Comments" : stepName,
                         style: TextStyle(fontSize: 22),
                       ))),
                   Divider(
@@ -65,8 +69,63 @@ class _CommentActivityState extends State<CommentActivity> {
                   Expanded(
                     child: buildComment(),
                   ),
-                  Divider(),
+
                   Padding(
+                    padding: MediaQuery.of(context).viewInsets,
+                    child: Container(
+                      child: Row(
+                        children: <Widget>[
+                          // Button send image
+                          Material(
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 1.0),
+                              child: IconButton(
+                                icon: Icon(Icons.image),
+                                onPressed: (){},
+                                color: appPrimaryColor,
+                              ),
+                            ),
+                            color: Colors.white,
+                          ),
+
+                          // Edit text
+                          Flexible(
+                            child: Container(
+                              child: TextField(
+                                onSubmitted: addComment,
+                                style: TextStyle( fontSize: 15.0),
+                                controller: _commentController,
+                                decoration: InputDecoration.collapsed(
+                                  hintText: 'Type your message...',
+                      
+                                ),
+
+                              ),
+                            ),
+                          ),
+
+                          // Button send message
+                          Material(
+                            child: Container(
+                              margin: EdgeInsets.symmetric(horizontal: 8.0),
+                              child: IconButton(
+                                icon: Icon(Icons.send),
+                                onPressed: () => addComment(_commentController.text),
+                                color: appPrimaryColor,
+                              ),
+                            ),
+                            color: Colors.white,
+                          ),
+                        ],
+                      ),
+                      width: double.infinity,
+                      height: 50.0,
+                      decoration: BoxDecoration(
+                          border: Border(top: BorderSide(color: appPrimaryColor, width: 0.5)),
+                          color: Colors.white),
+                    ),
+                  ),
+                /*  Padding(
                     padding: MediaQuery.of(context).viewInsets,
                     child: ListTile(
                       title: TextFormField(
@@ -83,7 +142,7 @@ class _CommentActivityState extends State<CommentActivity> {
                         child: Text("Post"),
                       ),
                     ),
-                  ),
+                  ),*/
                 ],
               ),
             ));
@@ -100,14 +159,14 @@ class _CommentActivityState extends State<CommentActivity> {
   }
 
   void fetchData() async {
-    CommentRespondModel dataComment = await APIService.getComment(postId, "");
+    CommentRespondModel dataComment = await APIService.getComment(targetKeyOrID,targetType,"");
     List<Comment> temp = [];
-    print("total comment: " + dataComment.data.comments.length.toString());
+    //print("total comment: " + dataComment.data.comments.length.toString());
     for (var i in dataComment.data.comments) {
       temp.add(Comment(
         displayName: i.user.displayName,
         userId: i.user.id,
-        avatar: i.user.avatar != null ? i.user.avatar : null,
+        avatar: i.user.avatar.url != null ? i.user.avatar.url : null,
         comment: i.content,
         dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
       ));
@@ -121,7 +180,7 @@ class _CommentActivityState extends State<CommentActivity> {
   void addComment(String comment) async {
     _commentController.clear();
     await APIService.comment(
-        postId, CommentRequestModel(content: comment, parentId: ""));
+        CommentRequestModel(targetKeyOrID: targetKeyOrID, content: comment, replyFor: "", targetType: targetType));
     await fetchData();
   }
 }

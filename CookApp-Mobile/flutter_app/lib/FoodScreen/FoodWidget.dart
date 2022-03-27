@@ -49,7 +49,7 @@ class _FoodWidgetState extends State<FoodWidget> {
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Image.network(
-                    food.photos[0],
+                    food.photos[0].url,
                     //"https://image.cooky.vn/recipe/g6/54859/s1242/cooky-recipe-637387013241463008.jpg",
                     fit: BoxFit.cover,
                     height: height * 0.5,

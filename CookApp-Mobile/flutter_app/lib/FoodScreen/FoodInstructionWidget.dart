@@ -1,9 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tastify/CommentScreen/CommentActivity.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
+import '../config.dart';
 import '../constants.dart';
 
 class FoodInstructionWidget extends StatefulWidget {
@@ -33,12 +36,7 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
     ingredients.clear();
     steps.clear();
     for (var i in food.ingredients) {
-      if (i.unit != null) {
-        ingredients
-            .add(i.unit.value.toString() + " " + i.unit.unit + " " + i.name);
-      } else if (i.name != null) {
-        ingredients.add(i.name);
-      }
+      ingredients.add(i.quantity.toString() + " " + i.unit.toString() + " " + i.name);
     }
     for (var i in food.steps) {
       steps.add(i);
@@ -69,7 +67,7 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
                 ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Image.network(
-                    food.photos[0],
+                    food.photos[0].url,
                     fit: BoxFit.cover,
                     height: height * 0.5,
                   ),
@@ -234,8 +232,29 @@ class _StepItemState extends State<StepItem> {
           steps: steps.map((item) {
             return Step(
                 isActive: currentStep == steps.indexOf(item),
-                title: Text("Step " + (steps.indexOf(item) + 1).toString(),
-                  style: TextStyle(fontSize: 16),
+                title: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text("Step " + (steps.indexOf(item) + 1).toString(),
+                      style: TextStyle(fontSize: 16),
+                    ),
+                    currentStep == steps.indexOf(item) ? GestureDetector(
+                      child: Icon(
+                        FontAwesomeIcons.comment,
+                        size: 25.0,
+                      ),
+                      onTap: (){
+                        return showModalBottomSheet(
+                          context: context,
+                          builder: (BuildContext context) {
+                            return CommentActivity(targetKeyOrID: steps[currentStep].id, targetType: Config.stepCommentsType, stepName: "Step " + (currentStep + 1).toString(),);
+                          },
+                          isScrollControlled: true,
+                          backgroundColor: Colors.transparent,
+                        );
+                      },
+                    ) : Container()
+                  ],
                 ),
                 content: Text(item.content));
           }).toList(),
