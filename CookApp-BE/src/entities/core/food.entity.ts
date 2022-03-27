@@ -6,7 +6,7 @@ import { Food } from '../../domains/core/food.domain';
 import { FoodIngredientEntity } from './foodIngredient.entity';
 import { RecipeStepEntity } from './recipeStep.entity';
 
-@Entity({ name: 'core.foods' })
+@Entity({ name: 'foods' })
 export class FoodEntity extends AbstractEntity {
 
   @Column({ name: 'servings' })
@@ -63,7 +63,7 @@ export class FoodEntity extends AbstractEntity {
 
 }
 
-@Entity({ name: 'core.food_medias' })
+@Entity({ name: 'food_medias' })
 export class FoodMediaEntity extends AbstractEntity {
 
   @ManyToOne(() => FoodEntity)

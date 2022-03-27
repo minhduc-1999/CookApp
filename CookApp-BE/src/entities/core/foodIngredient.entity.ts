@@ -9,7 +9,7 @@ import { Unit } from '../../domains/core/unit.domain';
 import { Image } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
 
-@Entity({ name: 'core.food_ingredients' })
+@Entity({ name: 'food_ingredients' })
 export class FoodIngredientEntity extends AbstractEntity {
 
   @Column({ name: "quantity" })

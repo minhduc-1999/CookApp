@@ -5,7 +5,7 @@ import { ProviderEntity } from './provider.entity';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { User } from '../../domains/social/user.domain';
 
-@Entity({ name: 'social.accounts' })
+@Entity({ name: 'accounts' })
 export class AccountEntity extends AbstractEntity {
 
   @Column({ name: 'username', unique: true })

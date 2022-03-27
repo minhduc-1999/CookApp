@@ -3,7 +3,7 @@ import { AbstractEntity } from '../../base/entities/base.entity';
 import { Unit } from '../../domains/core/unit.domain';
 import { FoodIngredientEntity } from './foodIngredient.entity';
 
-@Entity({ name: 'core.units' })
+@Entity({ name: 'units' })
 export class UnitEntity extends AbstractEntity {
 
   @Column({ name: "name" })

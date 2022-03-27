@@ -4,7 +4,7 @@ import { AbstractEntity } from '../../base/entities/base.entity';
 import { FoodIngredientEntity } from './foodIngredient.entity';
 import { Image } from '../../domains/social/media.domain';
 
-@Entity({ name: 'core.ingredients' })
+@Entity({ name: 'ingredients' })
 export class IngredientEntity extends AbstractEntity {
 
   @Column({ name: "name" })

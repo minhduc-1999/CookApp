@@ -9,7 +9,7 @@ import { InteractionEntity } from '../../entities/social/interaction.entity';
 import { IInteractable } from '../../domains/interfaces/IInteractable.interface';
 import { Audit } from '../../domains/audit.domain';
 
-@Entity({ name: 'core.recipe_steps' })
+@Entity({ name: 'recipe_steps' })
 export class RecipeStepEntity {
 
   @Column({ name: "content" })
@@ -48,7 +48,7 @@ export class RecipeStepEntity {
 
 }
 
-@Entity({ name: 'core.recipe_step_medias' })
+@Entity({ name: 'recipe_step_medias' })
 export class RecipeStepMediaEntity extends AbstractEntity {
 
   @ManyToOne(() => RecipeStepEntity)

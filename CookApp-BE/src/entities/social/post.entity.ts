@@ -6,7 +6,7 @@ import { Moment, Post } from '../../domains/social/post.domain';
 import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
 
-@Entity({ name: 'social.posts' })
+@Entity({ name: 'posts' })
 export class PostEntity {
 
   @OneToOne(() => InteractionEntity, it => it.post, { primary: true })
@@ -64,7 +64,7 @@ export class PostEntity {
   }
 }
 
-@Entity({ name: 'social.post_medias' })
+@Entity({ name: 'post_medias' })
 export class PostMediaEntity {
 
   @OneToOne(() => InteractionEntity, { primary: true })

@@ -3,7 +3,7 @@ import { Column, Entity, OneToOne } from 'typeorm';
 import { IInteractable } from '../../domains/interfaces/IInteractable.interface';
 import { PostEntity } from './post.entity';
 
-@Entity({ name: 'social.interactions' })
+@Entity({ name: 'interactions' })
 export class InteractionEntity extends AbstractEntity {
 
   @Column({
