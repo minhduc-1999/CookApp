@@ -6,7 +6,7 @@ import { SavedPost } from '../../domains/social/post.domain';
 import { Audit } from '../../domains/audit.domain';
 import { InteractionEntity } from './interaction.entity';
 
-@Entity({ name: 'saved_posts' })
+@Entity({ name: 'social.saved_posts' })
 export class SavedPostEntity extends AbstractEntity {
 
   @ManyToOne(() => UserEntity)

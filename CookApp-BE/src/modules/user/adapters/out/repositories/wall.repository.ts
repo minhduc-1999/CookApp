@@ -31,7 +31,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       .skip(query.limit * query.offset)
       .limit(query.limit)
       .getManyAndCount()
-    return [entities.map(entity => entity.toDomain()), total]
+    return [entities?.map(entity => entity.toDomain()), total]
   }
 
   async getWall(userId: string): Promise<User> {
@@ -39,7 +39,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       .createQueryBuilder("user")
       .where("user.id = :userId", { userId })
       .getOne()
-    return entity.toDomain()
+    return entity?.toDomain()
   }
 
 }

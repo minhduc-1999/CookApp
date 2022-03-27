@@ -13,21 +13,31 @@ export class AccountRepository extends BaseRepository implements IAccountReposit
   ) {
     super()
   }
+  async update(account: Account, data: Partial<Account>): Promise<Account> {
+    let accountEntity = new AccountEntity(account)
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+        await queryRunner.manager.update<AccountEntity>(AccountEntity, accountEntity.id, accountEntity.update(data))
+    } else {
+      accountEntity = null
+    }
+    return accountEntity.toDomain()
+  }
   async createAccount(account: Account, user: User): Promise<Account> {
-    let acc = new AccountEntity(account, user)
+    let accountEntity = new AccountEntity(account, user)
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       try {
-        await queryRunner.manager.save<AccountEntity>(acc)
+        await queryRunner.manager.save<AccountEntity>(accountEntity)
       } catch (err) {
         if (err instanceof QueryFailedError)
           throw new TypeormException(err)
         throw err
       }
     } else {
-      //TODO
+      accountEntity = null
     }
-    return acc.toDomain()
+    return accountEntity?.toDomain()
   }
 
 }

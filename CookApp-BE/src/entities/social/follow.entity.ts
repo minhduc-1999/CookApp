@@ -3,7 +3,7 @@ import { Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { UserEntity } from './user.entity';
 import { Follow } from '../../domains/social/follow.domain';
 
-@Entity({ name: 'follows' })
+@Entity({ name: 'social.follows' })
 export class FollowEntity extends AbstractEntity {
 
   @ManyToOne(() => UserEntity, user => user.followers)

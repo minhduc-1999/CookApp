@@ -4,8 +4,6 @@ heroku create tastify-be --remote tastify-be
 
 source CookApp-BE/.staging.env
 
-heroku config:set -a tastify-be MONGO_DATABASE=$MONGO_DATABASE
-heroku config:set -a tastify-be CONNECTION_STRING="$CONNECTION_STRING"
 heroku config:set -a tastify-be JWT_PRIVATE_KEY=$JWT_PRIVATE_KEY
 heroku config:set -a tastify-be JWT_EXPIRES_IN=$JWT_EXPIRES_IN
 heroku config:set -a tastify-be GOOGLE_USER_INFO_URL=$GOOGLE_USER_INFO_URL
@@ -36,12 +34,6 @@ heroku config:set -a tastify-be STAGING_URL=$STAGING_URL
 heroku config:set -a tastify-be ONESIGNAL_APP_ID=$ONESIGNAL_APP_ID
 heroku config:set -a tastify-be ONESIGNAL_REST_API_KEY=$ONESIGNAL_REST_API_KEY
 heroku config:set -a tastify-be ONESIGNAL_API_BASE_URL=$ONESIGNAL_API_BASE_URL
-heroku config:set -a tastify-be NEO4J_SCHEME=$NEO4J_SCHEME
-heroku config:set -a tastify-be NEO4J_HOST=$NEO4J_HOST
-heroku config:set -a tastify-be NEO4J_PORT=$NEO4J_PORT
-heroku config:set -a tastify-be NEO4J_USERNAME=$NEO4J_USERNAME
-heroku config:set -a tastify-be NEO4J_PASSWORD=$NEO4J_PASSWORD
-heroku config:set -a tastify-be NEO4J_DATABASE=$NEO4J_DATABASE
 heroku config:set -a tastify-be DB_HOST=$DB_HOST
 heroku config:set -a tastify-be DB_PORT=$DB_PORT
 heroku config:set -a tastify-be DB_APP_USER=$DB_APP_USER

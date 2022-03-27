@@ -11,6 +11,8 @@ import { ITransaction } from "adapters/typeormTransaction.adapter";
 import _ = require("lodash");
 import { IPostService } from "modules/user/services/post.service";
 import { NewPostEvent } from "modules/notification/events/NewPostNotification";
+import { MediaType } from "enums/social.enum";
+import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 
 export class CreatePostCommand extends BaseCommand {
   req: CreatePostRequest;
@@ -27,17 +29,19 @@ export class CreatePostCommandHandler
   constructor(
     @Inject("IPostService")
     private _postService: IPostService,
+    @Inject("IStorageService")
+    private _storageService: IStorageService,
     private _eventBus: EventBus,
   ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { req, user, tx } = command;
 
-    // if (req.images?.length > 0) {
-    //   req.images = await this._storageService.makePublic(
-    //     req.images,
-    //     MediaType.IMAGE
-    //   );
-    // }
+    if (req.images?.length > 0) {
+      req.images = await this._storageService.makePublic(
+        req.images,
+        MediaType.IMAGE
+      );
+    }
 
     let creatingPost: Post
 

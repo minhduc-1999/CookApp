@@ -9,6 +9,7 @@ import { Media } from "domains/social/media.domain";
 import { MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
+import { Unit } from "domains/core/unit.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -266,18 +267,16 @@ export class IngredientResponse {
   @ApiResponseProperty({ type: String })
   name: string
 
-  @ApiResponseProperty({
-    type: "string | number"
-  })
-  quantity: string | number
+  @ApiResponseProperty({ type: Number })
+  quantity: number
 
   @ApiResponseProperty({ type: String })
   unit: string
 
-  constructor(name: string, quantity: string | number, unit: string) {
+  constructor(name: string, quantity: number, unit: Unit) {
     this.name = name
     this.quantity = quantity
-    this.unit = unit
+    this.unit = unit?.name
   }
 }
 
@@ -340,14 +339,11 @@ export class FoodResponse extends AuditResponse {
     this.description = food?.description
     this.photos = food?.photos.map(photo => new MediaResponse(photo));
     this.totalTime = food?.totalTime
-    this.cookingMethod = food?.cookingMethod
-    this.group = food?.group
     this.steps = food?.steps.map(step =>
       new RecipeStepResponse(step.content, step.photos, step.id))
     this.ingredients = food?.ingredients.map(ingredient =>
       new IngredientResponse(ingredient.name, ingredient.quantity, ingredient.unit)
     )
-    this.origin = food?.origin
     this.videoUrl = food?.videoUrl
   }
 }

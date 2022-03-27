@@ -5,7 +5,7 @@ import { ProviderEntity } from './provider.entity';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { User } from '../../domains/social/user.domain';
 
-@Entity({ name: 'accounts' })
+@Entity({ name: 'social.accounts' })
 export class AccountEntity extends AbstractEntity {
 
   @Column({ name: 'username', unique: true })
@@ -49,5 +49,13 @@ export class AccountEntity extends AbstractEntity {
       user: data.user?.toDomain()
     })
   }
+
+  update(data: Partial<Account>): Partial<AccountEntity> {
+    return {
+      emailVerified: data.emailVerified ?? this.emailVerified,
+      password: data.password ?? this.password
+    }
+  }
+  
 }
 

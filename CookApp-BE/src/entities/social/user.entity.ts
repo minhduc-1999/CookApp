@@ -6,7 +6,7 @@ import { Sex } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { FollowEntity } from './follow.entity';
 
-@Entity({ name: 'users' })
+@Entity({ name: 'social.users' })
 export class UserEntity extends AbstractEntity {
 
   @Column({ name: 'height', nullable: true })

@@ -59,7 +59,7 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
         .select(["follow", "follower"])
         .getManyAndCount()
     }
-    return [entities.map(entity => entity?.follower?.toDomain()), total]
+    return [entities?.map(entity => entity?.follower?.toDomain()), total]
   }
 
   async getFollowees(userId: string, query?: PageOptionsDto): Promise<[User[], number]> {
@@ -82,7 +82,7 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
         .select(["follow", "followee"])
         .getManyAndCount()
     }
-    return [entities.map(entity => entity?.followee?.toDomain()), total]
+    return [entities?.map(entity => entity?.followee?.toDomain()), total]
   }
 
 }

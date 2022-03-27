@@ -49,6 +49,6 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       .skip(query.limit * query.offset)
       .limit(query.limit)
       .getManyAndCount()
-    return [entities.map(entity => entity.toDomain()), total]
+    return [entities?.map(entity => entity.toDomain()), total]
   }
 }

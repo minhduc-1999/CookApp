@@ -37,7 +37,7 @@ export class CommentRepository
       .skip(queryOpt.limit * queryOpt.offset)
       .limit(queryOpt.limit)
       .getManyAndCount()
-    return [entities.map(entity => entity.toDomain()), total]
+    return [entities?.map(entity => entity.toDomain()), total]
   }
 
   async countReply(commentId: string): Promise<number> {
@@ -56,7 +56,7 @@ export class CommentRepository
         entity.parent = new CommentEntity(comment.parent)
       }
       const commentEntity = await queryRunner.manager.save<CommentEntity>(entity)
-      return commentEntity.toDomain()
+      return commentEntity?.toDomain()
     }
     return null
   }

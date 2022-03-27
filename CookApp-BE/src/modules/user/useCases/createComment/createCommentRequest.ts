@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IInteractiveRequest } from "base/dtos/interfaces/interactableRequest.interface";
-import { IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { InteractiveTargetType } from "enums/social.enum";
 
@@ -23,10 +23,11 @@ export class CreateCommentRequest implements IInteractiveRequest {
   @IsEnum(InteractiveTargetType)
   targetType: InteractiveTargetType
 
-  @ApiPropertyOptional({ type: String })
-  @IsString()
-  @IsNotEmpty()
-  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"])
+  @ApiPropertyOptional({ type: [String] })
+  @IsArray()
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"], { each: true })
   @IsOptional()
-  images?: string;
+  images?: string[];
 }

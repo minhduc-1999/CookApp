@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
@@ -22,23 +22,23 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       .where("user.id = :id", { id: userId })
       .select(["user"])
       .getOne()
-    return user.toDomain()
+    return user?.toDomain()
   }
   async createUser(userData: User): Promise<User> {
-    let user = new UserEntity(userData)
+    let userEntity = new UserEntity(userData)
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       try {
-        user = await queryRunner.manager.save<UserEntity>(user)
+        userEntity = await queryRunner.manager.save<UserEntity>(userEntity)
       } catch (err) {
         if (err instanceof QueryFailedError)
           throw new TypeormException(err)
         throw err
       }
     } else {
-      //TODO
+      userEntity = null
     }
-    return user.toDomain()
+    return userEntity?.toDomain()
   }
 
   async getUserByEmail(email: string): Promise<User> {
@@ -48,7 +48,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       .where("account.email = :email", { email })
       .select(["account", "user.id", "user.displayName", "user.avatar"])
       .getOne()
-    return user.toDomain()
+    return user?.toDomain()
   }
 
   async getUserByUsername(username: string): Promise<User> {
@@ -58,7 +58,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       .where("account.username = :username", { username })
       .select(["user.id", "user.displayName", "user.avatar", "account"])
       .getOne()
-    return user.toDomain()
+    return user?.toDomain()
   }
 
   async getUserById(id: string): Promise<User> {
@@ -68,7 +68,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       .where("user.id = :id", { id })
       .select(["user.id", "user.displayName", "user.avatar", "account"])
       .getOne()
-    return user.toDomain()
+    return user?.toDomain()
   }
   async updateUserProfile(user: User): Promise<void> {
     const queryRunner = this.tx?.getRef() as QueryRunner
@@ -79,7 +79,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
         (new UserEntity(user)).getPartialUpdateObject()
       )
     } else {
-      //TODO
+      throw new InternalServerErrorException()
     }
   }
 
@@ -89,7 +89,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       .limit(query.limit)
       .getManyAndCount()
     return [
-      result[0].map(entity => entity.toDomain()),
+      result[0]?.map(entity => entity.toDomain()),
       result[1]
     ]
   }

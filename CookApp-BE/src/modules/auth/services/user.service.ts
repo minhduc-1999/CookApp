@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable } from "@nestjs/common";
+import { BadRequestException, Inject, Injectable, InternalServerErrorException } from "@nestjs/common";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
@@ -41,7 +41,15 @@ class UserService implements IUserService {
 
   async createNewUser(user: User, tx: ITransaction): Promise<User> {
     const newUser = await this._userRepo.setTransaction(tx).createUser(user)
-    await this._accountRepo.setTransaction(tx).createAccount(newUser.account, newUser) 
+    if (!newUser) {
+      throw new InternalServerErrorException()
+    }
+
+    const account = await this._accountRepo.setTransaction(tx).createAccount(newUser.account, newUser) 
+    if (!account) {
+      throw new InternalServerErrorException()
+    }
+
     return newUser;
   }
 }

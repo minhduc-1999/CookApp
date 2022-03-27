@@ -7,7 +7,7 @@ import { Comment } from '../../domains/social/comment.domain';
 import { Audit } from '../../domains/audit.domain';
 import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 
-@Entity({ name: 'comments' })
+@Entity({ name: 'social.comments' })
 export class CommentEntity extends AbstractEntity {
 
   @ManyToOne(() => UserEntity)
@@ -52,7 +52,7 @@ export class CommentEntity extends AbstractEntity {
   }
 }
 
-@Entity({ name: 'comment_medias' })
+@Entity({ name: 'social.comment_medias' })
 export class CommentMediaEntity extends AbstractEntity {
 
   @ManyToOne(() => CommentEntity)

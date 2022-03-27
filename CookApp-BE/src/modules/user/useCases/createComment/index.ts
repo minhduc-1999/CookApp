@@ -12,9 +12,10 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Post } from "domains/social/post.domain";
-import { InteractiveTargetType } from "enums/social.enum";
+import { InteractiveTargetType, MediaType } from "enums/social.enum";
 import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 import { CommentMedia, Image } from "domains/social/media.domain";
+import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
@@ -38,18 +39,20 @@ export class CreateCommentCommandHandler
     private _eventBus: EventBus,
     @Inject("IPostMediaRepository")
     private _postMediaRepo: IPostMediaRepository,
+    @Inject("IStorageService")
+    private _storageService: IStorageService,
     @Inject("IPostService")
     private _postService: IPostService
   ) { }
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
     const { commentReq, user, tx } = command;
 
-    // if (req.images?.length > 0) {
-    //   commentReq.images = await this._storageService.makePublic(
-    //     req.images,
-    //     MediaType.IMAGE
-    //   );
-    // }
+    if (commentReq.images?.length > 0) {
+      commentReq.images = await this._storageService.makePublic(
+        commentReq.images,
+        MediaType.IMAGE
+      );
+    }
 
     let target: IInteractable
 
@@ -72,9 +75,10 @@ export class CreateCommentCommandHandler
       default:
         throw new BadRequestException(ResponseDTO.fail("Target type not valid"))
     }
+
     let medias: CommentMedia[]
     if (commentReq.images?.length > 0) {
-      medias = [new Image({ key: commentReq.images })]
+      medias = commentReq.images?.map(image => new Image({ key: image }))
     }
 
     const parentComment = await this._commentService.getCommentBy(commentReq.replyFor)

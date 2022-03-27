@@ -6,7 +6,7 @@ import { ReactionType } from '../../enums/social.enum';
 import { Reaction } from '../../domains/social/reaction.domain';
 import { Audit } from '../../domains/audit.domain';
 
-@Entity({ name: 'reactions' })
+@Entity({ name: 'social.reactions' })
 export class ReactionEntity extends AbstractEntity {
 
   @ManyToOne(() => UserEntity)

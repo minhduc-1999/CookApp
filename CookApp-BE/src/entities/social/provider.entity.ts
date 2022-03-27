@@ -4,7 +4,7 @@ import { ExternalProvider } from '../../domains/social/account.domain';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { AccountEntity } from './account.entity';
 
-@Entity({ name: 'providers' })
+@Entity({ name: 'social.providers' })
 export class ProviderEntity extends AbstractEntity {
   @Column({
     type: "enum",

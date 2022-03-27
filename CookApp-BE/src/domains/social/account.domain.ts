@@ -27,6 +27,10 @@ export class Account extends Audit{
 
   emailVerified: boolean;
 
+  verify() {
+    this.emailVerified = true
+  }
+
   constructor(account?: Partial<Account>) {
     super(account)
     this.username = account?.username

@@ -1,6 +1,6 @@
-import { Audit } from "domains/audit.domain";
-import { IInteractable } from "domains/interfaces/IInteractable.interface";
-import { Image } from "domains/social/media.domain";
+import { Audit } from "../../domains/audit.domain";
+import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
+import { Image } from "../../domains/social/media.domain";
 
 export class RecipeStep extends Audit implements IInteractable {
   content: string;

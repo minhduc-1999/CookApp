@@ -21,7 +21,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     if (queryRunner && !queryRunner.isReleased) {
       const postInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(post))
       const postEntity = await queryRunner.manager.save<PostEntity>(new PostEntity(post, postInteraction))
-      return postEntity.toDomain()
+      return postEntity?.toDomain()
     }
     return null
   }
@@ -48,7 +48,6 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     if (queryRunner && !queryRunner.isReleased) {
       const entity = new PostEntity(post)
       const updateData = entity.update(data)
-      //TODO: interaction not udpate time
       await queryRunner.manager.createQueryBuilder()
         .update(InteractionEntity)
         .set({ updatedAt: new Date() })

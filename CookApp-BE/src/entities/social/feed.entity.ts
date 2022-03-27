@@ -6,7 +6,7 @@ import { Post } from '../../domains/social/post.domain';
 import { User } from '../../domains/social/user.domain';
 import { InteractionEntity } from './interaction.entity';
 
-@Entity({ name: 'feeds' })
+@Entity({ name: 'social.feeds' })
 export class FeedEntity extends AbstractEntity {
 
   @ManyToOne(() => UserEntity)
