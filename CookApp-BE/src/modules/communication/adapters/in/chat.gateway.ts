@@ -1,12 +1,12 @@
 import { Inject, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { WsParamTransaction, WsRequestTransaction } from "decorators/transaction.decorator";
 import { User } from "domains/social/user.domain";
 import { WebSocketAuthGuard } from "guards/websocketAuth.guard";
 import { ChatConnectCommand } from "modules/communication/usecases/chatConnect";
 import { ChatDiconnectCommand } from "modules/communication/usecases/chatDisconnect";
-import { Transaction } from "neo4j-driver";
 import { Socket, Server } from "socket.io";
 import { IWsMiddlewareFactory } from "../out/wsMiddlewareFactory.service";
 
@@ -35,7 +35,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async handleDisconnect(client: Socket) {
     console.log("disconneted: ", client.id)
     const user = client.handshake.auth.user as User
-    const command = new ChatDiconnectCommand(user, null)
+    const command = new ChatDiconnectCommand(user)
     this._commandBus.execute(command)
   }
 
@@ -44,7 +44,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   ) {
     console.log("connect", client.id)
     const user = client.handshake.auth.user as User
-    const command = new ChatConnectCommand(user, client.id, null)
+    const command = new ChatConnectCommand(user, client.id)
     this._commandBus.execute(command)
   }
 
@@ -53,7 +53,7 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
   async handleMessage(
     @MessageBody() body: any,
     @ConnectedSocket() socket: Socket,
-    @WsParamTransaction() tx: Transaction
+    @WsParamTransaction() tx: ITransaction
   ): Promise<void> {
     console.log("received message: ", body, tx)
     if (body.room)

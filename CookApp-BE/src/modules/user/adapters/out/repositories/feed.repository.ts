@@ -1,85 +1,54 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { PostEntity } from "entities/social/post.entity";
 import { Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
-import { parseInt } from "lodash";
-import { INeo4jService } from "modules/neo4j/services/neo4j.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
-import { int, Node } from "neo4j-driver";
+import { InjectRepository } from "@nestjs/typeorm";
+import { FeedEntity } from "entities/social/feed.entity";
+import { QueryRunner, Repository } from "typeorm";
 
 @Injectable()
 export class FeedRepository extends BaseRepository implements IFeedRepository {
-  private logger: Logger = new Logger(FeedRepository.name);
   constructor(
-    @Inject("INeo4jService")
-    private neo4jService: INeo4jService) {
+    @InjectRepository(FeedEntity)
+    private _feedRepo: Repository<FeedEntity>
+  ) {
     super()
   }
-  async pushNewPost(post: Post, followerIDs: string[]): Promise<void> {
-    this.neo4jService.write(`
-        MATCH (u:User) WHERE u.id IN $followerIDs
-        MATCH (p:Post{id: $postID})
-        CREATE (u)-[:SEE]->(p)
-      `,
-      this.tx,
-      {
-        followerIDs: followerIDs,
-        postID: post.id
-      })
+
+  async pushNewPost(post: Post, users: User[]): Promise<void> {
+    const queryRunner = this.tx?.getRef() as QueryRunner
+    const entities = users.map(user => new FeedEntity(user, post))
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.save<FeedEntity>(entities)
+    } else {
+      await this._feedRepo.save(entities)
+    }
   }
 
-  async getPosts(user: User, query: PageOptionsDto): Promise<Post[]> {
-    const res = await this.neo4jService.read(`
-        MATCH (u:User{id: $userID})-[:SEE|OWN]->(p:Post)
-        WITH p, u
-        ORDER BY p.createdAt DESC
-        SKIP $skip
-        LIMIT $limit
-        UNWIND p AS post
-        CALL {
-          WITH post
-          MATCH (c:Comment)-[*]->(post) 
-          RETURN count(c) AS totalComment
-        }
-        CALL {
-          WITH post
-          MATCH (post)<-[r:REACT]-(:User)
-          RETURN count(r) AS totalReaction
-        }
-        RETURN post, 
-          totalComment, 
-          totalReaction, 
-          u AS author,
-          [(post)-[:CONTAIN]->(m:Media) | m] AS medias
-      `,
-      {
-        userID: user.id,
-        skip: int(query.offset * query.limit),
-        limit: int(query.limit)
-      })
-    if (res.records.length === 0) return []
-    return res.records.map(record => {
-      const postNode = record.get("post")
-      const totalComment = parseInt(record.get("totalComment"))
-      const totalReaction = parseInt(record.get("totalReaction"))
-      const author = record.get("author")
-      const mediaNodes: Node[] = record.get("medias")
-      return PostEntity.toDomain(postNode, author, mediaNodes, totalComment, totalReaction)
-    })
-  }
-
-  async getTotalPosts(user: User): Promise<number> {
-    const res = await this.neo4jService.read(`
-        MATCH (:User{id: $userID})-[r:OWN|SEE]->(:Post) RETURN count(r) AS totalPost
-      `,
-      {
-        userID: user.id
-      }
-    )
-    if (res.records.length === 0)
-      return 0
-    return parseInt(res.records[0].get("totalPost"))
+  async getPosts(user: User, query: PageOptionsDto): Promise<[Post[], number]> {
+    const [entities, total] = await this._feedRepo
+      .createQueryBuilder("feed")
+      .innerJoinAndSelect("feed.post", "post")
+      .innerJoinAndSelect("post.author", "author")
+      .innerJoinAndSelect("post.interaction", "interaction")
+      .innerJoinAndSelect("post.medias", "media")
+      .innerJoinAndSelect("media.interaction", "mediaInter")
+      .where("feed.user_id = :userId", { userId: user.id })
+      .select([
+        "feed",
+        "post",
+        "interaction", 
+        "author.id", 
+        "author.displayName", 
+        "author.avatar",
+        "media",
+        "mediaInter"
+      ])
+      .skip(query.limit * query.offset)
+      .limit(query.limit)
+      .getManyAndCount()
+    return [entities?.map(entity => entity.toDomain()), total]
   }
 }

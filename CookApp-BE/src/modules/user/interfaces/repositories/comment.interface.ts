@@ -1,18 +1,17 @@
-import { Transaction } from "neo4j-driver";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
-import { Comment, CommentTarget } from "domains/social/comment.domain";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { Comment } from "domains/social/comment.domain";
 
 export interface ICommentRepository {
   createComment(comment: Comment): Promise<Comment>;
   getCommentById(id: string): Promise<Comment>;
-  setTransaction(tx: Transaction): ICommentRepository
-  getReplies(target: CommentTarget, replyOf: string, query: PageOptionsDto): Promise<Comment[]>
+  setTransaction(tx: ITransaction): ICommentRepository
   getComments(
-    target: CommentTarget,
+    target: IInteractable,
     query: PageOptionsDto
-  ): Promise<Comment[]>;
-  getAmountOfReply(parentId: string): Promise<number>;
-  getAmountOfComment(target: CommentTarget): Promise<number>;
-  getTotalComments(target: CommentTarget): Promise<number>;
-  createReply(comment: Comment): Promise<Comment>
+  ): Promise<[Comment[], number]>;
+  countReply(commentId: string): Promise<number>
+  countComments(target: IInteractable): Promise<number>
+  getReplies(parent: Comment, queryOpt: PageOptionsDto): Promise<[Comment[], number]>
 }

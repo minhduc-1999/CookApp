@@ -1,39 +1,93 @@
-import { RecipeStep } from 'domains/core/recipeStep.domain';
-import { Comment, CommentTarget } from 'domains/social/comment.domain';
-import { PostBase } from 'domains/social/post.domain';
-import { Node, Relationship } from 'neo4j-driver'
-import { AuditEntity } from '../base.entity';
+import { AbstractEntity } from '../../base/entities/base.entity';
 import { UserEntity } from './user.entity';
+import { OneToMany, Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
+import { InteractionEntity } from './interaction.entity';
+import { MediaType } from '../../enums/social.enum';
+import { Comment } from '../../domains/social/comment.domain';
+import { Audit } from '../../domains/audit.domain';
+import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 
-export class CommentEntity {
-  static toDomain(commentRelationship: Relationship, userNode: Node, numReply?: number): Comment {
-    const { properties: commentProps } = commentRelationship
-    const audit = AuditEntity.toDomain(commentRelationship)
-    const comment = new Comment({
+@Entity({ name: 'social.comments' })
+export class CommentEntity extends AbstractEntity {
+
+  @ManyToOne(() => UserEntity)
+  @JoinColumn({ name: "user_id" })
+  user: UserEntity
+
+  @ManyToOne(() => InteractionEntity)
+  @JoinColumn({ name: 'target_id' })
+  target: InteractionEntity;
+
+  @Column({ name: 'content' })
+  content: string;
+
+  @ManyToOne(() => CommentEntity, (comment) => comment.children, { nullable: true })
+  @JoinColumn({ name: "parent_id" })
+  parent: CommentEntity
+
+  @OneToMany(() => CommentEntity, (comment) => comment.parent)
+  children: CommentEntity[]
+
+  @OneToMany(() => CommentMediaEntity, media => media.comment)
+  medias: CommentMediaEntity[]
+
+  constructor(comment: Comment) {
+    super(comment)
+    this.user = new UserEntity(comment?.user)
+    this.target = new InteractionEntity(comment?.target)
+    this.content = comment?.content
+    this.medias = comment?.medias?.map(media => new CommentMediaEntity(media))
+  }
+
+  toDomain(): Comment {
+    const audit = new Audit(this)
+    return new Comment({
       ...audit,
-      content: commentProps.content,
-      user: UserEntity.toDomain(userNode),
-      numberOfReply: numReply ?? 0
+      user: this.user?.toDomain(),
+      content: this.content,
+      medias: this.medias?.map(media => media.toDomain()),
+      parent: this.parent?.toDomain(),
+      replies: this.children?.map(reply => reply.toDomain())
     })
-    return comment
+  }
+}
+
+@Entity({ name: 'social.comment_medias' })
+export class CommentMediaEntity extends AbstractEntity {
+
+  @ManyToOne(() => CommentEntity)
+  @JoinColumn({ name: "comment_id" })
+  comment: CommentEntity;
+
+  @Column({
+    name: 'type',
+    type: "enum",
+    enum: MediaType
+  })
+  type: MediaType;
+
+  @Column({ name: 'key' })
+  key: string
+
+  constructor(media: CommentMedia, comment?: Comment) {
+    super(media)
+    this.key = media?.key
+    this.type = media?.type
+    this.comment = comment && new CommentEntity(comment)
   }
 
-  static fromDomain(comment: Partial<Comment>): Record<string, any> {
-    const { user, target, replies, parent, numberOfReply, ...remain } = comment
-    return {
-      ...remain,
-    }
-  }
-
-  static getNodeType(target: CommentTarget): "Post" | "RecipeStep" {
-    if (target instanceof PostBase) {
-      return "Post"
-    }
-    else if (target instanceof RecipeStep) {
-      return "RecipeStep"
-    }
-    else {
-      throw new Error("No target found")
+  toDomain(): CommentMedia {
+    switch (this.type) {
+      case MediaType.IMAGE:
+        return new Image({
+          key: this.key,
+          id: this.id
+        })
+      case MediaType.VIDEO:
+        return new Video({
+          key: this.key,
+          id: this.id
+        })
     }
   }
 }

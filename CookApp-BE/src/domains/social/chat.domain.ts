@@ -1,5 +1,5 @@
 import { Audit } from "domains/audit.domain";
-import { Media } from "./media.domain";
+import { CommentMedia } from "./media.domain";
 import { User } from "./user.domain";
 
 export class Conversation extends Audit {
@@ -13,7 +13,7 @@ export class Conversation extends Audit {
 export class MessageContent {
   text: string
 
-  media: Media[]
+  media: CommentMedia[]
 
   externalLink: string
 }

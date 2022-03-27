@@ -1,42 +1,87 @@
-import { Audit } from "domains/audit.domain";
-import { ExternalProvider } from "enums/externalProvider.enum";
-import { Media } from "./media.domain";
-import { Profile } from "./profile.domain";
+import { Audit } from "../../domains/audit.domain";
+import { ReactionType, Sex } from "../../enums/social.enum";
+import { CommentMedia } from "./media.domain";
+import { Account } from "./account.domain";
+import { generateDisplayName } from "../../utils";
+import { Follow } from "./follow.domain";
+import { Post, SavedPost } from "./post.domain";
+import { Reaction } from "./reaction.domain";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { Comment } from "./comment.domain";
 
-class Provider {
-  type: ExternalProvider;
-  id: string;
-}
 
 export class User extends Audit {
-  username: string;
+  id: string 
 
-  password?: string;
-
-  email: string;
-
-  phone?: string;
-
-  avatar?: Media;
-
-  profile?: Profile;
+  avatar?: CommentMedia;
 
   displayName?: string;
 
-  externalProvider?: Provider;
+  height?: number;
 
-  emailVerified: boolean;
+  weight?: number;
 
-  constructor(user?: Partial<User>) {
+  birthDate?: Date;
+
+  firstName?: string;
+
+  lastName?: string;
+
+  sex?: Sex;
+
+  nFollowers?: number
+
+  nFollowees?: number
+
+  nPosts?: number
+
+  account?: Account
+
+  constructor(user: Partial<User>) {
     super(user)
-    this.username = user?.username
-    this.email = user?.email 
-    this.phone = user?.phone
+    this.account = user?.account
+    this.displayName = user?.displayName ?? generateDisplayName()
+    this.birthDate = user?.birthDate
     this.avatar = user?.avatar
-    this.profile = user?.profile
-    this.password = user?.password
-    this.displayName = user?.displayName
-    this.externalProvider = user?.externalProvider
-    this.emailVerified = user?.emailVerified
+    this.height = user?.height
+    this.weight = user?.weight
+    this.firstName = user?.firstName
+    this.lastName = user?.lastName
+    this.sex = user?.sex
+    this.nPosts = user?.nPosts
+    this.nFollowees = user?.nFollowees
+    this.nFollowers = user?.nFollowers
   }
+
+  follow(followee: User): Follow {
+    return new Follow({
+      follower: this,
+      followee
+    })
+  }
+
+  react(target: IInteractable, type: ReactionType ): Reaction {
+    return new Reaction({
+      reactor: this,
+      target: target,
+      type
+    })
+  }
+
+  savePost(target: Post): SavedPost{
+    return new SavedPost({
+      saver: this,
+      post: target
+    })
+  }
+
+  comment(target: IInteractable, content: string, medias?: CommentMedia[], replyFor?: Comment): Comment {
+    return new Comment({
+      target: target,
+      parent: replyFor,
+      content,
+      medias,
+      user: this
+    })
+  } 
 }

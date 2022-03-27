@@ -2,13 +2,14 @@ import { ApiProperty, ApiPropertyOptional, ApiResponseProperty } from "@nestjs/s
 import { Album, Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
-import { ReactionType } from "enums/reaction.enum";
 import { MetaDTO } from "./responseMeta.dto";
 import { Comment } from "domains/social/comment.domain"
-import { Sex } from "enums/sex.enum";
-import { Profile } from "domains/social/profile.domain";
 import { Food } from "domains/core/food.domain";
-import { Image, Media } from "domains/social/media.domain";
+import { Media } from "domains/social/media.domain";
+import { MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
+import { Audit } from "domains/audit.domain";
+import { Reaction } from "domains/social/reaction.domain";
+import { Unit } from "domains/core/unit.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -41,27 +42,35 @@ export class AuditResponse {
   @ApiResponseProperty({ type: Number })
   updatedAt?: number;
 
-  @ApiResponseProperty({ type: String })
-  updatedBy?: string;
-
-  constructor(audit: Partial<AuditResponse>) {
-    this.createdAt = audit?.createdAt
+  constructor(audit: Audit) {
+    this.createdAt = audit?.createdAt?.getTime()
     this.id = audit?.id
-    this.updatedAt = audit?.updatedAt
-    this.updatedBy = audit?.updatedBy
+    this.updatedAt = audit?.updatedAt?.getTime()
   }
 }
 
 export class MediaResponse {
   @ApiResponseProperty({ type: String })
-  key: string
+  id: string
 
   @ApiResponseProperty({ type: String })
   url: string
 
-  constructor(media: Media) {
-    this.key = media?.key
+  @ApiResponseProperty({ enum: MediaType })
+  type: MediaType
+
+  @ApiResponseProperty({ enum: ReactionType })
+  reaction?: ReactionType
+
+  @ApiResponseProperty({ enum: Number })
+  numberOfComment?: number
+
+  constructor(media: Media, reaction?: Reaction, nComents?: number) {
     this.url = media?.url
+    this.type = media?.type
+    this.id = media?.id
+    this.reaction = reaction?.type
+    this.numberOfComment = nComents
   }
 }
 
@@ -77,7 +86,7 @@ export class AuthorResponse {
 
   constructor(user: User) {
     this.id = user?.id
-    this.avatar = new MediaResponse(user?.avatar) 
+    this.avatar = new MediaResponse(user?.avatar)
     this.displayName = user?.displayName
   }
 }
@@ -90,10 +99,7 @@ export class PostResponse extends AuditResponse {
   name: string;
 
   @ApiResponseProperty({ type: [MediaResponse] })
-  images: MediaResponse[];
-
-  @ApiResponseProperty({ type: [MediaResponse] })
-  videos: MediaResponse[];
+  medias: MediaResponse[];
 
   @ApiResponseProperty({ type: AuthorResponse })
   author: AuthorResponse
@@ -107,28 +113,34 @@ export class PostResponse extends AuditResponse {
   @ApiResponseProperty({ enum: ReactionType })
   reaction?: ReactionType;
 
-  @ApiResponseProperty({ enum: ["Album", "Moment"] })
-  kind: "Album" | "Moment"
+  @ApiResponseProperty({ enum: PostType })
+  kind: PostType
 
-  constructor(post: Post) {
+  @ApiResponseProperty({ type: String })
+  location: string
+
+  @ApiResponseProperty({ type: Boolean })
+  saved?: boolean
+
+  constructor(post: Post, reaction?: Reaction, saved?: boolean) {
     super(post)
     this.author = new AuthorResponse(post?.author)
-    this.numOfComment = post?.numOfComment;
-    this.numOfReaction = post?.numOfReaction;
-    this.kind = post?.kind
-    switch (post?.kind) {
-      case "Album":
-        this.name = post?.name
-        this.images = post?.images.map(image => new MediaResponse(image));
-        this.videos = post?.videos.map(video => new MediaResponse(video));
-;
+    this.numOfComment = post?.nComments;
+    this.numOfReaction = post?.nReactions;
+    this.kind = post?.type
+    this.location = post?.location
+    this.medias = post?.medias.map(media => new MediaResponse(media));
+    this.reaction = reaction?.type
+    this.saved = saved
+    switch (post?.type) {
+      case PostType.ALBUM:
+        const album = post as Album
+        this.name = album?.name
+          ;
         break;
-      case "Moment":
-        this.content = post?.content
-        this.images = post?.images.map(image => new MediaResponse(image));
-;
-        this.videos = post?.videos.map(video => new MediaResponse(video));
-;
+      case PostType.MOMENT:
+        const moment = post as Moment
+        this.content = moment?.content
         break;
     }
   }
@@ -144,12 +156,16 @@ export class CommentResponse extends AuditResponse {
   @ApiResponseProperty({ type: Number })
   numberOfReply: number
 
+  @ApiResponseProperty({ type: [MediaResponse] })
+  medias: MediaResponse[]
+
   constructor(comment: Comment) {
     super(comment)
     this.id = comment?.id
     this.user = new AuthorResponse(comment?.user)
     this.content = comment?.content
-    this.numberOfReply = comment?.numberOfReply
+    this.numberOfReply = comment?.nReplies
+    this.medias = comment.medias?.map(media => new MediaResponse(media))
   }
 }
 
@@ -172,25 +188,22 @@ export class ProfileResponse {
   @ApiResponseProperty({ enum: Sex })
   sex?: Sex;
 
-  constructor(profile: Profile) {
+  constructor(profile: User) {
     this.height = profile?.height
     this.weight = profile?.weight
-    this.birthDate = profile?.birthDate
+    this.birthDate = profile?.birthDate?.getTime()
     this.firstName = profile?.firstName
     this.lastName = profile?.lastName
     this.sex = profile?.sex
   }
 }
 
-export class MomentResponse {
+export class MomentResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   content: string
 
   @ApiResponseProperty({ type: [MediaResponse] })
-  images?: MediaResponse[]
-
-  @ApiResponseProperty({ type: [MediaResponse] })
-  videos?: MediaResponse[]
+  medias?: MediaResponse[]
 
   @ApiResponseProperty({ enum: ["Moment"] })
   kind: "Moment"
@@ -211,28 +224,21 @@ export class MomentResponse {
   createdAt: number
 
   constructor(post: Moment) {
+    super(post)
     this.content = post?.content
-    this.images = post?.images.map(image => new MediaResponse(image));
-
-    this.videos = post?.videos.map(video => new MediaResponse(video));
-
+    this.medias = post?.medias.map(media => new MediaResponse(media));
     this.author = new AuthorResponse(post?.author)
-    this.numOfReaction = post?.numOfReaction
-    this.numOfComment = post?.numOfComment
-    this.id = post?.id
-    this.createdAt = post?.createdAt
+    this.numOfReaction = post?.nReactions
+    this.numOfComment = post?.nComments
   }
 }
 
-export class AlbumResponse {
+export class AlbumResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string
 
   @ApiResponseProperty({ type: [MediaResponse] })
-  images?: MediaResponse[]
-
-  @ApiResponseProperty({ type: [MediaResponse] })
-  videos?: MediaResponse[]
+  medias?: MediaResponse[]
 
   @ApiResponseProperty({ enum: ["Album"] })
   kind: "Album"
@@ -246,23 +252,13 @@ export class AlbumResponse {
   @ApiResponseProperty({ type: Number })
   numOfComment: number;
 
-  @ApiResponseProperty({ type: String })
-  id: string
-
-  @ApiResponseProperty({ type: Number })
-  createdAt: number
-
   constructor(post: Album) {
+    super(post)
     this.name = post?.name
-    this.images = post?.images.map(image => new MediaResponse(image));
-
-    this.videos = post?.videos.map(video => new MediaResponse(video));
-
+    this.medias = post?.medias.map(media => new MediaResponse(media));
     this.author = new AuthorResponse(post?.author)
-    this.numOfReaction = post?.numOfReaction
-    this.numOfComment = post?.numOfComment
-    this.id = post?.id
-    this.createdAt = post?.createdAt
+    this.numOfReaction = post?.nReactions
+    this.numOfComment = post?.nComments
   }
 }
 
@@ -271,18 +267,16 @@ export class IngredientResponse {
   @ApiResponseProperty({ type: String })
   name: string
 
-  @ApiResponseProperty({
-   type: "string | number" 
-  })
-  quantity: string | number
+  @ApiResponseProperty({ type: Number })
+  quantity: number
 
   @ApiResponseProperty({ type: String })
   unit: string
 
-  constructor(name: string, quantity: string | number, unit: string) {
+  constructor(name: string, quantity: number, unit: Unit) {
     this.name = name
     this.quantity = quantity
-    this.unit = unit
+    this.unit = unit?.name
   }
 }
 
@@ -345,14 +339,11 @@ export class FoodResponse extends AuditResponse {
     this.description = food?.description
     this.photos = food?.photos.map(photo => new MediaResponse(photo));
     this.totalTime = food?.totalTime
-    this.cookingMethod = food?.cookingMethod
-    this.group = food?.group
     this.steps = food?.steps.map(step =>
       new RecipeStepResponse(step.content, step.photos, step.id))
     this.ingredients = food?.ingredients.map(ingredient =>
       new IngredientResponse(ingredient.name, ingredient.quantity, ingredient.unit)
     )
-    this.origin = food?.origin
     this.videoUrl = food?.videoUrl
   }
 }

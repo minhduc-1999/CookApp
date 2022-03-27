@@ -1,7 +1,7 @@
-import { Audit } from "domains/audit.domain";
-import { Image } from "domains/social/media.domain";
+import { Audit } from "../../domains/audit.domain";
+import { Image, Video } from "../../domains/social/media.domain";
+import { Ingredient } from "./ingredient.domain";
 import { RecipeStep } from "./recipeStep.domain";
-
 
 export class Food extends Audit {
   servings: number;
@@ -10,25 +10,17 @@ export class Food extends Audit {
 
   description: string;
 
-  photos: Image[];
+  photos: (Image | Video)[];
 
   totalTime: number;
 
-  cookingMethod: string[];
-
-  group: string;
-
   steps: RecipeStep[];
 
-  ingredients: {
-    name: string
-    quantity: string | number
-    unit: string
-  }[];
-
-  origin: string;
+  ingredients: Ingredient[];
 
   videoUrl: string;
+
+  url: string;
 
   constructor(food: Partial<Food>) {
     super(food)
@@ -37,11 +29,9 @@ export class Food extends Audit {
     this.description = food?.description
     this.photos = food?.photos ?? []
     this.totalTime = food?.totalTime
-    this.cookingMethod = food?.cookingMethod
-    this.group = food?.group
     this.steps = food?.steps ?? []
     this.ingredients = food?.ingredients ?? []
-    this.origin = food?.origin
     this.videoUrl = food?.videoUrl
+    this.url = food?.url
   }
 }

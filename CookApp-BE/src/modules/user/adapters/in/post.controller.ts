@@ -1,6 +1,7 @@
 import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiConflictResponse, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
@@ -9,7 +10,7 @@ import {
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
-import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
+import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { UserReq } from "decorators/user.decorator";
 import { Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
@@ -21,13 +22,12 @@ import { DeleteSavedPostRequest } from "modules/user/useCases/deleteSavedPost/de
 import { EditPostCommand } from "modules/user/useCases/editPost";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
-import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
-import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
+import { GetPostDetailQuery } from "modules/user/useCases/getPostDetail";
+import { GetPostResponse } from "modules/user/useCases/getPostDetail/getPostResponse";
 import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
 import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";
 import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
-import { Transaction } from "neo4j-driver";
 import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/posts")
@@ -39,11 +39,11 @@ export class PostController {
   @PostHttp()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
-  @RequestTransaction()
+  @HttpRequestTransaction()
   async createPost(
     @Body() post: CreatePostRequest,
     @UserReq() user: User,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<Post>> {
     const createPostCommand = new CreatePostCommand(user, post, tx);
     const createdPost = await this._commandBus.execute(createPostCommand);
@@ -53,7 +53,6 @@ export class PostController {
   @Get(":postId/detail")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
-  @ApiNotFoundResponse({ description: "Post not found" })
   @ApiNotFoundResponse({ description: "Post not found" })
   async getPostById(
     @Param("postId", ParseUUIDPipe) postId: string,
@@ -67,13 +66,13 @@ export class PostController {
   @Patch(":postId")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
-  @RequestTransaction()
+  @HttpRequestTransaction()
   @ApiNotFoundResponse({ description: "Post not found" })
   async editPost(
     @Body() post: EditPostRequest,
     @UserReq() user: User,
     @Param("postId", ParseUUIDPipe) postId: string,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<EditPostResponse>> {
     post.id = postId;
     const editPostCommand = new EditPostCommand(tx, user, post);
@@ -82,7 +81,7 @@ export class PostController {
   }
 
   @PostHttp(":postId/save")
-  @RequestTransaction()
+  @HttpRequestTransaction()
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Save post successfully")
   @ApiConflictResponse({ description: "Post have been saved already" })
@@ -90,7 +89,7 @@ export class PostController {
   async savePost(
     @UserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {
     const savePostReq = new SavePostRequest(postID)
     const savePostCommand = new SavePostCommand(savePostReq, user, tx);
@@ -102,7 +101,7 @@ export class PostController {
 
 
   @Delete(":postId/save")
-  @RequestTransaction()
+  @HttpRequestTransaction()
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Delete saved post successfully")
   @ApiConflictResponse({ description: "Post have not been saved yet" })
@@ -110,7 +109,7 @@ export class PostController {
   async deleteSavedPost(
     @UserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {
     const dto = new DeleteSavedPostRequest(postID)
     const deleteSavedPostCommand = new DeleteSavedPostCommand(dto, user, tx);

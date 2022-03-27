@@ -1,36 +1,19 @@
 version: '3'
 services:
-  mongo:
-    image: mongo:latest
-    restart: always
-    env_file: .docker.env
-    ports:
-      - 27017:27017
-    volumes:
-      - tastify-db:/data/db
-
-  mongo-express:
-    image: mongo-express
-    restart: always
-    ports:
-      - 8081:8081
-    env_file: .me-docker.env
-
   mailhog:
     image: mailhog/mailhog
     ports:
       - 1025:1025
       - 8025:8025
-  neo4j:
-    image: neo4j:4.4
-    ports:
-      - 7474:7474
-      - 7687:7687
+
+  postgres:
+    image: postgres:latest
+    restart: always
     volumes:
-      - ./neo4j-db/data:/data
-      - ./neo4j-db/logs:/logs
-      - ./neo4j-db/conf:/conf
-      - ./neo4j-db/plugins:/plugins
-    env_file: .neo4j.env
+      - pg-tastify:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file: 
+      - .postgres.env
 volumes:
-  tastify-db:
+  pg-tastify:

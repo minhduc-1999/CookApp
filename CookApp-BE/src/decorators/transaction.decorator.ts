@@ -1,11 +1,11 @@
 import { applyDecorators, createParamDecorator, ExecutionContext, UseInterceptors } from "@nestjs/common";
-import { Neo4jTransactionInterceptor, WsTransactionInterceptor } from "modules/neo4j/interceptors/transaction.interceptor";
-import { Transaction } from "neo4j-driver";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { HttpTransactionInterceptor, WsTransactionInterceptor } from "interceptors/transaction.interceptor";
 import { Socket } from "socket.io";
 
-export const RequestTransaction = () => {
+export const HttpRequestTransaction = () => {
   return applyDecorators(
-    UseInterceptors(Neo4jTransactionInterceptor)
+    UseInterceptors(HttpTransactionInterceptor)
   )
 }
 
@@ -15,12 +15,12 @@ export const WsRequestTransaction = () => {
   )
 }
 
-export const ParamTransaction = createParamDecorator((_data, ctx: ExecutionContext): Transaction => {
+export const HttpParamTransaction = createParamDecorator((_data, ctx: ExecutionContext) : ITransaction => {
   const request = ctx.switchToHttp().getRequest();
-  return request.transaction as Transaction;
+  return request.transaction;
 })
 
-export const WsParamTransaction = createParamDecorator((_data, ctx: ExecutionContext): Transaction => {
+export const WsParamTransaction = createParamDecorator((_data, ctx: ExecutionContext): ITransaction => {
   const client = ctx.switchToWs().getClient<Socket>();
-  return client.handshake.auth.transaction as Transaction
+  return client.handshake.auth.transaction
 })

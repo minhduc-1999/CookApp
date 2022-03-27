@@ -30,8 +30,8 @@ export class NotificationService implements INotificationService {
     private _configService: ConfigService,
     private readonly _httpService: HttpService
   ) {
-    this.apiKey = _configService.get("notification.apiKey");
-    this.appID = _configService.get("notification.appID");
+    this.apiKey = this._configService.get("notification.apiKey");
+    this.appID = this._configService.get("notification.appID");
     this.apiUrl =
       _configService.get("notification.apiBaseUrl") + "v1/notifications";
   }

@@ -47,8 +47,8 @@ class AuthenticationService implements IAuthentication {
           loginToken: token,
           accessToken: this.jwtService.sign(payload),
           userId: user.id,
-          emailVerified: user.emailVerified,
-          email: user.email,
+          emailVerified: user.account.emailVerified,
+          email: user.account.email,
         };
       }).catch(error => {
         this._logger.error(error);
@@ -90,7 +90,7 @@ class AuthenticationService implements IAuthentication {
           UserErrorCode.INVALID_CREDENTIAL
         )
       );
-    await this.verifyPassword(password, user.password);
+    await this.verifyPassword(password, user.account.password);
     return user;
   }
 }

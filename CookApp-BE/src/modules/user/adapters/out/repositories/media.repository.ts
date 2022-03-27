@@ -1,137 +1,85 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 import { BaseRepository } from "base/repository.base";
-import { Media, MediaBase } from "domains/social/media.domain";
-import { Reaction } from "domains/social/reaction.domain";
-import { MediaEntity } from "entities/social/media.entity";
-import { ReactionEntity } from "entities/social/reaction.entity";
-import { MediaType } from "enums/mediaType.enum";
-import { INeo4jService } from "modules/neo4j/services/neo4j.service";
-import { IMediaRepository } from "modules/user/interfaces/repositories/media.interface";
+import { PostMedia } from "domains/social/media.domain";
+import { Post } from "domains/social/post.domain";
+import { InteractionEntity } from "entities/social/interaction.entity";
+import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
+import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
+import { QueryRunner, Repository } from "typeorm";
 
 @Injectable()
-export class MediaRepository extends BaseRepository implements IMediaRepository {
+export class PostMediaRepository extends BaseRepository implements IPostMediaRepository {
   constructor(
-    @Inject("INeo4jService")
-    private neo4jService: INeo4jService) {
+    @InjectRepository(PostMediaEntity)
+    private _postMediaRepo: Repository<PostMediaEntity>
+  ) {
     super()
   }
-  async reactMedia(reaction: Reaction): Promise<void> {
-    if (reaction.target instanceof MediaBase) {
-      await this.neo4jService.write(`
-        MATCH (u:User{id: $userID})
-        MATCH (p:Media{key: $key})
-        CREATE (u)-[r:REACT]->(p) SET r += $properties 
-        RETURN r
-      `,
-        this.tx,
-        {
-          key: reaction.target.key,
-          userID: reaction.reactor.id,
-          properties: {
-            type: reaction.type
-          }
-        },
-      )
+
+  async getMedias(ids: string[]): Promise<PostMedia[]> {
+    const entities = await this._postMediaRepo
+      .createQueryBuilder("media")
+      .innerJoinAndSelect("media.interaction", "interaction")
+      .where("media.id IN (:...ids)", { ids })
+      .select(["media", "interaction"])
+      .getMany()
+    return entities?.map(entity => entity.toDomain())
+  }
+
+  async getMedia(id: string): Promise<PostMedia> {
+    const entity = await this._postMediaRepo
+      .createQueryBuilder("media")
+      .innerJoinAndSelect("media.interaction", "interaction")
+      .where("media.id = :id", { id })
+      .select(["media", "interaction"])
+      .getOne()
+    return entity?.toDomain()
+  }
+
+  async addMedia(media: PostMedia, post: Post): Promise<PostMedia> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      const mediaInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(media))
+      const temp = new PostMediaEntity(media, mediaInteraction)
+      temp.post = new PostEntity(post)
+      const mediaEntity = await queryRunner.manager.save<PostMediaEntity>(temp)
+      return mediaEntity?.toDomain()
+    }
+    return null
+  }
+
+  async deleteMedia(media: PostMedia): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.softDelete(InteractionEntity, media.id)
     }
   }
-  async deleteReaction(reaction: Reaction): Promise<void> {
-    if (reaction.target instanceof MediaBase) {
-      await this.neo4jService.write(`
-        MATCH (u:User{id: $userID})-[r:REACT]->(p:Media{key: $key})
-        DELETE r
-      `,
-        this.tx,
-        {
-          key: reaction.target.key,
-          userID: reaction.reactor.id
-        },
-      )
+
+  async deleteMedias(medias: PostMedia[]): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      for (let media of medias) {
+        await queryRunner.manager.softDelete(InteractionEntity, media.id)
+      }
     }
   }
-  async getMedia(mediaKey: string): Promise<Media> {
-    const res = await this.neo4jService.read(`
-        MATCH (media:Media{key: $mediaKey})
-        RETURN media
-      `,
-      {
-        mediaKey,
-      },
-    )
-    if (res.records.length === 0)
-      return null
-    return MediaEntity.toDomain(res.records[0].get('media'))
-  }
-  async getReacitonByUserID(userID: string, mediaKey: string): Promise<Reaction> {
-    const res = await this.neo4jService.read(`
-        MATCH path = (u:User{id: $userID})-[r:REACT]->(p:Media{key: $mediaKey})
-        RETURN path
-      `,
-      {
-        mediaKey,
-        userID,
-      },
-    )
-    if (res.records.length === 0)
-      return null
-    return ReactionEntity.toDomain(res.records[0].get('path'))
-  }
 
-  async deleteMedias(keys: string[]): Promise<void> {
-    if (!keys || keys.length === 0)
-      return
-    await this.neo4jService.write(`
-        UNWIND $keys as key
-        MATCH (n:Media)
-        WHERE n.key = key
-        DETACH DELETE n
-      `,
-      this.tx,
-      {
-        keys
+  async addMedias(medias: PostMedia[], post: Post): Promise<PostMedia[]> {
+    if (!post) return null
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      const mediaEntities: PostMediaEntity[] = []
+      const postEntity = new PostEntity(post)
+      for (let media of medias) {
+        const mediaInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(media))
+        const temp = new PostMediaEntity(media, mediaInteraction)
+        temp.post = postEntity
+        const mediaEntity = await queryRunner.manager.save<PostMediaEntity>(temp)
+        mediaEntities.push(mediaEntity)
       }
-    )
+      return mediaEntities?.map(entity => entity.toDomain())
+    }
+    return null
   }
-  async addMedia(media: Media): Promise<void> {
-    await this.neo4jService.write(`
-        CREATE (n:Media)
-        SET n += $prop
-        RETURN n as media
-      `,
-      this.tx,
-      {
-        prop: media
-      }
-    )
-  }
-
-  async addMedias(keys: string[], type: MediaType): Promise<void> {
-    if (!keys || keys.length === 0)
-      return
-    await this.neo4jService.write(`
-        UNWIND $keys AS key
-        CREATE (n:Media)
-        SET n.key = key, n.type = $type
-      `,
-      this.tx,
-      {
-        keys,
-        type
-      }
-    )
-  }
-
-  async deleteMedia(key: string): Promise<void> {
-    if (!key) return
-    await this.neo4jService.write(`
-        MATCH (n:Media)
-        WHERE n.key = $key
-        DETACH DELETE n
-      `,
-      this.tx,
-      {
-        key
-      }
-    )
-  }
-
 }

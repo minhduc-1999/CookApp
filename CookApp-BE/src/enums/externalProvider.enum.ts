@@ -1,3 +1,3 @@
-export enum ExternalProvider {
+export enum ExternalProviderType {
   GOOGLE = "GOOGLE",
 }

@@ -1,12 +1,13 @@
 import { Body, Controller, Get, Post, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
-import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
+import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { UserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { CreateCommentCommand } from "modules/user/useCases/createComment";
@@ -15,7 +16,6 @@ import { CreateCommentResponse } from "modules/user/useCases/createComment/creat
 import { GetCommentsQuery } from "modules/user/useCases/getComments";
 import { GetCommentsRequest } from "modules/user/useCases/getComments/getCommentsRequest";
 import { GetCommentsResponse } from "modules/user/useCases/getComments/getCommentsResponse";
-import { Transaction } from "neo4j-driver";
 import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/comments")
@@ -27,11 +27,11 @@ export class CommentController {
   @Post()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(CreateCommentResponse, "Create comment successfully")
-  @RequestTransaction()
+  @HttpRequestTransaction()
   async createComment(
     @Body() body: CreateCommentRequest,
     @UserReq() user: User,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<CreateCommentResponse>> {
     const commentsQuery = new CreateCommentCommand(user, body, tx);
     const result = await this._commandBus.execute(commentsQuery);

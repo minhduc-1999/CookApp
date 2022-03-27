@@ -1,13 +1,13 @@
 import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { BaseCommand } from "base/cqrs/command.base";
 import { User } from "domains/social/user.domain";
 import { IAuthentication } from "modules/auth/services/authentication.service";
-import { Transaction } from "neo4j-driver";
 import { LoginResponse } from "./loginResponse";
 
 export class LoginCommand extends BaseCommand {
-  constructor(tx: Transaction, user: User) {
+  constructor(tx: ITransaction, user: User) {
     super(tx, user)
   }
 }
