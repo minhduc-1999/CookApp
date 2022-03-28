@@ -44,7 +44,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   async getUserByEmail(email: string): Promise<User> {
     const user = await this._repo
       .createQueryBuilder("user")
-      .innerJoinAndSelect("user.account", "account")
+      .leftJoinAndSelect("user.account", "account")
       .where("account.email = :email", { email })
       .select(["account", "user.id", "user.displayName", "user.avatar"])
       .getOne()
@@ -54,7 +54,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   async getUserByUsername(username: string): Promise<User> {
     const user = await this._repo
       .createQueryBuilder("user")
-      .innerJoinAndSelect("user.account", "account")
+      .leftJoinAndSelect("user.account", "account")
       .where("account.username = :username", { username })
       .select(["user.id", "user.displayName", "user.avatar", "account"])
       .getOne()
@@ -64,7 +64,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   async getUserById(id: string): Promise<User> {
     const user = await this._repo
       .createQueryBuilder("user")
-      .innerJoinAndSelect("user.account", "account")
+      .leftJoinAndSelect("user.account", "account")
       .where("user.id = :id", { id })
       .select(["user.id", "user.displayName", "user.avatar", "account"])
       .getOne()
@@ -84,13 +84,13 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   }
 
   async getUsers(query: PageOptionsDto): Promise<[User[], number]> {
-    const result = await this._repo.createQueryBuilder("user")
+    const [entities, total] = await this._repo.createQueryBuilder("user")
       .skip(query.limit * query.offset)
       .limit(query.limit)
       .getManyAndCount()
     return [
-      result[0]?.map(entity => entity.toDomain()),
-      result[1]
+      entities?.map(entity => entity.toDomain()),
+      total
     ]
   }
 

@@ -30,8 +30,8 @@ export class CommentRepository
   async getReplies(parent: Comment, queryOpt: PageOptionsDto): Promise<[Comment[], number]> {
     const [entities, total] = await this._commentRepo
       .createQueryBuilder("comment")
-      .innerJoinAndSelect("comment.user", "user")
-      .innerJoinAndSelect("comment.medias", "media")
+      .leftJoinAndSelect("comment.user", "user")
+      .leftJoinAndSelect("comment.medias", "media")
       .where("comment.parent_id = :parentId", { parentId: parent.id })
       .select(["comment", "user", "media"])
       .skip(queryOpt.limit * queryOpt.offset)
@@ -73,8 +73,8 @@ export class CommentRepository
   async getComments(target: IInteractable, query: PageOptionsDto): Promise<[Comment[], number]> {
     const [entities, total] = await this._commentRepo
       .createQueryBuilder("comment")
-      .innerJoinAndSelect("comment.user", "user")
-      .innerJoinAndSelect("comment.medias", "media")
+      .leftJoinAndSelect("comment.user", "user")
+      .leftJoinAndSelect("comment.medias", "media")
       .where("comment.target_id = :targetId", { targetId: target.id })
       .andWhere("comment.parent_id IS NULL")
       .select(["comment", "user", "media"])

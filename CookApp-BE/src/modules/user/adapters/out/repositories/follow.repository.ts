@@ -45,7 +45,7 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
     if (query) {
       [entities, total] = await this._followRepo
         .createQueryBuilder("follow")
-        .innerJoinAndSelect("follow.follower", "follower")
+        .leftJoinAndSelect("follow.follower", "follower")
         .where("follow.followee_id = :userId", { userId })
         .select(["follow", "follower"])
         .skip(query.limit * query.offset)
@@ -54,7 +54,7 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
     } else {
       [entities, total] = await this._followRepo
         .createQueryBuilder("follow")
-        .innerJoinAndSelect("follow.follower", "follower")
+        .leftJoinAndSelect("follow.follower", "follower")
         .where("follow.followee_id = :userId", { userId })
         .select(["follow", "follower"])
         .getManyAndCount()
@@ -68,7 +68,7 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
     if (query) {
       [entities, total] = await this._followRepo
         .createQueryBuilder("follow")
-        .innerJoinAndSelect("follow.followee", "followee")
+        .leftJoinAndSelect("follow.followee", "followee")
         .where("follow.follower_id = :userId", { userId })
         .select(["follow", "followee"])
         .skip(query.limit * query.offset)
@@ -77,7 +77,7 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
     } else {
       [entities, total] = await this._followRepo
         .createQueryBuilder("follow")
-        .innerJoinAndSelect("follow.followee", "followee")
+        .leftJoinAndSelect("follow.followee", "followee")
         .where("follow.follower_id = :userId", { userId })
         .select(["follow", "followee"])
         .getManyAndCount()

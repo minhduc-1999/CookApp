@@ -22,10 +22,10 @@ export class WallRepository extends BaseRepository implements IWallRepository {
   async getPosts(authorId: string, query: GetWallPostsRequest): Promise<[Post[], number]> {
     const [entities, total] = await this._postRepo
       .createQueryBuilder("post")
-      .innerJoinAndSelect("post.interaction", "interaction")
-      .innerJoinAndSelect("post.author", "author")
-      .innerJoinAndSelect("post.medias", "media")
-      .innerJoinAndSelect("media.interaction", "mediaInter")
+      .leftJoinAndSelect("post.interaction", "interaction")
+      .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("post.medias", "media")
+      .leftJoinAndSelect("media.interaction", "mediaInter")
       .where("author.id = :authorId", { authorId })
       .select(["post", "interaction", "media", "mediaInter"])
       .skip(query.limit * query.offset)

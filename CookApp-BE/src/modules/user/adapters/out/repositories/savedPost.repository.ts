@@ -45,7 +45,7 @@ export class SavedPostRepository extends BaseRepository implements ISavedPostRep
     const [entities, total] = await this._savedPostRepo
       .createQueryBuilder("saved")
       .innerJoin("saved.user", "user")
-      .innerJoinAndSelect("saved.post", "post")
+      .leftJoinAndSelect("saved.post", "post")
       .where("user.id = :userId", { userId: user.id })
       .select(["saved", "post"])
       .skip(queryOpt.limit * queryOpt.offset)

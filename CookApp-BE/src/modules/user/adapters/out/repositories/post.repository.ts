@@ -28,10 +28,10 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   async getPostById(postId: string): Promise<Post> {
     const postEntity = await this._postRepo
       .createQueryBuilder("post")
-      .innerJoinAndSelect("post.interaction", "interaction")
-      .innerJoinAndSelect("post.author", "author")
-      .innerJoinAndSelect("post.medias", "media")
-      .innerJoinAndSelect("media.interaction", "mediaInter")
+      .leftJoinAndSelect("post.interaction", "interaction")
+      .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("post.medias", "media")
+      .leftJoinAndSelect("media.interaction", "mediaInter")
       .where("post.id = :id", { id: postId })
       .select(["post", "interaction", "author", "media", "mediaInter"])
       .getOne()

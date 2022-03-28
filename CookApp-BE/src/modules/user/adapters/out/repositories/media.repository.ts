@@ -20,7 +20,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
   async getMedias(ids: string[]): Promise<PostMedia[]> {
     const entities = await this._postMediaRepo
       .createQueryBuilder("media")
-      .innerJoinAndSelect("media.interaction", "interaction")
+      .leftJoinAndSelect("media.interaction", "interaction")
       .where("media.id IN (:...ids)", { ids })
       .select(["media", "interaction"])
       .getMany()
@@ -30,7 +30,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
   async getMedia(id: string): Promise<PostMedia> {
     const entity = await this._postMediaRepo
       .createQueryBuilder("media")
-      .innerJoinAndSelect("media.interaction", "interaction")
+      .leftJoinAndSelect("media.interaction", "interaction")
       .where("media.id = :id", { id })
       .select(["media", "interaction"])
       .getOne()

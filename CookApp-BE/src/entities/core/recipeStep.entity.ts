@@ -23,20 +23,21 @@ export class RecipeStepEntity {
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 
+  @OneToMany(() => RecipeStepMediaEntity, media => media.recipeStep)
+  medias: RecipeStepMediaEntity[]
+
   constructor(step: RecipeStep, food?: Food, interaction?: IInteractable) {
     this.interaction = new InteractionEntity(interaction)
     this.content = step?.content
     this.food = food && new FoodEntity(food)
   }
 
-  @OneToMany(() => RecipeStepMediaEntity, media => media.recipeStep)
-  medias: RecipeStepMediaEntity[]
-
   toDomain(): RecipeStep {
     const audit = new Audit(this.interaction)
     return new RecipeStep({
       ...audit,
-      content: this.content
+      content: this.content,
+      photos: this.medias?.map(media => media.toDomain())
     })
   }
 

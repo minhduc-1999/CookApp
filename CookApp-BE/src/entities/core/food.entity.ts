@@ -15,7 +15,7 @@ export class FoodEntity extends AbstractEntity {
   @Column({ name: 'total_time' })
   totalTime: number;
 
-  @Column({ name: 'url' })
+  @Column({ name: 'url', nullable: true })
   url: string
 
   @Column({ name: 'description', nullable: true })
@@ -24,7 +24,7 @@ export class FoodEntity extends AbstractEntity {
   @Column({ name: "name" })
   name: string;
 
-  @Column({ name: "video_url" })
+  @Column({ name: "video_url", nullable: true })
   videoUrl: string;
 
   @OneToMany(() => FoodIngredientEntity, foodIng => foodIng.food)

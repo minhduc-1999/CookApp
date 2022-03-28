@@ -30,11 +30,11 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
   async getPosts(user: User, query: PageOptionsDto): Promise<[Post[], number]> {
     const [entities, total] = await this._feedRepo
       .createQueryBuilder("feed")
-      .innerJoinAndSelect("feed.post", "post")
-      .innerJoinAndSelect("post.author", "author")
-      .innerJoinAndSelect("post.interaction", "interaction")
-      .innerJoinAndSelect("post.medias", "media")
-      .innerJoinAndSelect("media.interaction", "mediaInter")
+      .leftJoinAndSelect("feed.post", "post")
+      .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("post.interaction", "interaction")
+      .leftJoinAndSelect("post.medias", "media")
+      .leftJoinAndSelect("media.interaction", "mediaInter")
       .where("feed.user_id = :userId", { userId: user.id })
       .select([
         "feed",
