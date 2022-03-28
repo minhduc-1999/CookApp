@@ -141,31 +141,9 @@ export class initTrigger1648461869105 implements MigrationInterface {
             FOR EACH ROW
             EXECUTE PROCEDURE post_insert_trigger_fnc();`
     )
-    await queryRunner.query(`
-            CREATE OR REPLACE FUNCTION post_soft_delete_trigger_fnc() returns trigger 
-            AS
-            $$
-            BEGIN
-              if new."deleted_at" is not null then 
-                update users set n_posts = n_posts - 1 where id = new."author_id";
-              end if;
-                return new;
-            END;
-            $$
-            LANGUAGE 'plpgsql';`
-    )
-    await queryRunner.query(`
-            CREATE TRIGGER post_soft_delete_trigger
-            AFTER update 
-            ON "posts"
-            FOR EACH ROW
-            EXECUTE PROCEDURE post_soft_delete_trigger_fnc();`
-    )
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.query(`DROP TRIGGER post_soft_delete_trigger ON posts`)
-    await queryRunner.query(`DROP FUNCTION post_soft_delete_trigger_fnc`)
     await queryRunner.query(`DROP TRIGGER post_insert_trigger ON posts`)
     await queryRunner.query(`DROP FUNCTION post_insert_trigger_fnc`)
 
