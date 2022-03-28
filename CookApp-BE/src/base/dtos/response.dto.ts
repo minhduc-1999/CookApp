@@ -10,6 +10,7 @@ import { MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { Ingredient } from "domains/core/ingredient.domain";
+import { RecipeStep } from "domains/core/recipeStep.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -65,12 +66,16 @@ export class MediaResponse {
   @ApiResponseProperty({ enum: Number })
   numberOfComment?: number
 
-  constructor(media: Media, reaction?: Reaction, nComents?: number) {
+  @ApiResponseProperty({ enum: Number })
+  numberOfReaction?: number
+
+  constructor(media: Media, reaction?: Reaction, nComents?: number, nReacitons?: number) {
     this.url = media?.url
     this.type = media?.type
     this.id = media?.id
     this.reaction = reaction?.type
     this.numberOfComment = nComents
+    this.numberOfReaction = nReacitons
   }
 }
 
@@ -290,10 +295,18 @@ export class RecipeStepResponse {
   @ApiResponseProperty({ type: String })
   id: string
 
-  constructor(content: string, photos: Media[], id: string) {
-    this.content = content
-    this.photos = photos?.map(photo => new MediaResponse(photo))
-    this.id = id
+  @ApiResponseProperty({ type: Number })
+  numberOfComment: number
+
+  @ApiResponseProperty({ type: Number })
+  numberOfReaction: number
+
+  constructor(step: RecipeStep) {
+    this.content = step?.content
+    this.photos = step?.photos?.map(photo => new MediaResponse(photo))
+    this.id = step?.id
+    this.numberOfComment = step?.nComments
+    this.numberOfReaction = step?.nReactions
   }
 }
 
@@ -339,7 +352,7 @@ export class FoodResponse extends AuditResponse {
     this.photos = food?.photos.map(photo => new MediaResponse(photo));
     this.totalTime = food?.totalTime
     this.steps = food?.steps.map(step =>
-      new RecipeStepResponse(step.content, step.photos, step.id))
+      new RecipeStepResponse(step))
     this.ingredients = food?.ingredients.map(ingredient =>
       new IngredientResponse(ingredient)
     )

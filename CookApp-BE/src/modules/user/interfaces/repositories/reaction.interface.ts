@@ -7,4 +7,5 @@ export interface IReactionRepository {
   delete(reaction: Reaction): Promise<void>;
   findById(userId: string, targetId: string): Promise<Reaction>;
   findByIds(userId: string, targetIds: string[]): Promise<Reaction[]>;
+  count(targetId: string): Promise<number>
 }

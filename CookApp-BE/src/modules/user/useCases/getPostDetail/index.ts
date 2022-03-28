@@ -48,7 +48,8 @@ export class GetPostDetailQueryHandler
     const task = post.medias?.map(async media => {
       const mediaReaction = await this._reacRepo.findById(user.id, media.id)
       const nComments = await this._commentRepo.countComments(media)
-      return new MediaResponse(media, mediaReaction, nComments)
+      const nReactions = await this._reacRepo.count(media.id)
+      return new MediaResponse(media, mediaReaction, nComments, nReactions)
     })
 
     result.medias = await Promise.all(task)

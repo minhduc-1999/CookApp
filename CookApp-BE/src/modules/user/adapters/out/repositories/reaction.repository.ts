@@ -14,6 +14,13 @@ export class ReactionRepository extends BaseRepository implements IReactionRepos
   ) {
     super()
   }
+  async count(targetId: string): Promise<number> {
+    const total = await this._reactionRepo
+      .createQueryBuilder("reaction")
+      .where("reaction.target_id = :targetId", { targetId })
+      .getCount()
+    return total
+  }
 
   async create(reaction: Reaction): Promise<void> {
     const queryRunner = this.tx.getRef() as QueryRunner

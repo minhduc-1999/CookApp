@@ -5,6 +5,7 @@ import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
+import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { ISavedPostRepository } from "modules/user/interfaces/repositories/savedPost.interface";
@@ -29,7 +30,9 @@ export class GetFeedPostsQueryHandler
     @Inject("IReactionRepository")
     private _reactionRepo: IReactionRepository,
     @Inject("ISavedPostRepository")
-    private _savedRepo: ISavedPostRepository
+    private _savedRepo: ISavedPostRepository,
+    @Inject("ICommentRepository")
+    private _commentRepo: ICommentRepository
   ) { }
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
@@ -59,6 +62,8 @@ export class GetFeedPostsQueryHandler
           user.id,
           post.id
         );
+        post.nComments = await this._commentRepo.countComments(post)
+        post.nReactions = await this._reactionRepo.count(post.id)
         const saved = await this._savedRepo.find(post.id, user.id)
         const temp = new GetPostResponse(post, reaction, saved ? true : false);
         return temp;

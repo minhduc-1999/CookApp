@@ -6,6 +6,8 @@ import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
+import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
+import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { GetFoodDetailResponse } from "./getFoodDetailResponse";
 
 export class GetFoodDetailQuery extends BaseQuery {
@@ -23,6 +25,10 @@ export class GetFoodDetailQueryHandler
   constructor(
     @Inject("IFoodRepository")
     private _foodRepo: IFoodRepository,
+    @Inject("IReactionRepository")
+    private _reacRepo: IReactionRepository,
+    @Inject("ICommentRepository")
+    private _commentRepo: ICommentRepository,
     @Inject("IStorageService") private _storageService: IStorageService
   ) { }
   async execute(query: GetFoodDetailQuery): Promise<GetFoodDetailResponse> {
@@ -38,13 +44,18 @@ export class GetFoodDetailQueryHandler
     if (food.steps.length > 0) {
       food.steps = await Promise.all(
         food.steps.map(async (step) => {
+          const nReactions = await this._reacRepo.count(step.id)
+          const nComments = await this._commentRepo.countComments(step)
           return {
             ...step,
+            nReactions,
+            nComments,
             photos: (await this._storageService.getDownloadUrls(step.photos))
           };
         })
       );
     }
+
 
     return new GetFoodDetailResponse(food);
   }

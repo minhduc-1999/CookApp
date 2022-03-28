@@ -1,5 +1,5 @@
 import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
@@ -8,6 +8,7 @@ import { FoodIngredientEntity } from "entities/core/foodIngredient.entity";
 import { RecipeStepEntity, RecipeStepMediaEntity } from "entities/core/recipeStep.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";
+import { UserModule } from "modules/user/user.module";
 import { ConfigModule } from "nestjs-config";
 import { FoodController } from "./adapters/in/food.controller";
 import { FoodRepository } from "./adapters/out/repositories/food.repository";
@@ -52,7 +53,8 @@ const controller = [FoodController];
       FoodIngredientEntity,
       RecipeStepEntity,
       RecipeStepMediaEntity
-    ])
+    ]),
+    forwardRef(() => UserModule)
   ],
   controllers: controller,
   providers: [

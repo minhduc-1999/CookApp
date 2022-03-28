@@ -1,5 +1,5 @@
 import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
@@ -144,7 +144,7 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
     AuthModule,
-    CoreModule,
+    forwardRef(() => CoreModule),
     TypeOrmModule.forFeature([
       UserEntity,
       AccountEntity,
@@ -174,6 +174,10 @@ const repositories = [
     ...queryHandlers,
     ...eventHandlers
   ],
-  exports: ["IFollowRepository"],
+  exports: [
+    "IFollowRepository",
+    "IReactionRepository",
+    "ICommentRepository"
+  ],
 })
 export class UserModule {}
