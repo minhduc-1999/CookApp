@@ -13,6 +13,7 @@ import { IReactionRepository } from "modules/user/interfaces/repositories/reacti
 import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Post } from "domains/social/post.domain";
+import { IFoodRecipeService } from "modules/core/services/recipeStep.service";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(
@@ -34,6 +35,8 @@ export class ReactCommandHandler
     private _postService: IPostService,
     @Inject("IPostMediaRepository")
     private _postMediaRepo: IPostMediaRepository,
+    @Inject("IFoodRecipeService")
+    private _recipeService : IFoodRecipeService,
     private _eventBus: EventBus,
     @Inject("IReactionRepository")
     private _reactionRepo: IReactionRepository
@@ -58,6 +61,9 @@ export class ReactCommandHandler
             ResponseDTO.fail("Media not found")
           );
         }
+        break;
+      case InteractiveTargetType.RECIPE_STEP:
+        target = await this._recipeService.getStepById(reactReq.targetId)
         break;
       default:
         throw new BadRequestException(ResponseDTO.fail("Target type not valid"))

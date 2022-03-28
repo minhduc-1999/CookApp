@@ -7,7 +7,6 @@ import { CreateCommentResponse } from "./createCommentResponse";
 import { ICommentService } from "modules/user/services/comment.service";
 import { IPostService } from "modules/user/services/post.service";
 import { CommentPostEvent } from "modules/notification/events/CommentNotification";
-import { RecipeStep } from "domains/core/recipeStep.domain";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
@@ -16,6 +15,7 @@ import { InteractiveTargetType, MediaType } from "enums/social.enum";
 import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 import { CommentMedia, Image } from "domains/social/media.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
+import { IFoodRecipeService } from "modules/core/services/recipeStep.service";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
@@ -41,6 +41,8 @@ export class CreateCommentCommandHandler
     private _postMediaRepo: IPostMediaRepository,
     @Inject("IStorageService")
     private _storageService: IStorageService,
+    @Inject("IFoodRecipeService")
+    private _recipeService : IFoodRecipeService,
     @Inject("IPostService")
     private _postService: IPostService
   ) { }
@@ -70,7 +72,7 @@ export class CreateCommentCommandHandler
         }
         break;
       case InteractiveTargetType.RECIPE_STEP:
-        target = new RecipeStep({ id: commentReq.targetId })
+        target = await this._recipeService.getStepById(commentReq.targetId)
         break;
       default:
         throw new BadRequestException(ResponseDTO.fail("Target type not valid"))

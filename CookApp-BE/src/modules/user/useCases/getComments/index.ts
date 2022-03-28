@@ -3,11 +3,11 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { RecipeStep } from "domains/core/recipeStep.domain";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Comment } from "domains/social/comment.domain";
 import { User } from "domains/social/user.domain";
 import { InteractiveTargetType } from "enums/social.enum";
+import { IFoodRecipeService } from "modules/core/services/recipeStep.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
@@ -38,6 +38,8 @@ export class GetCommentsQueryHandler
     private _commentService: ICommentService,
     @Inject("IPostMediaRepository")
     private _postMediaRepo: IPostMediaRepository,
+    @Inject("IFoodRecipeService")
+    private _recipeService : IFoodRecipeService,
   ) { }
   async execute(query: GetCommentsQuery): Promise<GetCommentsResponse> {
     const { request } = query;
@@ -57,8 +59,7 @@ export class GetCommentsQueryHandler
           [target] = await this._postService.getPostDetail(request.targetId)
           break;
         case InteractiveTargetType.RECIPE_STEP:
-          //TODO Check step's existence
-          target = new RecipeStep({ id: request.targetId })
+          target = await this._recipeService.getStepById(request.targetId)
           break;
         case InteractiveTargetType.POST_MEDIA:
           target = await this._postMediaRepo.getMedia(request.targetId)
