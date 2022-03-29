@@ -13,7 +13,7 @@ export enum MediaType {
 }
 
 export enum PostType {
-  ALBUM = "ALBUM", MOMENT = "MOMENT"
+  MOMENT = "MOMENT"
 }
 
 export enum Sex {

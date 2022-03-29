@@ -35,7 +35,7 @@ export class CreatePostRequest {
 
   @IsEnum(PostType)
   @ApiProperty({ enum: PostType })
-  kind: "ALBUM" | "MOMENT"
+  kind: PostType
 
   @IsOptional()
   @IsMeaningfulString(1)

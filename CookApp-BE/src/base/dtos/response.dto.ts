@@ -1,5 +1,5 @@
 import { ApiProperty, ApiPropertyOptional, ApiResponseProperty } from "@nestjs/swagger";
-import { Album, Moment, Post } from "domains/social/post.domain";
+import { Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { MetaDTO } from "./responseMeta.dto";
@@ -11,6 +11,7 @@ import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { Ingredient } from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
+import { Album } from "domains/social/album.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -138,11 +139,6 @@ export class PostResponse extends AuditResponse {
     this.reaction = reaction?.type
     this.saved = saved
     switch (post?.type) {
-      case PostType.ALBUM:
-        const album = post as Album
-        this.name = album?.name
-          ;
-        break;
       case PostType.MOMENT:
         const moment = post as Moment
         this.content = moment?.content
@@ -245,25 +241,14 @@ export class AlbumResponse extends AuditResponse {
   @ApiResponseProperty({ type: [MediaResponse] })
   medias?: MediaResponse[]
 
-  @ApiResponseProperty({ enum: ["Album"] })
-  kind: "Album"
-
   @ApiResponseProperty({ type: AuthorResponse })
   author: AuthorResponse
 
-  @ApiResponseProperty({ type: Number })
-  numOfReaction: number;
-
-  @ApiResponseProperty({ type: Number })
-  numOfComment: number;
-
-  constructor(post: Album) {
-    super(post)
-    this.name = post?.name
-    this.medias = post?.medias.map(media => new MediaResponse(media));
-    this.author = new AuthorResponse(post?.author)
-    this.numOfReaction = post?.nReactions
-    this.numOfComment = post?.nComments
+  constructor(album: Album) {
+    super(album)
+    this.name = album?.name
+    this.medias = album?.medias.map(media => new MediaResponse(media));
+    this.author = new AuthorResponse(album?.owner)
   }
 }
 

@@ -8,7 +8,7 @@ import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { Album, Moment, Post } from "domains/social/post.domain";
+import { Post } from "domains/social/post.domain";
 import { Image } from "domains/social/media.domain";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { MediaType } from "enums/social.enum";
@@ -41,21 +41,21 @@ export class EditPostCommandHandler
         )
       );
 
-    // // Delete images
-    // if (req.deleteImages && req.deleteImages.length > 0) {
-    //   // await this._mediaRepository.setTransaction(tx).deleteMedias(deleteImageKeys)
-    //   req.deleteImages = await this._storageService.deleteFiles(req.deleteImages);
-    // }
+    // Delete images
+    if (req.deleteImages && req.deleteImages.length > 0) {
+      // await this._mediaRepository.setTransaction(tx).deleteMedias(deleteImageKeys)
+      req.deleteImages = await this._storageService.deleteFiles(req.deleteImages);
+    }
 
-    // // Add new images
-    // if (req.addImages && req.addImages.length > 0) {
-    //   const keys = await this._storageService.makePublic(
-    //     command.req.addImages,
-    //     MediaType.IMAGE
-    //   );
-    //   req.addImages = keys
-    //   // await this._mediaRepository.setTransaction(tx).addMedias(keys, MediaType.POST_IMAGE)
-    // }
+    // Add new images
+    if (req.addImages && req.addImages.length > 0) {
+      const keys = await this._storageService.makePublic(
+        command.req.addImages,
+        MediaType.IMAGE
+      );
+      req.addImages = keys
+      // await this._mediaRepository.setTransaction(tx).addMedias(keys, MediaType.POST_IMAGE)
+    }
     
 
     let updateData: Partial<Post> = existedPost.update({

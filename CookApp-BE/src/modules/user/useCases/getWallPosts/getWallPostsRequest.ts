@@ -5,7 +5,7 @@ import { PostType } from "enums/social.enum";
 
 export class GetWallPostsRequest extends PageOptionsDto {
   @IsEnum(PostType)
-  @ApiPropertyOptional({ enum: PostType, default: "Moment"})
+  @ApiPropertyOptional({ enum: PostType})
   @IsOptional()
-  kind: "Album" | "Moment" 
+  kind: PostType
 }
