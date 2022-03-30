@@ -8,6 +8,7 @@ import 'package:tastify/EditPostScreen/EditPostActivity.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
+import 'package:tastify/NewFeedScreen/MultiImagesDetailActivity.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -22,20 +23,22 @@ class Post extends StatefulWidget {
       this.userId,
       this.location,
       this.content,
-      this.images,
+      this.medias,
       this.avatar,
       this.displayName,
       this.numOfReaction,
       this.numOfComment,
       this.dateTime,
-      this.isLike});
+      this.isLike,
+      this.saved,
+      this.reloadFunction});
 
   factory Post.fromJSON(Map data) {
     return Post(
       location: data['location'],
       id: data['id'],
       content: data['content'],
-      images: data['images'],
+      medias: data['medias'],
       avatar: data['avatar'],
       displayName: data['displayName'],
       numOfReaction: data['numOfReaction'],
@@ -64,24 +67,26 @@ class Post extends StatefulWidget {
   final String location;
   final String displayName;
   final String avatar;
-  final List<Images> images;
+  final List<Medias> medias;
   final int numOfReaction;
   final int numOfComment;
   final DateTime dateTime;
   final bool isLike;
-
+  final bool saved;
+  final Function reloadFunction;
   _Post createState() => _Post(
       id: this.id,
       userId: this.userId,
       location: this.location,
       content: this.content,
-      images: this.images,
+      medias: this.medias,
       displayName: this.displayName,
       avatar: this.avatar,
       numOfReaction: this.numOfReaction,
       numOfComment: this.numOfComment,
       dateTime: this.dateTime,
-      liked: this.isLike);
+      liked: this.isLike,
+      saved: this.saved);
 }
 
 class _Post extends State<Post> {
@@ -89,11 +94,11 @@ class _Post extends State<Post> {
   final String userId;
   final String content;
   final String location;
-  final List<Images> images;
+  final List<Medias> medias;
   final String displayName;
   final String avatar;
   final DateTime dateTime;
-
+  bool saved;
   int numOfReaction;
   int numOfComment;
   bool liked;
@@ -110,13 +115,14 @@ class _Post extends State<Post> {
       this.userId,
       this.location,
       this.content,
-      this.images,
+      this.medias,
       this.displayName,
       this.avatar,
       this.numOfReaction,
       this.numOfComment,
       this.dateTime,
-      this.liked});
+      this.liked,
+      this.saved});
 
   GestureDetector buildLikeIcon() {
     Color color;
@@ -147,11 +153,11 @@ class _Post extends State<Post> {
       child: Stack(
         alignment: Alignment.center,
         children: [
-          images.length == 1
+          medias.length == 1
               ? Container(
                   margin: EdgeInsets.only(bottom: 10),
                   child: ClipRRect(
-                    child: Image.network(images[0].url,
+                    child: Image.network(medias[0].url,
                         fit: BoxFit.cover,
                         width: 1000.0,
                         height: height * 0.55),
@@ -159,8 +165,37 @@ class _Post extends State<Post> {
               : Column(
                   children: [
                     CarouselSlider(
-                        items: images
-                            .map((item) => Container(
+                        items: medias
+                            .map((item) => GestureDetector(
+                                  onTap: () {
+                                    Navigator.push(
+                                        context,
+                                        PageRouteBuilder(
+                                            pageBuilder: (context, animation,
+                                                    secondaryAnimation) =>
+                                                MultiImagesDetailActivity(
+                                                  medias: medias,
+                                                ),
+                                            transitionsBuilder: (context,
+                                                animation,
+                                                secondaryAnimation,
+                                                child) {
+                                              const begin = Offset(0.0, 1.0);
+                                              const end = Offset.zero;
+                                              const curve = Curves.ease;
+
+                                              var tween = Tween(
+                                                      begin: begin, end: end)
+                                                  .chain(
+                                                      CurveTween(curve: curve));
+
+                                              return SlideTransition(
+                                                position:
+                                                    animation.drive(tween),
+                                                child: child,
+                                              );
+                                            }));
+                                  },
                                   child: Container(
                                     margin: EdgeInsets.only(bottom: 10),
                                     child: ClipRRect(
@@ -186,7 +221,7 @@ class _Post extends State<Post> {
                             enlargeCenterPage: false)),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
-                      children: images.asMap().entries.map((entry) {
+                      children: medias.asMap().entries.map((entry) {
                         return GestureDetector(
                           onTap: () => _controller.animateToPage(entry.key),
                           child: Container(
@@ -236,7 +271,7 @@ class _Post extends State<Post> {
         children: [
           (avatar != null)
               ? CircleAvatar(
-                  radius: 15,
+                  radius: 17,
                   backgroundColor: Colors.grey,
                   backgroundImage: NetworkImage(avatar),
                 )
@@ -245,20 +280,26 @@ class _Post extends State<Post> {
                                       width: size.width * 0.20,
                                       height: size.width * 0.20,
                                       fit: BoxFit.fill),*/
-                  radius: 15,
+                  radius: 17,
                   backgroundColor: Colors.grey,
                   backgroundImage:
                       AssetImage('assets/images/default_avatar.png')),
           SizedBox(
             width: width * 0.04,
           ),
-          GestureDetector(
-            child: displayName != null
-                ? Text(displayName, style: boldStyle)
-                : Text("user", style: boldStyle),
-            onTap: () {
-              openProfile(context, userId);
-            },
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GestureDetector(
+                child: displayName != null
+                    ? Text(displayName, style: boldStyle)
+                    : Text("user", style: boldStyle),
+                onTap: () {
+                  openProfile(context, userId);
+                },
+              ),
+              location != null ? Text(location, style: TextStyle(fontSize: 12),) : Container()
+            ],
           ),
           userId == currentUserId
               ? Expanded(
@@ -271,17 +312,45 @@ class _Post extends State<Post> {
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                       builder: (context) => buildMoreVert());*/
-                        Navigator.push(
+                        /*Navigator.push(
                           context,
                           MaterialPageRoute(
                               builder: (context) => EditPostActivity(
                                     id: this.id,
-                                    images: this.images,
+                                    medias: this.medias,
                                     content: this.content,
                                     avatar: this.avatar,
                                     displayName: this.displayName,
                                   )),
-                        );
+                        );*/
+                        Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                                pageBuilder: (context, animation,
+                                    secondaryAnimation) =>
+                                    EditPostActivity(
+                                      id: this.id,
+                                      medias: this.medias,
+                                      content: this.content,
+                                      avatar: this.avatar,
+                                      displayName: this.displayName,
+                                      location: this.location,
+                                    ),
+                                transitionsBuilder: (context,
+                                    animation,
+                                    secondaryAnimation,
+                                    child) {
+                                  const begin = Offset(0.0, 1.0);
+                                  const end = Offset.zero;
+                                  const curve = Curves.ease;
+
+                                  var tween = Tween(
+                                      begin: begin, end: end)
+                                      .chain(
+                                      CurveTween(curve: curve));
+
+                                  return FadeTransition(opacity: animation,child: child,);
+                                })).then(widget.reloadFunction);
                       },
                       icon: Icon(Icons.edit_outlined),
                       color: Colors.black.withOpacity(0.7),
@@ -375,7 +444,7 @@ class _Post extends State<Post> {
                     context: context,
                     builder: (BuildContext context) {
                       return CommentActivity(
-                        targetKeyOrID: id,
+                        targetId: id,
                         targetType: Config.postCommentsType,
                         stepName: " ",
                       );
@@ -388,7 +457,10 @@ class _Post extends State<Post> {
                 child: Container(
               margin: EdgeInsets.only(right: 15),
               alignment: Alignment.centerRight,
-              child: Icon(FontAwesomeIcons.solidSave, color: Colors.black,),
+              child: Icon(
+                FontAwesomeIcons.solidSave,
+                color: Colors.black,
+              ),
             ))
           ],
         ),
@@ -444,15 +516,16 @@ class _Post extends State<Post> {
       ],
     );
   }
+
   void _likePost(String postId2) async {
-    await APIService.react(ReactRequestModel(react: 'LOVE', targetKeyOrID: id,targetType:Config.postReactType));
+    await APIService.react(ReactRequestModel(
+        react: 'LOVE', targetKeyOrID: id, targetType: Config.postReactType));
     if (liked) {
       setState(() {
         liked = false;
         numOfReaction--;
       });
-    }
-    else {
+    } else {
       setState(() {
         liked = true;
         showHeart = true;

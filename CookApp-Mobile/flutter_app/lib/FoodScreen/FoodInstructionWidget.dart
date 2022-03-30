@@ -3,50 +3,72 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tastify/CommentScreen/CommentActivity.dart';
-import 'package:tastify/Model/FoodRespondModel.dart';
+import 'package:tastify/Model/FoodInstructionRespondModel.dart';
+import 'package:tastify/Services/APIService.dart';
+
 import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 
 import '../config.dart';
 import '../constants.dart';
 
 class FoodInstructionWidget extends StatefulWidget {
-  final Foods food;
-
+  final String id;
+  final String name;
   const FoodInstructionWidget({
-    this.food,
+    this.id,
+    this.name
   });
 
   @override
   _FoodInstructionWidgetState createState() =>
-      _FoodInstructionWidgetState(this.food);
+      _FoodInstructionWidgetState(this.id, this.name);
 }
 
 class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
-  final Foods food;
-
-
-  _FoodInstructionWidgetState(this.food);
+  FoodInstructionRespondModel food = FoodInstructionRespondModel();
+  final String id;
+  final String name;
+  bool circular = true;
+  _FoodInstructionWidgetState(this.id, this.name);
 
   List<String> ingredients = [];
   List<Steps> steps = [];
-
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fetchData();
+  }
+  void fetchData() async {
+      var temp = await APIService.getFoodInstruction(id);
+      setState(() {
+        food = temp;
+        circular = false;
+        for (var i in food.data.ingredients) {
+          ingredients.add(i.quantity.toString() + " " + i.unit.toString() + " " + i.name);
+        }
+        for (var i in food.data.steps) {
+          steps.add(i);
+        }
+      });
+  }
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
-    ingredients.clear();
+    /*ingredients.clear();
     steps.clear();
-    for (var i in food.ingredients) {
+    for (var i in food.data.ingredients) {
       ingredients.add(i.quantity.toString() + " " + i.unit.toString() + " " + i.name);
     }
-    for (var i in food.steps) {
+    for (var i in food.data.steps) {
       steps.add(i);
-    }
+    }*/
     return Scaffold(
         appBar: AppBar(
           automaticallyImplyLeading: true,
           brightness: Brightness.dark,
           title: Text(
-            food.name,
+            name,
           ),
           flexibleSpace: Container(
             decoration: BoxDecoration(
@@ -58,7 +80,7 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
             ),
           ),
         ),
-        body: Container(
+        body: circular ? Center(child: CircularProgressIndicator()) : Container(
           margin: EdgeInsets.all(8),
           child: SingleChildScrollView(
             child: Column(
@@ -67,7 +89,7 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
                 ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Image.network(
-                    food.photos[0].url,
+                    food.data.photos[0].url,
                     fit: BoxFit.cover,
                     height: height * 0.5,
                   ),
@@ -100,7 +122,7 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
                 ),*/
                 StepItem(steps: steps,),
 
-                food.videoUrl != null ? Column(
+                food.data.videoUrl != null ? Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
@@ -115,7 +137,7 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
                         player: YoutubePlayer(
                           controller: YoutubePlayerController(
                             initialVideoId: YoutubePlayer.convertUrlToId(
-                                food.videoUrl),
+                                food.data.videoUrl),
                             flags: YoutubePlayerFlags(autoPlay: false),
                           ),
                           showVideoProgressIndicator: true,
@@ -142,6 +164,8 @@ class _FoodInstructionWidgetState extends State<FoodInstructionWidget> {
           ),
         ));
   }
+
+
 }
 
 class Ingredient extends StatelessWidget {
@@ -247,7 +271,7 @@ class _StepItemState extends State<StepItem> {
                         return showModalBottomSheet(
                           context: context,
                           builder: (BuildContext context) {
-                            return CommentActivity(targetKeyOrID: steps[currentStep].id, targetType: Config.stepCommentsType, stepName: "Step " + (currentStep + 1).toString(),);
+                            return CommentActivity(targetId: steps[currentStep].id, targetType: Config.stepCommentsType, stepName: "Step " + (currentStep + 1).toString(),);
                           },
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,

@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
 import 'package:tastify/Services/APIService.dart';
@@ -9,23 +10,28 @@ import 'package:timeago/timeago.dart' as timeago;
 import '../constants.dart';
 
 class CommentActivity extends StatefulWidget {
-  final String targetKeyOrID;
+  final String targetId;
   final String targetType;
   final String stepName;
-  const CommentActivity({this.targetKeyOrID,this.targetType,this.stepName});
+
+  const CommentActivity({this.targetId, this.targetType, this.stepName});
 
   @override
-  _CommentActivityState createState() => _CommentActivityState(targetKeyOrID,targetType,stepName);
+  _CommentActivityState createState() =>
+      _CommentActivityState(targetId, targetType, stepName);
 }
 
 class _CommentActivityState extends State<CommentActivity> {
-  final String targetKeyOrID;
+  final String targetId;
   final String targetType;
   final String stepName;
   List<Comment> comments;
   bool didFetchComments = false;
+  FocusNode focusNode = FocusNode();
+  String labelText = "";
+  String replyFor = "";
 
-  _CommentActivityState(this.targetKeyOrID,this.targetType,this.stepName);
+  _CommentActivityState(this.targetId, this.targetType, this.stepName);
 
   final TextEditingController _commentController = TextEditingController();
 
@@ -38,6 +44,13 @@ class _CommentActivityState extends State<CommentActivity> {
   @override
   Widget build(BuildContext context) {
     return buildPage();
+  }
+
+  updateLabelText(String text, String replyFor) {
+    setState(() {
+      labelText = text;
+      this.replyFor = replyFor;
+    });
   }
 
   Widget buildPage() {
@@ -59,7 +72,9 @@ class _CommentActivityState extends State<CommentActivity> {
                       padding: EdgeInsets.all(8),
                       child: Center(
                           child: Text(
-                            targetType == Config.postCommentsType ? "Comments" : stepName,
+                        targetType == Config.postCommentsType
+                            ? "Comments"
+                            : stepName,
                         style: TextStyle(fontSize: 22),
                       ))),
                   Divider(
@@ -69,63 +84,98 @@ class _CommentActivityState extends State<CommentActivity> {
                   Expanded(
                     child: buildComment(),
                   ),
-
                   Padding(
                     padding: MediaQuery.of(context).viewInsets,
                     child: Container(
-                      child: Row(
-                        children: <Widget>[
-                          // Button send image
-                          Material(
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 1.0),
-                              child: IconButton(
-                                icon: Icon(Icons.image),
-                                onPressed: (){},
-                                color: appPrimaryColor,
-                              ),
-                            ),
-                            color: Colors.white,
-                          ),
-
-                          // Edit text
-                          Flexible(
-                            child: Container(
-                              child: TextField(
-                                onSubmitted: addComment,
-                                style: TextStyle( fontSize: 15.0),
-                                controller: _commentController,
-                                decoration: InputDecoration.collapsed(
-                                  hintText: 'Type your message...',
-                      
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        children: [
+                          this.labelText != ""
+                              ? Padding(
+                                  padding: const EdgeInsets.only(top: 8.0),
+                                  child: Wrap(
+                                    spacing: 10,
+                                    children: [
+                                      Text(
+                                        labelText,
+                                        style: TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12),
+                                      ),
+                                      GestureDetector(
+                                          onTap: () {
+                                            setState(() {
+                                              labelText = "";
+                                            });
+                                          },
+                                          child: Text(
+                                            "Cancel",
+                                            style: TextStyle(
+                                                fontWeight: FontWeight.bold,
+                                                fontSize: 12,
+                                                color: Colors.black
+                                                    .withOpacity(0.6)),
+                                          ))
+                                    ],
+                                  ),
+                                )
+                              : Container(),
+                          Row(
+                            children: <Widget>[
+                              // Button send image
+                              Material(
+                                child: Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 1.0),
+                                  child: IconButton(
+                                    icon: Icon(Icons.image),
+                                    onPressed: () {},
+                                    color: appPrimaryColor,
+                                  ),
                                 ),
-
+                                color: Colors.white,
                               ),
-                            ),
-                          ),
 
-                          // Button send message
-                          Material(
-                            child: Container(
-                              margin: EdgeInsets.symmetric(horizontal: 8.0),
-                              child: IconButton(
-                                icon: Icon(Icons.send),
-                                onPressed: () => addComment(_commentController.text),
-                                color: appPrimaryColor,
+                              // Edit text
+                              Flexible(
+                                child: Container(
+                                  child: TextFormField(
+                                    focusNode: focusNode,
+                                    style: TextStyle(fontSize: 15.0),
+                                    controller: _commentController,
+                                    decoration: InputDecoration.collapsed(
+                                      hintText: 'Type your message...',
+                                    ),
+                                  ),
+                                ),
                               ),
-                            ),
-                            color: Colors.white,
+
+                              // Button send message
+                              Material(
+                                child: Container(
+                                  margin: EdgeInsets.symmetric(horizontal: 8.0),
+                                  child: IconButton(
+                                    icon: Icon(Icons.send),
+                                    onPressed: () => addComment(
+                                        _commentController.text, replyFor),
+                                    color: appPrimaryColor,
+                                  ),
+                                ),
+                                color: Colors.white,
+                              ),
+                            ],
                           ),
                         ],
                       ),
                       width: double.infinity,
-                      height: 50.0,
+                      height: labelText != "" ? 71.0 : 50.0,
                       decoration: BoxDecoration(
-                          border: Border(top: BorderSide(color: appPrimaryColor, width: 0.5)),
+                          border: Border(
+                              top: BorderSide(
+                                  color: appPrimaryColor, width: 0.5)),
                           color: Colors.white),
                     ),
                   ),
-                /*  Padding(
+                  /*  Padding(
                     padding: MediaQuery.of(context).viewInsets,
                     child: ListTile(
                       title: TextFormField(
@@ -154,12 +204,24 @@ class _CommentActivityState extends State<CommentActivity> {
           alignment: FractionalOffset.center,
           child: CircularProgressIndicator());
     } else {
-      return ListView(children: comments);
+      return comments.length > 0 ? ListView(children: comments)
+      : Center(
+        child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+
+            children: [
+              Text("No comments yet", style: TextStyle(fontSize: 16, color: Colors.black.withOpacity(0.5)),),
+              Text("Be the first to comment.", style: TextStyle(fontSize: 16, color: Colors.black.withOpacity(0.5)))
+            ],
+
+        ),
+      );
     }
   }
 
   void fetchData() async {
-    CommentRespondModel dataComment = await APIService.getComment(targetKeyOrID,targetType,"");
+    CommentRespondModel dataComment =
+        await APIService.getComment(targetId, targetType, "");
     List<Comment> temp = [];
     //print("total comment: " + dataComment.data.comments.length.toString());
     for (var i in dataComment.data.comments) {
@@ -169,6 +231,12 @@ class _CommentActivityState extends State<CommentActivity> {
         avatar: i.user.avatar.url != null ? i.user.avatar.url : null,
         comment: i.content,
         dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
+        id: i.id,
+        numberOfReply: i.numberOfReply,
+        focusNode: this.focusNode,
+        updateLabelText: this.updateLabelText,
+        targetType: this.targetType,
+        targetId: this.targetId,
       ));
     }
     setState(() {
@@ -177,55 +245,268 @@ class _CommentActivityState extends State<CommentActivity> {
     });
   }
 
-  void addComment(String comment) async {
+  void addComment(String comment, String replyFor) async {
     _commentController.clear();
-    await APIService.comment(
-        CommentRequestModel(targetKeyOrID: targetKeyOrID, content: comment, replyFor: "", targetType: targetType));
+    await APIService.comment(CommentRequestModel(
+        targetId: targetId,
+        content: comment,
+        replyFor: replyFor,
+        targetType: targetType));
     await fetchData();
   }
 }
 
-class Comment extends StatelessWidget {
+class Comment extends StatefulWidget {
   final String displayName;
   final String userId;
   final String avatar;
   final String comment;
   final DateTime dateTime;
+  final String id;
+  final int numberOfReply;
+  final FocusNode focusNode;
+  final Function updateLabelText;
+  final String targetType;
+  final String targetId;
 
   //final Timestamp timestamp;
 
-  Comment(
-      {this.displayName,
+  Comment({
+    this.displayName,
+    this.userId,
+    this.avatar,
+    this.comment,
+    this.dateTime,
+    this.id,
+    this.numberOfReply,
+    this.focusNode,
+    this.updateLabelText,
+    this.targetType,
+    this.targetId,
+  });
+
+  @override
+  State<Comment> createState() => _CommentState();
+}
+
+class _CommentState extends State<Comment> {
+  List<ChildComment> childrenComment = [];
+  bool loadingChildComment = false;
+  @override
+  Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
+    return Column(
+        children: <Widget>[
+          /* ListTile(
+            title: Text(comment),
+            leading: CircleAvatar(
+              backgroundImage: NetworkImage(avatarUrl),
+            ),
+          ),
+          Divider()*/
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: <Widget>[
+              Container(
+                margin: EdgeInsets.only(
+                    left: size.width * 0.03, right: size.width * 0.03),
+                child: (widget.avatar != null)
+                    ? CircleAvatar(
+                        radius: 17,
+                        backgroundColor: Colors.grey,
+                        backgroundImage: NetworkImage(widget.avatar),
+                      )
+                    : CircleAvatar(
+                        radius: 17,
+                        backgroundColor: Colors.grey,
+                        backgroundImage:
+                            AssetImage('assets/images/default_avatar.png')),
+              ),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(15),
+                          color: backGroundFoodScreenColor),
+                      child: Padding(
+                        padding: const EdgeInsets.only(
+                            left: 10, top: 6, right: 8, bottom: 6),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: <Widget>[
+                            Text(
+                              widget.displayName,
+                              style: TextStyle(
+                                fontSize: 15,
+                                color: Colors.black,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            SizedBox(
+                              height: 2,
+                            ),
+                            SizedBox(
+                              width: size.width * 0.73,
+                              child: Text(widget.comment,
+                                  maxLines: 100,
+                                  style: TextStyle(
+                                    fontSize: 15,
+                                    color: Colors.black,
+                                  )),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    Container(
+                      margin: EdgeInsets.only(left: 10, right: 10, top: 4),
+                      child: Wrap(
+                        spacing: 15,
+                        children: [
+                          GestureDetector(
+                              onTap: () {
+                                widget.updateLabelText(
+                                    "Replying to " + widget.displayName, widget.id);
+                                widget.focusNode.requestFocus();
+                              },
+                              child: Text(
+                                "Reply",
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                    fontSize: 13),
+                              )),
+                          Text(
+                            timeago.format(widget.dateTime, locale: 'en_short'),
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(fontSize: 13, color: Colors.grey),
+                          ),
+                        ],
+                      ),
+                    ),
+                    childrenComment.length == 0
+                        ? widget.numberOfReply != 0
+                            ? Container(
+                                margin:
+                                    EdgeInsets.only(left: 10, right: 10, top: 4),
+                                child: GestureDetector(
+                                  onTap: () async {
+                                    setState(() {
+                                      loadingChildComment = true;
+                                    });
+                                    var dataChildrenComment =
+                                        await APIService.getComment(widget.targetId,
+                                            widget.targetType, widget.id);
+                                    List<ChildComment> temp = [];
+                                    for (var i
+                                        in dataChildrenComment.data.comments) {
+                                      temp.add(ChildComment(
+                                        displayName: i.user.displayName,
+                                        userId: i.user.id,
+                                        avatar: i.user.avatar.url != null ? i.user.avatar.url : null,
+                                        comment: i.content,
+                                        dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
+                                        id: i.id,
+                                        parentId: widget.id,
+                                        focusNode: widget.focusNode,
+                                        updateLabelText: widget.updateLabelText,
+                                        targetType: widget.targetType,
+                                        targetId: widget.targetId,
+                                      ));
+                                    }
+                                    setState(() {
+                                      childrenComment = temp;
+                                      loadingChildComment = false;
+                                    });
+                                  },
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.start,
+                                    children: [
+                                      Icon(
+                                        FontAwesomeIcons.reply,
+                                        size: 14,
+                                      ),
+                                      SizedBox(width: 15,),
+                                      widget.numberOfReply == 1
+                                          ? Text("View " +
+                                              widget.numberOfReply.toString() +
+                                              " reply")
+                                          : Text("View " +
+                                              widget.numberOfReply.toString() +
+                                              " replies"),
+                                      SizedBox(width: 15,),
+                                      loadingChildComment ? Transform.scale(scale: 0.4,child: CircularProgressIndicator()) : Container(),
+                                    ],
+                                  ),
+                                ),
+                              )
+                            : Container()
+                        : Padding(
+                          padding: const EdgeInsets.only(top: 8.0),
+                          child: ListView(children: childrenComment, shrinkWrap: true, physics: NeverScrollableScrollPhysics(),),
+                        ),
+
+                    childrenComment.length == 0 ? SizedBox(
+                      height: 10,
+                    ): Container(),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      );
+
+  }
+}
+
+class ChildComment extends StatelessWidget {
+  final String displayName;
+  final String userId;
+  final String avatar;
+  final String comment;
+  final DateTime dateTime;
+  final String id;
+  final String parentId;
+  final FocusNode focusNode;
+  final Function updateLabelText;
+  final String targetType;
+  final String targetId;
+
+  const ChildComment(
+      {this.targetId,
+      this.targetType,
+      this.displayName,
       this.userId,
       this.avatar,
       this.comment,
-      this.dateTime});
+      this.dateTime,
+      this.id,
+      this.focusNode,
+      this.updateLabelText,
+      this.parentId});
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Column(
       children: <Widget>[
-        /* ListTile(
-          title: Text(comment),
-          leading: CircleAvatar(
-            backgroundImage: NetworkImage(avatarUrl),
-          ),
-        ),
-        Divider()*/
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
             Container(
-              margin: EdgeInsets.only(left: size.width*0.03, right: size.width*0.03),
-              width: 40,
-              height: 40,
+              margin: EdgeInsets.only(
+                  right: size.width * 0.03),
               child: (avatar != null)
                   ? CircleAvatar(
+                      radius: 14,
                       backgroundColor: Colors.grey,
                       backgroundImage: NetworkImage(avatar),
                     )
                   : CircleAvatar(
+                      radius: 14,
                       backgroundColor: Colors.grey,
                       backgroundImage:
                           AssetImage('assets/images/default_avatar.png')),
@@ -238,62 +519,64 @@ class Comment extends StatelessWidget {
                       borderRadius: BorderRadius.circular(15),
                       color: backGroundFoodScreenColor),
                   child: Padding(
-                    padding: const EdgeInsets.only(left: 10, top: 6, right: 8, bottom: 6),
+                    padding: const EdgeInsets.only(
+                        left: 10, top: 6, right: 8, bottom: 6),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: <Widget>[
                         Text(
                           displayName,
                           style: TextStyle(
-                            fontSize: 16,
+                            fontSize: 15,
                             color: Colors.black,
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                        SizedBox(height: 2,),
                         SizedBox(
-                          width: size.width * 0.73,
+                          height: 2,
+                        ),
+                        SizedBox(
+                          width: size.width * 0.62,
                           child: Text(comment,
                               maxLines: 100,
                               style: TextStyle(
-                                fontSize: 16,
+                                fontSize: 15,
                                 color: Colors.black,
                               )),
                         ),
-
                       ],
-
-/*                RichText(
-                            text: TextSpan(
-                                style: TextStyle(
-                                  fontSize: 16,
-                                  color: Colors.black,
-                                ),
-                                children: <TextSpan>[
-                              TextSpan(
-                                  text: displayName,
-                                  style: TextStyle(
-                                    fontSize: 16,
-                                    color: Colors.black,
-                                    fontWeight: FontWeight.bold,
-                                  )),
-                              TextSpan(text: ' '),
-                              TextSpan(
-                                  text: comment,
-                                  style: TextStyle(fontSize: 16, color: Colors.black))
-                            ])),*/
                     ),
                   ),
                 ),
                 Container(
                   margin: EdgeInsets.only(left: 10, right: 10, top: 4),
-                  child: Text(
-                    timeago.format(dateTime),
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 14, color: Colors.grey),
+                  child: Wrap(
+                    spacing: 15,
+                    children: [
+                      GestureDetector(
+                          onTap: () {
+                            updateLabelText(
+                                "Replying to " + displayName, parentId);
+                            focusNode.requestFocus();
+                          },
+                          child: Text(
+                            "Reply",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                color: Colors.black,
+                                fontSize: 13),
+                          )),
+                      Text(
+                        timeago.format(dateTime, locale: 'en_short'),
+                        overflow: TextOverflow.ellipsis,
+                        style: TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                    ],
                   ),
                 ),
-                SizedBox(height: 10,)
+                SizedBox(
+                  height: 10,
+                ),
               ],
             ),
           ],

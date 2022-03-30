@@ -4,7 +4,8 @@ class PostRequestModel {
   List<String> videos;
   String kind;
   String name;
-  PostRequestModel({this.content, this.images, this.videos, this.kind, this.name});
+  String location;
+  PostRequestModel({this.content, this.images, this.videos, this.kind, this.name, this.location});
 
 
   Map<String, dynamic> toJson() {
@@ -14,6 +15,7 @@ class PostRequestModel {
     data['videos'] = this.videos;
     data['kind'] = this.kind;
     data['name'] = this.name;
+    data['location'] = this.location;
     return data;
   }
 }

@@ -30,9 +30,9 @@ class Config {
   static const String sendMessage = "/api/send_message";
   static const String tokenChatbot = "9bdf793944b54a2f49f67113de076366";
   //string
-  static const String postCommentsType = "Post";
-  static const String stepCommentsType = "RecipeStep";
+  static const String postCommentsType = "POST";
+  static const String stepCommentsType = "RECIPE_STEP";
   static const String postReactType = "POST";
-  static const String imageReactType = "MEDIA";
+  static const String imageReactType = "POST_MEDIA";
 
 }

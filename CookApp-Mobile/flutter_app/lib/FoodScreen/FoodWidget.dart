@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:readmore/readmore.dart';
 import 'package:tastify/FoodScreen/FoodInstructionWidget.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -33,7 +34,9 @@ class _FoodWidgetState extends State<FoodWidget> {
       }
     }
     return GestureDetector(
-      onTap: () {openInstruction(context: context,model: food);},
+      onTap: () {
+        openInstruction(context: context, id: food.id, name: food.name);
+      },
       child: Container(
         margin: EdgeInsets.all(8.0),
         decoration: BoxDecoration(
@@ -45,7 +48,8 @@ class _FoodWidgetState extends State<FoodWidget> {
           child: Column(
             children: [
               Container(
-                margin: EdgeInsets.only(left: 10, top: 15, right: 10, bottom: 15),
+                margin:
+                    EdgeInsets.only(left: 10, top: 15, right: 10, bottom: 15),
                 child: ClipRRect(
                   borderRadius: BorderRadius.all(Radius.circular(5.0)),
                   child: Image.network(
@@ -66,7 +70,9 @@ class _FoodWidgetState extends State<FoodWidget> {
                   ),
                 ),
               ),
-              SizedBox(height: 10,),
+              SizedBox(
+                height: 10,
+              ),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -78,37 +84,64 @@ class _FoodWidgetState extends State<FoodWidget> {
                     " " + food.totalTime.toString() + " minutes ",
                     style: TextStyle(fontSize: 16),
                   ),
-                  SizedBox(width: 10,),
+                  SizedBox(
+                    width: 10,
+                  ),
                   Icon(
                     FontAwesomeIcons.user,
                     size: 16,
                   ),
-                  food.servings == 1 ? Text(
-                    " " + food.servings.toString() + " person",
-                    style: TextStyle(fontSize: 16),
-                  ) : Text (
-                    " " + food.servings.toString() + " people",
-                    style: TextStyle(fontSize: 16),
-                  )
+                  food.servings == 1
+                      ? Text(
+                          " " + food.servings.toString() + " person",
+                          style: TextStyle(fontSize: 16),
+                        )
+                      : Text(
+                          " " + food.servings.toString() + " people",
+                          style: TextStyle(fontSize: 16),
+                        )
                 ],
               ),
               SizedBox(
                 height: 10,
               ),
               Container(
-                  margin: EdgeInsets.only(left: 10, right: 10,bottom: 10),
-                  child: Center(child: Text(ingredients, textAlign: TextAlign.justify,))),
+                  margin: EdgeInsets.only(left: 10, right: 10, bottom: 10),
+                  child: ReadMoreText(food.description,
+                      textAlign: TextAlign.justify,
+                      trimLines: 3,
+                      trimMode: TrimMode.Line,
+                      trimCollapsedText: 'Show more',
+                      trimExpandedText: 'Show less',
+
+                      style: TextStyle(
+                          fontSize: 14, color: Colors.black),
+                      lessStyle: TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold) ,
+                      moreStyle: TextStyle(
+                          fontSize: 14, fontWeight: FontWeight.bold))),
             ],
           ),
         ),
       ),
-
     );
   }
-  void openInstruction({BuildContext context,Foods model}) {
-    Navigator.of(context)
-        .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-      return FoodInstructionWidget(food: model,);
-    }));
+
+  void openInstruction({BuildContext context, String id, String name}) {
+    Navigator.push(
+        context,
+        PageRouteBuilder(
+            pageBuilder: (context, animation,
+                secondaryAnimation) =>
+                FoodInstructionWidget(
+                  id: id,
+                  name: name,
+                ),
+            transitionsBuilder: (context,
+                animation,
+                secondaryAnimation,
+                child) {
+              return FadeTransition(opacity: animation, child: child,);
+            }));
   }
 }

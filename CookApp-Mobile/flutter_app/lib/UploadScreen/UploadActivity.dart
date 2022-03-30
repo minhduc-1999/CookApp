@@ -247,7 +247,8 @@ class _UploadActivityState extends State<UploadActivity> {
                                 content: descriptionController.text,
                                 images: objectName,
                                 videos: video,
-                                kind: "Moment",
+                                location: locationController.text,
+                                kind: "MOMENT",
                                 name: "string"));
                             setState(() {
                               isAPIcallProcess = false;
