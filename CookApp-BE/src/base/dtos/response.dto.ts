@@ -70,13 +70,13 @@ export class MediaResponse {
   @ApiResponseProperty({ enum: Number })
   numberOfReaction?: number
 
-  constructor(media: Media, reaction?: Reaction, nComents?: number, nReacitons?: number) {
+  constructor(media: Media, reaction?: Reaction) {
     this.url = media?.url
     this.type = media?.type
     this.id = media?.id
     this.reaction = reaction?.type
-    this.numberOfComment = nComents
-    this.numberOfReaction = nReacitons
+    this.numberOfComment = media?.nComments
+    this.numberOfReaction = media?.nReactions
   }
 }
 
@@ -286,12 +286,16 @@ export class RecipeStepResponse {
   @ApiResponseProperty({ type: Number })
   numberOfReaction: number
 
-  constructor(step: RecipeStep) {
+  @ApiResponseProperty({ enum: ReactionType })
+  reaction: ReactionType
+
+  constructor(step: RecipeStep, reaction?: Reaction) {
     this.content = step?.content
     this.photos = step?.photos?.map(photo => new MediaResponse(photo))
     this.id = step?.id
     this.numberOfComment = step?.nComments
     this.numberOfReaction = step?.nReactions
+    this.reaction = reaction?.type
   }
 }
 
@@ -329,18 +333,18 @@ export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   videoUrl: string;
 
-  constructor(food: Food) {
+  constructor(food: Food, steps?: RecipeStepResponse[]) {
     super(food)
     this.servings = food?.servings
     this.name = food?.name
     this.description = food?.description
     this.photos = food?.photos.map(photo => new MediaResponse(photo));
     this.totalTime = food?.totalTime
-    this.steps = food?.steps.map(step =>
-      new RecipeStepResponse(step))
+    this.steps = steps ? steps 
+      : food?.steps.map(step => new RecipeStepResponse(step))
     this.ingredients = food?.ingredients.map(ingredient =>
-      new IngredientResponse(ingredient)
-    )
+        new IngredientResponse(ingredient)
+      )
     this.videoUrl = food?.videoUrl
   }
 }

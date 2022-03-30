@@ -44,10 +44,13 @@ export class PostEntity {
 
   toDomain(): Post {
     const audit = new Audit(this.interaction)
+    const { nReactions, nComments} = this.interaction
     switch (this.kind) {
       case PostType.MOMENT:
         return new Moment({
           ...audit,
+          nComments,
+          nReactions,
           content: this.content,
           medias: this.medias?.map(media => media.toDomain()),
           author: this.author.toDomain(),
@@ -93,14 +96,19 @@ export class PostMediaEntity {
   }
 
   toDomain(): CommentMedia {
+    const { nReactions, nComments} = this.interaction
     switch (this.type) {
       case MediaType.IMAGE:
         return new Image({
+          nReactions,
+          nComments,
           key: this.key,
           id: this.interaction && this.interaction.id
         })
       case MediaType.VIDEO:
         return new Video({
+          nReactions,
+          nComments,
           key: this.key,
           id: this.interaction && this.interaction.id
         })

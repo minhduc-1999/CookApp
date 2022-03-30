@@ -4,7 +4,6 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { MediaResponse } from "base/dtos/response.dto";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
@@ -28,8 +27,6 @@ export class GetPostDetailQueryHandler
     private _storageService: IStorageService,
     @Inject("IReactionRepository")
     private _reacRepo: IReactionRepository,
-    @Inject("ICommentRepository")
-    private _commentRepo: ICommentRepository
   ) { }
   async execute(query: GetPostDetailQuery): Promise<GetPostResponse> {
     const { postId, user } = query
@@ -47,9 +44,7 @@ export class GetPostDetailQueryHandler
 
     const task = post.medias?.map(async media => {
       const mediaReaction = await this._reacRepo.findById(user.id, media.id)
-      const nComments = await this._commentRepo.countComments(media)
-      const nReactions = await this._reacRepo.count(media.id)
-      return new MediaResponse(media, mediaReaction, nComments, nReactions)
+      return new MediaResponse(media, mediaReaction)
     })
 
     result.medias = await Promise.all(task)

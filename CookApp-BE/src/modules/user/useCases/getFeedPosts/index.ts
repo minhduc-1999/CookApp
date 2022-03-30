@@ -62,8 +62,8 @@ export class GetFeedPostsQueryHandler
           user.id,
           post.id
         );
-        post.nComments = await this._commentRepo.countComments(post)
-        post.nReactions = await this._reactionRepo.count(post.id)
+        // post.nComments = await this._commentRepo.countComments(post)
+        // post.nReactions = await this._reactionRepo.count(post.id)
         const saved = await this._savedRepo.find(post.id, user.id)
         const temp = new GetPostResponse(post, reaction, saved ? true : false);
         return temp;
