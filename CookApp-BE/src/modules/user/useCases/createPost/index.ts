@@ -43,6 +43,13 @@ export class CreatePostCommandHandler
       );
     }
 
+    if (req.videos?.length > 0) {
+      req.videos = await this._storageService.makePublic(
+        req.images,
+        MediaType.VIDEO
+      );
+    }
+
     let creatingPost: Post
 
     const medias = _.unionBy(

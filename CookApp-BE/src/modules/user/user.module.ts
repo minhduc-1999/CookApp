@@ -4,6 +4,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AccountEntity } from "entities/social/account.entity";
+import { AlbumEntity, AlbumMediaEntity } from "entities/social/album.entity";
 import { CommentEntity, CommentMediaEntity } from "entities/social/comment.entity";
 import { FeedEntity } from "entities/social/feed.entity";
 import { FollowEntity } from "entities/social/follow.entity";
@@ -18,12 +19,15 @@ import { AuthModule } from "modules/auth/auth.module";
 import { CoreModule } from "modules/core/core.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
+import { AlbumController } from "./adapters/in/album.controller";
 import { CommentController } from "./adapters/in/comment.controller";
 import { FeedController } from "./adapters/in/feed.controller";
 import { PostController } from "./adapters/in/post.controller";
 import { ReactionController } from "./adapters/in/reaction.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
+import { AlbumRepository } from "./adapters/out/repositories/album.repository";
+import { AlbumMediaRepository } from "./adapters/out/repositories/albumMedia.repository";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
 import { CommentMediaRepository } from "./adapters/out/repositories/commentMedia.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
@@ -34,8 +38,10 @@ import { ReactionRepository } from "./adapters/out/repositories/reaction.reposit
 import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { NewPostEventHandler } from "./events/propagateNewPost";
+import { AlbumService } from "./services/album.service";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
+import { CreateAlbumCommandHandler } from "./useCases/createAlbum";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
@@ -66,7 +72,8 @@ const commandHandlers = [
   UnfolllowCommandHandler,
   UpdateProfileCommandHandler,
   SavePostCommandHandler,
-  DeleteSavedPostCommandHandler
+  DeleteSavedPostCommandHandler,
+  CreateAlbumCommandHandler
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
@@ -82,6 +89,10 @@ const services = [
   {
     provide: "IPostService",
     useClass: PostService,
+  },
+  {
+    provide: "IAlbumService",
+    useClass: AlbumService,
   },
   {
     provide: "ICommentService",
@@ -133,6 +144,14 @@ const repositories = [
     provide: "ICommentMediaRepository",
     useClass: CommentMediaRepository,
   },
+  {
+    provide: "IAlbumRepository",
+    useClass: AlbumRepository,
+  },
+  {
+    provide: "IAlbumMediaRepository",
+    useClass: AlbumMediaRepository,
+  },
 ];
 
 @Module({
@@ -156,11 +175,14 @@ const repositories = [
       SavedPostEntity,
       FeedEntity,
       CommentEntity,
-      CommentMediaEntity
+      CommentMediaEntity,
+      AlbumEntity,
+      AlbumMediaEntity
     ])
   ],
   controllers: [
     PostController,
+    AlbumController,
     WallController,
     FeedController,
     CommentController,

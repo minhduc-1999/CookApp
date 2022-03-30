@@ -10,10 +10,13 @@ export class Album extends Audit {
 
   name: string
 
+  description: string
+
   update(data: Partial<Album>): Partial<Album> {
     return {
       name: data.name ?? this.name,
-      medias: data.medias ?? this.medias
+      medias: data.medias ?? this.medias,
+      description: data?.description ?? this.description
     }
   }
 
@@ -22,5 +25,6 @@ export class Album extends Audit {
     this.medias = album?.medias ?? []
     this.name = album?.name
     this.owner = album?.owner
+    this.description = album?.description
   }
 }

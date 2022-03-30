@@ -238,6 +238,9 @@ export class AlbumResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string
 
+  @ApiResponseProperty({ type: String })
+  description: string
+
   @ApiResponseProperty({ type: [MediaResponse] })
   medias?: MediaResponse[]
 
@@ -249,6 +252,7 @@ export class AlbumResponse extends AuditResponse {
     this.name = album?.name
     this.medias = album?.medias.map(media => new MediaResponse(media));
     this.author = new AuthorResponse(album?.owner)
+    this.description = album?.description
   }
 }
 
@@ -340,11 +344,11 @@ export class FoodResponse extends AuditResponse {
     this.description = food?.description
     this.photos = food?.photos.map(photo => new MediaResponse(photo));
     this.totalTime = food?.totalTime
-    this.steps = steps ? steps 
+    this.steps = steps ? steps
       : food?.steps.map(step => new RecipeStepResponse(step))
     this.ingredients = food?.ingredients.map(ingredient =>
-        new IngredientResponse(ingredient)
-      )
+      new IngredientResponse(ingredient)
+    )
     this.videoUrl = food?.videoUrl
   }
 }

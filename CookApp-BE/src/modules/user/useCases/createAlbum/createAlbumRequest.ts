@@ -1,30 +1,25 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
-import { PostType } from "enums/social.enum";
 
-export class CreatePostRequest {
-  @IsNotEmpty()
-  @ApiPropertyOptional({ type: String, description: "Moment's content" })
-  @IsString()
+export class CreateAlbumRequest {
   @IsMeaningfulString(1)
-  @IsOptional()
-  content?: string;
+  @ApiProperty({ type: String, description: "Album's name" })
+  name: string
 
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String  })
   @IsString()
   @IsMeaningfulString(1)
   @IsOptional()
-  location?: string;
+  description?: string;
 
-  @ApiPropertyOptional({ type: [String] })
+  @ApiProperty({ type: [String] })
   @IsArray()
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
   @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"], { each: true })
-  @IsOptional()
   images?: string[];
 
   @IsString({ each: true })
@@ -34,8 +29,5 @@ export class CreatePostRequest {
   @IsFileExtensions(["mp4"], { each: true })
   videos?: string[];
 
-  @IsEnum(PostType)
-  @ApiProperty({ enum: PostType })
-  kind: PostType
 }
 

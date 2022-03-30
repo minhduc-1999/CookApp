@@ -1,51 +1,50 @@
 import { UserEntity } from './user.entity';
 import { OneToMany, OneToOne, ManyToOne, Column, Entity, JoinColumn } from 'typeorm';
 import { InteractionEntity } from './interaction.entity';
-import { MediaType, PostType } from '../../enums/social.enum';
+import { MediaType } from '../../enums/social.enum';
 import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
-import { Album } from 'domains/social/album.domain';
-import { AbstractEntity } from 'base/entities/base.entity';
+import { Album } from '../../domains/social/album.domain';
+import { AbstractEntity } from '../../base/entities/base.entity';
 
-@Entity({ name: 'posts' })
+@Entity({ name: 'albums' })
 export class AlbumEntity extends AbstractEntity {
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity )
   @JoinColumn({ name: "owner_id" })
   owner: UserEntity;
 
   @Column({ name: 'name' })
   name: string
 
+  @Column({ name: 'description' })
+  description: string
+
   @OneToMany(() => AlbumMediaEntity, media => media.album)
   medias: AlbumMediaEntity[]
 
-  @Column({
-    type: "enum",
-    enum: PostType,
-    nullable: false,
-    name: "kind"
-  })
-  kind: PostType
-
-  constructor(post: Album ) {
-    super(post)
-    this.owner = new UserEntity(post?.owner)
+  constructor(album: Album) {
+    super(album)
+    this.owner = new UserEntity(album?.owner)
+    this.name = album?.name
+    this.description = album?.description
   }
 
   toDomain(): Album {
     const audit = new Audit(this)
-        return new Album({
-          ...audit,
-          name: this.name,
-          medias: this.medias?.map(media => media.toDomain()),
-          owner: this.owner?.toDomain(),
-        })
-    }
+    return new Album({
+      ...audit,
+      name: this.name,
+      medias: this.medias?.map(media => media.toDomain()),
+      owner: this.owner?.toDomain(),
+      description: this.description
+    })
+  }
 
   update(data: Partial<Album>): Partial<AlbumEntity> {
     return {
-      name: data.name ?? this.name,
+      name: data?.name ?? this.name,
+      description: data?.description ?? this.description
     }
   }
 }
