@@ -24,7 +24,6 @@ export function createUpdatingNestedObject<T, R>(
 
 export function createUpdatingObject<T>(
   updateObj: T,
-  updateBy: string
 ): Partial<T> {
   const keys = Object.keys(updateObj).filter(
     (key) => updateObj[key] !== null && updateObj[key] !== undefined
@@ -33,9 +32,6 @@ export function createUpdatingObject<T>(
   keys.forEach((key) => {
     updatingObj[key] = updateObj[key];
   });
-  updatingObj["updatedAt"] = _.now();
-  updatingObj["updatedBy"] = updateBy;
-
   return updatingObj;
 }
 
@@ -90,7 +86,7 @@ export function generateDisplayName() {
   );
 }
 
-function retrieveObjectNameFromUrl( url: string,
+export function retrieveObjectNameFromUrl( url: string,
   eliminatedSeed: string
 ): string {
   const a = url.slice(url.indexOf(eliminatedSeed) + eliminatedSeed.length);
@@ -111,3 +107,7 @@ export function sleep(ms: number) {
   });
 }
 
+export function inspectObj(obj: any) {
+    const util = require('util')
+    console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }))
+}

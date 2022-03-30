@@ -1,22 +1,19 @@
-import { ReactionType } from "enums/reaction.enum";
-import { Media } from "./media.domain";
-import { Post } from "./post.domain";
+import { Audit } from "../../domains/audit.domain";
+import { ReactionType } from "enums/social.enum";
 import { User } from "./user.domain";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
 
-export class Reaction {
+export class Reaction extends Audit{
   type: ReactionType;
 
   reactor: User;
 
-  target: Post | Media
+  target: IInteractable
 
   constructor(reaction: Partial<Reaction>) {
+    super(reaction)
     this.type = reaction?.type
     this.reactor = reaction?.reactor
     this.target = reaction?.target
-  }
-
-  public setTarget(target: Post | Media) {
-    this.target = target
   }
 }

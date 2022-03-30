@@ -9,12 +9,13 @@ import {
 } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
-import { ParamTransaction, RequestTransaction } from "decorators/transaction.decorator";
+import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { UserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { FollowCommand } from "modules/user/useCases/follow";
@@ -25,7 +26,6 @@ import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";
 import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallPostsRequest";
 import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWallPostsResponse";
 import { UnfolllowCommand } from "modules/user/useCases/unfollow";
-import { Transaction } from "neo4j-driver";
 import { ParseRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/:id/walls")
@@ -52,11 +52,11 @@ export class WallController {
   @Post("followers")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(FollowResponse, "Follow successfully")
-  @RequestTransaction()
+  @HttpRequestTransaction()
   async follow(
     @Param("id", ParseUUIDPipe) targetId: string,
     @UserReq() user: User,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<FollowResponse>> {
     const command = new FollowCommand(user, targetId, tx);
     const result = await this._commandBus.execute(command);
@@ -68,11 +68,11 @@ export class WallController {
   @Delete("followers")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(UnfolllowCommand, "Unfollow successfully")
-  @RequestTransaction()
+  @HttpRequestTransaction()
   async unfollow(
     @Param("id", ParseUUIDPipe) targetId: string,
     @UserReq() user: User,
-    @ParamTransaction() tx: Transaction
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<UnfolllowCommand>> {
     const command = new UnfolllowCommand(user, targetId, tx);
     const result = await this._commandBus.execute(command);

@@ -1,24 +1,16 @@
-import _ = require("lodash");
-
 export class Audit {
   id: string;
 
-  createdAt: number;
+  createdAt: Date;
 
-  updatedAt: number;
+  updatedAt?: Date;
 
-  updatedBy: string;
-
-  deletedAt?: number;
-
-  deletedBy?: string;
+  deletedAt?: Date;
 
   constructor(audit: Partial<Audit>) {
-    this.createdAt = audit?.createdAt ?? _.now()
+    this.createdAt = audit?.createdAt 
     this.id = audit?.id
     this.updatedAt = audit?.updatedAt
-    this.updatedBy = audit?.updatedBy
     this.deletedAt = audit?.deletedAt
-    this.deletedBy = audit?.deletedBy
   }
 }

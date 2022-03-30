@@ -1,9 +1,9 @@
-import { Transaction } from "neo4j-driver";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 export abstract class BaseRepository {
-  protected tx: Transaction;
+  protected tx: ITransaction;
 
-  public setTransaction(tx: Transaction) {
+  public setTransaction(tx: ITransaction) {
     this.tx = tx;
     return this;
   }

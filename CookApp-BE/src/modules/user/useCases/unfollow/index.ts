@@ -5,12 +5,12 @@ import { UnfollowResponse } from "./followResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { IUserService } from "modules/auth/services/user.service";
-import { Transaction } from "neo4j-driver";
-import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { IFollowRepository } from "modules/user/interfaces/repositories/follow.interface";
 
 export class UnfolllowCommand extends BaseCommand {
   targetId: string;
-  constructor(user: User, targetId: string, tx: Transaction) {
+  constructor(user: User, targetId: string, tx: ITransaction) {
     super(tx, user);
     this.targetId = targetId;
   }
@@ -21,8 +21,8 @@ export class UnfolllowCommandHandler
   implements ICommandHandler<UnfolllowCommand>
 {
   constructor(
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository,
+    @Inject("IFollowRepository")
+    private _followRepo: IFollowRepository,
     @Inject("IUserService")
     private _userService: IUserService
   ) { }
@@ -36,10 +36,10 @@ export class UnfolllowCommandHandler
 
     await this._userService.getUserById(targetId);
 
-    const isFollowed = await this._wallRepo.isFollowed(user.id, targetId);
-    if (!isFollowed)
+    const follow = await this._followRepo.getFollow(user.id, targetId);
+    if (!follow)
       throw new BadRequestException(ResponseDTO.fail("Not follow yet"));
-    this._wallRepo.setTransaction(tx).deleteFollower(user.id, targetId)
+    this._followRepo.setTransaction(tx).deleteFollower(follow)
     return new UnfollowResponse();
   }
 }

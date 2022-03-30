@@ -1,36 +1,47 @@
-export abstract class MediaBase {
+import { Audit } from "../../domains/audit.domain"
+import { IInteractable } from "../../domains/interfaces/IInteractable.interface"
+import { MediaType } from "../../enums/social.enum"
+
+export abstract class MediaBase extends Audit implements IInteractable {
   key: string
 
   url: string
 
+  type: MediaType
+
+  nReactions: number
+
+  nComments: number
+
   constructor(media: Partial<MediaBase>) {
+    super(media)
     this.key = media?.key
     this.url = media?.url
+    this.nComments = media?.nComments
+    this.nReactions = media?.nReactions
   }
 
-  abstract isValidKey(): boolean 
+  abstract isValidKey(): boolean
 }
 
 export class Image extends MediaBase {
-  type: "IMAGE"
 
   constructor(image: Partial<Image>) {
     super(image)
-    this.type = "IMAGE"
+    this.type = MediaType.IMAGE
   }
 
-  isValidKey() : boolean {
+  isValidKey(): boolean {
     const regex = /^(\w{1,256}\/){0,256}\w{1,256}\.(png|jpg|jpeg|PNG|JPG|JPEG)$/;
     return regex.test(this.key);
   }
 }
 
 export class Video extends MediaBase {
-  type: "VIDEO"
 
   constructor(video: Partial<Video>) {
     super(video)
-    this.type = "VIDEO"
+    this.type = MediaType.VIDEO
   }
 
   isValidKey(): boolean {
@@ -38,4 +49,20 @@ export class Video extends MediaBase {
   }
 }
 
-export type Media = Image | Video
+export class Audio extends MediaBase {
+
+  constructor(video: Partial<Video>) {
+    super(video)
+    this.type = MediaType.AUDIO
+  }
+
+  isValidKey(): boolean {
+    return true
+  }
+}
+
+export type CommentMedia = Image | Video
+
+export type PostMedia = Image | Video
+
+export type Media = Image | Video | Audio

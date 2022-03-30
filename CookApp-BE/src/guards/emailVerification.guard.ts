@@ -22,7 +22,7 @@ export class EmailVerificationGuard implements CanActivate {
 
     const user: User = request.user;
 
-    if (!user.emailVerified) {
+    if (!user.account.emailVerified) {
       throw new UnauthorizedException("Confirm your email first");
     }
 

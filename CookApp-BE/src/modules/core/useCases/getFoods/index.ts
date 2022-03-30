@@ -25,7 +25,8 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
   ) { }
   async execute(query: GetFoodsQuery): Promise<GetFoodsResponse> {
     const { queryOptions } = query;
-    const foods = await this._foodRepo.getFoods(queryOptions);
+    const [foods, totalCount] = await this._foodRepo.getFoods(queryOptions);
+
     for (let food of foods) {
       food.photos = (await this._storageService.getDownloadUrls(food.photos)) as Image[];
       if (food.steps.length > 0) {
@@ -39,7 +40,7 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
         );
       }
     }
-    const totalCount = await this._foodRepo.getTotalFoods(query.queryOptions);
+
     let meta: PageMetadata;
     if (foods.length > 0) {
       meta = new PageMetadata(

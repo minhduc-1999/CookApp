@@ -13,7 +13,6 @@ import * as helmet from "helmet";
 import * as cookieParser from "cookie-parser";
 import { TransformResponse } from "./interceptors/transform.interceptor";
 import { ErrorsInterceptor } from "./interceptors/errors.interceptor";
-import { Neo4jErrorFilter } from "modules/neo4j/exception-filters/neo4j-exception.filter";
 import { HttpExceptionFilter } from "exception_filter/httpException.filter";
 
 const morganFormat =
@@ -50,7 +49,7 @@ async function bootstrap() {
 
   app.useGlobalInterceptors(new TransformResponse(), new ErrorsInterceptor());
 
-  app.useGlobalFilters(new HttpExceptionFilter(), new Neo4jErrorFilter());
+  app.useGlobalFilters(new HttpExceptionFilter());
 
   /**
    * Swagger API

@@ -5,7 +5,8 @@ import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
+import { ISavedPostRepository } from "modules/user/interfaces/repositories/savedPost.interface";
 import { SavedPostDTO, GetSavedPostsResponse } from "./getSavedPostsResponse";
 export class GetSavedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -21,37 +22,38 @@ export class GetSavedPostsQueryHandler
 {
   constructor(
     @Inject("IStorageService") private _storageService: IStorageService,
-    @Inject("IPostRepository")
-    private _postRepo: IPostRepository,
+    @Inject("IReactionRepository")
+    private _reactionRepo: IReactionRepository,
+    @Inject("ISavedPostRepository")
+    private _savedPostRepo: ISavedPostRepository,
   ) { }
   async execute(query: GetSavedPostsQuery): Promise<GetSavedPostsResponse> {
     const { queryOptions, user } = query;
-    const posts = await this._postRepo.getSavedPosts(user, queryOptions);
+    const [posts, total] = await this._savedPostRepo.getSavedPosts(user, queryOptions);
 
     for (let item of posts) {
       const { post } = item
-      post.images = await this._storageService.getDownloadUrls(post.images);
-      if (post.author?.avatar && post.author?.avatar.isValidKey()) {
+      post.medias = await this._storageService.getDownloadUrls(post.medias);
+      if (post.author?.avatar) {
         post.author.avatar = (
           await this._storageService.getDownloadUrls([post.author.avatar])
         )[0];
       }
     }
 
-    const totalCount = await this._postRepo.getTotalSavedPost(user)
     let meta: PageMetadata;
     if (posts.length > 0) {
       meta = new PageMetadata(
         queryOptions.offset,
         queryOptions.limit,
-        totalCount
+        total
       );
     }
 
     const postsRes = await Promise.all(
       posts.map(async (item) => {
         const temp = new SavedPostDTO(item);
-        const reaction = await this._postRepo.getReactionByUserId(
+        const reaction = await this._reactionRepo.findById(
           user.id,
           item.post.id
         );

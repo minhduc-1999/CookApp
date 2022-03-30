@@ -1,13 +1,16 @@
-import { BadRequestException, Inject } from "@nestjs/common";
+import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { RecipeStep } from "domains/core/recipeStep.domain";
-import { Comment, CommentTarget } from "domains/social/comment.domain";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { Comment } from "domains/social/comment.domain";
 import { User } from "domains/social/user.domain";
+import { InteractiveTargetType } from "enums/social.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
+import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 import { ICommentService } from "modules/user/services/comment.service";
 import { IPostService } from "modules/user/services/post.service";
 import { GetCommentsRequest } from "./getCommentsRequest";
@@ -32,7 +35,9 @@ export class GetCommentsQueryHandler
     private _postService: IPostService,
     @Inject("IStorageService") private _storageService: IStorageService,
     @Inject("ICommentService")
-    private _commentService: ICommentService
+    private _commentService: ICommentService,
+    @Inject("IPostMediaRepository")
+    private _postMediaRepo: IPostMediaRepository,
   ) { }
   async execute(query: GetCommentsQuery): Promise<GetCommentsResponse> {
     const { request } = query;
@@ -40,43 +45,39 @@ export class GetCommentsQueryHandler
     let comments: Comment[] = []
     let totalCount: number = 0
 
-    let target: CommentTarget;
+    let target: IInteractable;
 
-    switch (request.targetType) {
-      case "Post":
-        target = (await this._postService.getPostDetail(request.targetKeyOrID))[0];
-        break;
-      case "RecipeStep":
-        // Check step's existence
-        target = new RecipeStep({id: request.targetKeyOrID})
-        break;
-      default:
-        throw new BadRequestException(ResponseDTO.fail("Target type not found"))
-    }
 
     if (request.replyOf) {
-      await this._commentService.getCommentBy(request.replyOf)
-      comments = await this._commentRepo.getReplies(
-        target,
-        request.replyOf,
-        request
-      );
-      totalCount = await this._commentRepo.getAmountOfReply(
-        query.request.replyOf
-      );
+      const parent = await this._commentService.getCommentBy(request.replyOf);
+      [comments, totalCount] = await this._commentRepo.getReplies(parent, request);
     } else {
-      comments = await this._commentRepo.getComments(
-        target,
-        request
-      );
-      totalCount = await this._commentRepo.getAmountOfComment(
-        target
-      );
+      switch (request.targetType) {
+        case InteractiveTargetType.POST:
+          [target] = await this._postService.getPostDetail(request.targetId)
+          break;
+        case InteractiveTargetType.RECIPE_STEP:
+          //TODO Check step's existence
+          target = new RecipeStep({ id: request.targetId })
+          break;
+        case InteractiveTargetType.POST_MEDIA:
+          target = await this._postMediaRepo.getMedia(request.targetId)
+          if (!target) {
+            throw new NotFoundException(
+              ResponseDTO.fail("Media not found")
+            );
+          }
+          break;
+        default:
+          throw new BadRequestException(ResponseDTO.fail("Target type not found"))
+      }
+      [comments, totalCount] = await this._commentRepo.getComments(target, request);
     }
 
     for (let comment of comments) {
-      comment.numberOfReply = await this._commentRepo.getAmountOfReply(comment.id);
-      if (comment.user.avatar && comment.user.avatar.isValidKey()) {
+      comment.nReplies = await this._commentRepo.countReply(comment.id);
+      comment.medias = await this._storageService.getDownloadUrls(comment.medias)
+      if (comment.user.avatar) {
         comment.user.avatar = (
           await this._storageService.getDownloadUrls([comment.user.avatar])
         )[0];

@@ -28,17 +28,16 @@ export class GetWallPostsQueryHandler
   ) { }
   async execute(query: GetWallPostsQuery): Promise<GetWallPostsResponse> {
     const { queryReq, targetId } = query;
-    const posts = await this._wallRepo.getPosts(targetId, queryReq);
+    const [posts, total] = await this._wallRepo.getPosts(targetId, queryReq);
     for (let post of posts) {
-      post.images = await this._storageService.getDownloadUrls(post.images);
+      post.medias = await this._storageService.getDownloadUrls(post.medias);
     }
-    const totalCount = await this._wallRepo.getTotalPosts(targetId, queryReq);
     let meta: PageMetadata;
     if (posts.length > 0) {
       meta = new PageMetadata(
         queryReq.offset,
         queryReq.limit,
-        totalCount
+        total
       );
     }
     return new GetWallPostsResponse(posts, meta);

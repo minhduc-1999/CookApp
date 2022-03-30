@@ -6,8 +6,9 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
-import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
-import { GetPostResponse } from "../getPostById/getPostResponse";
+import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
+import { ISavedPostRepository } from "modules/user/interfaces/repositories/savedPost.interface";
+import { GetPostResponse } from "../getPostDetail/getPostResponse";
 import { GetFeedPostsResponse } from "./getFeedPostsResponse";
 export class GetFeedPostsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -25,42 +26,41 @@ export class GetFeedPostsQueryHandler
     @Inject("IFeedRepository")
     private _feedRepo: IFeedRepository,
     @Inject("IStorageService") private _storageService: IStorageService,
-    @Inject("IPostRepository")
-    private _postRepo: IPostRepository,
-  ) {}
+    @Inject("IReactionRepository")
+    private _reactionRepo: IReactionRepository,
+    @Inject("ISavedPostRepository")
+    private _savedRepo: ISavedPostRepository
+  ) { }
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
-    const posts = await this._feedRepo.getPosts(user, queryOptions);
+    const [posts, total] = await this._feedRepo.getPosts(user, queryOptions);
 
     for (let post of posts) {
-      post.images = await this._storageService.getDownloadUrls(post.images);
-      if (post.author?.avatar && post.author?.avatar.isValidKey()) {
+      post.medias = await this._storageService.getDownloadUrls(post.medias);
+      if (post.author?.avatar) {
         post.author.avatar = (
           await this._storageService.getDownloadUrls([post.author.avatar])
         )[0];
       }
     }
 
-    const totalCount = await this._feedRepo.getTotalPosts(user);
     let meta: PageMetadata;
     if (posts.length > 0) {
       meta = new PageMetadata(
         queryOptions.offset,
         queryOptions.limit,
-        totalCount
+        total
       );
     }
 
     const postsRes = await Promise.all(
       posts.map(async (post) => {
-        const temp = new GetPostResponse(post);
-        const reaction = await this._postRepo.getReactionByUserId(
+        const reaction = await this._reactionRepo.findById(
           user.id,
           post.id
         );
-        if (reaction) {
-          temp.reaction = reaction.type;
-        }
+        const saved = await this._savedRepo.find(post.id, user.id)
+        const temp = new GetPostResponse(post, reaction, saved ? true : false);
         return temp;
       })
     );

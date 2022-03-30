@@ -1,7 +1,17 @@
 import { HttpModule } from "@nestjs/axios";
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
+import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
+import { AccountEntity } from "entities/social/account.entity";
+import { CommentEntity, CommentMediaEntity } from "entities/social/comment.entity";
+import { FeedEntity } from "entities/social/feed.entity";
+import { FollowEntity } from "entities/social/follow.entity";
+import { InteractionEntity } from "entities/social/interaction.entity";
+import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
+import { ReactionEntity } from "entities/social/reaction.entity";
+import { SavedPostEntity } from "entities/social/savedPost.entity";
+import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { AuthModule } from "modules/auth/auth.module";
@@ -14,14 +24,17 @@ import { ReactionController } from "./adapters/in/reaction.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
+import { CommentMediaRepository } from "./adapters/out/repositories/commentMedia.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
-import { MediaRepository } from "./adapters/out/repositories/media.repository";
+import { FollowRepository } from "./adapters/out/repositories/follow.repository";
+import { PostMediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
+import { ReactionRepository } from "./adapters/out/repositories/reaction.repository";
+import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { NewPostEventHandler } from "./events/propagateNewPost";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
-import { ReactionService } from "./services/reaction.service";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
@@ -29,7 +42,7 @@ import { EditPostCommandHandler } from "./useCases/editPost";
 import { FollowCommandHandler } from "./useCases/follow";
 import { GetCommentsQueryHandler } from "./useCases/getComments";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
-import { GetPostDetailQueryHandler } from "./useCases/getPostById";
+import { GetPostDetailQueryHandler } from "./useCases/getPostDetail";
 import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { GetSavedPostsQueryHandler } from "./useCases/getSavedPosts";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
@@ -62,7 +75,7 @@ const queryHandlers = [
   GetCommentsQueryHandler,
   GetWallQueryHandler,
   GetUsersQueryHandler,
-  GetSavedPostsQueryHandler
+  GetSavedPostsQueryHandler,
 ];
 const services = [
   {
@@ -73,15 +86,15 @@ const services = [
     provide: "ICommentService",
     useClass: CommentService,
   },
-  {
-    provide: "IReactionService",
-    useClass: ReactionService,
-  },
 ];
 const repositories = [
   {
     provide: "IUserRepository",
     useClass: UserRepository,
+  },
+  {
+    provide: "IFollowRepository",
+    useClass: FollowRepository,
   },
   {
     provide: "IPostRepository",
@@ -100,8 +113,24 @@ const repositories = [
     useClass: CommentRepository,
   },
   {
-    provide: "IMediaRepository",
-    useClass: MediaRepository,
+    provide: "PostMediaRepository",
+    useClass: PostMediaRepository,
+  },
+  {
+    provide: "IReactionRepository",
+    useClass: ReactionRepository,
+  },
+  {
+    provide: "ISavedPostRepository",
+    useClass: SavedPostRepository,
+  },
+  {
+    provide: "IPostMediaRepository",
+    useClass: PostMediaRepository,
+  },
+  {
+    provide: "ICommentMediaRepository",
+    useClass: CommentMediaRepository,
   },
 ];
 
@@ -114,6 +143,19 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
     AuthModule,
+    TypeOrmModule.forFeature([
+      UserEntity,
+      AccountEntity,
+      PostEntity,
+      InteractionEntity,
+      PostMediaEntity,
+      FollowEntity,
+      ReactionEntity,
+      SavedPostEntity,
+      FeedEntity,
+      CommentEntity,
+      CommentMediaEntity
+    ])
   ],
   controllers: [
     PostController,
@@ -130,6 +172,6 @@ const repositories = [
     ...queryHandlers,
     ...eventHandlers
   ],
-  exports: ["IWallRepository"],
+  exports: ["IFollowRepository"],
 })
 export class UserModule {}

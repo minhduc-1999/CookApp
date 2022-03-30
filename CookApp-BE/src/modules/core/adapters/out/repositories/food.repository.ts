@@ -1,44 +1,57 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { Model } from "mongoose";
-import { Transaction } from "neo4j-driver";
 import { Food } from "domains/core/food.domain";
-import { FoodDocument, FoodModel } from "modules/core/entities/core/food.entity";
+import { FoodEntity } from "entities/core/food.entity";
+import { Repository } from "typeorm";
 
 export interface IFoodRepository {
-  getFoods(query: PageOptionsDto): Promise<Food[]>;
-  getTotalFoods(query: PageOptionsDto): Promise<number>;
-  setTransaction(tx: Transaction): IFoodRepository
+  getFoods(query: PageOptionsDto): Promise<[Food[], number]>;
+  setTransaction(tx: ITransaction): IFoodRepository
+  getById(id: string): Promise<Food>
 }
 
 @Injectable()
 export class FoodRepository extends BaseRepository implements IFoodRepository {
-  private logger: Logger = new Logger(FoodRepository.name);
-  constructor(@InjectModel(FoodModel.name) private _foodModel: Model<FoodDocument>) {
+  constructor(
+    @InjectRepository(FoodEntity)
+    private _foodRepo: Repository<FoodEntity>
+  ) {
     super();
   }
+  async getById(id: string): Promise<Food> {
+    const entity = await this._foodRepo
+      .createQueryBuilder("food")
+      .leftJoinAndSelect("food.ingredients", "ingredient")
+      .leftJoinAndSelect("food.medias", "media")
+      .leftJoinAndSelect("food.steps", "step")
+      .leftJoinAndSelect("step.interaction", "stepInter")
+      .leftJoinAndSelect("step.medias", "stepMedia")
+      .where("food.id = :id", { id })
+      .select(["food", "ingredient", "step", "media", "stepInter", "stepMedia"])
+      .getOne()
 
-  async getTotalFoods(query: PageOptionsDto): Promise<number> {
-    let textSearch = {};
-    if (query.q == "") textSearch = {};
-    else textSearch = { $text: { $search: query.q } };
-    return this._foodModel.count(textSearch).exec();
+    return entity?.toDomain()
   }
-
-  async getFoods(query: PageOptionsDto): Promise<Food[]> {
-    let textSearch = {};
-    if (query.q == "") textSearch = {};
-    else textSearch = { $text: { $search: query.q } };
-    const foods = await this._foodModel
-      .find(textSearch)
+  async getFoods(query: PageOptionsDto): Promise<[Food[], number]> {
+    const [foodEntities, total] = await this._foodRepo
+      .createQueryBuilder("food")
+      // .leftJoinAndSelect("food.ingredients", "ingredient")
+      .leftJoinAndSelect("food.medias", "media")
+      // .leftJoinAndSelect("food.steps", "step")
+      // .leftJoinAndSelect("step.interaction", "stepInter")
+      // .leftJoinAndSelect("step.medias", "stepMedia")
+      // .select(["food", "ingredient", "step", "media", "stepInter", "stepMedia"])
+      .select(["food", "media"])
       .skip(query.limit * query.offset)
-      .limit(query.limit);
-    if (foods.length < 1) return [];
-
-    return foods.map((food) => {
-      return FoodModel.toDomain(food)
-    });
+      .limit(query.limit)
+      .getManyAndCount()
+    console.log(foodEntities.length)
+    return [
+      foodEntities?.map(entity => entity.toDomain()),
+      total
+    ]
   }
 }

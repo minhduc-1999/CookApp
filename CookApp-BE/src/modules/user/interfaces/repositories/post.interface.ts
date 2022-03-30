@@ -1,23 +1,10 @@
-import { User } from "@sentry/node";
-import { PageOptionsDto } from "base/pageOptions.base";
-import { Post, SavedPost } from "domains/social/post.domain";
-import { Reaction } from "domains/social/reaction.domain";
-import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
-import { Transaction } from "neo4j-driver";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { Post } from "domains/social/post.domain";
 
 export interface IPostRepository {
   createPost(post: Post): Promise<Post>;
   getPostById(postId: string): Promise<Post>;
   getPostByIds(postId: string[]): Promise<Post[]>;
-  updatePost(post: Post, editPostDto: EditPostRequest): Promise<void>;
-  reactPost(reaction: Reaction): Promise<boolean>;
-  deleteReact(reaction: Reaction): Promise<boolean>;
-  getReactionByUserId(userId: string, postId: string): Promise<Reaction>;
-  setTransaction(tx: Transaction): IPostRepository
-  isExisted(postID: string): Promise<boolean>
-  savePost(savedPost: SavedPost): Promise<void>
-  deleteSavedPost(postID: string, user: User): Promise<void>
-  isSavedPost(postID: string, user: User): Promise<boolean>
-  getSavedPosts(user: User, pageOptionDto: PageOptionsDto): Promise<SavedPost[]>
-  getTotalSavedPost(user: User): Promise<number>
+  updatePost(post: Post, data: Partial<Post>): Promise<void>;
+  setTransaction(tx: ITransaction): IPostRepository
 }

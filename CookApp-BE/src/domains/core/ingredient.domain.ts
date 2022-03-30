@@ -1,9 +1,16 @@
-import { Audit } from "domains/audit.domain";
+import { Audit } from "../../domains/audit.domain";
 
 export class Ingredient extends Audit {
   name: string;
 
-  group?: string;
+  quantity: number
 
-  images?: string[];
+  unit: string
+
+  constructor(obj: Partial<Ingredient>) {
+    super(obj)
+    this.name = obj?.name
+    this.quantity = obj?.quantity
+    this.unit = obj?.unit
+  }
 }
