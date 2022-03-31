@@ -56,11 +56,11 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     }
   }
 
-  async deleteMedias(medias: PostMedia[]): Promise<void> {
+  async deleteMedias(ids: string[]): Promise<void> {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
-      for (let media of medias) {
-        await queryRunner.manager.softDelete(InteractionEntity, media.id)
+      for (let id of ids) {
+        await queryRunner.manager.softDelete(InteractionEntity, id)
       }
     }
   }

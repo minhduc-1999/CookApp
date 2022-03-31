@@ -5,6 +5,7 @@ import { MediaType, PostType } from '../../enums/social.enum';
 import { Moment, Post } from '../../domains/social/post.domain';
 import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
+import { isNil } from 'lodash';
 
 @Entity({ name: 'posts' })
 export class PostEntity {
@@ -52,7 +53,7 @@ export class PostEntity {
           nComments,
           nReactions,
           content: this.content,
-          medias: this.medias?.map(media => media.toDomain()),
+          medias: this.medias?.filter(media => !isNil(media.interaction)).map(media => media.toDomain()),
           author: this.author.toDomain(),
           location: this.location
         })

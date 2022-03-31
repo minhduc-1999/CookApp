@@ -6,7 +6,7 @@ export interface IPostMediaRepository {
   setTransaction(tx: ITransaction): IPostMediaRepository
   addMedia(media: PostMedia, post: Post): Promise<PostMedia>
   deleteMedia(media: PostMedia): Promise<void>
-  deleteMedias(media: PostMedia[]): Promise<void>
+  deleteMedias(ids: string[]): Promise<void>
   addMedias(medias: PostMedia[], post: Post): Promise<PostMedia[]>
   getMedia(id: string): Promise<PostMedia>
   getMedias(ids: string[]): Promise<PostMedia[]>

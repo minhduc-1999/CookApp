@@ -32,8 +32,8 @@ import { CommentRepository } from "./adapters/out/repositories/comment.repositor
 import { CommentMediaRepository } from "./adapters/out/repositories/commentMedia.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { FollowRepository } from "./adapters/out/repositories/follow.repository";
-import { PostMediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
+import { PostMediaRepository } from "./adapters/out/repositories/postMedia.repository";
 import { ReactionRepository } from "./adapters/out/repositories/reaction.repository";
 import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
