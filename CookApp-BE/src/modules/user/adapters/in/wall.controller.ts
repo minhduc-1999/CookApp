@@ -20,6 +20,9 @@ import { UserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { FollowCommand } from "modules/user/useCases/follow";
 import { FollowResponse } from "modules/user/useCases/follow/followResponse";
+import { GetAlbumsQuery } from "modules/user/useCases/getAlbums";
+import { GetAlbumsResponse } from "modules/user/useCases/getAlbums/getAlbumResponse";
+import { GetAlbumsRequest } from "modules/user/useCases/getAlbums/getWallPostsRequest";
 import { GetWallQuery } from "modules/user/useCases/getWall";
 import { GetWallResponse } from "modules/user/useCases/getWall/getWallResponse";
 import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";
@@ -46,6 +49,25 @@ export class WallController {
     const result = await this._queryBus.execute(postsQuery);
     return Result.ok(result, {
       messages: ["Get wall's posts successfully"],
+    });
+  }
+
+  @Get("albums")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(
+    GetAlbumsResponse,
+    "Get albums successfully"
+  )
+  async getAlbums(
+    @Query(new ParseRequestPipe<typeof GetAlbumsRequest>()) query: GetAlbumsRequest,
+    @Param("id", ParseUUIDPipe) targetId: string,
+    @UserReq() user: User
+  ): Promise<Result<GetAlbumsResponse>> {
+    query.targetId = targetId
+    const getAlbumsQuery = new GetAlbumsQuery(user, query);
+    const result = await this._queryBus.execute(getAlbumsQuery);
+    return Result.ok(result, {
+      messages: ["Get album successfully"],
     });
   }
 

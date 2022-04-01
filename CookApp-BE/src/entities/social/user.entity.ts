@@ -75,6 +75,7 @@ export class UserEntity extends AbstractEntity {
   }
 
   toDomain(): User {
+    if (!this.id) return null
     const data = this
     return new User({
       ...data,

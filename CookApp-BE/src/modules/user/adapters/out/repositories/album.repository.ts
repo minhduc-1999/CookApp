@@ -27,6 +27,7 @@ export class AlbumRepository extends BaseRepository implements IAlbumRepository 
       skip: queryOpt.limit * queryOpt.offset,
       take: queryOpt.limit
     })
+
     return [entities?.map(entity => entity.toDomain()), total]
   }
 

@@ -47,6 +47,7 @@ import { CreatePostCommandHandler } from "./useCases/createPost";
 import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
 import { EditPostCommandHandler } from "./useCases/editPost";
 import { FollowCommandHandler } from "./useCases/follow";
+import { GetAlbumsQueryHandler } from "./useCases/getAlbums";
 import { GetCommentsQueryHandler } from "./useCases/getComments";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostDetail";
@@ -84,6 +85,7 @@ const queryHandlers = [
   GetWallQueryHandler,
   GetUsersQueryHandler,
   GetSavedPostsQueryHandler,
+  GetAlbumsQueryHandler
 ];
 const services = [
   {

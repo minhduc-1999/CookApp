@@ -245,13 +245,13 @@ export class AlbumResponse extends AuditResponse {
   medias?: MediaResponse[]
 
   @ApiResponseProperty({ type: AuthorResponse })
-  author: AuthorResponse
+  owner: AuthorResponse
 
   constructor(album: Album) {
     super(album)
     this.name = album?.name
     this.medias = album?.medias.map(media => new MediaResponse(media));
-    this.author = new AuthorResponse(album?.owner)
+    this.owner = album?.owner && new AuthorResponse(album.owner)
     this.description = album?.description
   }
 }

@@ -5,12 +5,12 @@ import { BaseCommand } from "base/cqrs/command.base";
 import { Image, Video } from "domains/social/media.domain";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import _ = require("lodash");
-import { MediaType } from "enums/social.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { CreateAlbumRequest } from "./createAlbumRequest";
 import { CreateAlbumResponse } from "./createAlbumResponse";
 import { Album } from "domains/social/album.domain";
 import { IAlbumService } from "modules/user/services/album.service";
+import { MediaType } from "enums/social.enum";
 
 export class CreateAlbumCommand extends BaseCommand {
   req: CreateAlbumRequest;
@@ -33,26 +33,26 @@ export class CreateAlbumCommandHandler
   async execute(command: CreateAlbumCommand): Promise<CreateAlbumResponse> {
     const { req, user, tx } = command;
 
-    // if (req.images?.length > 0) {
-    //   req.images = await this._storageService.makePublic(
-    //     req.images,
-    //     MediaType.IMAGE
-    //   );
-    // }
+    if (req.images?.length > 0) {
+      req.images = await this._storageService.makePublic(
+        req.images,
+        MediaType.IMAGE
+      );
+    }
 
-    // if (req.videos?.length > 0) {
-    //   req.videos = await this._storageService.makePublic(
-    //     req.videos,
-    //     MediaType.VIDEO
-    //   );
-    // }
-
+    if (req.videos?.length > 0) {
+      req.videos = await this._storageService.makePublic(
+        req.videos,
+        MediaType.VIDEO
+      );
+    }
 
     const medias = _.unionBy(
       req.images?.map(image => new Image({ key: image })),
       req.videos?.map(video => new Video({ key: video })),
       'key'
     )
+
     const creatingAlbum = new Album({
       medias,
       name: req.name,
