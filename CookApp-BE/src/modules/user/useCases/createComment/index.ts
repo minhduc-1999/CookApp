@@ -16,6 +16,7 @@ import { IPostMediaRepository } from "modules/user/interfaces/repositories/postM
 import { CommentMedia, Image } from "domains/social/media.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFoodRecipeService } from "modules/core/services/recipeStep.service";
+import { IAlbumMediaRepository } from "modules/user/interfaces/repositories/albumMedia.interface";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
@@ -43,6 +44,8 @@ export class CreateCommentCommandHandler
     private _storageService: IStorageService,
     @Inject("IFoodRecipeService")
     private _recipeService : IFoodRecipeService,
+    @Inject("IAlbumMediaRepository")
+    private _albumMediaRepo: IAlbumMediaRepository,
     @Inject("IPostService")
     private _postService: IPostService
   ) { }
@@ -73,6 +76,14 @@ export class CreateCommentCommandHandler
         break;
       case InteractiveTargetType.RECIPE_STEP:
         target = await this._recipeService.getStepById(commentReq.targetId)
+        break;
+      case InteractiveTargetType.ALBUM_MEDIA:
+        target = await this._albumMediaRepo.getMedia(commentReq.targetId)
+        if (!target) {
+          throw new NotFoundException(
+            ResponseDTO.fail("Media not found")
+          );
+        }
         break;
       default:
         throw new BadRequestException(ResponseDTO.fail("Target type not valid"))
