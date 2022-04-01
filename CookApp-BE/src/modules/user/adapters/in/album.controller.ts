@@ -1,6 +1,6 @@
-import { Body, Controller, Post as PostHttp } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post as PostHttp } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { Result } from "base/result.base";
 import {
@@ -13,6 +13,8 @@ import { User } from "domains/social/user.domain";
 import { CreateAlbumCommand } from "modules/user/useCases/createAlbum";
 import { CreateAlbumRequest } from "modules/user/useCases/createAlbum/createAlbumRequest";
 import { CreateAlbumResponse } from "modules/user/useCases/createAlbum/createAlbumResponse";
+import { GetAlbumDetailQuery } from "modules/user/useCases/getAlbumDetail";
+import { GetAlbumDetailResponse } from "modules/user/useCases/getAlbumDetail/getAlbumResponse";
 
 @Controller("users/albums")
 @ApiTags("User/Album")
@@ -34,4 +36,16 @@ export class AlbumController {
     return Result.ok(createdAlbum, { messages: ["Create album successfully"] });
   }
 
+  @Get(":albumId")
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustom(GetAlbumDetailResponse, "Get album successfully")
+  @ApiNotFoundResponse({ description: "Album not found" })
+  async getPostById(
+    @Param("albumId", ParseUUIDPipe) albumId: string,
+    @UserReq() user: User
+  ): Promise<Result<GetAlbumDetailResponse>> {
+    const query = new GetAlbumDetailQuery(user, albumId);
+    const album = await this._queryBus.execute(query);
+    return Result.ok(album, { messages: ["Get album successfully"] });
+  }
 }

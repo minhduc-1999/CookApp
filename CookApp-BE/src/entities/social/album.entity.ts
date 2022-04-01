@@ -10,7 +10,7 @@ import { AbstractEntity } from '../../base/entities/base.entity';
 @Entity({ name: 'albums' })
 export class AlbumEntity extends AbstractEntity {
 
-  @ManyToOne(() => UserEntity )
+  @ManyToOne(() => UserEntity)
   @JoinColumn({ name: "owner_id" })
   owner: UserEntity;
 
@@ -78,14 +78,19 @@ export class AlbumMediaEntity {
   }
 
   toDomain(): CommentMedia {
+    const { nReactions, nComments } = this.interaction
     switch (this.type) {
       case MediaType.IMAGE:
         return new Image({
+          nReactions,
+          nComments,
           key: this.key,
           id: this.interaction && this.interaction.id
         })
       case MediaType.VIDEO:
         return new Video({
+          nReactions,
+          nComments,
           key: this.key,
           id: this.interaction && this.interaction.id
         })

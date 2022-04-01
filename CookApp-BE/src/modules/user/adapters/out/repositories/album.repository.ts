@@ -43,7 +43,7 @@ export class AlbumRepository extends BaseRepository implements IAlbumRepository 
 
   async getAlbumById(albumId: string): Promise<Album> {
     const albumEntity = await this._albumRepo.findOne(albumId, {
-      relations: ["medias", "owner"]
+      relations: ["medias", "owner", "medias.interaction"]
     })
     return albumEntity?.toDomain()
   }

@@ -24,7 +24,7 @@ export class AlbumService implements IAlbumService {
 
     if (!album)
       throw new NotFoundException(
-        ResponseDTO.fail("Post not found", UserErrorCode.ALBUM_NOT_FOUND)
+        ResponseDTO.fail("Album not found", UserErrorCode.ALBUM_NOT_FOUND)
       );
 
     return album
