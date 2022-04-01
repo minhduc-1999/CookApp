@@ -48,7 +48,12 @@ export class AlbumRepository extends BaseRepository implements IAlbumRepository 
     return albumEntity?.toDomain()
   }
 
-  updateAlbum(album: Album, data: Partial<Album>): Promise<void> {
-    throw new Error("Method not implemented.");
+  async updateAlbum(album: Album, data: Partial<Album>): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      const entity = new AlbumEntity(album)
+      const updateData = entity.update(data)
+      await queryRunner.manager.update<AlbumEntity>(AlbumEntity, entity, updateData)
+    }
   }
 }

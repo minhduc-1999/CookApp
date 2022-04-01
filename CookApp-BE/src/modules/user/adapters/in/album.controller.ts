@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post as PostHttp } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -13,6 +13,9 @@ import { User } from "domains/social/user.domain";
 import { CreateAlbumCommand } from "modules/user/useCases/createAlbum";
 import { CreateAlbumRequest } from "modules/user/useCases/createAlbum/createAlbumRequest";
 import { CreateAlbumResponse } from "modules/user/useCases/createAlbum/createAlbumResponse";
+import { EditAlbumCommand } from "modules/user/useCases/editAlbum";
+import { EditAlbumRequest } from "modules/user/useCases/editAlbum/editAlbumRequest";
+import { EditAlbumResponse } from "modules/user/useCases/editAlbum/editAlbumResponse";
 import { GetAlbumDetailQuery } from "modules/user/useCases/getAlbumDetail";
 import { GetAlbumDetailResponse } from "modules/user/useCases/getAlbumDetail/getAlbumResponse";
 
@@ -34,6 +37,23 @@ export class AlbumController {
     const createAlbumCommand = new CreateAlbumCommand(user, body, tx);
     const createdAlbum = await this._commandBus.execute(createAlbumCommand);
     return Result.ok(createdAlbum, { messages: ["Create album successfully"] });
+  }
+
+  @Patch(":albumId")
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustom(EditAlbumResponse, "Edit album successfully")
+  @HttpRequestTransaction()
+  @ApiNotFoundResponse({ description: "Album not found" })
+  async editPost(
+    @Body() body: EditAlbumRequest,
+    @UserReq() user: User,
+    @Param("albumId", ParseUUIDPipe) albumId: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<EditAlbumResponse>> {
+    body.id = albumId;
+    const editAlbumCommand = new EditAlbumCommand(tx, user, body);
+    const res = await this._commandBus.execute(editAlbumCommand);
+    return Result.ok(res, { messages: ["Edit album successfully"] });
   }
 
   @Get(":albumId")

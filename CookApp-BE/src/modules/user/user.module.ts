@@ -45,6 +45,7 @@ import { CreateAlbumCommandHandler } from "./useCases/createAlbum";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
+import { EditAlbumCommandHandler } from "./useCases/editAlbum";
 import { EditPostCommandHandler } from "./useCases/editPost";
 import { FollowCommandHandler } from "./useCases/follow";
 import { GetAlbumDetailQueryHandler } from "./useCases/getAlbumDetail";
@@ -75,7 +76,8 @@ const commandHandlers = [
   UpdateProfileCommandHandler,
   SavePostCommandHandler,
   DeleteSavedPostCommandHandler,
-  CreateAlbumCommandHandler
+  CreateAlbumCommandHandler,
+  EditAlbumCommandHandler
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,

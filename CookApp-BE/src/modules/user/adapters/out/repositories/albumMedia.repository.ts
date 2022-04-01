@@ -18,6 +18,7 @@ export class AlbumMediaRepository extends BaseRepository implements IAlbumMediaR
   }
 
   async getMedias(ids: string[]): Promise<PostMedia[]> {
+    if (!ids || ids.length === 0) return []
     const entities = await this._postMediaRepo
       .createQueryBuilder("media")
       .leftJoinAndSelect("media.interaction", "interaction")
@@ -28,6 +29,7 @@ export class AlbumMediaRepository extends BaseRepository implements IAlbumMediaR
   }
 
   async getMedia(id: string): Promise<PostMedia> {
+    if (!id) return null
     const entity = await this._postMediaRepo
       .createQueryBuilder("media")
       .leftJoinAndSelect("media.interaction", "interaction")

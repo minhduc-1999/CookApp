@@ -6,6 +6,7 @@ import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
 import { Album } from '../../domains/social/album.domain';
 import { AbstractEntity } from '../../base/entities/base.entity';
+import { isNil } from 'lodash';
 
 @Entity({ name: 'albums' })
 export class AlbumEntity extends AbstractEntity {
@@ -35,7 +36,7 @@ export class AlbumEntity extends AbstractEntity {
     return new Album({
       ...audit,
       name: this.name,
-      medias: this.medias?.map(media => media.toDomain()),
+      medias: this.medias?.filter(media => !isNil(media.interaction)).map(media => media.toDomain()),
       owner: this.owner?.toDomain(),
       description: this.description
     })
