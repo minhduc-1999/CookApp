@@ -76,7 +76,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       await queryRunner.manager.update(
         UserEntity,
         { id: user.id },
-        (new UserEntity(user)).getPartialUpdateObject()
+        (new UserEntity(user)).update()
       )
     } else {
       throw new InternalServerErrorException()
@@ -94,8 +94,11 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     ]
   }
 
-  updateStatus(user: User, statusID?: string): Promise<void> {
-    throw new Error("Method not implemented.");
+  async updateStatus(user: User, statusID?: string): Promise<void> {
+      await this._repo.update(
+        { id: user.id },
+        { status: statusID }
+      )
   }
 }
 

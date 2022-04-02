@@ -37,6 +37,8 @@ export class User extends Audit {
 
   account?: Account
 
+  status: string
+
   constructor(user: Partial<User>) {
     super(user)
     this.account = user?.account
@@ -51,6 +53,7 @@ export class User extends Audit {
     this.nPosts = user?.nPosts
     this.nFollowees = user?.nFollowees
     this.nFollowers = user?.nFollowers
+    this.status = user?.status
   }
 
   follow(followee: User): Follow {

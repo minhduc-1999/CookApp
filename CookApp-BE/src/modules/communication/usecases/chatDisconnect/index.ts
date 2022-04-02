@@ -22,6 +22,6 @@ export class ChatDisconnectCommandHandler
   ) { }
   async execute(command: ChatDiconnectCommand): Promise<void> {
     const { user } = command
-    this._userRepo.updateStatus(user)
+    this._userRepo.updateStatus(user, "")
   }
 }

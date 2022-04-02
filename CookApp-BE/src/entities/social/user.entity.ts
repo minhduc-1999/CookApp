@@ -49,6 +49,9 @@ export class UserEntity extends AbstractEntity {
   @Column({ name: 'display_name' })
   displayName: string;
 
+  @Column({ name: 'status', default: "" })
+  status: string;
+
   @OneToOne(() => AccountEntity, account => account.user)
   account: AccountEntity
 
@@ -72,6 +75,7 @@ export class UserEntity extends AbstractEntity {
     this.avatar = user?.avatar?.key
     this.displayName = user?.displayName
     this.account = user?.account && new AccountEntity(user.account)
+    this.status = user?.status
   }
 
   toDomain(): User {
@@ -84,7 +88,7 @@ export class UserEntity extends AbstractEntity {
     })
   }
 
-  getPartialUpdateObject() : Partial<UserEntity>{
+  update() : Partial<UserEntity>{
     const {account, nPosts, nFollowees, nFollowers, ...remain } = this
     return {
       ...remain
