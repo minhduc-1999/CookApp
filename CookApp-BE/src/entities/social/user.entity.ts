@@ -5,6 +5,7 @@ import { Image } from '../../domains/social/media.domain';
 import { Sex } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { FollowEntity } from './follow.entity';
+import { ConversationMemberEntity } from './conversation.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends AbstractEntity {
@@ -60,6 +61,9 @@ export class UserEntity extends AbstractEntity {
 
   @OneToMany(() => FollowEntity, follow => follow.follower)
   followers: FollowEntity[]
+
+  @OneToMany(() => ConversationMemberEntity , member => member.user)
+  memberOf: ConversationMemberEntity[]
 
   constructor(user: User) {
     super(user)

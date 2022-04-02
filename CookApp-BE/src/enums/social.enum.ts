@@ -23,3 +23,15 @@ export enum Sex {
 }
 
 export const SexEnum = ['male', 'female', 'other']
+
+export enum ConversationType {
+  DIRECT = "DIRECT",
+  GROUP = "GROUP"
+}
+
+export enum MessageContentType {
+  TEXT = "TEXT",
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+  AUDIO = "AUDIO"
+}
