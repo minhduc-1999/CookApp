@@ -16,6 +16,7 @@ import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { AuthModule } from "modules/auth/auth.module";
+import { CommunicationModule } from "modules/communication/communication.module";
 import { CoreModule } from "modules/core/core.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
@@ -184,7 +185,8 @@ const repositories = [
       CommentMediaEntity,
       AlbumEntity,
       AlbumMediaEntity
-    ])
+    ]),
+    CommunicationModule
   ],
   controllers: [
     PostController,

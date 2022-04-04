@@ -52,6 +52,7 @@ const repositories = [
     },
     ...commandHandlers,
     ...repositories
-  ]
+  ],
+  exports: ["IConversationRepository"]
 })
 export class CommunicationModule { }
