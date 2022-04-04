@@ -13,7 +13,7 @@ import { GetFoodDetailQuery } from "modules/core/useCases/getFoodDetail";
 import { GetFoodDetailResponse } from "modules/core/useCases/getFoodDetail/getFoodDetailResponse";
 import { GetFoodsQuery } from "modules/core/useCases/getFoods";
 import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
-import { ParseRequestPipe } from "pipes/parseRequest.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("foods")
 @ApiTags("Foods")
@@ -25,7 +25,7 @@ export class FoodController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodsResponse, "Get foods successfully")
   async getFoods(
-    @Query(new ParseRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
     @UserReq() user: User
   ): Promise<Result<GetFoodsResponse>> {
     const foodQuery = new GetFoodsQuery(user, query);

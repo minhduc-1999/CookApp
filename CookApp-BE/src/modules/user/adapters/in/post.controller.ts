@@ -28,7 +28,7 @@ import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
 import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";
 import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
-import { ParseRequestPipe } from "pipes/parseRequest.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/posts")
 @ApiTags("User/Post")
@@ -126,7 +126,7 @@ export class PostController {
     "Get saved posts successfully"
   )
   async getSavedPosts(
-    @Query(new ParseRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
     @UserReq() user: User
   ): Promise<Result<GetSavedPostsResponse>> {
     const savedPostsQuery = new GetSavedPostsQuery(user, query);

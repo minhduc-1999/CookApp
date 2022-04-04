@@ -29,7 +29,7 @@ import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";
 import { GetWallPostsRequest } from "modules/user/useCases/getWallPosts/getWallPostsRequest";
 import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWallPostsResponse";
 import { UnfolllowCommand } from "modules/user/useCases/unfollow";
-import { ParseRequestPipe } from "pipes/parseRequest.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/:id/walls")
 @ApiTags("User/Wall")
@@ -41,7 +41,7 @@ export class WallController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetWallPostsResponse, "Get wall's posts successfully")
   async getWallPosts(
-    @Query(new ParseRequestPipe<typeof GetWallPostsRequest>()) query: GetWallPostsRequest,
+    @Query(new ParseHttpRequestPipe<typeof GetWallPostsRequest>()) query: GetWallPostsRequest,
     @UserReq() user: User,
     @Param("id", ParseUUIDPipe) targetId: string
   ): Promise<Result<GetWallPostsResponse>> {
@@ -59,7 +59,7 @@ export class WallController {
     "Get albums successfully"
   )
   async getAlbums(
-    @Query(new ParseRequestPipe<typeof GetAlbumsRequest>()) query: GetAlbumsRequest,
+    @Query(new ParseHttpRequestPipe<typeof GetAlbumsRequest>()) query: GetAlbumsRequest,
     @Param("id", ParseUUIDPipe) targetId: string,
     @UserReq() user: User
   ): Promise<Result<GetAlbumsResponse>> {

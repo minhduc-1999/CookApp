@@ -15,7 +15,7 @@ import { UserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetFeedPostsQuery } from "modules/user/useCases/getFeedPosts";
 import { GetFeedPostsResponse } from "modules/user/useCases/getFeedPosts/getFeedPostsResponse";
-import { ParseRequestPipe } from "pipes/parseRequest.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/feeds")
 @ApiTags("User/Feed")
@@ -30,7 +30,7 @@ export class FeedController {
     "Get feed's posts successfully"
   )
   async getFeedPosts(
-    @Query(new ParseRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
     @UserReq() user: User
   ): Promise<Result<GetFeedPostsResponse>> {
     const postsQuery = new GetFeedPostsQuery(user, query);

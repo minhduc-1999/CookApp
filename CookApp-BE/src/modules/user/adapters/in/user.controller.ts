@@ -18,7 +18,7 @@ import { GetUsersQuery } from "modules/user/useCases/getUsers";
 import { GetUsersResponse } from "modules/user/useCases/getUsers/getUsersResponse";
 import { UpdateProfileCommand } from "modules/user/useCases/updateProfile";
 import { UpdateProfileRequest } from "modules/user/useCases/updateProfile/updateProfileRequest";
-import { ParseRequestPipe } from "pipes/parseRequest.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users")
 @ApiTags("Users")
@@ -32,7 +32,7 @@ export class UserController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetUsersResponse, "Get users successfully")
   async findUsers(
-    @Query(new ParseRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
     @UserReq() user: User
   ): Promise<Result<GetUsersResponse>> {
     const queryOp = new GetUsersQuery(user, query);

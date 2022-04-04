@@ -16,7 +16,7 @@ import { CreateCommentResponse } from "modules/user/useCases/createComment/creat
 import { GetCommentsQuery } from "modules/user/useCases/getComments";
 import { GetCommentsRequest } from "modules/user/useCases/getComments/getCommentsRequest";
 import { GetCommentsResponse } from "modules/user/useCases/getComments/getCommentsResponse";
-import { ParseRequestPipe } from "pipes/parseRequest.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/comments")
 @ApiTags("User/Comment")
@@ -47,7 +47,7 @@ export class CommentController {
     "Get post's comments successfully"
   )
   async getPostCommentsPosts(
-    @Query(new ParseRequestPipe<typeof GetCommentsRequest>()) query: GetCommentsRequest,
+    @Query(new ParseHttpRequestPipe<typeof GetCommentsRequest>()) query: GetCommentsRequest,
     @UserReq() user: User,
   ): Promise<Result<GetCommentsResponse>> {
     const getCommentsQuery = new GetCommentsQuery(user, query);
