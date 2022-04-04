@@ -2,10 +2,11 @@ import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { BaseRepository } from "base/repository.base";
+import { plainToClass } from "class-transformer";
 import { Conversation } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
 import { ConversationEntity, ConversationMemberEntity } from "entities/social/conversation.entity";
-import { IsNull, Not, QueryRunner, Repository } from "typeorm";
+import { In, IsNull, Not, QueryRunner, Repository } from "typeorm";
 
 export interface IConversationRepository {
   findById(id: string): Promise<Conversation>
@@ -13,6 +14,7 @@ export interface IConversationRepository {
   isMember(convId: string, userId: string): Promise<Boolean>
   getMembers(convId: string): Promise<User[]>
   setTransaction(tx: ITransaction): IConversationRepository
+  findDirectConversation(memberId1: string, memberId2: string): Promise<Conversation>
 }
 @Injectable()
 export class ConversationRepository extends BaseRepository implements IConversationRepository {
@@ -23,6 +25,23 @@ export class ConversationRepository extends BaseRepository implements IConversat
     private _convMemberRepo: Repository<ConversationMemberEntity>,
   ) {
     super()
+  }
+  async findDirectConversation(memberId1: string, memberId2: string): Promise<Conversation> {
+    const result = await this._conversationRepo.query(`
+      SELECT * 
+      FROM conversations c2 
+      WHERE 
+        c2.id IN (
+          SELECT cm2.conversation_id 
+          FROM conversation_members cm2, conversation_members cm 
+          WHERE cm2.user_id = $1
+           AND cm2.conversation_id = cm.conversation_id 
+           AND cm.user_id = $2 )
+        AND c2."type" = 'DIRECT'
+   `, [memberId1, memberId2])
+    if (result.length === 0)
+      return null
+    return plainToClass(ConversationEntity, result[0]).toDomain()
   }
 
   async isMember(convId: string, userId: string): Promise<Boolean> {

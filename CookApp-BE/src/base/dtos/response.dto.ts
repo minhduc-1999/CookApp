@@ -6,12 +6,13 @@ import { MetaDTO } from "./responseMeta.dto";
 import { Comment } from "domains/social/comment.domain"
 import { Food } from "domains/core/food.domain";
 import { Media } from "domains/social/media.domain";
-import { MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
+import { ConversationType, MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { Ingredient } from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { Album } from "domains/social/album.domain";
+import { Conversation } from "domains/social/conversation.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -350,5 +351,15 @@ export class FoodResponse extends AuditResponse {
       new IngredientResponse(ingredient)
     )
     this.videoUrl = food?.videoUrl
+  }
+}
+
+export class ConversationResponse  extends AuditResponse {
+  @ApiResponseProperty({ enum: ConversationType })
+  type: ConversationType
+
+  constructor(conv: Conversation){
+    super(conv)
+    this.type = conv?.type
   }
 }

@@ -4,6 +4,7 @@ import { ConversationType, MessageContentType } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { UserEntity } from './user.entity';
 import { Conversation, Message, MessageContent } from 'domains/social/conversation.domain';
+import { Audit } from 'domains/audit.domain';
 
 @Entity({ name: 'conversations' })
 export class ConversationEntity extends AbstractEntity {
@@ -24,7 +25,9 @@ export class ConversationEntity extends AbstractEntity {
   }
 
   toDomain(): Conversation {
+    const audit = new Audit(this)
     return new Conversation({
+      ...audit,
       type: this.type,
       members: this.members?.map(member => member.toDomain()[1])
     })
@@ -82,7 +85,9 @@ export class MessageEntity extends AbstractEntity {
   }
 
   toDomain(): Message {
+    const audit = new Audit(this)
     return new Message({
+      ...audit,
       to: this.conversation?.toDomain(),
       sender: this.sender?.toDomain()[1],
       message: new MessageContent(this.content, this.contentType)
