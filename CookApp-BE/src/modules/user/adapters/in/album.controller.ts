@@ -8,7 +8,7 @@ import {
   ApiFailResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { CreateAlbumCommand } from "modules/user/useCases/createAlbum";
 import { CreateAlbumRequest } from "modules/user/useCases/createAlbum/createAlbumRequest";
@@ -31,7 +31,7 @@ export class AlbumController {
   @HttpRequestTransaction()
   async createPost(
     @Body() body: CreateAlbumRequest,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<CreateAlbumResponse>> {
     const createAlbumCommand = new CreateAlbumCommand(user, body, tx);
@@ -46,7 +46,7 @@ export class AlbumController {
   @ApiNotFoundResponse({ description: "Album not found" })
   async editPost(
     @Body() body: EditAlbumRequest,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @Param("albumId", ParseUUIDPipe) albumId: string,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<EditAlbumResponse>> {
@@ -62,7 +62,7 @@ export class AlbumController {
   @ApiNotFoundResponse({ description: "Album not found" })
   async getPostById(
     @Param("albumId", ParseUUIDPipe) albumId: string,
-    @UserReq() user: User
+    @HttpUserReq() user: User
   ): Promise<Result<GetAlbumDetailResponse>> {
     const query = new GetAlbumDetailQuery(user, albumId);
     const album = await this._queryBus.execute(query);

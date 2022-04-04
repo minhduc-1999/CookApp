@@ -8,7 +8,7 @@ import {
   ApiFailResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { ReactCommand } from "modules/user/useCases/react";
 import { ReactRequest } from "modules/user/useCases/react/reactRequest";
@@ -25,7 +25,7 @@ export class ReactionController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(ReactResponse, "Update react status successfully")
   async reactPost(
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @Body() body: ReactRequest,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<ReactResponse>> {

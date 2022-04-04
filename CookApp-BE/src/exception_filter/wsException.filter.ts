@@ -11,10 +11,10 @@ import { Socket } from "socket.io";
 @Catch(WsException)
 export class WsExceptionFilter implements ExceptionFilter {
   catch(exception: WsException, host: ArgumentsHost) {
+    console.error(exception)
     const client = host.switchToWs().getClient<Socket>();
     const err = exception.getError()
     if (err instanceof WsRequestValidationError) {
-      console.error(err)
       client.emit(ChatEventType.SEND_MESSAGE_ERROR, err.message)
       return
     }

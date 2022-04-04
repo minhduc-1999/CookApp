@@ -2,8 +2,8 @@ import { Column, Entity, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../domains/social/user.domain';
 import { ConversationType, MessageContentType } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
-import { Conversation, Message } from '../../domains/social/chat.domain';
 import { UserEntity } from './user.entity';
+import { Conversation, Message, MessageContent } from 'domains/social/conversation.domain';
 
 @Entity({ name: 'conversations' })
 export class ConversationEntity extends AbstractEntity {
@@ -14,15 +14,20 @@ export class ConversationEntity extends AbstractEntity {
   @OneToMany(() => MessageEntity, message => message.conversation)
   messages: MessageEntity[]
 
-  @OneToMany(() => ConversationMemberEntity, member => member.conversation)
+  @OneToMany(() => ConversationMemberEntity, member => member.conversation, { cascade: ["insert"] })
   members: ConversationMemberEntity[]
 
-  constructor(user: User) {
-    super(user)
+  constructor(conv: Conversation) {
+    super(conv)
+    this.type = conv?.type
+    this.members = conv?.members?.map(member => new ConversationMemberEntity(member))
   }
 
   toDomain(): Conversation {
-    if (!this.id) return null
+    return new Conversation({
+      type: this.type,
+      members: this.members?.map(member => member.toDomain()[1])
+    })
   }
 
 }
@@ -34,8 +39,21 @@ export class ConversationMemberEntity extends AbstractEntity {
   conversation: ConversationEntity
 
   @ManyToOne(() => UserEntity)
-  @JoinColumn({ name: "user_id"})
+  @JoinColumn({ name: "user_id" })
   user: UserEntity
+
+  constructor(user: User, conv?: Conversation) {
+    super(null)
+    this.user = user && new UserEntity(user)
+    this.conversation = conv && new ConversationEntity(conv)
+  }
+
+  toDomain(): [Conversation, User] {
+    return [
+      this.conversation?.toDomain(),
+      this.user?.toDomain()
+    ]
+  }
 }
 
 @Entity({ name: 'messages' })
@@ -52,14 +70,22 @@ export class MessageEntity extends AbstractEntity {
   conversation: ConversationEntity
 
   @ManyToOne(() => ConversationMemberEntity)
-  @JoinColumn({ name: "sender_id"})
+  @JoinColumn({ name: "sender_id" })
   sender: ConversationMemberEntity
 
-  constructor(user: User) {
-    super(user)
+  constructor(msg: Message) {
+    super(msg)
+    this.content = msg?.message?.content
+    this.contentType = msg?.message?.type
+    this.conversation = msg?.to && new ConversationEntity(msg.to)
+    this.sender = msg?.sender && new ConversationMemberEntity(msg.sender)
   }
 
   toDomain(): Message {
-    if (!this.id) return null
+    return new Message({
+      to: this.conversation?.toDomain(),
+      sender: this.sender?.toDomain()[1],
+      message: new MessageContent(this.content, this.contentType)
+    })
   }
 }

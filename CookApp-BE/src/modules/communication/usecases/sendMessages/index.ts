@@ -1,6 +1,12 @@
+import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { WsException } from "@nestjs/websockets";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { BaseCommand } from "base/cqrs/command.base";
+import { Message } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
+import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
+import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
 import { SendMessageRequest } from "./sendMessageRequest";
 
 export class SendMessageCommand extends BaseCommand {
@@ -8,9 +14,9 @@ export class SendMessageCommand extends BaseCommand {
   constructor(
     user: User,
     request: SendMessageRequest,
-    // tx: Transaction
+    tx: ITransaction
   ) {
-    super(null, user);
+    super(tx, user);
     this.commentReq = request;
   }
 }
@@ -20,12 +26,31 @@ export class SendMessageCommandHandler
   implements ICommandHandler<SendMessageCommand>
 {
   constructor(
+    @Inject("IConversationRepository")
+    private _convRepo: IConversationRepository,
+    @Inject("IMessageRepository")
+    private _msgRepo: IMessageRepository
   ) { }
-  async execute(command: SendMessageCommand): Promise<void> {
+  async execute(command: SendMessageCommand): Promise<[Message, User[]]> {
+    const { user, commentReq, tx } = command
+
     //Check conversation existed
-    //
+    const conversation = await this._convRepo.findById(commentReq.to)
+
+    if (!conversation) {
+      throw new WsException("Conversation not found")
+    }
+
     //Check if user in conversation
-    //
+    const isMember = await this._convRepo.isMember(conversation.id, user.id)
+    if (!isMember) {
+      throw new WsException("Not in conversation")
+    }
+
     //Send message
+    const msg = user.inbox(conversation, commentReq.message, commentReq.type)
+    await this._msgRepo.setTransaction(tx).createMessage(msg)
+    const onlineMembers = await this._convRepo.getMembers(conversation.id)
+    return [msg, onlineMembers.filter(member => member.id !== user.id)]
   }
 }

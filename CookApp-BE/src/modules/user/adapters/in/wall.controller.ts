@@ -16,7 +16,7 @@ import {
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { FollowCommand } from "modules/user/useCases/follow";
 import { FollowResponse } from "modules/user/useCases/follow/followResponse";
@@ -42,7 +42,7 @@ export class WallController {
   @ApiOKResponseCustom(GetWallPostsResponse, "Get wall's posts successfully")
   async getWallPosts(
     @Query(new ParseHttpRequestPipe<typeof GetWallPostsRequest>()) query: GetWallPostsRequest,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @Param("id", ParseUUIDPipe) targetId: string
   ): Promise<Result<GetWallPostsResponse>> {
     const postsQuery = new GetWallPostsQuery(user, targetId, query);
@@ -61,7 +61,7 @@ export class WallController {
   async getAlbums(
     @Query(new ParseHttpRequestPipe<typeof GetAlbumsRequest>()) query: GetAlbumsRequest,
     @Param("id", ParseUUIDPipe) targetId: string,
-    @UserReq() user: User
+    @HttpUserReq() user: User
   ): Promise<Result<GetAlbumsResponse>> {
     query.targetId = targetId
     const getAlbumsQuery = new GetAlbumsQuery(user, query);
@@ -77,7 +77,7 @@ export class WallController {
   @HttpRequestTransaction()
   async follow(
     @Param("id", ParseUUIDPipe) targetId: string,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<FollowResponse>> {
     const command = new FollowCommand(user, targetId, tx);
@@ -93,7 +93,7 @@ export class WallController {
   @HttpRequestTransaction()
   async unfollow(
     @Param("id", ParseUUIDPipe) targetId: string,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<UnfolllowCommand>> {
     const command = new UnfolllowCommand(user, targetId, tx);
@@ -108,7 +108,7 @@ export class WallController {
   @ApiOKResponseCustom(GetWallResponse, "Get wall information successfully")
   async getWall(
     @Param("id", ParseUUIDPipe) targetId: string,
-    @UserReq() user: User
+    @HttpUserReq() user: User
   ) {
     const query = new GetWallQuery(user, targetId);
     const result = await this._queryBus.execute(query);

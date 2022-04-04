@@ -7,7 +7,7 @@ import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetFoodDetailQuery } from "modules/core/useCases/getFoodDetail";
 import { GetFoodDetailResponse } from "modules/core/useCases/getFoodDetail/getFoodDetailResponse";
@@ -26,7 +26,7 @@ export class FoodController {
   @ApiOKResponseCustom(GetFoodsResponse, "Get foods successfully")
   async getFoods(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
-    @UserReq() user: User
+    @HttpUserReq() user: User
   ): Promise<Result<GetFoodsResponse>> {
     const foodQuery = new GetFoodsQuery(user, query);
     const result = await this._queryBus.execute(foodQuery);
@@ -39,7 +39,7 @@ export class FoodController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodDetailResponse, "Get food successfully")
   async getFoodDetail(
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @Param("foodId", ParseUUIDPipe) foodId: string
   ): Promise<Result<GetFoodDetailResponse>> {
     const foodQuery = new GetFoodDetailQuery(user, foodId);

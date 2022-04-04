@@ -17,14 +17,26 @@ export class Conversation extends Audit {
 export class Message extends Audit {
   sender: User
 
-  content: MessageContent
+  message: MessageContent
 
   to: Conversation
+
+  constructor(msg: Partial<Message>) {
+    super(msg)
+    this.sender = msg?.sender
+    this.message = msg?.message
+    this.to = msg?.to
+  }
 }
 
 export class MessageContent {
   content: string
 
   type: MessageContentType
+
+  constructor(content: string, type: MessageContentType) {
+    this.content = content
+    this.type = type
+  }
 }
 

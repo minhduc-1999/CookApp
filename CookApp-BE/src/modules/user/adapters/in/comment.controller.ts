@@ -8,7 +8,7 @@ import {
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { CreateCommentCommand } from "modules/user/useCases/createComment";
 import { CreateCommentRequest } from "modules/user/useCases/createComment/createCommentRequest";
@@ -30,7 +30,7 @@ export class CommentController {
   @HttpRequestTransaction()
   async createComment(
     @Body() body: CreateCommentRequest,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<CreateCommentResponse>> {
     const commentsQuery = new CreateCommentCommand(user, body, tx);
@@ -48,7 +48,7 @@ export class CommentController {
   )
   async getPostCommentsPosts(
     @Query(new ParseHttpRequestPipe<typeof GetCommentsRequest>()) query: GetCommentsRequest,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
   ): Promise<Result<GetCommentsResponse>> {
     const getCommentsQuery = new GetCommentsQuery(user, query);
     const result = await this._queryBus.execute(getCommentsQuery);

@@ -1,3 +1,4 @@
+import { isFunction } from "lodash";
 import _ = require("lodash");
 const randomWords = require("random-words");
 
@@ -86,7 +87,7 @@ export function generateDisplayName() {
   );
 }
 
-export function retrieveObjectNameFromUrl( url: string,
+export function retrieveObjectNameFromUrl(url: string,
   eliminatedSeed: string
 ): string {
   const a = url.slice(url.indexOf(eliminatedSeed) + eliminatedSeed.length);
@@ -108,6 +109,39 @@ export function sleep(ms: number) {
 }
 
 export function inspectObj(obj: any) {
-    const util = require('util')
-    console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }))
+  const util = require('util')
+  console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }))
+}
+
+export function mapWsPayload(payload: unknown): { data: any; ack?: Function } {
+  if (!Array.isArray(payload)) {
+    if (isFunction(payload)) {
+      return { data: undefined, ack: payload as Function };
+    }
+    return { data: payload };
+  }
+  const lastElement = payload[payload.length - 1];
+  const isAck = isFunction(lastElement);
+  if (isAck) {
+    const size = payload.length - 1;
+    return {
+      data: size === 1 ? payload[0] : payload.slice(0, size),
+      ack: lastElement,
+    };
+  }
+  return { data: payload };
+}
+
+export function mapWsAck(payload: unknown): Function {
+  if (!Array.isArray(payload)) {
+    if (isFunction(payload)) {
+      return payload as Function
+    }
+    return null
+  }
+  const lastElement = payload[payload.length - 1];
+  if (isFunction(lastElement)) {
+    return lastElement
+  }
+  return null
 }
