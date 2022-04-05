@@ -61,12 +61,13 @@ export class ConversationRepository extends BaseRepository implements IConversat
 
   async getMembers(convId: string): Promise<User[]> {
     const entities = await this._convMemberRepo.find({
+      relations: ["user"],
       where: {
         conversation: {
           id: convId
         },
         user: {
-          status: Not(IsNull())
+          status: Not("")
         }
       }
     })

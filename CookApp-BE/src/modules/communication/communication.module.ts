@@ -1,7 +1,8 @@
 import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
-import { ConversationEntity, ConversationMemberEntity, MessageEntity } from "entities/social/conversation.entity";
+import { ConversationEntity, ConversationMemberEntity } from "entities/social/conversation.entity";
+import { MessageEntity } from "entities/social/message.entity";
 import { AuthModule } from "modules/auth/auth.module";
 import { ChatGateway } from "./adapters/in/chat.gateway";
 import { ConversationController } from "./adapters/in/conversation.controller";
@@ -41,7 +42,7 @@ const repositories = [
       MessageEntity
     ])
   ],
-  controllers:[
+  controllers: [
     ConversationController
   ],
   providers: [

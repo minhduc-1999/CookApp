@@ -15,9 +15,9 @@ export class WsExceptionFilter implements ExceptionFilter {
     const client = host.switchToWs().getClient<Socket>();
     const err = exception.getError()
     if (err instanceof WsRequestValidationError) {
-      client.emit(ChatEventType.SEND_MESSAGE_ERROR, err.message)
+      client.emit(ChatEventType.CHAT_ERROR, err.message)
       return
     }
-    client.emit(ChatEventType.SEND_MESSAGE_ERROR, exception.message)
+    client.emit(ChatEventType.CHAT_ERROR, exception.message)
   }
 }

@@ -3,7 +3,8 @@ import { InjectRepository } from "@nestjs/typeorm";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { BaseRepository } from "base/repository.base";
 import { Message } from "domains/social/conversation.domain";
-import { MessageEntity } from "entities/social/conversation.entity";
+import { ConversationMemberEntity } from "entities/social/conversation.entity";
+import { MessageEntity } from "entities/social/message.entity";
 import { QueryRunner, Repository } from "typeorm";
 
 export interface IMessageRepository {
@@ -21,9 +22,20 @@ export class MessageRepository extends BaseRepository implements IMessageReposit
   async createMessage(message: Message): Promise<Message> {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
+      const memberEntity = await queryRunner.manager.findOne<ConversationMemberEntity>(ConversationMemberEntity, {
+        where: {
+          user: {
+            id: message.sender.id
+          },
+          conversation: {
+            id: message.to.id
+          }
+        }
+      })
       const msg = new MessageEntity(message)
-      const entity = await queryRunner.manager.save(msg)
-      return entity?.toDomain()
+      msg.sender = memberEntity
+      const result = await queryRunner.manager.save<MessageEntity>(msg)
+      return result?.toDomain()
     }
     return null
   }

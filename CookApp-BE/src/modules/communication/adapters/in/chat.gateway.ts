@@ -4,7 +4,7 @@ import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect,
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { WsParamTransaction, WsRequestTransaction } from "decorators/transaction.decorator";
 import { WsUserReq } from "decorators/user.decorator";
-import { Message, MessageContent } from "domains/social/conversation.domain";
+import { Message } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
 import { WsExceptionFilter } from "exception_filter/wsException.filter";
 import { WebSocketAuthGuard } from "guards/websocketAuth.guard";
@@ -64,15 +64,10 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     @WsParamTransaction() tx: ITransaction,
     @WsUserReq() user: User
   ): Promise<void> {
-    console.log("received message: ", body)
     const command = new SendMessageCommand(user, body, tx)
     const [msg, onlineUsers] = (await this._commandBus.execute(command)) as [Message, User[]]
     onlineUsers.forEach(user => {
-      socket.to(user.status).emit(ChatEventType.OUT_MSG, msg)
+      socket.to(user.status).emit(ChatEventType.OUT_MSG, msg.message)
     })
-    // if (body.to)
-    //   socket.broadcast.to(body.room).emit("chat:message", body.message)
-    // else
-    //   socket.broadcast.emit("chat:message", body.message)
   }
 }
