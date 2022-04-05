@@ -8,6 +8,7 @@ import 'package:tastify/Model/CommentRespondModel.dart';
 import 'package:tastify/Model/EditPostRequestModel.dart';
 import 'package:tastify/Model/EditProfileRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
+import 'package:tastify/Model/FoodInstructionRespondModel.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
 import 'package:tastify/Model/LoginRequestModel.dart';
@@ -220,14 +221,14 @@ class APIService {
   }
 
   static Future<CommentRespondModel> getComment(
-      String targetKeyOrID, String targetType, String replyOf) async {
+      String targetId, String targetType, String replyOf) async {
     var url =
         Uri.parse(Config.apiURL + Config.commentAPI);
     if (replyOf != "" && replyOf != null) {
       url = url.replace(queryParameters: <String, String>{
         'offset': '0',
         'limit': '10',
-        'targetKeyOrID': targetKeyOrID,
+        'targetId': targetId,
         'targetType': targetType,
         'replyOf': replyOf
       });
@@ -235,7 +236,7 @@ class APIService {
       url = url.replace(queryParameters: <String, String>{
         'offset': '0',
         'limit': '10',
-        'targetKeyOrID': targetKeyOrID,
+        'targetId': targetId,
         'targetType': targetType,
       });
     }
@@ -313,6 +314,17 @@ class APIService {
         },
         body: jsonEncode(model.toJson()));
     return respone.statusCode == 200;
+  }
+  static Future<FoodInstructionRespondModel> getFoodInstruction(String id) async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI + "/" + id);
+
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return foodInstructionRespondModel(respone.body);
   }
   static Future<FoodRespondModel> getFood(int offset) async {
     var url = Uri.parse(Config.apiURL + Config.foodAPI)

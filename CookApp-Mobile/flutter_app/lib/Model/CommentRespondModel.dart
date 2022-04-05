@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'NewFeedRespondModel.dart';
 CommentRespondModel commentRespondModel(String str) =>
     CommentRespondModel.fromJson(json.decode(str));
 class CommentRespondModel {
@@ -77,28 +79,33 @@ class Comments {
   String id;
   int createdAt;
   int updatedAt;
-  String updatedBy;
   User user;
   String content;
   int numberOfReply;
+  List<Medias> medias;
 
   Comments(
       {this.id,
         this.createdAt,
         this.updatedAt,
-        this.updatedBy,
         this.user,
         this.content,
-        this.numberOfReply});
+        this.numberOfReply,
+        this.medias});
 
   Comments.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    updatedBy = json['updatedBy'];
     user = json['user'] != null ? new User.fromJson(json['user']) : null;
     content = json['content'];
     numberOfReply = json['numberOfReply'];
+    if (json['medias'] != null) {
+      medias = <Medias>[];
+      json['medias'].forEach((v) {
+        medias.add(new Medias.fromJson(v));
+      });
+    }
   }
 
   Map<String, dynamic> toJson() {
@@ -106,12 +113,14 @@ class Comments {
     data['id'] = this.id;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
-    data['updatedBy'] = this.updatedBy;
     if (this.user != null) {
       data['user'] = this.user.toJson();
     }
     data['content'] = this.content;
     data['numberOfReply'] = this.numberOfReply;
+    if (this.medias != null) {
+      data['medias'] = this.medias.map((v) => v.toJson()).toList();
+    }
     return data;
   }
 }
@@ -142,20 +151,26 @@ class User {
 }
 
 class Avatar {
-  String key;
+  String id;
   String url;
+  String type;
+  String reaction;
 
-  Avatar({this.key, this.url});
+  Avatar({this.id, this.url, this.type, this.reaction});
 
   Avatar.fromJson(Map<String, dynamic> json) {
-    key = json['key'];
+    id = json['id'];
     url = json['url'];
+    type = json['type'];
+    reaction = json['reaction'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['key'] = this.key;
+    data['id'] = this.id;
     data['url'] = this.url;
+    data['type'] = this.type;
+    data['reaction'] = this.reaction;
     return data;
   }
 }
@@ -184,4 +199,3 @@ class Metadata {
     return data;
   }
 }
-

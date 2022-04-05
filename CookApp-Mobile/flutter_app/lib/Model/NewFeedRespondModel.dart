@@ -25,20 +25,20 @@ class NewFeedRespondModel {
 }
 
 class Meta {
-  bool ok;
   List<String> messages;
+  bool ok;
 
-  Meta({this.ok, this.messages});
+  Meta({this.messages, this.ok});
 
   Meta.fromJson(Map<String, dynamic> json) {
-    ok = json['ok'];
     messages = json['messages'].cast<String>();
+    ok = json['ok'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['ok'] = this.ok;
     data['messages'] = this.messages;
+    data['ok'] = this.ok;
     return data;
   }
 }
@@ -51,7 +51,7 @@ class Data {
 
   Data.fromJson(Map<String, dynamic> json) {
     if (json['posts'] != null) {
-      posts = new List<Posts>();
+      posts = <Posts>[];
       json['posts'].forEach((v) {
         posts.add(new Posts.fromJson(v));
       });
@@ -79,47 +79,40 @@ class Posts {
   int updatedAt;
   String content;
   String name;
-  String updatedBy;
-  List<Images> images;
-  List<Videos> videos;
+  List<Medias> medias;
   Author author;
   int numOfReaction;
   int numOfComment;
-  String kind;
   String reaction;
+  String kind;
+  String location;
+  bool saved;
+
   Posts(
       {this.id,
         this.createdAt,
         this.updatedAt,
-        this.updatedBy,
         this.content,
         this.name,
-        this.images,
-        this.videos,
+        this.medias,
         this.author,
         this.numOfReaction,
         this.numOfComment,
         this.reaction,
-        this.kind});
-
+        this.kind,
+        this.location,
+        this.saved});
 
   Posts.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
-    updatedBy = json['updatedBy'];
     content = json['content'];
     name = json['name'];
-    if (json['images'] != null) {
-      images = <Images>[];
-      json['images'].forEach((v) {
-        images.add(new Images.fromJson(v));
-      });
-    }
-    if (json['videos'] != null) {
-      videos = <Videos>[];
-      json['videos'].forEach((v) {
-        videos.add(new Videos.fromJson(v));
+    if (json['medias'] != null) {
+      medias = <Medias>[];
+      json['medias'].forEach((v) {
+        medias.add(new Medias.fromJson(v));
       });
     }
     author =
@@ -128,6 +121,8 @@ class Posts {
     numOfComment = json['numOfComment'];
     reaction = json['reaction'];
     kind = json['kind'];
+    location = json['location'];
+    saved = json['saved'];
   }
 
   Map<String, dynamic> toJson() {
@@ -135,14 +130,10 @@ class Posts {
     data['id'] = this.id;
     data['createdAt'] = this.createdAt;
     data['updatedAt'] = this.updatedAt;
-    data['updatedBy'] = this.updatedBy;
     data['content'] = this.content;
     data['name'] = this.name;
-    if (this.images != null) {
-      data['images'] = this.images.map((v) => v.toJson()).toList();
-    }
-    if (this.videos != null) {
-      data['videos'] = this.videos.map((v) => v.toJson()).toList();
+    if (this.medias != null) {
+      data['medias'] = this.medias.map((v) => v.toJson()).toList();
     }
     if (this.author != null) {
       data['author'] = this.author.toJson();
@@ -151,28 +142,58 @@ class Posts {
     data['numOfComment'] = this.numOfComment;
     data['reaction'] = this.reaction;
     data['kind'] = this.kind;
+    data['location'] = this.location;
+    data['saved'] = this.saved;
+    return data;
+  }
+}
+
+class Medias {
+  String id;
+  String url;
+  String type;
+  String reaction;
+
+  Medias({this.id, this.url, this.type, this.reaction});
+
+  Medias.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    url = json['url'];
+    type = json['type'];
+    reaction = json['reaction'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['url'] = this.url;
+    data['type'] = this.type;
+    data['reaction'] = this.reaction;
     return data;
   }
 }
 
 class Author {
   String id;
+  Medias avatar;
   String displayName;
-  Avatar avatar;
 
-  Author({this.id, this.displayName, this.avatar});
+  Author({this.id, this.avatar, this.displayName});
 
   Author.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    displayName = json['displayName'] != null ? json['displayName'] : null;
-    avatar = json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
+    avatar =
+    json['avatar'] != null ? new Medias.fromJson(json['avatar']) : null;
+    displayName = json['displayName'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
+    if (this.avatar != null) {
+      data['avatar'] = this.avatar.toJson();
+    }
     data['displayName'] = this.displayName;
-    data['avatar'] = this.avatar.toJson();
     return data;
   }
 }
@@ -186,10 +207,10 @@ class Metadata {
   Metadata({this.page, this.pageSize, this.totalPage, this.totalCount});
 
   Metadata.fromJson(Map<String, dynamic> json) {
-    page = json['page'] != null ? json['page'] : null;
-    pageSize = json['pageSize'] != null ? json['pageSize'] : null;
-    totalPage = json['totalPage'] != null ? json['totalPage'] : null;
-    totalCount = json['totalCount'] != null ? json['totalCount'] : null;
+    page = json['page'];
+    pageSize = json['pageSize'];
+    totalPage = json['totalPage'];
+    totalCount = json['totalCount'];
   }
 
   Map<String, dynamic> toJson() {
@@ -198,60 +219,6 @@ class Metadata {
     data['pageSize'] = this.pageSize;
     data['totalPage'] = this.totalPage;
     data['totalCount'] = this.totalCount;
-    return data;
-  }
-}
-class Images {
-  String key;
-  String url;
-
-  Images({this.key, this.url});
-
-  Images.fromJson(Map<String, dynamic> json) {
-    key = json['key'] != null ? json['key'] : null;
-    url = json['url'] != null ? json['url'] : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['key'] = this.key;
-    data['url'] = this.url;
-    return data;
-  }
-}
-class Videos {
-  String key;
-  String url;
-
-  Videos({this.key, this.url});
-
-  Videos.fromJson(Map<String, dynamic> json) {
-    key = json['key'] != null ? json['key'] : null;
-    url = json['url'] != null ? json['url'] : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['key'] = this.key;
-    data['url'] = this.url;
-    return data;
-  }
-}
-class Avatar {
-  String key;
-  String url;
-
-  Avatar({this.key, this.url});
-
-  Avatar.fromJson(Map<String, dynamic> json) {
-    key = json['key'] != null ? json['key'] : null;
-    url = json['url'] != null ? json['url'] : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['key'] = this.key;
-    data['url'] = this.url;
     return data;
   }
 }

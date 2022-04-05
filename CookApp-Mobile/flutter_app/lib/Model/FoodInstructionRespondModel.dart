@@ -1,13 +1,13 @@
 import 'dart:convert';
-FoodRespondModel foodRespondModel(String str) =>
-    FoodRespondModel.fromJson(json.decode(str));
-class FoodRespondModel {
+FoodInstructionRespondModel foodInstructionRespondModel(String str) =>
+    FoodInstructionRespondModel.fromJson(json.decode(str));
+class FoodInstructionRespondModel {
   Meta meta;
   Data data;
 
-  FoodRespondModel({this.meta, this.data});
+  FoodInstructionRespondModel({this.meta, this.data});
 
-  FoodRespondModel.fromJson(Map<String, dynamic> json) {
+  FoodInstructionRespondModel.fromJson(Map<String, dynamic> json) {
     meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
@@ -44,64 +44,35 @@ class Meta {
 }
 
 class Data {
-  List<Foods> foods;
-  Metadata metadata;
-
-  Data({this.foods, this.metadata});
-
-  Data.fromJson(Map<String, dynamic> json) {
-    if (json['foods'] != null) {
-      foods = <Foods>[];
-      json['foods'].forEach((v) {
-        foods.add(new Foods.fromJson(v));
-      });
-    }
-    metadata = json['metadata'] != null
-        ? new Metadata.fromJson(json['metadata'])
-        : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.foods != null) {
-      data['foods'] = this.foods.map((v) => v.toJson()).toList();
-    }
-    if (this.metadata != null) {
-      data['metadata'] = this.metadata.toJson();
-    }
-    return data;
-  }
-}
-
-class Foods {
   int createdAt;
   String id;
+  int updatedAt;
   int servings;
   String name;
   String description;
   List<Photos> photos;
   int totalTime;
-
   List<Steps> steps;
   List<Ingredients> ingredients;
   String videoUrl;
 
-  Foods(
+  Data(
       {this.createdAt,
         this.id,
+        this.updatedAt,
         this.servings,
         this.name,
         this.description,
         this.photos,
         this.totalTime,
-
         this.steps,
         this.ingredients,
         this.videoUrl});
 
-  Foods.fromJson(Map<String, dynamic> json) {
+  Data.fromJson(Map<String, dynamic> json) {
     createdAt = json['createdAt'];
     id = json['id'];
+    updatedAt = json['updatedAt'];
     servings = json['servings'];
     name = json['name'];
     description = json['description'];
@@ -112,7 +83,6 @@ class Foods {
       });
     }
     totalTime = json['totalTime'];
-
     if (json['steps'] != null) {
       steps = <Steps>[];
       json['steps'].forEach((v) {
@@ -132,6 +102,7 @@ class Foods {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['createdAt'] = this.createdAt;
     data['id'] = this.id;
+    data['updatedAt'] = this.updatedAt;
     data['servings'] = this.servings;
     data['name'] = this.name;
     data['description'] = this.description;
@@ -139,7 +110,6 @@ class Foods {
       data['photos'] = this.photos.map((v) => v.toJson()).toList();
     }
     data['totalTime'] = this.totalTime;
-
     if (this.steps != null) {
       data['steps'] = this.steps.map((v) => v.toJson()).toList();
     }
@@ -152,21 +122,22 @@ class Foods {
 }
 
 class Photos {
-  String key;
   String url;
+  String type;
   String id;
-  Photos({this.key, this.url, this.id});
+
+  Photos({this.url, this.type, this.id});
 
   Photos.fromJson(Map<String, dynamic> json) {
-    key = json['key'];
     url = json['url'];
+    type = json['type'];
     id = json['id'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['key'] = this.key;
     data['url'] = this.url;
+    data['type'] = this.type;
     data['id'] = this.id;
     return data;
   }
@@ -174,7 +145,7 @@ class Photos {
 
 class Steps {
   String content;
-  List<StepsPhoto> photos;
+  List<Photos> photos;
   String id;
 
   Steps({this.content, this.photos, this.id});
@@ -182,9 +153,9 @@ class Steps {
   Steps.fromJson(Map<String, dynamic> json) {
     content = json['content'];
     if (json['photos'] != null) {
-      photos = <StepsPhoto>[];
+      photos = <Photos>[];
       json['photos'].forEach((v) {
-        photos.add(new StepsPhoto.fromJson(v));
+        photos.add(new Photos.fromJson(v));
       });
     }
     id = json['id'];
@@ -201,38 +172,16 @@ class Steps {
   }
 }
 
-class StepsPhoto {
-  String key;
-  String url;
-  String type;
-
-  StepsPhoto({this.key, this.url, this.type});
-
-  StepsPhoto.fromJson(Map<String, dynamic> json) {
-    key = json['key'];
-    url = json['url'];
-    type = json['type'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['key'] = this.key;
-    data['url'] = this.url;
-    data['type'] = this.type;
-    return data;
-  }
-}
-
 class Ingredients {
   String name;
-  String quantity;
+  num quantity;
   String unit;
 
   Ingredients({this.name, this.quantity, this.unit});
 
   Ingredients.fromJson(Map<String, dynamic> json) {
     name = json['name'];
-    quantity = json['quantity'].toString();
+    quantity = json['quantity'];
     unit = json['unit'];
   }
 
@@ -241,31 +190,6 @@ class Ingredients {
     data['name'] = this.name;
     data['quantity'] = this.quantity;
     data['unit'] = this.unit;
-    return data;
-  }
-}
-
-class Metadata {
-  int page;
-  int pageSize;
-  int totalPage;
-  int totalCount;
-
-  Metadata({this.page, this.pageSize, this.totalPage, this.totalCount});
-
-  Metadata.fromJson(Map<String, dynamic> json) {
-    page = json['page'];
-    pageSize = json['pageSize'];
-    totalPage = json['totalPage'];
-    totalCount = json['totalCount'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['page'] = this.page;
-    data['pageSize'] = this.pageSize;
-    data['totalPage'] = this.totalPage;
-    data['totalCount'] = this.totalCount;
     return data;
   }
 }
