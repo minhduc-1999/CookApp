@@ -6,13 +6,13 @@ import { MetaDTO } from "./responseMeta.dto";
 import { Comment } from "domains/social/comment.domain"
 import { Food } from "domains/core/food.domain";
 import { Media } from "domains/social/media.domain";
-import { ConversationType, MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
+import { ConversationType, MediaType, MessageContentType, PostType, ReactionType, Sex } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { Ingredient } from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { Album } from "domains/social/album.domain";
-import { Conversation } from "domains/social/conversation.domain";
+import { Conversation, Message } from "domains/social/conversation.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -354,12 +354,34 @@ export class FoodResponse extends AuditResponse {
   }
 }
 
-export class ConversationResponse  extends AuditResponse {
+export class ConversationResponse extends AuditResponse {
   @ApiResponseProperty({ enum: ConversationType })
   type: ConversationType
 
-  constructor(conv: Conversation){
+  constructor(conv: Conversation) {
     super(conv)
     this.type = conv?.type
+  }
+}
+
+export class MessageResponse extends AuditResponse {
+  @ApiResponseProperty({ type: String })
+  content: string
+
+  @ApiResponseProperty({ enum: MessageContentType })
+  type: MessageContentType
+
+  @ApiResponseProperty({ type: AuthorResponse })
+  sender: AuthorResponse
+
+  @ApiResponseProperty({ type: String })
+  to: string
+
+  constructor(msg: Message) {
+    super(msg)
+    this.to = msg?.to?.id
+    this.content = msg?.message?.content
+    this.type = msg?.message?.type
+    this.sender = msg?.sender && new AuthorResponse(msg.sender)
   }
 }

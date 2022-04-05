@@ -2,9 +2,9 @@ import { Inject, UseFilters, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import { ConnectedSocket, MessageBody, OnGatewayConnection, OnGatewayDisconnect, OnGatewayInit, SubscribeMessage, WebSocketGateway, WebSocketServer } from "@nestjs/websockets";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { MessageResponse } from "base/dtos/response.dto";
 import { WsParamTransaction, WsRequestTransaction } from "decorators/transaction.decorator";
 import { WsUserReq } from "decorators/user.decorator";
-import { Message } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
 import { WsExceptionFilter } from "exception_filter/wsException.filter";
 import { WebSocketAuthGuard } from "guards/websocketAuth.guard";
@@ -65,9 +65,9 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect, On
     @WsUserReq() user: User
   ): Promise<void> {
     const command = new SendMessageCommand(user, body, tx)
-    const [msg, onlineUsers] = (await this._commandBus.execute(command)) as [Message, User[]]
+    const [msg, onlineUsers] = (await this._commandBus.execute(command)) as [MessageResponse, User[]]
     onlineUsers.forEach(user => {
-      socket.to(user.status).emit(ChatEventType.OUT_MSG, msg.message)
+      socket.to(user.status).emit(ChatEventType.OUT_MSG, msg)
     })
   }
 }

@@ -1,7 +1,8 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
   ApiCreatedResponseCustom,
@@ -13,6 +14,9 @@ import { User } from "domains/social/user.domain";
 import { CreateConversationCommand } from "modules/communication/usecases/createConversation";
 import { CreateConversationRequest } from "modules/communication/usecases/createConversation/createConversationRequest";
 import { CreateConversationResponse } from "modules/communication/usecases/createConversation/createConversationResponse";
+import { GetMessagesQuery } from "modules/communication/usecases/getMessages";
+import { GetMessagesResponse } from "modules/communication/usecases/getMessages/getMessagesResponse";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("conversation")
 @ApiTags("User/Chat")
@@ -51,16 +55,17 @@ export class ConversationController {
   //   return Result.ok(res, { messages: ["Edit album successfully"] });
   // }
 
-  // @Get(":albumId")
-  // @ApiFailResponseCustom()
-  // @ApiCreatedResponseCustom(GetAlbumDetailResponse, "Get album successfully")
-  // @ApiNotFoundResponse({ description: "Album not found" })
-  // async getPostById(
-  //   @Param("albumId", ParseUUIDPipe) albumId: string,
-  //   @HttpUserReq() user: User
-  // ): Promise<Result<GetAlbumDetailResponse>> {
-  //   const query = new GetAlbumDetailQuery(user, albumId);
-  //   const album = await this._queryBus.execute(query);
-  //   return Result.ok(album, { messages: ["Get album successfully"] });
-  // }
+  @Get(":conversationId/messages")
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustom(GetMessagesResponse, "Get messages successfully")
+  @ApiNotFoundResponse({ description: "Conversation not found" })
+  async getPostById(
+    @Param("conversationId", ParseUUIDPipe) convId: string,
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) queryOpt: PageOptionsDto,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetMessagesResponse>> {
+    const query = new GetMessagesQuery(user, convId, queryOpt);
+    const res = await this._queryBus.execute(query);
+    return Result.ok(res, { messages: ["Get messages successfully"] });
+  }
 }

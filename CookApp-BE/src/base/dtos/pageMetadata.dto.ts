@@ -3,10 +3,13 @@ import { ApiResponseProperty } from "@nestjs/swagger";
 export class PageMetadata {
   @ApiResponseProperty({ type: Number })
   totalPage: number;
+
   @ApiResponseProperty({ type: Number })
   page: number;
+
   @ApiResponseProperty({ type: Number })
   pageSize: number;
+
   @ApiResponseProperty({ type: Number })
   totalCount: number;
 
