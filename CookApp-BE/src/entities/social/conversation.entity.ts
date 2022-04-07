@@ -3,8 +3,8 @@ import { User } from '../../domains/social/user.domain';
 import { ConversationType } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { UserEntity } from './user.entity';
-import { Conversation } from 'domains/social/conversation.domain';
-import { Audit } from 'domains/audit.domain';
+import { Conversation } from '../../domains/social/conversation.domain';
+import { Audit } from '../../domains/audit.domain';
 import { MessageEntity } from './message.entity';
 
 @Entity({ name: 'conversations' })

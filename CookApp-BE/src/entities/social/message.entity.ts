@@ -1,10 +1,9 @@
 import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { MessageContentType } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
-import { Message, MessageContent } from 'domains/social/conversation.domain';
-import { Audit } from 'domains/audit.domain';
+import { Message, MessageContent } from '../../domains/social/conversation.domain';
+import { Audit } from '../../domains/audit.domain';
 import { ConversationEntity, ConversationMemberEntity } from './conversation.entity';
-
 
 @Entity({ name: 'messages' })
 export class MessageEntity extends AbstractEntity {

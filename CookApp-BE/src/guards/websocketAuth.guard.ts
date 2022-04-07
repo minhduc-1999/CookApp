@@ -1,8 +1,6 @@
 import { Injectable, ExecutionContext, CanActivate } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
-import { JwtAuthTokenPayload } from 'base/jwtPayload';
-import { Socket } from 'socket.io';
 
 @Injectable()
 export class WebSocketAuthGuard implements CanActivate {
@@ -20,18 +18,16 @@ export class WebSocketAuthGuard implements CanActivate {
       return true;
     }
 
-    const token = context
-      .switchToWs()
-      .getClient<Socket>()
-      .handshake
-      .auth
-      .token
+    // const token = context
+    //   .switchToWs()
+    //   .getClient<Socket>()
+    //   .jk
 
-    if (!token) return false
+    // if (!token) return false
 
-    const payload = this._jwtService.verify<JwtAuthTokenPayload>(token)
+    // const payload = this._jwtService.verify<JwtAuthTokenPayload>(token)
 
-    if (!payload) return false
+    // if (!payload) return false
 
     return true
   }

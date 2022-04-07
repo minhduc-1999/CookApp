@@ -15,6 +15,7 @@ export interface IConversationRepository {
   getMembers(convId: string): Promise<User[]>
   setTransaction(tx: ITransaction): IConversationRepository
   findDirectConversation(memberId1: string, memberId2: string): Promise<Conversation>
+  findConversation(userId: string): Promise<Conversation[]>
 }
 @Injectable()
 export class ConversationRepository extends BaseRepository implements IConversationRepository {
@@ -25,6 +26,15 @@ export class ConversationRepository extends BaseRepository implements IConversat
     private _convMemberRepo: Repository<ConversationMemberEntity>,
   ) {
     super()
+  }
+  async findConversation(userId: string): Promise<Conversation[]> {
+    const result = await this._convMemberRepo
+      .createQueryBuilder("member")
+      .distinctOn(["member.conversation_id"])
+      .leftJoinAndSelect("member.conversation", "conversation")
+      .where("member.user_id = :userId", { userId })
+      .getMany()
+    return result.map(entity => entity.toDomain()[0])
   }
   async findDirectConversation(memberId1: string, memberId2: string): Promise<Conversation> {
     const result = await this._conversationRepo.query(`

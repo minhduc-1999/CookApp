@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post as PostHttp, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -18,11 +18,14 @@ import { GetMessagesQuery } from "modules/communication/usecases/getMessages";
 import { GetMessagesResponse } from "modules/communication/usecases/getMessages/getMessagesResponse";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
-@Controller("conversation")
+@Controller("conversations")
 @ApiTags("User/Chat")
 @ApiBearerAuth()
 export class ConversationController {
-  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
+  constructor(
+    private _commandBus: CommandBus,
+    private _queryBus: QueryBus,
+  ) { }
 
   @PostHttp()
   @ApiFailResponseCustom()
@@ -37,23 +40,6 @@ export class ConversationController {
     const convRes = await this._commandBus.execute(createAlbumCommand);
     return Result.ok(convRes, { messages: ["Create conversation successfully"] });
   }
-
-  // @Patch(":albumId")
-  // @ApiFailResponseCustom()
-  // @ApiCreatedResponseCustom(EditAlbumResponse, "Edit album successfully")
-  // @HttpRequestTransaction()
-  // @ApiNotFoundResponse({ description: "Album not found" })
-  // async editPost(
-  //   @Body() body: EditAlbumRequest,
-  //   @HttpUserReq() user: User,
-  //   @Param("albumId", ParseUUIDPipe) albumId: string,
-  //   @HttpParamTransaction() tx: ITransaction
-  // ): Promise<Result<EditAlbumResponse>> {
-  //   body.id = albumId;
-  //   const editAlbumCommand = new EditAlbumCommand(tx, user, body);
-  //   const res = await this._commandBus.execute(editAlbumCommand);
-  //   return Result.ok(res, { messages: ["Edit album successfully"] });
-  // }
 
   @Get(":conversationId/messages")
   @ApiFailResponseCustom()

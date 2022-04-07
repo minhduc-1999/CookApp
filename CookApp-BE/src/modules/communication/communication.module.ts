@@ -6,7 +6,7 @@ import { MessageEntity } from "entities/social/message.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { AuthModule } from "modules/auth/auth.module";
 import { ShareModule } from "modules/share/share.module";
-import { ChatGateway } from "./adapters/in/chat.gateway";
+import { ChatController } from "./adapters/in/chat.controller";
 import { ConversationController } from "./adapters/in/conversation.controller";
 import { ConversationRepository } from "./adapters/out/conversation.repository";
 import { MessageRepository } from "./adapters/out/message.repository";
@@ -16,6 +16,7 @@ import { ChatDisconnectCommandHandler } from "./usecases/chatDisconnect";
 import { CreateConversationCommandHandler } from "./usecases/createConversation";
 import { GetMessagesQueryHandler } from "./usecases/getMessages";
 import { SendMessageCommandHandler } from "./usecases/sendMessages";
+import { TransmitMessagesQueryHandler } from "./usecases/transmitMessages";
 
 const commandHandlers = [
   SendMessageCommandHandler,
@@ -25,7 +26,8 @@ const commandHandlers = [
 ]
 
 const queryHandlers = [
-  GetMessagesQueryHandler
+  GetMessagesQueryHandler,
+  TransmitMessagesQueryHandler
 ]
 
 const repositories = [
@@ -53,10 +55,10 @@ const repositories = [
     }),
   ],
   controllers: [
-    ConversationController
+    ConversationController,
+    ChatController
   ],
   providers: [
-    ChatGateway,
     {
       provide: "IWsMiddlewareFactory",
       useClass: WsMiddlewareFactory
