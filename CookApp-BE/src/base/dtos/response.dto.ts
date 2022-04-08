@@ -354,16 +354,6 @@ export class FoodResponse extends AuditResponse {
   }
 }
 
-export class ConversationResponse extends AuditResponse {
-  @ApiResponseProperty({ enum: ConversationType })
-  type: ConversationType
-
-  constructor(conv: Conversation) {
-    super(conv)
-    this.type = conv?.type
-  }
-}
-
 export class MessageResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   content: string
@@ -385,3 +375,18 @@ export class MessageResponse extends AuditResponse {
     this.sender = msg?.sender && new AuthorResponse(msg.sender)
   }
 }
+
+export class ConversationResponse extends AuditResponse {
+  @ApiResponseProperty({ enum: ConversationType })
+  type: ConversationType
+
+  @ApiResponseProperty({type: MessageResponse})
+  lastMessage: MessageResponse
+
+  constructor(conv: Conversation) {
+    super(conv)
+    this.type = conv?.type
+    this.lastMessage = conv?.lastMessage && new MessageResponse(conv.lastMessage)
+  }
+}
+

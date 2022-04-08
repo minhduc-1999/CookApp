@@ -31,14 +31,15 @@ export class ConversationRepository extends BaseRepository implements IConversat
   }
 
   async findMany(userId: string, queryOpt: PageOptionsDto): Promise<[Conversation[], number]> {
-    const [entities, total] = await this._conversationRepo
-      .createQueryBuilder("conversation")
-      .leftJoinAndSelect("conversation.members", "member")
+    const [entities, total] = await this._conversationRepo.createQueryBuilder("conv")
+      .leftJoin("conv.members", "member")
+      .leftJoinAndSelect("conv.lastMessage", "message")
       .where("member.user_id = :userId", { userId })
-      .orderBy("conversation.createdAt", "DESC")
+      .orderBy("message.createdAt", "DESC")
       .skip(queryOpt.limit * queryOpt.offset)
-      .limit(queryOpt.limit)
+      .take(queryOpt.limit)
       .getManyAndCount()
+
     return [
       entities?.map(entity => entity.toDomain()),
       total
@@ -114,7 +115,9 @@ export class ConversationRepository extends BaseRepository implements IConversat
 
 
   async findById(id: string) {
-    const entity = await this._conversationRepo.findOne(id)
+    const entity = await this._conversationRepo.findOne(id, {
+      relations: ["lastMessage"]
+    })
     return entity?.toDomain()
   }
 }

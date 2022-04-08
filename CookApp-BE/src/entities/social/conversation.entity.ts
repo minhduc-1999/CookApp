@@ -1,4 +1,4 @@
-import { Column, Entity, OneToMany, ManyToOne, JoinColumn } from 'typeorm';
+import { Column, Entity, OneToMany, ManyToOne, JoinColumn, OneToOne } from 'typeorm';
 import { User } from '../../domains/social/user.domain';
 import { ConversationType } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
@@ -19,6 +19,10 @@ export class ConversationEntity extends AbstractEntity {
   @OneToMany(() => ConversationMemberEntity, member => member.conversation, { cascade: ["insert"] })
   members: ConversationMemberEntity[]
 
+  @OneToOne(() => MessageEntity, { nullable: true })
+  @JoinColumn({ name: 'last_message_id' })
+  lastMessage: MessageEntity
+
   constructor(conv: Conversation) {
     super(conv)
     this.type = conv?.type
@@ -30,7 +34,8 @@ export class ConversationEntity extends AbstractEntity {
     return new Conversation({
       ...audit,
       type: this.type,
-      members: this.members?.map(member => member.toDomain()[1])
+      members: this.members?.map(member => member.toDomain()[1]),
+      lastMessage: this.lastMessage?.toDomain()
     })
   }
 

@@ -7,10 +7,13 @@ export class Conversation extends Audit {
 
   members: User[]
 
+  lastMessage: Message
+
   constructor(conversation: Partial<Conversation>) {
     super(conversation)
     this.type = conversation?.type
-    this.members = conversation.members
+    this.members = conversation?.members
+    this.lastMessage = conversation?.lastMessage
   }
 }
 
