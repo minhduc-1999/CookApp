@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Injectable, InternalServerErrorException, NotImplementedException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
@@ -106,10 +106,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   }
 
   async updateStatus(user: User, statusID?: string): Promise<void> {
-      await this._repo.update(
-        { id: user.id },
-        { status: statusID }
-      )
+    throw new NotImplementedException()
   }
 }
 

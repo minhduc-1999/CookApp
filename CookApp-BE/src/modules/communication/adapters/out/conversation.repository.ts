@@ -1,12 +1,13 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
 import { Conversation } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
 import { ConversationEntity, ConversationMemberEntity } from "entities/social/conversation.entity";
-import { In, IsNull, Not, QueryRunner, Repository } from "typeorm";
+import { Not, QueryRunner, Repository } from "typeorm";
 
 export interface IConversationRepository {
   findById(id: string): Promise<Conversation>
@@ -16,6 +17,7 @@ export interface IConversationRepository {
   setTransaction(tx: ITransaction): IConversationRepository
   findDirectConversation(memberId1: string, memberId2: string): Promise<Conversation>
   findConversation(userId: string): Promise<Conversation[]>
+  findMany(userId: string, queryOpt: PageOptionsDto): Promise<[Conversation[], number]>
 }
 @Injectable()
 export class ConversationRepository extends BaseRepository implements IConversationRepository {
@@ -27,6 +29,22 @@ export class ConversationRepository extends BaseRepository implements IConversat
   ) {
     super()
   }
+
+  async findMany(userId: string, queryOpt: PageOptionsDto): Promise<[Conversation[], number]> {
+    const [entities, total] = await this._conversationRepo
+      .createQueryBuilder("conversation")
+      .leftJoinAndSelect("conversation.members", "member")
+      .where("member.user_id = :userId", { userId })
+      .orderBy("conversation.createdAt", "DESC")
+      .skip(queryOpt.limit * queryOpt.offset)
+      .limit(queryOpt.limit)
+      .getManyAndCount()
+    return [
+      entities?.map(entity => entity.toDomain()),
+      total
+    ]
+  }
+
   async findConversation(userId: string): Promise<Conversation[]> {
     const result = await this._convMemberRepo
       .createQueryBuilder("member")

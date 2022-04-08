@@ -14,6 +14,8 @@ import { User } from "domains/social/user.domain";
 import { CreateConversationCommand } from "modules/communication/usecases/createConversation";
 import { CreateConversationRequest } from "modules/communication/usecases/createConversation/createConversationRequest";
 import { CreateConversationResponse } from "modules/communication/usecases/createConversation/createConversationResponse";
+import { GetConversationsQuery } from "modules/communication/usecases/getConversations";
+import { GetConversationsResponse } from "modules/communication/usecases/getConversations/getMessagesResponse";
 import { GetMessagesQuery } from "modules/communication/usecases/getMessages";
 import { GetMessagesResponse } from "modules/communication/usecases/getMessages/getMessagesResponse";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
@@ -53,5 +55,17 @@ export class ConversationController {
     const query = new GetMessagesQuery(user, convId, queryOpt);
     const res = await this._queryBus.execute(query);
     return Result.ok(res, { messages: ["Get messages successfully"] });
+  }
+
+  @Get()
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustom(GetConversationsResponse, "Get conversations successfully")
+  async getConversations(
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) queryOpt: PageOptionsDto,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetMessagesResponse>> {
+    const query = new GetConversationsQuery(user, queryOpt);
+    const res = await this._queryBus.execute(query);
+    return Result.ok(res, { messages: ["Get conversations successfully"] });
   }
 }

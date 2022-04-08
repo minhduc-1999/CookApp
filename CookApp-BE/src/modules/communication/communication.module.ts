@@ -14,6 +14,7 @@ import { WsMiddlewareFactory } from "./adapters/out/wsMiddlewareFactory.service"
 import { ChatConnectCommandHandler } from "./usecases/chatConnect";
 import { ChatDisconnectCommandHandler } from "./usecases/chatDisconnect";
 import { CreateConversationCommandHandler } from "./usecases/createConversation";
+import { GetConversationsQueryHandler } from "./usecases/getConversations";
 import { GetMessagesQueryHandler } from "./usecases/getMessages";
 import { SendMessageCommandHandler } from "./usecases/sendMessages";
 import { TransmitMessagesQueryHandler } from "./usecases/transmitMessages";
@@ -27,7 +28,8 @@ const commandHandlers = [
 
 const queryHandlers = [
   GetMessagesQueryHandler,
-  TransmitMessagesQueryHandler
+  TransmitMessagesQueryHandler,
+  GetConversationsQueryHandler
 ]
 
 const repositories = [
