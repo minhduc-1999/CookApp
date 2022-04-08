@@ -15,6 +15,14 @@ export class Conversation extends Audit {
     this.members = conversation?.members
     this.lastMessage = conversation?.lastMessage
   }
+
+  isSeenAll(lastSeenMsg: Message): boolean {
+    if (!this.lastMessage)
+      return true
+    if (!lastSeenMsg)
+      return false
+    return lastSeenMsg.id === this.lastMessage.id
+  }
 }
 
 export class Message extends Audit {

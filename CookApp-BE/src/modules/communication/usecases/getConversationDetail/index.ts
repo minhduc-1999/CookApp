@@ -5,6 +5,7 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
+import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
 import { GetConversationDetailResponse } from "./getConversationDetailResponse";
 
 export class GetConversationDetailQuery extends BaseQuery {
@@ -22,9 +23,17 @@ export class GetConversationDetailQueryHandler
   constructor(
     @Inject("IConversationRepository")
     private _convRepo: IConversationRepository,
+    @Inject("IMessageRepository")
+    private _messageRepo: IMessageRepository,
   ) { }
   async execute(query: GetConversationDetailQuery): Promise<GetConversationDetailResponse> {
     const { conversationId, user } = query
+
+    const isMember = await this._convRepo.isMember(conversationId, user.id)
+
+    if (!isMember) {
+      throw new ForbiddenException(ResponseDTO.fail("Not in conversation"))
+    }
 
     const conversation = await this._convRepo.findById(conversationId)
 
@@ -32,12 +41,9 @@ export class GetConversationDetailQueryHandler
       throw new NotFoundException(ResponseDTO.fail("Conversation not found", UserErrorCode.CONVERSATION_NOT_FOUND))
     }
 
-    const isMember = await this._convRepo.isMember(conversation.id, user.id)
+    const lastSeenMsg = await this._messageRepo.findLastSeenMessage(user.id, conversation.id)
+    const isSeenAll = conversation.isSeenAll(lastSeenMsg)
 
-    if (!isMember) {
-      throw new ForbiddenException(ResponseDTO.fail("Not in conversation"))
-    }
-
-    return new GetConversationDetailResponse(conversation)
+    return new GetConversationDetailResponse(conversation, isSeenAll)
   }
 }

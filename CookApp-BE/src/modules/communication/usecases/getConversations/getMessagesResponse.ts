@@ -1,7 +1,6 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { ConversationResponse } from "base/dtos/response.dto";
-import { Conversation } from "domains/social/conversation.domain";
 
 export class GetConversationsResponse {
   @ApiResponseProperty({ type: [ConversationResponse] })
@@ -10,8 +9,8 @@ export class GetConversationsResponse {
   @ApiResponseProperty({ type: PageMetadata })
   metadata: PageMetadata;
 
-  constructor(conversations: Conversation[], meta: PageMetadata) {
-    this.conversations = conversations?.map(conv => new ConversationResponse(conv));
+  constructor(convRess: ConversationResponse[], meta: PageMetadata) {
+    this.conversations = convRess
     this.metadata = meta;
   }
 }

@@ -383,10 +383,14 @@ export class ConversationResponse extends AuditResponse {
   @ApiResponseProperty({type: MessageResponse})
   lastMessage: MessageResponse
 
-  constructor(conv: Conversation) {
+  @ApiResponseProperty({type: Boolean})
+  readAll: boolean
+
+  constructor(conv: Conversation, readAll?: boolean) {
     super(conv)
     this.type = conv?.type
     this.lastMessage = conv?.lastMessage && new MessageResponse(conv.lastMessage)
+    this.readAll = readAll
   }
 }
 

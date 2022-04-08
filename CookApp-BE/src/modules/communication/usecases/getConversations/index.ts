@@ -2,11 +2,11 @@ import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
+import { ConversationResponse } from "base/dtos/response.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
 import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
-import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { GetConversationsResponse } from "./getMessagesResponse";
 
 export class GetConversationsQuery extends BaseQuery {
@@ -24,8 +24,6 @@ export class GetConversationsQueryHandler
   constructor(
     @Inject("IMessageRepository")
     private _messageRepo: IMessageRepository,
-    @Inject("IStorageService")
-    private _storageService: IStorageService,
     @Inject("IConversationRepository")
     private _conversationRepo: IConversationRepository
   ) { }
@@ -43,6 +41,14 @@ export class GetConversationsQueryHandler
       );
     }
 
-    return new GetConversationsResponse(conversations, meta);
+    const tasks = conversations.map(async conv => {
+      const lastSeenMsg = await this._messageRepo.findLastSeenMessage(user.id, conv.id)
+      const isSeenAll = conv.isSeenAll(lastSeenMsg)
+      return new ConversationResponse(conv, isSeenAll)
+    })
+
+    return await Promise.all(tasks).then(data => {
+      return new GetConversationsResponse(data, meta)
+    })
   }
 }
