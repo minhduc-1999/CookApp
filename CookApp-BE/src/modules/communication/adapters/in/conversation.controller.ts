@@ -14,6 +14,8 @@ import { User } from "domains/social/user.domain";
 import { CreateConversationCommand } from "modules/communication/usecases/createConversation";
 import { CreateConversationRequest } from "modules/communication/usecases/createConversation/createConversationRequest";
 import { CreateConversationResponse } from "modules/communication/usecases/createConversation/createConversationResponse";
+import { GetConversationDetailQuery } from "modules/communication/usecases/getConversationDetail";
+import { GetConversationDetailResponse } from "modules/communication/usecases/getConversationDetail/getConversationDetailResponse";
 import { GetConversationsQuery } from "modules/communication/usecases/getConversations";
 import { GetConversationsResponse } from "modules/communication/usecases/getConversations/getMessagesResponse";
 import { GetMessagesQuery } from "modules/communication/usecases/getMessages";
@@ -55,6 +57,19 @@ export class ConversationController {
     const query = new GetMessagesQuery(user, convId, queryOpt);
     const res = await this._queryBus.execute(query);
     return Result.ok(res, { messages: ["Get messages successfully"] });
+  }
+
+  @Get(":conversationId")
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustom(GetConversationDetailResponse, "Get conversation successfully")
+  @ApiNotFoundResponse({ description: "Conversation not found" })
+  async getConversation(
+    @Param("conversationId", ParseUUIDPipe) convId: string,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetConversationDetailResponse>> {
+    const query = new GetConversationDetailQuery(user, convId);
+    const res = await this._queryBus.execute(query);
+    return Result.ok(res, { messages: ["Get conversation successfully"] });
   }
 
   @Get()

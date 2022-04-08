@@ -1,10 +1,10 @@
-import { Inject } from "@nestjs/common";
+import { ForbiddenException, Inject, NotFoundException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { WsException } from "@nestjs/websockets";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { BaseCommand } from "base/cqrs/command.base";
-import { MessageResponse } from "base/dtos/response.dto";
+import { MessageResponse, ResponseDTO } from "base/dtos/response.dto";
 import { User } from "domains/social/user.domain";
+import { UserErrorCode } from "enums/errorCode.enum";
 import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
 import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
 import { NewMessageEvent } from "modules/communication/events/eventType";
@@ -40,14 +40,14 @@ export class SendMessageCommandHandler
     const conversation = await this._convRepo.findById(commentReq.to)
 
     if (!conversation) {
-      throw new WsException("Conversation not found")
+      throw new NotFoundException(ResponseDTO.fail("Conversation not found", UserErrorCode.CONVERSATION_NOT_FOUND))
     }
 
     //Check if user in conversation
     const isMember = await this._convRepo.isMember(conversation.id, user.id)
 
     if (!isMember) {
-      throw new WsException("Not in conversation")
+      throw new ForbiddenException(ResponseDTO.fail("Not in conversation"))
     }
 
     //Send message
