@@ -53,7 +53,7 @@ export class ConversationRepository extends BaseRepository implements IConversat
       .leftJoinAndSelect("member.conversation", "conversation")
       .where("member.user_id = :userId", { userId })
       .getMany()
-    return result.map(entity => entity.toDomain()[0])
+    return result.map(entity => entity.toDomain().conversation)
   }
   async findDirectConversation(memberId1: string, memberId2: string): Promise<Conversation> {
     const result = await this._conversationRepo.query(`
@@ -100,7 +100,7 @@ export class ConversationRepository extends BaseRepository implements IConversat
         }
       }
     })
-    return entities?.map(item => item.toDomain()[1])
+    return entities?.map(item => item.toDomain().user)
   }
 
   async create(conv: Conversation): Promise<Conversation> {

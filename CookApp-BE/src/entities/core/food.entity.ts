@@ -66,7 +66,7 @@ export class FoodEntity extends AbstractEntity {
 @Entity({ name: 'food_medias' })
 export class FoodMediaEntity extends AbstractEntity {
 
-  @ManyToOne(() => FoodEntity)
+  @ManyToOne(() => FoodEntity, { nullable: false })
   @JoinColumn({ name: "food_id" })
   food: FoodEntity;
 

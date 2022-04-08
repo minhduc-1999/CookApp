@@ -17,7 +17,7 @@ export class FoodIngredientEntity extends AbstractEntity {
   @Column({ name: "ingredient" })
   ingredient: string
 
-  @ManyToOne(() => FoodEntity, food => food.ingredients)
+  @ManyToOne(() => FoodEntity, food => food.ingredients, { nullable: false })
   @JoinColumn({ name: "food_id" })
   food: FoodEntity
 

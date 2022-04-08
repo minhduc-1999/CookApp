@@ -14,11 +14,11 @@ export class MessageEntity extends AbstractEntity {
   @Column({ type: "enum", enum: MessageContentType, name: "content_type", nullable: false })
   contentType: MessageContentType
 
-  @ManyToOne(() => ConversationEntity, conversation => conversation.messages)
+  @ManyToOne(() => ConversationEntity, conversation => conversation.messages, { nullable: false })
   @JoinColumn({ name: "conversation_id" })
   conversation: ConversationEntity
 
-  @ManyToOne(() => ConversationMemberEntity)
+  @ManyToOne(() => ConversationMemberEntity, { nullable: false })
   @JoinColumn({ name: "sender_id" })
   sender: ConversationMemberEntity
 
@@ -34,7 +34,7 @@ export class MessageEntity extends AbstractEntity {
     return new Message({
       ...audit,
       to: this.conversation?.toDomain(),
-      sender: this.sender?.toDomain()[1],
+      sender: this.sender?.toDomain().user,
       message: new MessageContent(this.content, this.contentType)
     })
   }

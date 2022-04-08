@@ -10,11 +10,11 @@ import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 @Entity({ name: 'comments' })
 export class CommentEntity extends AbstractEntity {
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user: UserEntity
 
-  @ManyToOne(() => InteractionEntity)
+  @ManyToOne(() => InteractionEntity, { nullable: false })
   @JoinColumn({ name: 'target_id' })
   target: InteractionEntity;
 
@@ -55,7 +55,7 @@ export class CommentEntity extends AbstractEntity {
 @Entity({ name: 'comment_medias' })
 export class CommentMediaEntity extends AbstractEntity {
 
-  @ManyToOne(() => CommentEntity)
+  @ManyToOne(() => CommentEntity, { nullable: false })
   @JoinColumn({ name: "comment_id" })
   comment: CommentEntity;
 

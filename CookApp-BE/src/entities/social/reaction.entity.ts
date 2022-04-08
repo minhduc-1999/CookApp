@@ -9,11 +9,11 @@ import { Audit } from '../../domains/audit.domain';
 @Entity({ name: 'reactions' })
 export class ReactionEntity extends AbstractEntity {
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "user_id", referencedColumnName: "id" })
   user: UserEntity
 
-  @ManyToOne(() => InteractionEntity)
+  @ManyToOne(() => InteractionEntity, { nullable: false })
   @JoinColumn({ name: 'target_id'})
   target: InteractionEntity;
 

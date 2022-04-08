@@ -14,7 +14,7 @@ export class PostEntity {
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "author_id" })
   author: UserEntity;
 
@@ -75,7 +75,7 @@ export class PostMediaEntity {
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 
-  @ManyToOne(() => PostEntity, post => post.medias)
+  @ManyToOne(() => PostEntity, post => post.medias, { nullable: false })
   @JoinColumn({ name: "post_id" })
   post: PostEntity;
 

@@ -15,7 +15,7 @@ export class RecipeStepEntity {
   @Column({ name: "content" })
   content: string;
 
-  @ManyToOne(() => FoodEntity, food => food.steps)
+  @ManyToOne(() => FoodEntity, food => food.steps, { nullable: false })
   @JoinColumn({ name: "food_id" })
   food: FoodEntity
 
@@ -55,7 +55,7 @@ export class RecipeStepEntity {
 @Entity({ name: 'recipe_step_medias' })
 export class RecipeStepMediaEntity extends AbstractEntity {
 
-  @ManyToOne(() => RecipeStepEntity)
+  @ManyToOne(() => RecipeStepEntity, { nullable: false })
   @JoinColumn({ name: "recipe_step_id" })
   recipeStep: RecipeStepEntity;
 
