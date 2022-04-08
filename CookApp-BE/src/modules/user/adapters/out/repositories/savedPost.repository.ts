@@ -49,7 +49,7 @@ export class SavedPostRepository extends BaseRepository implements ISavedPostRep
       .where("user.id = :userId", { userId: user.id })
       .select(["saved", "post"])
       .skip(queryOpt.limit * queryOpt.offset)
-      .limit(queryOpt.limit)
+      .take(queryOpt.limit)
       .getManyAndCount()
     return [entities?.map(entity => entity.toDomain()), total]
   }

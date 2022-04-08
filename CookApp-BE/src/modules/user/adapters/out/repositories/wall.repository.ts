@@ -29,7 +29,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
       .where("author.id = :authorId", { authorId })
       .select(["post", "interaction", "media", "mediaInter"])
       .skip(query.limit * query.offset)
-      .limit(query.limit)
+      .take(query.limit)
       .getManyAndCount()
     return [entities?.map(entity => entity.toDomain()), total]
   }

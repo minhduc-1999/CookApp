@@ -47,7 +47,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
         "mediaInter"
       ])
       .skip(query.limit * query.offset)
-      .limit(query.limit)
+      .take(query.limit)
       .getManyAndCount()
     return [entities?.map(entity => entity.toDomain()), total]
   }

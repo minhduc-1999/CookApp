@@ -97,7 +97,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   async getUsers(query: PageOptionsDto): Promise<[User[], number]> {
     const [entities, total] = await this._repo.createQueryBuilder("user")
       .skip(query.limit * query.offset)
-      .limit(query.limit)
+      .take(query.limit)
       .getManyAndCount()
     return [
       entities?.map(entity => entity.toDomain()),
