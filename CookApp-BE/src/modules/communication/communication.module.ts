@@ -17,6 +17,7 @@ import { CreateConversationCommandHandler } from "./usecases/createConversation"
 import { GetConversationDetailQueryHandler } from "./usecases/getConversationDetail";
 import { GetConversationsQueryHandler } from "./usecases/getConversations";
 import { GetMessagesQueryHandler } from "./usecases/getMessages";
+import { SeenMessageCommandHandler } from "./usecases/seenMessages";
 import { SendMessageCommandHandler } from "./usecases/sendMessages";
 import { TransmitMessagesQueryHandler } from "./usecases/transmitMessages";
 
@@ -24,7 +25,8 @@ const commandHandlers = [
   SendMessageCommandHandler,
   ChatConnectCommandHandler,
   ChatDisconnectCommandHandler,
-  CreateConversationCommandHandler
+  CreateConversationCommandHandler,
+  SeenMessageCommandHandler
 ]
 
 const queryHandlers = [

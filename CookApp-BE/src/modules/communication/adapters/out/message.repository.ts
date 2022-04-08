@@ -12,6 +12,7 @@ export interface IMessageRepository {
   createMessage(message: Message): Promise<Message>
   setTransaction(tx: ITransaction): IMessageRepository
   getMessages(convId: string, queryOpt: PageOptionsDto): Promise<[Message[], number]>
+  findById(msgId: string): Promise<Message>
 }
 @Injectable()
 export class MessageRepository extends BaseRepository implements IMessageRepository {
@@ -20,6 +21,13 @@ export class MessageRepository extends BaseRepository implements IMessageReposit
     private _messageRepo: Repository<MessageEntity>,
   ) {
     super()
+  }
+  async findById(msgId: string): Promise<Message> {
+    const entity = await this._messageRepo.findOne(msgId, {
+      relations: ["sender", "sender.user"],
+    })
+    console.log(entity)
+    return entity?.toDomain()
   }
 
   async getMessages(convId: string, queryOpt: PageOptionsDto): Promise<[Message[], number]> {

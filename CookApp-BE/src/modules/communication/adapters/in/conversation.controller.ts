@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Post as PostHttp, Query } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Post, Post as PostHttp, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -7,6 +7,7 @@ import { Result } from "base/result.base";
 import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
+  ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
@@ -20,6 +21,7 @@ import { GetConversationsQuery } from "modules/communication/usecases/getConvers
 import { GetConversationsResponse } from "modules/communication/usecases/getConversations/getMessagesResponse";
 import { GetMessagesQuery } from "modules/communication/usecases/getMessages";
 import { GetMessagesResponse } from "modules/communication/usecases/getMessages/getMessagesResponse";
+import { SeenMessageCommand } from "modules/communication/usecases/seenMessages";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("conversations")
@@ -70,6 +72,21 @@ export class ConversationController {
     const query = new GetConversationDetailQuery(user, convId);
     const res = await this._queryBus.execute(query);
     return Result.ok(res, { messages: ["Get conversation successfully"] });
+  }
+
+  @Post(":conversationId/messages/:messageId/seen")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Seen message successfully")
+  @HttpRequestTransaction()
+  async seenMessage(
+    @Param("conversationId", ParseUUIDPipe) convId: string,
+    @Param("messageId", ParseUUIDPipe) msgId: string,
+    @HttpParamTransaction() tx: ITransaction,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetMessagesResponse>> {
+    const query = new SeenMessageCommand(user, msgId, convId, tx);
+    await this._commandBus.execute(query);
+    return Result.ok(null, { messages: ["Seen message successfully"] });
   }
 
   @Get()

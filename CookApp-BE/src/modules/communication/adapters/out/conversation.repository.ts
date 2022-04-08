@@ -4,7 +4,7 @@ import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { plainToClass } from "class-transformer";
-import { Conversation } from "domains/social/conversation.domain";
+import { Conversation, Message } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
 import { ConversationEntity, ConversationMemberEntity } from "entities/social/conversation.entity";
 import { Not, QueryRunner, Repository } from "typeorm";
@@ -18,6 +18,7 @@ export interface IConversationRepository {
   findDirectConversation(memberId1: string, memberId2: string): Promise<Conversation>
   findConversation(userId: string): Promise<Conversation[]>
   findMany(userId: string, queryOpt: PageOptionsDto): Promise<[Conversation[], number]>
+  updateSeen(userId: string, conversationId: string, msg: Message): Promise<void>
 }
 @Injectable()
 export class ConversationRepository extends BaseRepository implements IConversationRepository {
@@ -28,6 +29,22 @@ export class ConversationRepository extends BaseRepository implements IConversat
     private _convMemberRepo: Repository<ConversationMemberEntity>,
   ) {
     super()
+  }
+
+  async updateSeen(userId: string, conversationId: string, msg: Message): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.createQueryBuilder()
+        .update(ConversationMemberEntity)
+        .set({
+          lastSeenMessage: {
+            id: msg.id
+          }
+        })
+        .where("user_id = :userId", { userId })
+        .andWhere("conversation_id = :conversationId", { conversationId })
+        .execute()
+    }
   }
 
   async findMany(userId: string, queryOpt: PageOptionsDto): Promise<[Conversation[], number]> {
