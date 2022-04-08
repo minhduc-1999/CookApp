@@ -19,6 +19,7 @@ export interface IConversationRepository {
   findConversation(userId: string): Promise<Conversation[]>
   findMany(userId: string, queryOpt: PageOptionsDto): Promise<[Conversation[], number]>
   updateSeen(userId: string, conversationId: string, msg: Message): Promise<void>
+  getUnseenConversationNumber(userId: string): Promise<number>
 }
 @Injectable()
 export class ConversationRepository extends BaseRepository implements IConversationRepository {
@@ -29,6 +30,15 @@ export class ConversationRepository extends BaseRepository implements IConversat
     private _convMemberRepo: Repository<ConversationMemberEntity>,
   ) {
     super()
+  }
+  async getUnseenConversationNumber(userId: string): Promise<number> {
+    const raw = await this._conversationRepo.query(`
+        SELECT count(*) FROM conversations c 
+        LEFT JOIN conversation_members cm on cm.conversation_id = c.id 
+        WHERE c.last_msg_id  != cm.last_seen_msg_id 
+          AND cm.user_id  = $1
+        `, [userId])
+    return Number(raw[0].count)
   }
 
   async updateSeen(userId: string, conversationId: string, msg: Message): Promise<void> {

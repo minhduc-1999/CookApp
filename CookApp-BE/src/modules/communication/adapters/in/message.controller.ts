@@ -1,14 +1,16 @@
-import { Body, Controller, MessageEvent, Post, Sse } from "@nestjs/common";
+import { Body, Controller, Get, MessageEvent, Post, Sse } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { MessageResponse } from "base/dtos/response.dto";
 import { Result } from "base/result.base";
-import { ApiFailResponseCustom, ApiOKResponseCustom } from "decorators/apiSuccessResponse.decorator";
+import { ApiCreatedResponseCustom, ApiFailResponseCustom, ApiOKResponseCustom } from "decorators/apiSuccessResponse.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { ChatEventType } from "modules/communication/events/eventType";
+import { GetChatStatusQuery } from "modules/communication/usecases/getChatStatus";
+import { GetChatStatusResponse } from "modules/communication/usecases/getChatStatus/getChatStatusResponse";
 import { SendMessageCommand } from "modules/communication/usecases/sendMessages";
 import { SendMessageRequest } from "modules/communication/usecases/sendMessages/sendMessageRequest";
 import { SendMessageResponse } from "modules/communication/usecases/sendMessages/sendMessageResponse";
@@ -18,11 +20,22 @@ import { from, map, mergeMap, Observable } from "rxjs";
 @Controller("messages")
 @ApiTags("User/Chat")
 @ApiBearerAuth()
-export class ChatController {
+export class MessageController {
   constructor(
     private _queryBus: QueryBus,
     private _commandBus: CommandBus,
   ) { }
+
+  @Get("status")
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustom(GetChatStatusResponse, "Get status successfully")
+  async getConversation(
+    @HttpUserReq() user: User
+  ): Promise<Result<GetChatStatusResponse>> {
+    const query = new GetChatStatusQuery(user);
+    const res = await this._queryBus.execute(query);
+    return Result.ok(res, { messages: ["Get status successfully"] });
+  }
 
   @Post()
   @ApiFailResponseCustom()

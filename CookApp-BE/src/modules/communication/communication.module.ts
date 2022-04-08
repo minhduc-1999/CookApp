@@ -6,14 +6,15 @@ import { MessageEntity } from "entities/social/message.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { AuthModule } from "modules/auth/auth.module";
 import { ShareModule } from "modules/share/share.module";
-import { ChatController } from "./adapters/in/chat.controller";
 import { ConversationController } from "./adapters/in/conversation.controller";
+import { MessageController } from "./adapters/in/message.controller";
 import { ConversationRepository } from "./adapters/out/conversation.repository";
 import { MessageRepository } from "./adapters/out/message.repository";
 import { WsMiddlewareFactory } from "./adapters/out/wsMiddlewareFactory.service";
 import { ChatConnectCommandHandler } from "./usecases/chatConnect";
 import { ChatDisconnectCommandHandler } from "./usecases/chatDisconnect";
 import { CreateConversationCommandHandler } from "./usecases/createConversation";
+import { GetChatStatusQueryHandler } from "./usecases/getChatStatus";
 import { GetConversationDetailQueryHandler } from "./usecases/getConversationDetail";
 import { GetConversationsQueryHandler } from "./usecases/getConversations";
 import { GetMessagesQueryHandler } from "./usecases/getMessages";
@@ -33,7 +34,8 @@ const queryHandlers = [
   GetMessagesQueryHandler,
   TransmitMessagesQueryHandler,
   GetConversationsQueryHandler,
-  GetConversationDetailQueryHandler
+  GetConversationDetailQueryHandler,
+  GetChatStatusQueryHandler
 ]
 
 const repositories = [
@@ -62,7 +64,7 @@ const repositories = [
   ],
   controllers: [
     ConversationController,
-    ChatController
+    MessageController
   ],
   providers: [
     {
