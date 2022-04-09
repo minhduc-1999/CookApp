@@ -12,6 +12,7 @@ heroku config:set -a tastify-be GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
 heroku config:set -a tastify-be PORT=$PORT
 heroku config:set -a tastify-be APP_ENV=$APP_ENV
 heroku config:set -a tastify-be SENTRY_URL=$SENTRY_URL
+heroku config:set -a tastify-be EMAIL_VERIFICATION_REQUIRE=$EMAIL_VERIFICATION_REQUIRE
 heroku config:set -a tastify-be TZ=$TZ
 heroku config:set -a tastify-be LIMIT=$LIMIT
 heroku config:set -a tastify-be OFFSET=$OFFSET

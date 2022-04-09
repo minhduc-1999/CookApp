@@ -13,6 +13,7 @@ import { Account } from "domains/social/account.domain";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { IUserService } from "modules/auth/services/user.service";
+import { ConfigService } from "nestjs-config";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
@@ -30,7 +31,8 @@ export class RegisterCommandHandler
     @Inject("IMailService")
     private _mailService: IMailService,
     @Inject("IConfigurationService")
-    private _configurationService: IConfigurationService
+    private _configurationService: IConfigurationService,
+    private _configService: ConfigService
   ) { }
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
     const { registerDto, tx } = command;
@@ -38,7 +40,7 @@ export class RegisterCommandHandler
     const account = new Account({
       ...registerDto,
       password: hashedPassword,
-      emailVerified: false
+      emailVerified: !this._configService.get("app.emailVerificationRequire")
     })
 
     const newUser = new User({
