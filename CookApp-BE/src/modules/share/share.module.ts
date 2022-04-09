@@ -24,16 +24,27 @@ const handler = [GetUploadPresignedLinkQueryHandler];
     ConfigModule,
     MailerModule.forRootAsync({
       useFactory: async (config: ConfigService): Promise<MailerOptions> => {
+        const env = config.get("app.env")
+        let auth: any;
+        if (env === "development")
+          auth = {}
+        else {
+          auth = {
+            type: "oauth2",
+            clientId: config.get("mail.clientId"),
+            clientSecret: config.get("mail.clientSecret"),
+            user: config.get("mail.user"),
+            refreshToken: config.get("mail.refreshToken"),
+            accessToken: config.get("mail.accessToken")
+          }
+        }
         return {
           transport: {
             host: config.get("mail.host"),
             port: config.get("mail.port"),
             ignoreTLS: false,
             secure: false,
-            auth: {
-              user: config.get("mail.user"),
-              pass: config.get("mail.password"),
-            },
+            auth
           },
           defaults: {
             from: config.get("mail.defaultFrom"),

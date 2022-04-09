@@ -38,12 +38,15 @@ export class RegisterCommandHandler
     const account = new Account({
       ...registerDto,
       password: hashedPassword,
-      emailVerified: true
+      emailVerified: false
     })
+
     const newUser = new User({
       account
     });
+
     let createdUser: User;
+
     try {
       createdUser = await this._userService.createNewUser(newUser, tx)
     } catch (err) {
