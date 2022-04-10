@@ -1,21 +1,29 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:firebase_messaging/firebase_messaging.dart';
+//import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tastify/UploadScreen/UploadActivity.dart';
-
+import 'package:flutter_client_sse/flutter_client_sse.dart';
+import 'package:socket_io_client/socket_io_client.dart' as IO;
+import 'package:web_socket_channel/io.dart';
 import 'ProfileScreen/EditProfileActivity.dart';
 import 'Services/Auth.dart';
 import 'Services/SharedService.dart';
+import 'config.dart';
+import 'package:web_socket_channel/web_socket_channel.dart';
+import 'package:web_socket_channel/status.dart' as status;
 String currentUserId;
-Widget _defaultHome = LoginActivity(auth: Auth(),);
-//Widget _defaultHome = UploadActivity();
-const AndroidNotificationChannel channel = AndroidNotificationChannel(
+Stream<SSEModel> sseModel;
+Widget _defaultHome = LoginActivity(
+  auth: Auth(),
+);
+
+/*const AndroidNotificationChannel channel = AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // title
     'This channel is used for important notifications.', // description
@@ -23,26 +31,39 @@ const AndroidNotificationChannel channel = AndroidNotificationChannel(
     playSound: true);
 
 final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
-FlutterLocalNotificationsPlugin();
+    FlutterLocalNotificationsPlugin();
 
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   await Firebase.initializeApp();
   print('A bg message just showed up :  ${message.messageId}');
-}
+}*/
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await Firebase.initializeApp();
 
-
-
   bool isLoggedIn = await SharedService.isLoggedIn();
-  if (isLoggedIn){
+  if (isLoggedIn) {
     var loginDetails = await SharedService.loginDetails();
     currentUserId = loginDetails.data.userId;
+    /*IO.Socket socket =
+        IO.io(Config.chatURL,
+            IO.OptionBuilder()
+                .disableAutoConnect()
+                .setQuery({"token": loginDetails.data.accessToken})
+            .setTimeout(60000)
+                .build()
+        );
+    socket.on("connect", (data) =>  print("socket: connected"));
+    socket.on("connect_error", (data) =>  print("socket: connect_error : " + data));
+    socket.on("disconnect", (data) =>  print("socket: disconnect"));
+    socket.connect();*/
+    await SharedService.chatSSEService();
 
-    _defaultHome = HomeActivity(auth: Auth(),);
+    _defaultHome = HomeActivity(
+      auth: Auth(),
+    );
   }
   runApp(MyApp());
 }
@@ -68,12 +89,14 @@ class MyApp extends StatelessWidget {
       ),
       routes: {
         '/': (context) => _defaultHome,
-        '/home': (context) => HomeActivity(auth: Auth(),),
-        '/login': (context) => LoginActivity(auth: Auth(),),
+        '/home': (context) => HomeActivity(
+              auth: Auth(),
+            ),
+        '/login': (context) => LoginActivity(
+              auth: Auth(),
+            ),
         '/signup': (context) => SignUpActivity(),
       },
-
-
     );
   }
 }
@@ -98,52 +121,14 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   int _counter = 0;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) {
-      RemoteNotification notification = message.notification;
-      AndroidNotification android = message.notification?.android;
-      if (notification != null && android != null) {
-        flutterLocalNotificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                channel.description,
-                color: Colors.blue,
-                playSound: true,
-                icon: '@mipmap/ic_launcher',
-              ),
-            ));
-      }
-    });
 
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      print('A new onMessageOpenedApp event was published!');
-      RemoteNotification notification = message.notification;
-      AndroidNotification android = message.notification?.android;
-      if (notification != null && android != null) {
-        showDialog(
-            context: context,
-            builder: (_) {
-              return AlertDialog(
-                title: Text(notification.title),
-                content: SingleChildScrollView(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [Text(notification.body)],
-                  ),
-                ),
-              );
-            });
-      }
-    });
   }
+
   void _incrementCounter() {
     setState(() {
       // This call to setState tells the Flutter framework that something has
@@ -154,21 +139,9 @@ class _MyHomePageState extends State<MyHomePage> {
       _counter++;
     });
   }
-  void showNotification() {
-    setState(() {
-      _counter++;
-    });
-    flutterLocalNotificationsPlugin.show(
-        0,
-        "Testing $_counter",
-        "How you doin ?",
-        NotificationDetails(
-            android: AndroidNotificationDetails(channel.id, channel.name, channel.description,
-                importance: Importance.high,
-                color: Colors.blue,
-                playSound: true,
-                icon: '@mipmap/ic_launcher')));
-  }
+
+
+
   @override
   Widget build(BuildContext context) {
     // This method is rerun every time setState is called, for instance as done
@@ -214,7 +187,7 @@ class _MyHomePageState extends State<MyHomePage> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: showNotification,
+        onPressed: (){},
         tooltip: 'Increment',
         child: Icon(Icons.add),
       ), // This trailing comma makes auto-formatting nicer for build methods.

@@ -8,7 +8,7 @@ import 'package:tastify/EditPostScreen/EditPostActivity.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
-import 'package:tastify/NewFeedScreen/MultiImagesDetailActivity.dart';
+import '../MultiImagesDetailScreen/MultiImagesDetailActivity.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
@@ -109,7 +109,17 @@ class _Post extends State<Post> {
     color: Colors.black,
     fontWeight: FontWeight.bold,
   );
+  FutureOr _updateTotalCommentLike(dynamic value) async {
+    var data = await APIService.getPostDetail(id);
 
+      setState(() {
+        numOfComment = data.data.numOfComment;
+        numOfReaction = data.data.numOfReaction;
+        liked = data.data.reaction != null;
+      });
+
+
+  }
   _Post(
       {this.id,
       this.userId,
@@ -174,7 +184,15 @@ class _Post extends State<Post> {
                                             pageBuilder: (context, animation,
                                                     secondaryAnimation) =>
                                                 MultiImagesDetailActivity(
-                                                  medias: medias,
+                                                  numOfReaction: this.numOfReaction,
+                                                  numOfComment: this.numOfComment,
+                                                  postId: this.id,
+                                                  isLiked: this.liked,
+                                                  content: this.content,
+                                                  location: this.location,
+                                                  displayName: this.displayName,
+                                                  avatar: this.avatar,
+                                                  dateTime: this.dateTime,
                                                 ),
                                             transitionsBuilder: (context,
                                                 animation,
@@ -194,7 +212,7 @@ class _Post extends State<Post> {
                                                     animation.drive(tween),
                                                 child: child,
                                               );
-                                            }));
+                                            })).then(_updateTotalCommentLike);
                                   },
                                   child: Container(
                                     margin: EdgeInsets.only(bottom: 10),
@@ -298,6 +316,7 @@ class _Post extends State<Post> {
                   openProfile(context, userId);
                 },
               ),
+              SizedBox(height: 2,),
               location != null ? Text(location, style: TextStyle(fontSize: 12),) : Container()
             ],
           ),
@@ -307,22 +326,6 @@ class _Post extends State<Post> {
                     alignment: Alignment.centerRight,
                     child: IconButton(
                       onPressed: () {
-                        /*return showModalBottomSheet(
-                      context: context,
-                      isScrollControlled: true,
-                      backgroundColor: Colors.transparent,
-                      builder: (context) => buildMoreVert());*/
-                        /*Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => EditPostActivity(
-                                    id: this.id,
-                                    medias: this.medias,
-                                    content: this.content,
-                                    avatar: this.avatar,
-                                    displayName: this.displayName,
-                                  )),
-                        );*/
                         Navigator.push(
                             context,
                             PageRouteBuilder(
@@ -362,54 +365,6 @@ class _Post extends State<Post> {
       ),
     );
   }
-
-  /*Widget buildMoreVert() {
-    return DraggableScrollableSheet(
-      maxChildSize: 0.5,
-      minChildSize: 0.3,
-      initialChildSize: 0.5,
-      builder: (_, controller) => Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-        ),
-        padding: EdgeInsets.only(top: 10, left: 5,bottom: 10,right: 5),
-        child: ListView(
-          controller: controller,
-          children: [
-            ListTile(
-              leading: Icon(
-                Icons.edit_outlined,
-                color: Colors.black,
-              ),
-              title: Text(
-                "Edit post",
-                style: TextStyle(fontSize: 16),
-              ),
-              onTap: (){
-                Navigator.of(context).pop();
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => EditPostActivity(id: this.id,images: this.images,content: this.content,avatar: this.avatar,displayName: this.displayName,)),
-                );
-              },
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.save_outlined,
-                color: Colors.black,
-              ),
-              title: Text(
-                "Save post",
-                style: TextStyle(fontSize: 16),
-              ),
-            ),
-
-          ],
-        ),
-      ),
-    );
-  }*/
   Container loadingPlaceHolder = Container(
     height: 400.0,
     child: Center(child: CircularProgressIndicator()),
@@ -418,9 +373,10 @@ class _Post extends State<Post> {
   @override
   Widget build(BuildContext context) {
     //liked = (likes[currentUserModel.id.toString()] == true);
-
+    String contentValues = displayName + content;
     return Column(
       mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         buildPostHeader(),
         buildLikeableImage(),
@@ -436,10 +392,6 @@ class _Post extends State<Post> {
                   size: 25.0,
                 ),
                 onTap: () {
-                  /*goToComments(
-                    context: context,
-                    postId: id,
-                  );*/
                   return showModalBottomSheet(
                     context: context,
                     builder: (BuildContext context) {
@@ -451,7 +403,7 @@ class _Post extends State<Post> {
                     },
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                  );
+                  ).then(_updateTotalCommentLike);
                 }),
             Expanded(
                 child: Container(
@@ -464,41 +416,46 @@ class _Post extends State<Post> {
             ))
           ],
         ),
-        Row(
-          children: <Widget>[
-            Container(
-              margin: const EdgeInsets.only(left: 15.0),
-              child: numOfReaction != 0
+        Container(
+          margin: EdgeInsets.only(left: 15,right: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: <Widget>[
+              numOfReaction > 1
                   ? Text(
-                      "${numOfReaction} likes",
-                      style: boldStyle,
-                    )
-                  : Text(
-                      "0 like",
-                      style: boldStyle,
-                    ),
-            )
-          ],
+                "${numOfReaction} likes",
+              )
+                  : numOfReaction == 0 || numOfReaction == 1
+                  ? Text(
+                "${numOfReaction} like",
+              )
+                  : Container(),
+              numOfComment > 1
+                  ? Text(
+                "${numOfComment} comments",
+              )
+                  : numOfComment == 0 || numOfComment == 1
+                  ? Text(
+                "${numOfComment} comment",
+              )
+                  : Container()
+            ],
+          ),
         ),
-        Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: <Widget>[
-            Container(
-                margin: const EdgeInsets.only(left: 15.0),
-                child: displayName != null
-                    ? Text(
-                        displayName,
-                        style: boldStyle,
-                      )
-                    : Text(
-                        "user",
-                        style: boldStyle,
-                      )),
-            SizedBox(
-              width: 5,
-            ),
-            Expanded(child: Text(content)),
-          ],
+        Padding(
+          padding: const EdgeInsets.only(left: 15,right: 15, top: 3,bottom: 3),
+          child: Divider(height: 2,thickness: 0.4,),
+        ),
+        Padding(
+          padding: const EdgeInsets.only(left: 15, right: 15),
+          child: RichText(
+              textAlign: TextAlign.left,
+              text: TextSpan(
+                children: [
+                  TextSpan(text: displayName + "  ",style: boldStyle),
+                  TextSpan(text: content, style: TextStyle(color: Colors.black))
+                ]
+              )),
         ),
         SizedBox(
           height: 5,
@@ -519,9 +476,10 @@ class _Post extends State<Post> {
 
   void _likePost(String postId2) async {
     await APIService.react(ReactRequestModel(
-        react: 'LOVE', targetKeyOrID: id, targetType: Config.postReactType));
+        react: 'LOVE', targetId: id, targetType: Config.postReactType));
     if (liked) {
       setState(() {
+
         liked = false;
         numOfReaction--;
       });
@@ -551,70 +509,3 @@ class _Post extends State<Post> {
   }
 }
 
-/*class ImagePostFromId extends StatelessWidget {
-  final String id;
-
-  const ImagePostFromId({this.id});
-
-  getImagePost() async {
-    var document =
-        await FirebaseFirestore.instance.collection('posts').doc(id).get();
-    return ImagePost.fromDocument(document);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return FutureBuilder(
-        future: getImagePost(),
-        builder: (context, snapshot) {
-          if (!snapshot.hasData)
-            return Container(
-                alignment: FractionalOffset.center,
-                padding: const EdgeInsets.only(top: 10.0),
-                child: CircularProgressIndicator());
-          return snapshot.data;
-        });
-  }
-}*/
-
-/*void goToComments(
-    {BuildContext context, String postId, String ownerId, String mediaUrl}) {
-  Navigator.of(context)
-      .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-    return CommentPage(
-      postId: postId,
-      postOwner: ownerId,
-      postMediaUrl: mediaUrl,
-    );
-  }));
-}*/
-
-/*void openImagePost(BuildContext context, Post post) {
-  Navigator.of(context)
-      .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-    return Center(
-      child: Scaffold(
-          appBar: AppBar(
-            automaticallyImplyLeading: true,
-            brightness: Brightness.dark,
-            flexibleSpace: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: <Color>[appPrimaryColor, appPrimaryColor2],
-                ),
-              ),
-            ),
-            title: Text('${post.displayName}' + '\'s Post'),
-          ),
-          body: ListView(
-            children: <Widget>[
-              Container(
-                child: post,
-              ),
-            ],
-          )),
-    );
-  }));
-}*/

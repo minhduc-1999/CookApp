@@ -6,8 +6,9 @@ class Config {
   static const String chatbot = "Chatbot";
   static const String notifications = "Notifications";
   //url
-  //static const String apiURL = "http://192.168.1.11:3000";
+
   static const String apiURL = "https://tastify-be.herokuapp.com";
+  static const String chatURL = "https://tastify-be.herokuapp.com/chat";
   static const String loginAPI = "/api/login";
   static const String loginByGoogleAPI = "/api/google/redirect";
   static const String registerAPI = "/api/register";
@@ -20,6 +21,8 @@ class Config {
   static const String endUserWallPostAPI = "/walls/posts";
   static const String postDetails = "/api/users/posts/";
   static const String commentAPI = "/api/users/comments";
+
+  static const String sseAPI = apiURL + "/api/messages/sse";
 
   static const String reactAPI = "/api/users/reaction";
   static const String userFeedAPI = "/api/users/feeds/posts";
