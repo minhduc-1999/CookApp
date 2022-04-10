@@ -13,6 +13,8 @@ import { IReactionRepository } from "modules/user/interfaces/repositories/reacti
 import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Post } from "domains/social/post.domain";
+import { IFoodRecipeService } from "modules/core/services/recipeStep.service";
+import { IAlbumMediaRepository } from "modules/user/interfaces/repositories/albumMedia.interface";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(
@@ -34,9 +36,13 @@ export class ReactCommandHandler
     private _postService: IPostService,
     @Inject("IPostMediaRepository")
     private _postMediaRepo: IPostMediaRepository,
+    @Inject("IAlbumMediaRepository")
+    private _albumMediaRepo: IAlbumMediaRepository,
+    @Inject("IFoodRecipeService")
+    private _recipeService : IFoodRecipeService,
     private _eventBus: EventBus,
     @Inject("IReactionRepository")
-    private _reactionRepo: IReactionRepository
+    private _reactionRepo: IReactionRepository,
   ) { }
   async execute(command: ReactCommand): Promise<ReactResponse> {
     const { user, reactReq, tx } = command;
@@ -53,6 +59,17 @@ export class ReactCommandHandler
         break;
       case InteractiveTargetType.POST_MEDIA:
         target = await this._postMediaRepo.getMedia(reactReq.targetId)
+        if (!target) {
+          throw new NotFoundException(
+            ResponseDTO.fail("Media not found")
+          );
+        }
+        break;
+      case InteractiveTargetType.RECIPE_STEP:
+        target = await this._recipeService.getStepById(reactReq.targetId)
+        break;
+      case InteractiveTargetType.ALBUM_MEDIA:
+        target = await this._albumMediaRepo.getMedia(reactReq.targetId)
         if (!target) {
           throw new NotFoundException(
             ResponseDTO.fail("Media not found")

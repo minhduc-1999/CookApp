@@ -29,7 +29,7 @@ export class GetFeedPostsQueryHandler
     @Inject("IReactionRepository")
     private _reactionRepo: IReactionRepository,
     @Inject("ISavedPostRepository")
-    private _savedRepo: ISavedPostRepository
+    private _savedRepo: ISavedPostRepository,
   ) { }
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;

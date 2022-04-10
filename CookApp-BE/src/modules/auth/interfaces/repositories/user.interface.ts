@@ -12,4 +12,5 @@ export interface IUserRepository {
   getUsers(query: PageOptionsDto): Promise<[User[], number]>;
   updateStatus(user: User, statusID?: string): Promise<void>
   getProfile(userId: string): Promise<User>
+  existAll(userIds: string[]): Promise<boolean>
 }

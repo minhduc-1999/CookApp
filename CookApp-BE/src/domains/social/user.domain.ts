@@ -1,5 +1,5 @@
 import { Audit } from "../../domains/audit.domain";
-import { ReactionType, Sex } from "../../enums/social.enum";
+import { MessageContentType, ReactionType, Sex } from "../../enums/social.enum";
 import { CommentMedia } from "./media.domain";
 import { Account } from "./account.domain";
 import { generateDisplayName } from "../../utils";
@@ -8,10 +8,11 @@ import { Post, SavedPost } from "./post.domain";
 import { Reaction } from "./reaction.domain";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Comment } from "./comment.domain";
+import { Conversation, Message, MessageContent } from "./conversation.domain";
 
 
 export class User extends Audit {
-  id: string 
+  id: string
 
   avatar?: CommentMedia;
 
@@ -37,6 +38,8 @@ export class User extends Audit {
 
   account?: Account
 
+  status: string
+
   constructor(user: Partial<User>) {
     super(user)
     this.account = user?.account
@@ -51,6 +54,7 @@ export class User extends Audit {
     this.nPosts = user?.nPosts
     this.nFollowees = user?.nFollowees
     this.nFollowers = user?.nFollowers
+    this.status = user?.status
   }
 
   follow(followee: User): Follow {
@@ -60,7 +64,7 @@ export class User extends Audit {
     })
   }
 
-  react(target: IInteractable, type: ReactionType ): Reaction {
+  react(target: IInteractable, type: ReactionType): Reaction {
     return new Reaction({
       reactor: this,
       target: target,
@@ -68,7 +72,7 @@ export class User extends Audit {
     })
   }
 
-  savePost(target: Post): SavedPost{
+  savePost(target: Post): SavedPost {
     return new SavedPost({
       saver: this,
       post: target
@@ -83,5 +87,13 @@ export class User extends Audit {
       medias,
       user: this
     })
-  } 
+  }
+
+  inbox(conv: Conversation, content: string, contentType: MessageContentType): Message {
+    return new Message({
+      to: conv,
+      sender: this,
+      message: new MessageContent(content, contentType)
+    })
+  }
 }

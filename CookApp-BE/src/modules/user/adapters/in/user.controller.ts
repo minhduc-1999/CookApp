@@ -10,7 +10,7 @@ import {
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetProfileQuery } from "modules/user/useCases/getProfile";
 import { GetProfileResponse } from "modules/user/useCases/getProfile/getProfileResponse";
@@ -18,7 +18,7 @@ import { GetUsersQuery } from "modules/user/useCases/getUsers";
 import { GetUsersResponse } from "modules/user/useCases/getUsers/getUsersResponse";
 import { UpdateProfileCommand } from "modules/user/useCases/updateProfile";
 import { UpdateProfileRequest } from "modules/user/useCases/updateProfile/updateProfileRequest";
-import { ParseRequestPipe } from "pipes/parseRequest.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users")
 @ApiTags("Users")
@@ -32,8 +32,8 @@ export class UserController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetUsersResponse, "Get users successfully")
   async findUsers(
-    @Query(new ParseRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
-    @UserReq() user: User
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @HttpUserReq() user: User
   ): Promise<Result<GetUsersResponse>> {
     const queryOp = new GetUsersQuery(user, query);
     const result = await this._queryBus.execute(queryOp);
@@ -45,7 +45,7 @@ export class UserController {
   @Get("profile")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetProfileResponse, "Getting profile successfully")
-  async getProfile(@UserReq() user: User): Promise<Result<GetProfileResponse>> {
+  async getProfile(@HttpUserReq() user: User): Promise<Result<GetProfileResponse>> {
     const query = new GetProfileQuery(user);
     const result = await this._queryBus.execute(query);
     return Result.ok(result, { messages: ["Getting profile successfully"] });
@@ -57,7 +57,7 @@ export class UserController {
   @ApiOKResponseCustomWithoutData("Updating profile successfully")
   @HttpRequestTransaction()
   async updateProfile(
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @Body() body: UpdateProfileRequest,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {

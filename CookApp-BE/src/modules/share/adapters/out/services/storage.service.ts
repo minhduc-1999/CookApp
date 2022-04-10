@@ -9,8 +9,9 @@ import {
   getNameFromPath,
 } from "utils";
 import { IStorageProvider } from "./provider.service";
-import { CommentMedia } from "domains/social/media.domain";
+import { CommentMedia, Media } from "domains/social/media.domain";
 import { MediaType } from "enums/social.enum";
+import { isNil } from "lodash";
 
 export interface IStorageService {
   getUploadSignedLink(fileName: string): Promise<PreSignedLinkResponse>;
@@ -26,7 +27,7 @@ export interface IStorageService {
     newKeys: string[],
     mediaType: MediaType
   ): Promise<string[]>;
-  deleteFiles(urls: string[]): Promise<string[]>;
+  deleteFiles(medias: Media[]): Promise<Media[]>;
 }
 
 export type ObjectMetadata = {
@@ -52,26 +53,26 @@ export class FireBaseService implements IStorageService {
   ) {
     this.bucket = this._provider.getBucket()
   }
-  async deleteFiles(objectKeys: string[]): Promise<string[]> {
-    const deleteTasks: Promise<string>[] = [];
-    for (let objectKey of objectKeys) {
-      const file = this.bucket.file(objectKey);
+  async deleteFiles(medias: Media[]): Promise<Media[]> {
+    const deleteTasks: Promise<Media>[] = [];
+    for (let media of medias) {
+      const file = this.bucket.file(media.key);
       deleteTasks.push(
         file
           .delete({ ignoreNotFound: true })
           .then((res) => {
-            if (res[0].statusCode === 204) return objectKey;
-            else return "";
+            if (res[0].statusCode === 204) return media;
+            else return null
           })
           .catch((err) => {
             this.logger.error(err);
-            return "";
+            return null
           })
       );
     }
     return Promise.all(deleteTasks).then((objs) => {
-      return objs.filter((objName) => {
-        return objName !== "";
+      return objs.filter((obj) => {
+        return !isNil(obj);
       });
     });
   }

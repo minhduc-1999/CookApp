@@ -23,7 +23,7 @@ import { RegisterResponse } from "modules/auth/useCases/register/registerRespons
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
 import { User } from "domains/social/user.domain";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmailRequest";
 import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
 import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
@@ -67,7 +67,7 @@ export class AuthController {
   @ApiOKResponseCustom(LoginResponse, "Login successfully")
   @Public()
   @NotRequireEmailVerification()
-  async login(@UserReq() user: User): Promise<Result<LoginResponse>> {
+  async login(@HttpUserReq() user: User): Promise<Result<LoginResponse>> {
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
     return Result.ok(result, { messages: ["Login successfully"] });
@@ -84,7 +84,7 @@ export class AuthController {
   @Public()
   @NotRequireEmailVerification()
   async googleAuthRedirect(
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
   ) {
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
@@ -111,7 +111,7 @@ export class AuthController {
   @ApiOKResponseCustomWithoutData("Resend email verification successfully")
   async resendEmailVerificationCallback(
     @Body() body: ResendEmailVerificationRequest,
-    @UserReq() user: User
+    @HttpUserReq() user: User
   ): Promise<Result<void>> {
     let command = new ResendEmailVerificationCommand(body, user, null);
     await this._commandBus.execute(command);

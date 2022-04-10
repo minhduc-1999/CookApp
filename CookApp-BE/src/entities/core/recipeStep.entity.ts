@@ -34,8 +34,11 @@ export class RecipeStepEntity {
 
   toDomain(): RecipeStep {
     const audit = new Audit(this.interaction)
+    const { nReactions, nComments } = this.interaction
     return new RecipeStep({
       ...audit,
+      nReactions,
+      nComments,
       content: this.content,
       photos: this.medias?.map(media => media.toDomain())
     })

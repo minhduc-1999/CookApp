@@ -6,6 +6,7 @@ export class GetFeedPostsResponse {
   @ApiResponseProperty({ type: [PostResponse] })
   posts: PostResponse[];
 
+  @ApiResponseProperty({ type: PageMetadata })
   metadata: PageMetadata;
 
   constructor(posts: PostResponse[], meta: PageMetadata) {

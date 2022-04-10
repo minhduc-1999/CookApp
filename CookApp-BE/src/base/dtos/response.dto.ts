@@ -1,15 +1,18 @@
 import { ApiProperty, ApiPropertyOptional, ApiResponseProperty } from "@nestjs/swagger";
-import { Album, Moment, Post } from "domains/social/post.domain";
+import { Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { MetaDTO } from "./responseMeta.dto";
 import { Comment } from "domains/social/comment.domain"
 import { Food } from "domains/core/food.domain";
 import { Media } from "domains/social/media.domain";
-import { MediaType, PostType, ReactionType, Sex } from "enums/social.enum";
+import { ConversationType, MediaType, MessageContentType, PostType, ReactionType, Sex } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
 import { Ingredient } from "domains/core/ingredient.domain";
+import { RecipeStep } from "domains/core/recipeStep.domain";
+import { Album } from "domains/social/album.domain";
+import { Conversation, Message } from "domains/social/conversation.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -65,12 +68,16 @@ export class MediaResponse {
   @ApiResponseProperty({ enum: Number })
   numberOfComment?: number
 
-  constructor(media: Media, reaction?: Reaction, nComents?: number) {
+  @ApiResponseProperty({ enum: Number })
+  numberOfReaction?: number
+
+  constructor(media: Media, reaction?: Reaction) {
     this.url = media?.url
     this.type = media?.type
     this.id = media?.id
     this.reaction = reaction?.type
-    this.numberOfComment = nComents
+    this.numberOfComment = media?.nComments
+    this.numberOfReaction = media?.nReactions
   }
 }
 
@@ -133,11 +140,6 @@ export class PostResponse extends AuditResponse {
     this.reaction = reaction?.type
     this.saved = saved
     switch (post?.type) {
-      case PostType.ALBUM:
-        const album = post as Album
-        this.name = album?.name
-          ;
-        break;
       case PostType.MOMENT:
         const moment = post as Moment
         this.content = moment?.content
@@ -237,28 +239,21 @@ export class AlbumResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string
 
+  @ApiResponseProperty({ type: String })
+  description: string
+
   @ApiResponseProperty({ type: [MediaResponse] })
   medias?: MediaResponse[]
 
-  @ApiResponseProperty({ enum: ["Album"] })
-  kind: "Album"
-
   @ApiResponseProperty({ type: AuthorResponse })
-  author: AuthorResponse
+  owner: AuthorResponse
 
-  @ApiResponseProperty({ type: Number })
-  numOfReaction: number;
-
-  @ApiResponseProperty({ type: Number })
-  numOfComment: number;
-
-  constructor(post: Album) {
-    super(post)
-    this.name = post?.name
-    this.medias = post?.medias.map(media => new MediaResponse(media));
-    this.author = new AuthorResponse(post?.author)
-    this.numOfReaction = post?.nReactions
-    this.numOfComment = post?.nComments
+  constructor(album: Album) {
+    super(album)
+    this.name = album?.name
+    this.medias = album?.medias.map(media => new MediaResponse(media));
+    this.owner = album?.owner && new AuthorResponse(album.owner)
+    this.description = album?.description
   }
 }
 
@@ -290,10 +285,22 @@ export class RecipeStepResponse {
   @ApiResponseProperty({ type: String })
   id: string
 
-  constructor(content: string, photos: Media[], id: string) {
-    this.content = content
-    this.photos = photos?.map(photo => new MediaResponse(photo))
-    this.id = id
+  @ApiResponseProperty({ type: Number })
+  numberOfComment: number
+
+  @ApiResponseProperty({ type: Number })
+  numberOfReaction: number
+
+  @ApiResponseProperty({ enum: ReactionType })
+  reaction: ReactionType
+
+  constructor(step: RecipeStep, reaction?: Reaction) {
+    this.content = step?.content
+    this.photos = step?.photos?.map(photo => new MediaResponse(photo))
+    this.id = step?.id
+    this.numberOfComment = step?.nComments
+    this.numberOfReaction = step?.nReactions
+    this.reaction = reaction?.type
   }
 }
 
@@ -331,18 +338,50 @@ export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   videoUrl: string;
 
-  constructor(food: Food) {
+  constructor(food: Food, steps?: RecipeStepResponse[]) {
     super(food)
     this.servings = food?.servings
     this.name = food?.name
     this.description = food?.description
     this.photos = food?.photos.map(photo => new MediaResponse(photo));
     this.totalTime = food?.totalTime
-    this.steps = food?.steps.map(step =>
-      new RecipeStepResponse(step.content, step.photos, step.id))
+    this.steps = steps ? steps
+      : food?.steps.map(step => new RecipeStepResponse(step))
     this.ingredients = food?.ingredients.map(ingredient =>
       new IngredientResponse(ingredient)
     )
     this.videoUrl = food?.videoUrl
+  }
+}
+
+export class ConversationResponse extends AuditResponse {
+  @ApiResponseProperty({ enum: ConversationType })
+  type: ConversationType
+
+  constructor(conv: Conversation) {
+    super(conv)
+    this.type = conv?.type
+  }
+}
+
+export class MessageResponse extends AuditResponse {
+  @ApiResponseProperty({ type: String })
+  content: string
+
+  @ApiResponseProperty({ enum: MessageContentType })
+  type: MessageContentType
+
+  @ApiResponseProperty({ type: AuthorResponse })
+  sender: AuthorResponse
+
+  @ApiResponseProperty({ type: String })
+  to: string
+
+  constructor(msg: Message) {
+    super(msg)
+    this.to = msg?.to?.id
+    this.content = msg?.message?.content
+    this.type = msg?.message?.type
+    this.sender = msg?.sender && new AuthorResponse(msg.sender)
   }
 }

@@ -1,9 +1,10 @@
 import { HttpModule } from "@nestjs/axios";
-import { Module } from "@nestjs/common";
+import { forwardRef, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AccountEntity } from "entities/social/account.entity";
+import { AlbumEntity, AlbumMediaEntity } from "entities/social/album.entity";
 import { CommentEntity, CommentMediaEntity } from "entities/social/comment.entity";
 import { FeedEntity } from "entities/social/feed.entity";
 import { FollowEntity } from "entities/social/follow.entity";
@@ -15,31 +16,41 @@ import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
 import { AuthModule } from "modules/auth/auth.module";
+import { CommunicationModule } from "modules/communication/communication.module";
+import { CoreModule } from "modules/core/core.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule } from "nestjs-config";
+import { AlbumController } from "./adapters/in/album.controller";
 import { CommentController } from "./adapters/in/comment.controller";
 import { FeedController } from "./adapters/in/feed.controller";
 import { PostController } from "./adapters/in/post.controller";
 import { ReactionController } from "./adapters/in/reaction.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
+import { AlbumRepository } from "./adapters/out/repositories/album.repository";
+import { AlbumMediaRepository } from "./adapters/out/repositories/albumMedia.repository";
 import { CommentRepository } from "./adapters/out/repositories/comment.repository";
 import { CommentMediaRepository } from "./adapters/out/repositories/commentMedia.repository";
 import { FeedRepository } from "./adapters/out/repositories/feed.repository";
 import { FollowRepository } from "./adapters/out/repositories/follow.repository";
-import { PostMediaRepository } from "./adapters/out/repositories/media.repository";
 import { PostRepository } from "./adapters/out/repositories/post.repository";
+import { PostMediaRepository } from "./adapters/out/repositories/postMedia.repository";
 import { ReactionRepository } from "./adapters/out/repositories/reaction.repository";
 import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { NewPostEventHandler } from "./events/propagateNewPost";
+import { AlbumService } from "./services/album.service";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
+import { CreateAlbumCommandHandler } from "./useCases/createAlbum";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
 import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
+import { EditAlbumCommandHandler } from "./useCases/editAlbum";
 import { EditPostCommandHandler } from "./useCases/editPost";
 import { FollowCommandHandler } from "./useCases/follow";
+import { GetAlbumDetailQueryHandler } from "./useCases/getAlbumDetail";
+import { GetAlbumsQueryHandler } from "./useCases/getAlbums";
 import { GetCommentsQueryHandler } from "./useCases/getComments";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostDetail";
@@ -65,7 +76,9 @@ const commandHandlers = [
   UnfolllowCommandHandler,
   UpdateProfileCommandHandler,
   SavePostCommandHandler,
-  DeleteSavedPostCommandHandler
+  DeleteSavedPostCommandHandler,
+  CreateAlbumCommandHandler,
+  EditAlbumCommandHandler
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
@@ -76,11 +89,17 @@ const queryHandlers = [
   GetWallQueryHandler,
   GetUsersQueryHandler,
   GetSavedPostsQueryHandler,
+  GetAlbumsQueryHandler,
+  GetAlbumDetailQueryHandler
 ];
 const services = [
   {
     provide: "IPostService",
     useClass: PostService,
+  },
+  {
+    provide: "IAlbumService",
+    useClass: AlbumService,
   },
   {
     provide: "ICommentService",
@@ -132,6 +151,14 @@ const repositories = [
     provide: "ICommentMediaRepository",
     useClass: CommentMediaRepository,
   },
+  {
+    provide: "IAlbumRepository",
+    useClass: AlbumRepository,
+  },
+  {
+    provide: "IAlbumMediaRepository",
+    useClass: AlbumMediaRepository,
+  },
 ];
 
 @Module({
@@ -143,6 +170,7 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
     AuthModule,
+    forwardRef(() => CoreModule),
     TypeOrmModule.forFeature([
       UserEntity,
       AccountEntity,
@@ -154,11 +182,15 @@ const repositories = [
       SavedPostEntity,
       FeedEntity,
       CommentEntity,
-      CommentMediaEntity
-    ])
+      CommentMediaEntity,
+      AlbumEntity,
+      AlbumMediaEntity
+    ]),
+    CommunicationModule
   ],
   controllers: [
     PostController,
+    AlbumController,
     WallController,
     FeedController,
     CommentController,
@@ -172,6 +204,10 @@ const repositories = [
     ...queryHandlers,
     ...eventHandlers
   ],
-  exports: ["IFollowRepository"],
+  exports: [
+    "IFollowRepository",
+    "IReactionRepository",
+    "ICommentRepository"
+  ],
 })
 export class UserModule {}

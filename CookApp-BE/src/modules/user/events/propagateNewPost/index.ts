@@ -15,8 +15,7 @@ export class NewPostEventHandler implements IEventHandler<NewPostEvent> {
 
   async handle(event: NewPostEvent): Promise<void> {
     const [followers, _] = await this._followRepo.getFollowers(event.author.id);
-    if (followers.length === 0)
-      return
+    followers.push(event.author)
     await this._feedRepository.pushNewPost(event.post, followers)
   }
 }

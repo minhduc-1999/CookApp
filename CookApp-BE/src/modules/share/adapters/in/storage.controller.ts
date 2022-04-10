@@ -6,7 +6,7 @@ import {
   ApiFailResponseCustom,
   ApiOKListResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetUploadPresignedLinkQuery } from "modules/share/useCases/getUploadPresignedLink";
 import { PreSignedLinkRequest } from "modules/share/useCases/getUploadPresignedLink/presignedLinkRequest";
@@ -27,7 +27,7 @@ export class StorageController {
   )
   async getPresignedLinks(
     @Body() body: PreSignedLinkRequest,
-    @UserReq() user: User
+    @HttpUserReq() user: User
   ): Promise<Result<PreSignedLinkResponse[]>> {
     const query = new GetUploadPresignedLinkQuery(body, user.id);
     const result = await this._queryBus.execute(query);

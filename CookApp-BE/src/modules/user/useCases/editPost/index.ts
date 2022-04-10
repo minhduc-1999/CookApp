@@ -8,10 +8,11 @@ import { EditPostRequest } from "./editPostRequest";
 import { EditPostResponse } from "./editPostResponse";
 import { BaseCommand } from "base/cqrs/command.base";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { Album, Moment, Post } from "domains/social/post.domain";
+import { Post } from "domains/social/post.domain";
 import { Image } from "domains/social/media.domain";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { MediaType } from "enums/social.enum";
+import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
 export class EditPostCommand extends BaseCommand {
   req: EditPostRequest;
   constructor(tx: ITransaction, user: User, post: EditPostRequest) {
@@ -28,6 +29,8 @@ export class EditPostCommandHandler
     private _postService: IPostService,
     @Inject("IStorageService")
     private _storageService: IStorageService,
+    @Inject("IPostMediaRepository")
+    private _postMediaRepo: IPostMediaRepository,
   ) { }
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
     const { user, tx, req } = command;
@@ -41,21 +44,21 @@ export class EditPostCommandHandler
         )
       );
 
-    // // Delete images
-    // if (req.deleteImages && req.deleteImages.length > 0) {
-    //   // await this._mediaRepository.setTransaction(tx).deleteMedias(deleteImageKeys)
-    //   req.deleteImages = await this._storageService.deleteFiles(req.deleteImages);
-    // }
+    let deleteMedias = await this._postMediaRepo.getMedias(req.deleteImages)
 
-    // // Add new images
-    // if (req.addImages && req.addImages.length > 0) {
-    //   const keys = await this._storageService.makePublic(
-    //     command.req.addImages,
-    //     MediaType.IMAGE
-    //   );
-    //   req.addImages = keys
-    //   // await this._mediaRepository.setTransaction(tx).addMedias(keys, MediaType.POST_IMAGE)
-    // }
+    // Delete images
+    if (req.deleteImages?.length > 0) {
+      deleteMedias = await this._storageService.deleteFiles(deleteMedias)
+    }
+
+    // Add new images
+    if (req.addImages && req.addImages.length > 0) {
+      const keys = await this._storageService.makePublic(
+        command.req.addImages,
+        MediaType.IMAGE
+      );
+      req.addImages = keys
+    }
     
 
     let updateData: Partial<Post> = existedPost.update({
@@ -63,7 +66,7 @@ export class EditPostCommandHandler
       medias: req.addImages?.map(image => new Image({ key: image }))
     })
 
-    await this._postService.updatePost(existedPost, updateData, tx, req.deleteImages)
+    await this._postService.updatePost(existedPost, updateData, tx, deleteMedias?.map(media => media.id))
     return new EditPostResponse();
   }
 }

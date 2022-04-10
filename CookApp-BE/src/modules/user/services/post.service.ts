@@ -13,7 +13,7 @@ import { ISavedPostRepository } from "../interfaces/repositories/savedPost.inter
 export interface IPostService {
   getPostDetail(postId: string, userId?: string): Promise<[Post, Reaction, SavedPost]>;
   createPost(post: Post, tx: ITransaction): Promise<Post>
-  updatePost(post: Post, data: Partial<Post>, tx: ITransaction, deleteMediaKeys?: string[]): Promise<void>
+  updatePost(post: Post, data: Partial<Post>, tx: ITransaction, deleteMediaIds?: string[]): Promise<void>
 }
 
 
@@ -26,15 +26,12 @@ export class PostService implements IPostService {
     @Inject("IPostMediaRepository") private _postMediaRepo: IPostMediaRepository,
     @Inject("IStorageService") private _storageService: IStorageService,
   ) { }
-  async updatePost(post: Moment, data: Partial<Moment>, tx: ITransaction, deleteMediaKeys?: string[]): Promise<void> {
+  async updatePost(post: Moment, data: Partial<Moment>, tx: ITransaction, deleteMediaIds?: string[]): Promise<void> {
     if (data.medias?.length > 0) {
       await this._postMediaRepo.setTransaction(tx).addMedias(data.medias, post)
     }
-    if (deleteMediaKeys?.length > 0) {
-      const deleteMedias = await this._postMediaRepo.getMedias(deleteMediaKeys)
-      if (deleteMedias.length > 0) {
-        await this._postMediaRepo.setTransaction(tx).deleteMedias(deleteMedias)
-      }
+    if (deleteMediaIds?.length > 0) {
+      await this._postMediaRepo.setTransaction(tx).deleteMedias(deleteMediaIds)
     }
     await this._postRepo.setTransaction(tx).updatePost(post, data)
   }

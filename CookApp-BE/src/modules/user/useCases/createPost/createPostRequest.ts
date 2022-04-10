@@ -31,16 +31,11 @@ export class CreatePostRequest {
   @IsArray()
   @ApiPropertyOptional({ type: [String] })
   @IsOptional()
+  @IsFileExtensions(["mp4"], { each: true })
   videos?: string[];
 
   @IsEnum(PostType)
   @ApiProperty({ enum: PostType })
-  kind: "ALBUM" | "MOMENT"
-
-  @IsOptional()
-  @IsMeaningfulString(1)
-  @ApiPropertyOptional({ type: String, description: "Album's name" })
-  @IsOptional()
-  name?: string
+  kind: PostType
 }
 

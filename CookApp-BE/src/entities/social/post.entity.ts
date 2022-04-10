@@ -5,6 +5,7 @@ import { MediaType, PostType } from '../../enums/social.enum';
 import { Moment, Post } from '../../domains/social/post.domain';
 import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
+import { isNil } from 'lodash';
 
 @Entity({ name: 'posts' })
 export class PostEntity {
@@ -44,12 +45,15 @@ export class PostEntity {
 
   toDomain(): Post {
     const audit = new Audit(this.interaction)
+    const { nReactions, nComments} = this.interaction
     switch (this.kind) {
       case PostType.MOMENT:
         return new Moment({
           ...audit,
+          nComments,
+          nReactions,
           content: this.content,
-          medias: this.medias?.map(media => media.toDomain()),
+          medias: this.medias?.filter(media => !isNil(media.interaction)).map(media => media.toDomain()),
           author: this.author.toDomain(),
           location: this.location
         })
@@ -93,14 +97,19 @@ export class PostMediaEntity {
   }
 
   toDomain(): CommentMedia {
+    const { nReactions, nComments} = this.interaction
     switch (this.type) {
       case MediaType.IMAGE:
         return new Image({
+          nReactions,
+          nComments,
           key: this.key,
           id: this.interaction && this.interaction.id
         })
       case MediaType.VIDEO:
         return new Video({
+          nReactions,
+          nComments,
           key: this.key,
           id: this.interaction && this.interaction.id
         })

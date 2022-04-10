@@ -11,7 +11,7 @@ import {
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
-import { UserReq } from "decorators/user.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
@@ -28,7 +28,7 @@ import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
 import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";
 import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
-import { ParseRequestPipe } from "pipes/parseRequest.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/posts")
 @ApiTags("User/Post")
@@ -42,7 +42,7 @@ export class PostController {
   @HttpRequestTransaction()
   async createPost(
     @Body() post: CreatePostRequest,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<Post>> {
     const createPostCommand = new CreatePostCommand(user, post, tx);
@@ -56,7 +56,7 @@ export class PostController {
   @ApiNotFoundResponse({ description: "Post not found" })
   async getPostById(
     @Param("postId", ParseUUIDPipe) postId: string,
-    @UserReq() user: User
+    @HttpUserReq() user: User
   ): Promise<Result<GetPostResponse>> {
     const query = new GetPostDetailQuery(user, postId);
     const post = await this._queryBus.execute(query);
@@ -70,7 +70,7 @@ export class PostController {
   @ApiNotFoundResponse({ description: "Post not found" })
   async editPost(
     @Body() post: EditPostRequest,
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @Param("postId", ParseUUIDPipe) postId: string,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<EditPostResponse>> {
@@ -87,7 +87,7 @@ export class PostController {
   @ApiConflictResponse({ description: "Post have been saved already" })
   @ApiNotFoundResponse({ description: "Post not found" })
   async savePost(
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {
@@ -107,7 +107,7 @@ export class PostController {
   @ApiConflictResponse({ description: "Post have not been saved yet" })
   @ApiNotFoundResponse({ description: "Post not found" })
   async deleteSavedPost(
-    @UserReq() user: User,
+    @HttpUserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {
@@ -126,8 +126,8 @@ export class PostController {
     "Get saved posts successfully"
   )
   async getSavedPosts(
-    @Query(new ParseRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
-    @UserReq() user: User
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @HttpUserReq() user: User
   ): Promise<Result<GetSavedPostsResponse>> {
     const savedPostsQuery = new GetSavedPostsQuery(user, query);
     const result = await this._queryBus.execute(savedPostsQuery);

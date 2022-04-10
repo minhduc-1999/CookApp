@@ -1,23 +1,24 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BaseRepository } from "base/repository.base";
+import { Album } from "domains/social/album.domain";
 import { PostMedia } from "domains/social/media.domain";
-import { Post } from "domains/social/post.domain";
+import { AlbumEntity, AlbumMediaEntity } from "entities/social/album.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
-import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
-import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
+import { IAlbumMediaRepository } from "modules/user/interfaces/repositories/albumMedia.interface";
 import { QueryRunner, Repository } from "typeorm";
 
 @Injectable()
-export class PostMediaRepository extends BaseRepository implements IPostMediaRepository {
+export class AlbumMediaRepository extends BaseRepository implements IAlbumMediaRepository{
   constructor(
-    @InjectRepository(PostMediaEntity)
-    private _postMediaRepo: Repository<PostMediaEntity>
+    @InjectRepository(AlbumMediaEntity)
+    private _postMediaRepo: Repository<AlbumMediaEntity>
   ) {
     super()
   }
 
   async getMedias(ids: string[]): Promise<PostMedia[]> {
+    if (!ids || ids.length === 0) return []
     const entities = await this._postMediaRepo
       .createQueryBuilder("media")
       .leftJoinAndSelect("media.interaction", "interaction")
@@ -28,6 +29,7 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
   }
 
   async getMedia(id: string): Promise<PostMedia> {
+    if (!id) return null
     const entity = await this._postMediaRepo
       .createQueryBuilder("media")
       .leftJoinAndSelect("media.interaction", "interaction")
@@ -37,13 +39,13 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     return entity?.toDomain()
   }
 
-  async addMedia(media: PostMedia, post: Post): Promise<PostMedia> {
+  async addMedia(media: PostMedia, album: Album): Promise<PostMedia> {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
       const mediaInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(media))
-      const temp = new PostMediaEntity(media, mediaInteraction)
-      temp.post = new PostEntity(post)
-      const mediaEntity = await queryRunner.manager.save<PostMediaEntity>(temp)
+      const temp = new AlbumMediaEntity(media, mediaInteraction)
+      temp.album = new AlbumEntity(album)
+      const mediaEntity = await queryRunner.manager.save<AlbumMediaEntity>(temp)
       return mediaEntity?.toDomain()
     }
     return null
@@ -65,17 +67,17 @@ export class PostMediaRepository extends BaseRepository implements IPostMediaRep
     }
   }
 
-  async addMedias(medias: PostMedia[], post: Post): Promise<PostMedia[]> {
-    if (!post) return null
+  async addMedias(medias: PostMedia[], album: Album): Promise<PostMedia[]> {
+    if (!album) return null
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
-      const mediaEntities: PostMediaEntity[] = []
-      const postEntity = new PostEntity(post)
+      const mediaEntities: AlbumMediaEntity[] = []
+      const postEntity = new AlbumEntity(album)
       for (let media of medias) {
         const mediaInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(media))
-        const temp = new PostMediaEntity(media, mediaInteraction)
-        temp.post = postEntity
-        const mediaEntity = await queryRunner.manager.save<PostMediaEntity>(temp)
+        const temp = new AlbumMediaEntity(media, mediaInteraction)
+        temp.album = postEntity
+        const mediaEntity = await queryRunner.manager.save<AlbumMediaEntity>(temp)
         mediaEntities.push(mediaEntity)
       }
       return mediaEntities?.map(entity => entity.toDomain())

@@ -1,6 +1,6 @@
 import { BadRequestException, Inject } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { Album, Moment, Post } from "domains/social/post.domain";
+import { Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
@@ -11,7 +11,7 @@ import { ITransaction } from "adapters/typeormTransaction.adapter";
 import _ = require("lodash");
 import { IPostService } from "modules/user/services/post.service";
 import { NewPostEvent } from "modules/notification/events/NewPostNotification";
-import { MediaType } from "enums/social.enum";
+import { MediaType, PostType } from "enums/social.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 
 export class CreatePostCommand extends BaseCommand {
@@ -43,6 +43,13 @@ export class CreatePostCommandHandler
       );
     }
 
+    if (req.videos?.length > 0) {
+      req.videos = await this._storageService.makePublic(
+        req.images,
+        MediaType.VIDEO
+      );
+    }
+
     let creatingPost: Post
 
     const medias = _.unionBy(
@@ -52,16 +59,7 @@ export class CreatePostCommandHandler
     )
 
     switch (req.kind) {
-      case "ALBUM": {
-        creatingPost = new Album({
-          author: user,
-          name: req.name,
-          medias,
-          location: req.location
-        })
-        break;
-      }
-      case "MOMENT": {
+      case PostType.MOMENT: {
         creatingPost = new Moment({
           author: user,
           content: req.content,

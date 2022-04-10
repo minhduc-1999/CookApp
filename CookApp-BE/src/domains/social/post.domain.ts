@@ -56,27 +56,6 @@ export class Moment extends PostBase {
   }
 }
 
-export class Album extends PostBase {
-
-  update(data: Partial<PostBase>): Partial<PostBase> {
-    throw new Error("Method not implemented.");
-  }
-  canCreate(): boolean {
-    if (!this.name)
-      return false
-    return true
-  }
-  name: string
-  medias?: CommentMedia[]
-
-  constructor(post: Partial<Album>) {
-    super(post)
-    this.name = post.name
-    this.medias = post.medias ?? []
-    this.type = PostType.ALBUM
-  }
-}
-
 export type Post = Moment
 
 export class SavedPost extends Audit {

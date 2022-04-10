@@ -5,6 +5,7 @@ import { Image } from '../../domains/social/media.domain';
 import { Sex } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { FollowEntity } from './follow.entity';
+import { ConversationMemberEntity } from './conversation.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends AbstractEntity {
@@ -49,6 +50,9 @@ export class UserEntity extends AbstractEntity {
   @Column({ name: 'display_name' })
   displayName: string;
 
+  @Column({ name: 'status', default: "" })
+  status: string;
+
   @OneToOne(() => AccountEntity, account => account.user)
   account: AccountEntity
 
@@ -57,6 +61,9 @@ export class UserEntity extends AbstractEntity {
 
   @OneToMany(() => FollowEntity, follow => follow.follower)
   followers: FollowEntity[]
+
+  @OneToMany(() => ConversationMemberEntity , member => member.user)
+  memberOf: ConversationMemberEntity[]
 
   constructor(user: User) {
     super(user)
@@ -72,9 +79,11 @@ export class UserEntity extends AbstractEntity {
     this.avatar = user?.avatar?.key
     this.displayName = user?.displayName
     this.account = user?.account && new AccountEntity(user.account)
+    this.status = user?.status
   }
 
   toDomain(): User {
+    if (!this.id) return null
     const data = this
     return new User({
       ...data,
@@ -83,7 +92,7 @@ export class UserEntity extends AbstractEntity {
     })
   }
 
-  getPartialUpdateObject() : Partial<UserEntity>{
+  update() : Partial<UserEntity>{
     const {account, nPosts, nFollowees, nFollowers, ...remain } = this
     return {
       ...remain

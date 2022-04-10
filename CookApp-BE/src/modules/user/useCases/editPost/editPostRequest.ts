@@ -1,7 +1,7 @@
 import {
   ApiPropertyOptional,
 } from "@nestjs/swagger";
-import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
 
@@ -30,21 +30,10 @@ export class EditPostRequest {
 
   @ApiPropertyOptional({ type: [String] })
   @IsArray()
-  @IsString({ each: true })
+  @IsUUID("4", { each: true })
   @IsNotEmpty({ each: true })
-  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"], { each: true })
   @IsOptional()
   deleteImages?: string[];
 
   id: string
-
-  @ApiPropertyOptional({
-    description: "Album's name",
-    type: String
-  })
-  @IsMeaningfulString(1)
-  @IsString()
-  @IsNotEmpty()
-  @IsOptional()
-  name: string
 }

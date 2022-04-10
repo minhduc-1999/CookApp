@@ -6,7 +6,7 @@ import { User } from "domains/social/user.domain";
 import { UserEntity } from "entities/social/user.entity";
 import { TypeormException } from "exception_filter/postgresException.filter";
 import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
-import { QueryRunner, Repository, QueryFailedError } from "typeorm";
+import { QueryRunner, Repository, QueryFailedError, In } from "typeorm";
 
 @Injectable()
 export class UserRepository extends BaseRepository implements IUserRepository {
@@ -16,6 +16,17 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   ) {
     super()
   }
+
+  async existAll(userIds: string[]): Promise<boolean> {
+    if (userIds.length === 0) return false
+    const count = await this._repo.count({
+      where: {
+        id: In(userIds)
+      }
+    })
+    return count === userIds.length
+  }
+  
   async getProfile(userId: string): Promise<User> {
     const user = await this._repo
       .createQueryBuilder("user")
@@ -76,7 +87,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       await queryRunner.manager.update(
         UserEntity,
         { id: user.id },
-        (new UserEntity(user)).getPartialUpdateObject()
+        (new UserEntity(user)).update()
       )
     } else {
       throw new InternalServerErrorException()
@@ -94,8 +105,11 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     ]
   }
 
-  updateStatus(user: User, statusID?: string): Promise<void> {
-    throw new Error("Method not implemented.");
+  async updateStatus(user: User, statusID?: string): Promise<void> {
+      await this._repo.update(
+        { id: user.id },
+        { status: statusID }
+      )
   }
 }
 

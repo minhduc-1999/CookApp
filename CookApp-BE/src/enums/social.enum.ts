@@ -1,5 +1,5 @@
 export enum InteractiveTargetType {
-  POST = "POST", POST_MEDIA = "POST_MEDIA", RECIPE_STEP = "RECIPE_STEP"
+  POST = "POST", POST_MEDIA = "POST_MEDIA", RECIPE_STEP = "RECIPE_STEP", ALBUM_MEDIA = "ALBUM_MEDIA"
 }
 
 export enum ReactionType {
@@ -13,7 +13,7 @@ export enum MediaType {
 }
 
 export enum PostType {
-  ALBUM = "ALBUM", MOMENT = "MOMENT"
+  MOMENT = "MOMENT"
 }
 
 export enum Sex {
@@ -23,3 +23,15 @@ export enum Sex {
 }
 
 export const SexEnum = ['male', 'female', 'other']
+
+export enum ConversationType {
+  DIRECT = "DIRECT",
+  GROUP = "GROUP"
+}
+
+export enum MessageContentType {
+  TEXT = "TEXT",
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+  AUDIO = "AUDIO"
+}

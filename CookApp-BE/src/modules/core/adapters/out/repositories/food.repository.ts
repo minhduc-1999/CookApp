@@ -36,19 +36,11 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     return entity?.toDomain()
   }
   async getFoods(query: PageOptionsDto): Promise<[Food[], number]> {
-    const [foodEntities, total] = await this._foodRepo
-      .createQueryBuilder("food")
-      // .leftJoinAndSelect("food.ingredients", "ingredient")
-      .leftJoinAndSelect("food.medias", "media")
-      // .leftJoinAndSelect("food.steps", "step")
-      // .leftJoinAndSelect("step.interaction", "stepInter")
-      // .leftJoinAndSelect("step.medias", "stepMedia")
-      // .select(["food", "ingredient", "step", "media", "stepInter", "stepMedia"])
-      .select(["food", "media"])
-      .skip(query.limit * query.offset)
-      .limit(query.limit)
-      .getManyAndCount()
-    console.log(foodEntities.length)
+    const [foodEntities, total]  = await this._foodRepo.findAndCount({
+      relations: ["medias"],
+      skip: query.limit * query.offset,
+      take: query.limit
+    })
     return [
       foodEntities?.map(entity => entity.toDomain()),
       total

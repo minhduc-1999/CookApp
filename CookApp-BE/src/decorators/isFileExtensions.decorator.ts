@@ -11,7 +11,7 @@ export class IsMeaningfullStringConstrain
   implements ValidatorConstraintInterface {
   validate(text: string, args: ValidationArguments) {
     const extensions: string[] = args.constraints[0];
-    const regexSring = `^\\S.*\\S\\.(${extensions.join('|')})$`;
+    const regexSring = `^\\S.*\\.(${extensions.join('|')})$`;
     const regex = new RegExp(regexSring);
     return regex.test(text)
   }
