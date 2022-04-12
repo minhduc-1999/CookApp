@@ -8,6 +8,7 @@ import { UserErrorCode } from "enums/errorCode.enum";
 import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
 import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
 import { NewMessageEvent } from "modules/communication/events/eventType";
+import { INlpServcie } from "modules/share/adapters/out/services/nlp.service";
 import { SendMessageRequest } from "./sendMessageRequest";
 
 export class SendMessageCommand extends BaseCommand {
@@ -31,30 +32,34 @@ export class SendMessageCommandHandler
     private _convRepo: IConversationRepository,
     @Inject("IMessageRepository")
     private _msgRepo: IMessageRepository,
-    private _eventBus: EventBus
+    private _eventBus: EventBus,
+    @Inject("INlpService")
+    private _nlpService: INlpServcie
   ) { }
   async execute(command: SendMessageCommand): Promise<MessageResponse> {
-    const { user, commentReq, tx } = command
+    //const { user, commentReq, tx } = command
 
-    //Check conversation existed
-    const conversation = await this._convRepo.findById(commentReq.to)
+    ////Check conversation existed
+    //const conversation = await this._convRepo.findById(commentReq.to)
 
-    if (!conversation) {
-      throw new NotFoundException(ResponseDTO.fail("Conversation not found", UserErrorCode.CONVERSATION_NOT_FOUND))
-    }
+    //if (!conversation) {
+    //  throw new NotFoundException(ResponseDTO.fail("Conversation not found", UserErrorCode.CONVERSATION_NOT_FOUND))
+    //}
 
-    //Check if user in conversation
-    const isMember = await this._convRepo.isMember(conversation.id, user.id)
+    ////Check if user in conversation
+    //const isMember = await this._convRepo.isMember(conversation.id, user.id)
 
-    if (!isMember) {
-      throw new ForbiddenException(ResponseDTO.fail("Not in conversation"))
-    }
+    //if (!isMember) {
+    //  throw new ForbiddenException(ResponseDTO.fail("Not in conversation"))
+    //}
 
-    //Send message
-    const msg = user.inbox(conversation, commentReq.message, commentReq.type)
-    const result = await this._msgRepo.setTransaction(tx).createMessage(msg)
-    result.sender = user
-    this._eventBus.publish(new NewMessageEvent(result))
-    return new MessageResponse(result)
+    ////Send message
+    //const msg = user.inbox(conversation, commentReq.message, commentReq.type)
+    //const result = await this._msgRepo.setTransaction(tx).createMessage(msg)
+    //result.sender = user
+    //this._eventBus.publish(new NewMessageEvent(result))
+    //return new MessageResponse(result)
+    await this._nlpService.detectIntent(command.commentReq.message)
+    return new MessageResponse(null)
   }
 }

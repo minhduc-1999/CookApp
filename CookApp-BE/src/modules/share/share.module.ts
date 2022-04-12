@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from "nestjs-config";
 import { join } from "path";
 import { StorageController } from "./adapters/in/storage.controller";
 import { MailService } from "./adapters/out/services/mail.service";
+import { DialogflowService } from "./adapters/out/services/nlp.service";
 import { FirebaseStorageProvider } from "./adapters/out/services/provider.service";
 import { FireBaseService } from "./adapters/out/services/storage.service";
 import { GetUploadPresignedLinkQueryHandler } from "./useCases/getUploadPresignedLink";
@@ -80,9 +81,13 @@ const handler = [GetUploadPresignedLinkQueryHandler];
       provide: "IMailService",
       useClass: MailService,
     },
+    {
+      provide: "INlpService",
+      useClass: DialogflowService,
+    },
     ...handler,
   ],
-  exports: ["IStorageService", "IMailService"],
+  exports: ["IStorageService", "IMailService", "INlpService"],
 })
 export class ShareModule {
   static register(options: { storage: StorageOptions }): DynamicModule {
