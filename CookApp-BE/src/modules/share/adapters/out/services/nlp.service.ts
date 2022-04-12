@@ -1,10 +1,21 @@
 import { Injectable } from "@nestjs/common";
 import * as Dialogflow from "@google-cloud/dialogflow"
 import { ConfigService } from "nestjs-config";
-import { inspectObj } from "utils";
+import { v4 as uuidv4 } from 'uuid'
 
 export interface INlpServcie {
-  detectIntent(query: string, sessionID?: string): Promise<void>
+  detectIntent(query: string, sessionID?: string): Promise<NlpResponse>
+}
+
+type NlpResponse = {
+  allRequiredParamsPresent: boolean
+  action: string
+  parameters: {
+    fields: any
+  },
+  fulfillmentText: string,
+  endInteraction: boolean,
+  sessionID: string
 }
 
 type NlpRequest = Dialogflow.protos.google.cloud.dialogflow.v2.IDetectIntentRequest
@@ -19,16 +30,18 @@ export class DialogflowService implements INlpServcie {
     })
   }
 
-  async detectIntent(query: string, sessionID?: string): Promise<void> {
+  async detectIntent(query: string, sessionID?: string): Promise<NlpResponse> {
     if (!sessionID) {
-      sessionID = '23-f123af14'
+      sessionID = uuidv4()
     }
+
     const projectID = this._configService.get("nlp.projectID")
     const langCode = this._configService.get("nlp.langCode")
     const sesstionPath = this.client.projectAgentSessionPath(
       projectID,
       sessionID
     )
+
     const req: NlpRequest = {
       session: sesstionPath,
       queryInput: {
@@ -39,7 +52,16 @@ export class DialogflowService implements INlpServcie {
       }
     }
 
-    const response = await this.client.detectIntent(req)
-    inspectObj(response)
+    const [response] = await this.client.detectIntent(req)
+    return {
+      endInteraction: response.queryResult.intent.endInteraction,
+      fulfillmentText: response.queryResult.fulfillmentText,
+      action: response?.queryResult.action,
+      allRequiredParamsPresent: response?.queryResult.allRequiredParamsPresent,
+      parameters: {
+        fields: response?.queryResult.parameters.fields
+      },
+      sessionID: sessionID
+    }
   }
 }

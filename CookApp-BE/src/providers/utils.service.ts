@@ -131,11 +131,9 @@ export class UtilsService {
     }
   }
 
-  static generateUniqueCode(length: number = 6, seed?: string) {
-    if (!seed) {
-      seed = '1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM';
-    }
-    const nanoid = customAlphabet(seed, length);
+  static generateUniqueCode(length: number = 6) {
+    const alphabet = '1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM';
+    const nanoid = customAlphabet(alphabet, length);
     return nanoid() //=> "4f90d13a42"
   }
 }
