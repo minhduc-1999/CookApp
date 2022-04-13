@@ -1,4 +1,3 @@
-
 import { UtilsService } from '../providers/utils.service';
 
 export default {

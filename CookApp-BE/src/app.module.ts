@@ -1,5 +1,6 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { APP_INTERCEPTOR } from "@nestjs/core";
+import { MongooseModule } from "@nestjs/mongoose";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AuthModule } from "modules/auth/auth.module";
@@ -30,7 +31,17 @@ import { contextMiddleware } from "./middleware/context.middleware";
     CoreModule,
     NotificationModule,
     ConfigurationModule,
-    CommunicationModule
+    CommunicationModule,
+    MongooseModule.forRootAsync({
+      useFactory: async (config: ConfigService) => {
+        const { connectionString, database } = config.get("search-engine");
+        return {
+          uri: connectionString,
+          dbName: database,
+        };
+      },
+      inject: [ConfigService]
+    })
   ],
   controllers: [AppController],
   providers: [
