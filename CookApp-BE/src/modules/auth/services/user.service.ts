@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException } from "@nestjs/common";
+import { Inject, Injectable, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
@@ -32,7 +32,7 @@ class UserService implements IUserService {
   async getUserById(userId: string): Promise<User> {
     const user = await this._userRepo.getUserById(userId);
     if (!user)
-      throw new BadRequestException(
+      throw new NotFoundException(
         ResponseDTO.fail("User not found", UserErrorCode.USER_NOT_FOUND)
       );
     user.avatar = (await this._storageService.getDownloadUrls([user.avatar]))[0]

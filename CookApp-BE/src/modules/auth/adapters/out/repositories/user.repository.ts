@@ -31,7 +31,6 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     const user = await this._repo
       .createQueryBuilder("user")
       .where("user.id = :id", { id: userId })
-      .select(["user"])
       .getOne()
     return user?.toDomain()
   }

@@ -131,7 +131,7 @@ export class PostResponse extends AuditResponse {
 
   constructor(post: Post, reaction?: Reaction, saved?: boolean) {
     super(post)
-    this.author = new AuthorResponse(post?.author)
+    this.author = post?.author && new AuthorResponse(post?.author)
     this.numOfComment = post?.nComments;
     this.numOfReaction = post?.nReactions;
     this.kind = post?.type

@@ -19,8 +19,8 @@ export class SavedPostEntity extends AbstractEntity {
 
   constructor(item: SavedPost) {
     super(item)
-    this.user = new UserEntity(item?.saver)
-    this.post = new PostEntity(item?.post, new InteractionEntity(item?.post))
+    this.user = item?.saver && new UserEntity(item?.saver)
+    this.post = item?.post && new PostEntity(item?.post, new InteractionEntity(item?.post))
   }
 
   toDomain(): SavedPost {
