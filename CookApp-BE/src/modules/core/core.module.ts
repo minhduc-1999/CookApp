@@ -1,6 +1,7 @@
 import { HttpModule } from "@nestjs/axios";
 import { forwardRef, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
+import { MongooseModule } from "@nestjs/mongoose";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { FoodEntity, FoodMediaEntity } from "entities/core/food.entity";
@@ -13,6 +14,8 @@ import { ConfigModule } from "nestjs-config";
 import { FoodController } from "./adapters/in/food.controller";
 import { FoodRepository } from "./adapters/out/repositories/food.repository";
 import { RecipeStepRepository } from "./adapters/out/repositories/recipeStep.repository";
+import { FoodSeService } from "./adapters/out/services/foodSe.service";
+import { FoodModel } from "./entities/se/food.schema";
 import { FoodRecipeService } from "./services/recipeStep.service";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
 import { GetFoodsQueryHandler } from "./useCases/getFoods";
@@ -22,10 +25,15 @@ const queryHandlers = [
   GetFoodsQueryHandler,
   GetFoodDetailQueryHandler
 ];
+
 const services = [
   {
     provide: "IFoodRecipeService",
     useClass: FoodRecipeService,
+  },
+  {
+    provide: "IFoodSeService",
+    useClass: FoodSeService,
   },
 ];
 const repositories = [
@@ -54,7 +62,10 @@ const controller = [FoodController];
       RecipeStepEntity,
       RecipeStepMediaEntity
     ]),
-    forwardRef(() => UserModule)
+    forwardRef(() => UserModule),
+    MongooseModule.forFeature([
+      FoodModel
+    ])
   ],
   controllers: controller,
   providers: [
@@ -64,7 +75,9 @@ const controller = [FoodController];
     ...queryHandlers,
   ],
   exports: [
-    "IFoodRecipeService"
+    "IFoodRecipeService",
+    "IFoodRepository",
+    "IFoodSeService"
   ]
 })
-export class CoreModule {}
+export class CoreModule { }

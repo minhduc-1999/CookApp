@@ -1,5 +1,21 @@
 version: '3'
 services:
+  mongo:
+    image: mongo:latest
+    restart: always
+    env_file: .mongo.env
+    ports:
+      - 27017:27017
+    volumes:
+      - tastify-se:/data/db
+
+  mongo-express:
+    image: mongo-express
+    restart: always
+    ports:
+      - 8081:8081
+    env_file: .mongoex.env
+
   mailhog:
     image: mailhog/mailhog
     ports:
@@ -17,3 +33,4 @@ services:
       - .postgres.env
 volumes:
   pg-tastify:
+  tastify-se:

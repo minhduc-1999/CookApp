@@ -8,6 +8,8 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { GetFoodsResponse } from "./getFoodsResponse";
 import { Image } from "domains/social/media.domain";
+import { Food } from "domains/core/food.domain";
+import { IFoodSeService } from "modules/core/adapters/out/services/foodSe.service";
 export class GetFoodsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
   constructor(user: User, queryOptions?: PageOptionsDto) {
@@ -21,11 +23,23 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
   constructor(
     @Inject("IFoodRepository")
     private _foodRepo: IFoodRepository,
-    @Inject("IStorageService") private _storageService: IStorageService
+    @Inject("IStorageService")
+    private _storageService: IStorageService,
+    @Inject("IFoodSeService")
+    private _foodSeService: IFoodSeService,
   ) { }
   async execute(query: GetFoodsQuery): Promise<GetFoodsResponse> {
     const { queryOptions } = query;
-    const [foods, totalCount] = await this._foodRepo.getFoods(queryOptions);
+    let foods: Food[]
+    let totalCount = 0
+
+    if (queryOptions.q) {
+      const [ids, total] = await this._foodSeService.findManyByNameAndCount(queryOptions.q, queryOptions)
+      totalCount = total
+      foods = await this._foodRepo.getByIds(ids)
+    } else {
+      [foods, totalCount] = await this._foodRepo.getFoods(queryOptions);
+    }
 
     for (let food of foods) {
       food.photos = (await this._storageService.getDownloadUrls(food.photos)) as Image[];

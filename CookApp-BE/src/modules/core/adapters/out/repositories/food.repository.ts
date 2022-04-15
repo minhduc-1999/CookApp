@@ -4,13 +4,18 @@ import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { Food } from "domains/core/food.domain";
+import { Ingredient } from "domains/core/ingredient.domain";
+import { RecipeStep } from "domains/core/recipeStep.domain";
 import { FoodEntity } from "entities/core/food.entity";
-import { Repository } from "typeorm";
+import { In, Repository } from "typeorm";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<[Food[], number]>;
   setTransaction(tx: ITransaction): IFoodRepository
   getById(id: string): Promise<Food>
+  getByIds(ids: string[]): Promise<Food[]>
+  getSteps(foodId: string): Promise<RecipeStep[]>
+  getIngredients(foodId: string): Promise<Ingredient[]>
 }
 
 @Injectable()
@@ -21,6 +26,37 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
   ) {
     super();
   }
+
+  async getIngredients(foodId: string): Promise<Ingredient[]> {
+    const entity = await this._foodRepo.findOne({
+      relations: ["ingredients"],
+      where: {
+        id: foodId
+      }
+    })
+    return entity?.toDomain().ingredients
+  }
+
+  async getSteps(foodId: string): Promise<RecipeStep[]> {
+    const entity = await this._foodRepo.findOne({
+      relations: ["steps"],
+      where: {
+        id: foodId
+      }
+    })
+    return entity?.toDomain().steps
+  }
+
+  async getByIds(ids: string[]): Promise<Food[]> {
+    const entities = await this._foodRepo.find({
+      relations: ["medias"],
+      where: {
+        id: In(ids)
+      }
+    })
+    return entities?.map(entity => entity.toDomain())
+  }
+
   async getById(id: string): Promise<Food> {
     const entity = await this._foodRepo
       .createQueryBuilder("food")
@@ -36,7 +72,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     return entity?.toDomain()
   }
   async getFoods(query: PageOptionsDto): Promise<[Food[], number]> {
-    const [foodEntities, total]  = await this._foodRepo.findAndCount({
+    const [foodEntities, total] = await this._foodRepo.findAndCount({
       relations: ["medias"],
       skip: query.limit * query.offset,
       take: query.limit

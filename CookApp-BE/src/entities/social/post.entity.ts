@@ -44,7 +44,7 @@ export class PostEntity {
   }
 
   toDomain(): Post {
-    const audit = new Audit(this.interaction)
+    const audit = this.interaction && new Audit(this.interaction)
     const { nReactions, nComments} = this.interaction
     switch (this.kind) {
       case PostType.MOMENT:

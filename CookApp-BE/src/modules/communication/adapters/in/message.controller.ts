@@ -1,4 +1,4 @@
-import { Body, Controller, Get, MessageEvent, Post, Sse } from "@nestjs/common";
+import { Body, Controller, Get, MessageEvent, Post, Req, Sse } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -16,6 +16,7 @@ import { SendMessageRequest } from "modules/communication/usecases/sendMessages/
 import { SendMessageResponse } from "modules/communication/usecases/sendMessages/sendMessageResponse";
 import { TransmitMessagesQuery } from "modules/communication/usecases/transmitMessages";
 import { from, map, mergeMap, Observable } from "rxjs";
+import { Request } from "express"
 
 @Controller("messages")
 @ApiTags("User/Chat")
@@ -46,8 +47,8 @@ export class MessageController {
     @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<SendMessageResponse>> {
-    const commentsQuery = new SendMessageCommand(user, body, tx);
-    const result = await this._commandBus.execute(commentsQuery);
+    const command = new SendMessageCommand(user, body, tx);
+    const result = await this._commandBus.execute(command);
     return Result.ok(result, {
       messages: ["Send message successfully"],
     });
