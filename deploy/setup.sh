@@ -43,5 +43,9 @@ heroku config:set -a tastify-be DB_PORT=$DB_PORT
 heroku config:set -a tastify-be DB_APP_USER=$DB_APP_USER
 heroku config:set -a tastify-be DB_APP_PASS=$DB_APP_PASS
 heroku config:set -a tastify-be DB_NAME=$DB_NAME
+heroku config:set -a tastify-be MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING
+heroku config:set -a tastify-be MONGO_DB_NAME=$MONGO_DB_NAME
+heroku config:set -a tastify-be NLP_LANGUAGE_CODE=$NLP_LANGUAGE_CODE
+heroku config:set -a tastify-be PROJECT_ID=$PROJECT_ID
 
 heroku buildpacks:add -a tastify-be heroku/nodejs
