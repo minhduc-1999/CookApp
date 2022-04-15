@@ -6,11 +6,21 @@ import { PageOptionsDto } from 'base/pageOptions.base';
 
 export interface IFoodSeService {
   findManyByNameAndCount(name: string, opt: PageOptionsDto): Promise<[string[], number]>
+  findOneByName(name: string): Promise<string>
 }
 
 @Injectable()
 export class FoodSeService implements IFoodSeService {
   constructor(@InjectModel(FoodItem.name) private _foodModel: Model<FoodDocument>) { }
+
+  async findOneByName(name: string): Promise<string> {
+    const food = await this._foodModel.findOne({
+      $text: {
+        $search: name
+      }
+    })
+    return food?._id
+  }
 
   async findManyByNameAndCount(name: string, opt: PageOptionsDto): Promise<[string[], number]> {
     const textSearch = {

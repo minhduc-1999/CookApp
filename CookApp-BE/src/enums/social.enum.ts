@@ -27,7 +27,6 @@ export const SexEnum = ['male', 'female', 'other']
 export enum ConversationType {
   DIRECT = "DIRECT",
   GROUP = "GROUP",
-  BOT = "BOT"
 }
 
 export enum MessageContentType {
@@ -40,6 +39,6 @@ export enum MessageContentType {
 }
 
 export const BotActionType = {
-  "food.ingredient-show": "food.ingredient-show",
-  "food.step-show": "food.step-show"
+  "SHOW_INGREDIENT": "food.show-ingredient",
+  "SHOW_RECIPE": "food.show-recipe"
 }

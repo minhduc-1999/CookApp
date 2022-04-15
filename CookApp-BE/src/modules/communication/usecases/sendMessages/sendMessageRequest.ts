@@ -8,7 +8,6 @@ export class SendMessageRequest {
   @ApiProperty({ type: String })
   botSessionID: string
 
-  @IsUUID()
   @ApiProperty({ type: String })
   to: string
 

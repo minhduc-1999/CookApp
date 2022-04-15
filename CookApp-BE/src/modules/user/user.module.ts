@@ -170,7 +170,6 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
     AuthModule,
-    forwardRef(() => CoreModule),
     TypeOrmModule.forFeature([
       UserEntity,
       AccountEntity,
@@ -186,7 +185,8 @@ const repositories = [
       AlbumEntity,
       AlbumMediaEntity
     ]),
-    CommunicationModule
+    forwardRef(() => CommunicationModule),
+    forwardRef(() => CoreModule)
   ],
   controllers: [
     PostController,
@@ -210,4 +210,4 @@ const repositories = [
     "ICommentRepository"
   ],
 })
-export class UserModule {}
+export class UserModule { }

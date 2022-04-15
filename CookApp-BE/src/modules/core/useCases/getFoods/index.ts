@@ -8,8 +8,8 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { GetFoodsResponse } from "./getFoodsResponse";
 import { Image } from "domains/social/media.domain";
-import { IFoodSeService } from "modules/core/adapters/out/services/se.service";
 import { Food } from "domains/core/food.domain";
+import { IFoodSeService } from "modules/core/adapters/out/services/foodSe.service";
 export class GetFoodsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
   constructor(user: User, queryOptions?: PageOptionsDto) {

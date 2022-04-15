@@ -1,18 +1,25 @@
-import { ApiResponseProperty } from "@nestjs/swagger";
-import { MessageResponse } from "base/dtos/response.dto";
+import { ApiExtraModels, ApiProperty, getSchemaPath } from "@nestjs/swagger";
+import { BotResponse, MessageResponse } from "base/dtos/response.dto";
 import { Message } from "domains/social/conversation.domain";
 
-export class SendMessageResponse extends MessageResponse {
-  @ApiResponseProperty({ type: String })
-  sessionID: string
+@ApiExtraModels(MessageResponse, BotResponse)
+export class SendMessageResponse {
 
-  @ApiResponseProperty({ type: Boolean })
-  endInteraction: boolean
+  @ApiProperty({
+    type: 'object',
+    oneOf: [
+      { $ref: getSchemaPath(MessageResponse) },
+      { $ref: getSchemaPath(BotResponse) }
+    ]
+  })
+  content: MessageResponse | BotResponse
 
-  constructor(msg: Message, sessionID?: string, end?: boolean) {
-    super(msg)
-    this.sessionID = sessionID
-    this.endInteraction = end
+  constructor(dataRes: Message | BotResponse) {
+    if (dataRes instanceof Message) {
+      this.content = new MessageResponse(dataRes)
+    }
+    else
+      this.content = dataRes
   }
 
 }

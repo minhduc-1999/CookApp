@@ -14,7 +14,7 @@ import { ConfigModule } from "nestjs-config";
 import { FoodController } from "./adapters/in/food.controller";
 import { FoodRepository } from "./adapters/out/repositories/food.repository";
 import { RecipeStepRepository } from "./adapters/out/repositories/recipeStep.repository";
-import { FoodSeService } from "./adapters/out/services/se.service";
+import { FoodSeService } from "./adapters/out/services/foodSe.service";
 import { FoodModel } from "./entities/se/food.schema";
 import { FoodRecipeService } from "./services/recipeStep.service";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
@@ -25,6 +25,7 @@ const queryHandlers = [
   GetFoodsQueryHandler,
   GetFoodDetailQueryHandler
 ];
+
 const services = [
   {
     provide: "IFoodRecipeService",
@@ -74,7 +75,9 @@ const controller = [FoodController];
     ...queryHandlers,
   ],
   exports: [
-    "IFoodRecipeService"
+    "IFoodRecipeService",
+    "IFoodRepository",
+    "IFoodSeService"
   ]
 })
 export class CoreModule { }

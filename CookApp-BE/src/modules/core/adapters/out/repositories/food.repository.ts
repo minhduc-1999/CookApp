@@ -4,6 +4,8 @@ import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { Food } from "domains/core/food.domain";
+import { Ingredient } from "domains/core/ingredient.domain";
+import { RecipeStep } from "domains/core/recipeStep.domain";
 import { FoodEntity } from "entities/core/food.entity";
 import { In, Repository } from "typeorm";
 
@@ -12,6 +14,8 @@ export interface IFoodRepository {
   setTransaction(tx: ITransaction): IFoodRepository
   getById(id: string): Promise<Food>
   getByIds(ids: string[]): Promise<Food[]>
+  getSteps(foodId: string): Promise<RecipeStep[]>
+  getIngredients(foodId: string): Promise<Ingredient[]>
 }
 
 @Injectable()
@@ -22,6 +26,27 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
   ) {
     super();
   }
+
+  async getIngredients(foodId: string): Promise<Ingredient[]> {
+    const entity = await this._foodRepo.findOne({
+      relations: ["ingredients"],
+      where: {
+        id: foodId
+      }
+    })
+    return entity?.toDomain().ingredients
+  }
+
+  async getSteps(foodId: string): Promise<RecipeStep[]> {
+    const entity = await this._foodRepo.findOne({
+      relations: ["steps"],
+      where: {
+        id: foodId
+      }
+    })
+    return entity?.toDomain().steps
+  }
+
   async getByIds(ids: string[]): Promise<Food[]> {
     const entities = await this._foodRepo.find({
       relations: ["medias"],

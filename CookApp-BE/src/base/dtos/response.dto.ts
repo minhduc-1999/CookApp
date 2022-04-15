@@ -1,4 +1,4 @@
-import { ApiProperty, ApiPropertyOptional, ApiResponseProperty } from "@nestjs/swagger";
+import { ApiExtraModels, ApiProperty, ApiPropertyOptional, ApiResponseProperty, getSchemaPath } from "@nestjs/swagger";
 import { Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
@@ -354,8 +354,49 @@ export class FoodResponse extends AuditResponse {
   }
 }
 
-export class MessageResponse extends AuditResponse {
+@ApiExtraModels(RecipeStepResponse, IngredientResponse)
+export class BotResponse {
   @ApiResponseProperty({ type: String })
+  text: string
+
+  @ApiProperty({
+    type: 'array',
+    items: {
+      oneOf: [
+        { $ref: getSchemaPath(RecipeStepResponse) },
+        { $ref: getSchemaPath(IngredientResponse) }
+      ]
+    }
+  })
+  attachment: (RecipeStepResponse | IngredientResponse)[]
+
+  @ApiResponseProperty({ enum: MessageContentType })
+  type: MessageContentType
+
+  @ApiResponseProperty({ type: String })
+  sessionID: string
+
+  @ApiResponseProperty({ type: Boolean })
+  endInteraction: boolean
+
+  constructor(text: string, end: boolean, sessionID?: string, attach?: (RecipeStep | Ingredient)[], attachType?: MessageContentType) {
+    this.text = text
+    this.attachment = attach?.map(item => {
+      if (item instanceof RecipeStep) {
+        return new RecipeStepResponse(item)
+      }
+      return new IngredientResponse(item)
+    })
+    this.type = attachType
+    this.sessionID = sessionID
+    this.endInteraction = end
+  }
+}
+
+export class MessageResponse extends AuditResponse {
+  @ApiProperty({
+    type: String
+  })
   content: string
 
   @ApiResponseProperty({ enum: MessageContentType })
@@ -380,10 +421,10 @@ export class ConversationResponse extends AuditResponse {
   @ApiResponseProperty({ enum: ConversationType })
   type: ConversationType
 
-  @ApiResponseProperty({type: MessageResponse})
+  @ApiResponseProperty({ type: MessageResponse })
   lastMessage: MessageResponse
 
-  @ApiResponseProperty({type: Boolean})
+  @ApiResponseProperty({ type: Boolean })
   readAll: boolean
 
   constructor(conv: Conversation, readAll?: boolean) {
