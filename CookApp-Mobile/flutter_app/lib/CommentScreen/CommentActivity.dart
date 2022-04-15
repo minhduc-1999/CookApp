@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tastify/Model/CommentRequestModel.dart';
@@ -30,7 +31,7 @@ class _CommentActivityState extends State<CommentActivity> {
   FocusNode focusNode = FocusNode();
   String labelText = "";
   String replyFor = "";
-
+  ScrollController _scrollController = ScrollController();
   _CommentActivityState(this.targetId, this.targetType, this.stepName);
 
   final TextEditingController _commentController = TextEditingController();
@@ -40,7 +41,13 @@ class _CommentActivityState extends State<CommentActivity> {
     super.initState();
     fetchData();
   }
-
+ /* _scrollToEnd() async {
+    if (_needsScroll) {
+      _needsScroll = false;
+      _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 200), curve: Curves.easeInOut);
+    }
+  }*/
   @override
   Widget build(BuildContext context) {
     return buildPage();
@@ -155,8 +162,7 @@ class _CommentActivityState extends State<CommentActivity> {
                                   margin: EdgeInsets.symmetric(horizontal: 8.0),
                                   child: IconButton(
                                     icon: Icon(Icons.send),
-                                    onPressed: () => addComment(
-                                        _commentController.text, replyFor),
+                                    onPressed: () => addComment(_commentController.text, replyFor),
                                     color: appPrimaryColor,
                                   ),
                                 ),
@@ -204,7 +210,7 @@ class _CommentActivityState extends State<CommentActivity> {
           alignment: FractionalOffset.center,
           child: CircularProgressIndicator());
     } else {
-      return comments.length > 0 ? ListView(children: comments)
+      return comments.length > 0 ? ListView(controller: _scrollController,children: comments)
       : Center(
         child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -220,8 +226,7 @@ class _CommentActivityState extends State<CommentActivity> {
   }
 
   void fetchData() async {
-    CommentRespondModel dataComment =
-        await APIService.getComment(targetId, targetType, "");
+    CommentRespondModel dataComment = await APIService.getComment(targetId, targetType, "");
     List<Comment> temp = [];
     //print("total comment: " + dataComment.data.comments.length.toString());
     for (var i in dataComment.data.comments) {
@@ -247,6 +252,7 @@ class _CommentActivityState extends State<CommentActivity> {
 
   void addComment(String comment, String replyFor) async {
     _commentController.clear();
+
     await APIService.comment(CommentRequestModel(
         targetId: targetId,
         content: comment,
@@ -269,8 +275,6 @@ class Comment extends StatefulWidget {
   final String targetType;
   final String targetId;
 
-  //final Timestamp timestamp;
-
   Comment({
     this.displayName,
     this.userId,
@@ -283,6 +287,7 @@ class Comment extends StatefulWidget {
     this.updateLabelText,
     this.targetType,
     this.targetId,
+
   });
 
   @override
@@ -291,19 +296,14 @@ class Comment extends StatefulWidget {
 
 class _CommentState extends State<Comment> {
   List<ChildComment> childrenComment = [];
+
+
   bool loadingChildComment = false;
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
     return Column(
         children: <Widget>[
-          /* ListTile(
-            title: Text(comment),
-            leading: CircleAvatar(
-              backgroundImage: NetworkImage(avatarUrl),
-            ),
-          ),
-          Divider()*/
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: <Widget>[
@@ -399,10 +399,13 @@ class _CommentState extends State<Comment> {
                                     var dataChildrenComment =
                                         await APIService.getComment(widget.targetId,
                                             widget.targetType, widget.id);
+
                                     List<ChildComment> temp = [];
-                                    for (var i
-                                        in dataChildrenComment.data.comments) {
-                                      temp.add(ChildComment(
+
+
+                                    for (var i in dataChildrenComment.data.comments) {
+                                      temp.add(
+                                          ChildComment(
                                         displayName: i.user.displayName,
                                         userId: i.user.id,
                                         avatar: i.user.avatar.url != null ? i.user.avatar.url : null,
@@ -414,7 +417,8 @@ class _CommentState extends State<Comment> {
                                         updateLabelText: widget.updateLabelText,
                                         targetType: widget.targetType,
                                         targetId: widget.targetId,
-                                      ));
+                                      )
+                                      );
                                     }
                                     setState(() {
                                       childrenComment = temp;

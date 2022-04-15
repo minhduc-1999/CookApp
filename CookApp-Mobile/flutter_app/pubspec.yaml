@@ -33,7 +33,7 @@ dependencies:
   flare_flutter: ^3.0.1
   api_cache_manager: ^1.0.2
   image_picker: ^0.8.4+4
-  snippet_coder_utils: ^1.0.9
+  snippet_coder_utils: ^1.0.12
   photo_manager: ^0.6.0
   uuid: ^3.0.5
   timeago: ^3.1.0
@@ -55,7 +55,9 @@ dependencies:
   geocoding: ^2.0.2
   location: ^4.2.0
   readmore: ^2.1.0
-
+  socket_io_client: ^2.0.0-beta.4-nullsafety.0
+  web_socket_channel: ^2.1.0
+  flutter_client_sse: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

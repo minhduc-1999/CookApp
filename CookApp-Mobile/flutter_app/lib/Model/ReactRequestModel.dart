@@ -1,19 +1,19 @@
 class ReactRequestModel {
-  String targetKeyOrID;
+  String targetId;
   String targetType;
   String react;
 
-  ReactRequestModel({this.targetKeyOrID, this.targetType, this.react});
+  ReactRequestModel({this.targetId, this.targetType, this.react});
 
   ReactRequestModel.fromJson(Map<String, dynamic> json) {
-    targetKeyOrID = json['targetKeyOrID'];
+    targetId = json['targetId'];
     targetType = json['targetType'];
     react = json['react'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['targetKeyOrID'] = this.targetKeyOrID;
+    data['targetId'] = this.targetId;
     data['targetType'] = this.targetType;
     data['react'] = this.react;
     return data;

@@ -15,6 +15,7 @@ import 'package:tastify/Model/LoginRequestModel.dart';
 import 'package:tastify/Model/LoginRespondModel.dart';
 import 'package:tastify/Model/MessageRequestModel.dart';
 import 'package:tastify/Model/MessageRespondModel.dart';
+import 'package:tastify/Model/MultiImagesRespondModel.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/Model/PostDetailsRespondModel.dart';
 import 'package:tastify/Model/PostRequestModel.dart';
@@ -29,6 +30,7 @@ import 'package:tastify/Model/ResendEmailRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Model/UserWallRespondModel.dart';
 import 'package:tastify/Model/WallPostRespondModel.dart';
+import '../MultiImagesDetailScreen/MultiImagesDetailActivity.dart';
 import 'package:tastify/NewFeedScreen/UserDelegateModel.dart';
 
 import 'package:tastify/config.dart';
@@ -405,5 +407,15 @@ class APIService {
     } else {
       return false;
     }
+  }
+
+  static Future<MultiImagesRespondModel> getPostDetail(String postId) async {
+    var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId + "/detail");
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return multiImageRespondModel(respone.body);
   }
 }

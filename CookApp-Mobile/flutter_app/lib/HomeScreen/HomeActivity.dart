@@ -1,6 +1,7 @@
-import 'package:firebase_messaging/firebase_messaging.dart';
+//import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_local_notifications/flutter_local_notifications.dart';
+import 'package:flutter_client_sse/flutter_client_sse.dart';
+//import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:tastify/FoodScreen/FoodActivity.dart';
 import 'package:tastify/MessageScreen/MessageActivity.dart';
@@ -11,6 +12,7 @@ import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
+import 'package:tastify/config.dart';
 import '../NewFeedScreen/Post.dart';
 import '../NewFeedScreen/PostDetail.dart';
 import 'package:tastify/keyOneSignal.dart';
@@ -20,18 +22,13 @@ import 'package:tastify/main.dart';
 import '../constants.dart';
 
 class NavigationItem {
-  const NavigationItem(this.title, this.icon);
+  NavigationItem(this.title, this.icon,this.totalNew);
   final String title;
   final IconData icon;
+  int totalNew;
 }
 
-const List<NavigationItem> allNavigationItems = <NavigationItem>[
-  NavigationItem('Home', Icons.home),
-  NavigationItem('Food', Icons.lunch_dining),
-  NavigationItem('Chatbot', Icons.chat_bubble),
-  NavigationItem('Notifications', Icons.notifications),
-  NavigationItem('Profile', Icons.person)
-];
+
 
 class HomeActivity extends StatefulWidget {
   final AuthBase auth;
@@ -48,6 +45,13 @@ class HomeActivityState extends State<HomeActivity> {
 
   PageController _pageController = PageController(initialPage: 0);
 
+  List<NavigationItem> allNavigationItems = <NavigationItem>[
+    NavigationItem('Home', Icons.home,-1),
+    NavigationItem('Food', Icons.lunch_dining,-1),
+    NavigationItem('Chatbot', Icons.chat_bubble,0),
+    NavigationItem('Notifications', Icons.notifications,0),
+    NavigationItem('Profile', Icons.person,-1)
+  ];
   HomeActivityState(this.auth);
 
   @override
@@ -76,6 +80,14 @@ class HomeActivityState extends State<HomeActivity> {
       }
     });
     OneSignal.shared.setExternalUserId(currentUserId);
+
+    sseModel.listen((event) {
+      print("event messages: " + event.data);
+
+      setState(() {
+
+      });
+    });
   }
 
   @override
@@ -144,4 +156,6 @@ class HomeActivityState extends State<HomeActivity> {
       return Future.value(true);
     }
   }
+
+
 }
