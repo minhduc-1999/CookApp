@@ -35,7 +35,10 @@ export class ConversationRepository extends BaseRepository implements IConversat
     const raw = await this._conversationRepo.query(`
         SELECT count(*) FROM conversations c 
         LEFT JOIN conversation_members cm on cm.conversation_id = c.id 
-        WHERE c.last_msg_id  != cm.last_seen_msg_id 
+        WHERE (
+            cm.last_seen_msg_id <> c.last_msg_id
+            or (cm.last_seen_msg_id is null and c.last_msg_id is not null)
+          ) 
           AND cm.user_id  = $1
         `, [userId])
     return Number(raw[0].count)
