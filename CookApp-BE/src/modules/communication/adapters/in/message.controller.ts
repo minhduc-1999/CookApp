@@ -14,9 +14,11 @@ import { GetChatStatusResponse } from "modules/communication/usecases/getChatSta
 import { SendMessageCommand } from "modules/communication/usecases/sendMessages";
 import { SendMessageRequest } from "modules/communication/usecases/sendMessages/sendMessageRequest";
 import { SendMessageResponse } from "modules/communication/usecases/sendMessages/sendMessageResponse";
+import { SpeakToBotCommand } from "modules/communication/usecases/speakToBot";
+import { SpeakToBotRequest } from "modules/communication/usecases/speakToBot/speakToBotRequest";
+import { SpeakToBotResponse } from "modules/communication/usecases/speakToBot/speakToBotResponse";
 import { TransmitMessagesQuery } from "modules/communication/usecases/transmitMessages";
 import { from, map, mergeMap, Observable } from "rxjs";
-import { Request } from "express"
 
 @Controller("messages")
 @ApiTags("User/Chat")
@@ -51,6 +53,20 @@ export class MessageController {
     const result = await this._commandBus.execute(command);
     return Result.ok(result, {
       messages: ["Send message successfully"],
+    });
+  }
+
+  @Post("bot")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(SpeakToBotResponse, "Successfully")
+  async speakToBot(
+    @Body() body: SpeakToBotRequest,
+    @HttpUserReq() user: User,
+  ): Promise<Result<SendMessageResponse>> {
+    const command = new SpeakToBotCommand(user, body, null);
+    const result = await this._commandBus.execute(command);
+    return Result.ok(result, {
+      messages: ["Successfully"],
     });
   }
 

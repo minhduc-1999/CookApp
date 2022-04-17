@@ -1,11 +1,12 @@
 import { ApiProperty } from "@nestjs/swagger"
-import { IsEnum, IsString, IsUUID } from "class-validator"
+import { IsEnum, IsOptional, IsString, IsUUID } from "class-validator"
 import { MessageContentType } from "enums/social.enum"
 
-export class SendMessageRequest {
-  @ApiProperty({ type: String })
+export class SpeakToBotRequest {
   @IsUUID()
-  to: string
+  @IsOptional()
+  @ApiProperty({ type: String })
+  botSessionID: string
 
   @ApiProperty({ type: String })
   @IsString()

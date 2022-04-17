@@ -360,15 +360,26 @@ export class BotResponse {
   text: string
 
   @ApiProperty({
-    type: 'array',
-    items: {
-      oneOf: [
-        { $ref: getSchemaPath(RecipeStepResponse) },
-        { $ref: getSchemaPath(IngredientResponse) }
-      ]
+    type: 'object',
+    properties: {
+      recipes: {
+        type: "array",
+        items: {
+          $ref: getSchemaPath(RecipeStepResponse)
+        }
+      },
+      ingredients: {
+        type: "array",
+        items: {
+          $ref: getSchemaPath(IngredientResponse)
+        }
+      }
     }
   })
-  attachment: (RecipeStepResponse | IngredientResponse)[]
+  attachment: {
+    recipes: RecipeStepResponse[],
+    ingredients: IngredientResponse[]
+  }
 
   @ApiResponseProperty({ enum: MessageContentType })
   type: MessageContentType
@@ -379,14 +390,21 @@ export class BotResponse {
   @ApiResponseProperty({ type: Boolean })
   endInteraction: boolean
 
-  constructor(text: string, end: boolean, sessionID?: string, attach?: (RecipeStep | Ingredient)[], attachType?: MessageContentType) {
+  constructor(text: string, end: boolean, sessionID?: string, attach?: (RecipeStep[] | Ingredient[]), attachType?: MessageContentType) {
     this.text = text
-    this.attachment = attach?.map(item => {
-      if (item instanceof RecipeStep) {
-        return new RecipeStepResponse(item)
+    if (attach && attach[0] instanceof RecipeStep) {
+      this.attachment = {
+        ...this.attachment,
+        recipes: attach.map(at => new RecipeStepResponse(at))
       }
-      return new IngredientResponse(item)
-    })
+    }
+
+    if (attach && attach[0] instanceof Ingredient) {
+      this.attachment = {
+        ...this.attachment,
+        ingredients: attach.map(at => new IngredientResponse(at))
+      }
+    }
     this.type = attachType
     this.sessionID = sessionID
     this.endInteraction = end
@@ -427,13 +445,13 @@ export class ConversationResponse extends AuditResponse {
   @ApiResponseProperty({ type: Boolean })
   readAll: boolean
 
-  @ApiResponseProperty({ type: [AuthorResponse]})
+  @ApiResponseProperty({ type: [AuthorResponse] })
   members: AuthorResponse[]
 
-  @ApiResponseProperty({ type: String})
+  @ApiResponseProperty({ type: String })
   name: string
 
-  @ApiResponseProperty({ type: String})
+  @ApiResponseProperty({ type: String })
   cover: string
 
   constructor(conv: Conversation, readAll?: boolean) {
