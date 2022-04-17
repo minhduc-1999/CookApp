@@ -427,11 +427,23 @@ export class ConversationResponse extends AuditResponse {
   @ApiResponseProperty({ type: Boolean })
   readAll: boolean
 
+  @ApiResponseProperty({ type: [AuthorResponse]})
+  members: AuthorResponse[]
+
+  @ApiResponseProperty({ type: String})
+  name: string
+
+  @ApiResponseProperty({ type: String})
+  cover: string
+
   constructor(conv: Conversation, readAll?: boolean) {
     super(conv)
     this.type = conv?.type
     this.lastMessage = conv?.lastMessage && new MessageResponse(conv.lastMessage)
     this.readAll = readAll
+    this.members = conv?.members?.map(user => new AuthorResponse(user))
+    this.cover = conv?.cover
+    this.name = conv?.name
   }
 }
 

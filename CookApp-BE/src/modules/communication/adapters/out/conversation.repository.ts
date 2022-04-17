@@ -7,13 +7,13 @@ import { plainToClass } from "class-transformer";
 import { Conversation, Message } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
 import { ConversationEntity, ConversationMemberEntity } from "entities/social/conversation.entity";
-import { Not, QueryRunner, Repository } from "typeorm";
+import { FindManyOptions, Not, QueryRunner, Repository } from "typeorm";
 
 export interface IConversationRepository {
   findById(id: string): Promise<Conversation>
   create(conv: Conversation): Promise<Conversation>
   isMember(convId: string, userId: string): Promise<Boolean>
-  getMembers(convId: string): Promise<User[]>
+  getMembers(convId: string, n?: number): Promise<User[]>
   setTransaction(tx: ITransaction): IConversationRepository
   findDirectConversation(memberId1: string, memberId2: string): Promise<Conversation>
   findConversation(userId: string): Promise<Conversation[]>
@@ -31,6 +31,7 @@ export class ConversationRepository extends BaseRepository implements IConversat
   ) {
     super()
   }
+
   async getUnseenConversationNumber(userId: string): Promise<number> {
     const raw = await this._conversationRepo.query(`
         SELECT count(*) FROM conversations c 
@@ -118,18 +119,29 @@ export class ConversationRepository extends BaseRepository implements IConversat
     return count === 1
   }
 
-  async getMembers(convId: string): Promise<User[]> {
-    const entities = await this._convMemberRepo.find({
-      relations: ["user"],
-      where: {
-        conversation: {
-          id: convId
+  async getMembers(convId: string, n?: number): Promise<User[]> {
+    let opt: FindManyOptions<ConversationMemberEntity>
+    if (n > 0) {
+      opt = {
+        relations: ["user"],
+        where: {
+          conversation: {
+            id: convId
+          },
         },
-        user: {
-          status: Not("")
+        take: n
+      }
+    } else {
+      opt = {
+        relations: ["user"],
+        where: {
+          conversation: {
+            id: convId
+          },
         }
       }
-    })
+    }
+    const entities = await this._convMemberRepo.find(opt)
     return entities?.map(item => item.toDomain().user)
   }
 
@@ -146,7 +158,7 @@ export class ConversationRepository extends BaseRepository implements IConversat
 
   async findById(id: string) {
     const entity = await this._conversationRepo.findOne(id, {
-      relations: ["lastMessage"]
+      relations: ["lastMessage", "members", "members.user"]
     })
     return entity?.toDomain()
   }

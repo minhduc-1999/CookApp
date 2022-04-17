@@ -7,6 +7,7 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
 import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
+import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { GetConversationsResponse } from "./getMessagesResponse";
 
 export class GetConversationsQuery extends BaseQuery {
@@ -25,12 +26,23 @@ export class GetConversationsQueryHandler
     @Inject("IMessageRepository")
     private _messageRepo: IMessageRepository,
     @Inject("IConversationRepository")
-    private _conversationRepo: IConversationRepository
+    private _conversationRepo: IConversationRepository,
+    @Inject("IStorageService")
+    private _storageService: IStorageService
   ) { }
   async execute(query: GetConversationsQuery): Promise<GetConversationsResponse> {
     const { user, queryOptions } = query;
 
     const [conversations, total] = await this._conversationRepo.findMany(user.id, queryOptions)
+
+    for (let conv of conversations) {
+      let members = await this._conversationRepo.getMembers(conv.id, 3)
+      members = members.filter(m => m.id !== user.id)
+      for (let member of members) {
+        [member.avatar] = await this._storageService.getDownloadUrls([member.avatar])
+      }
+      conv.fillNameAndCover(members)
+    }
 
     let meta: PageMetadata;
     if (conversations.length > 0) {

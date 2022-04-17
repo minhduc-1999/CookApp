@@ -14,11 +14,21 @@ export class FoodSeService implements IFoodSeService {
   constructor(@InjectModel(FoodItem.name) private _foodModel: Model<FoodDocument>) { }
 
   async findOneByName(name: string): Promise<string> {
-    const food = await this._foodModel.findOne({
-      $text: {
-        $search: name
-      }
-    })
+    const food = await this._foodModel
+      .findOne({
+        $text: {
+          $search: name
+        }
+      }, {
+        score: {
+          $meta: "textScore"
+        }
+      })
+      .sort({
+        score: {
+          $meta: "textScore"
+        }
+      })
     return food?._id
   }
 
@@ -27,7 +37,16 @@ export class FoodSeService implements IFoodSeService {
       $text: { $search: name }
     }
     const foods = await this._foodModel
-      .find(textSearch)
+      .find(textSearch, {
+        score: {
+          $meta: "textScore"
+        }
+      })
+      .sort({
+        score: {
+          $meta: "textScore"
+        }
+      })
       .skip(opt.limit * opt.offset)
       .limit(opt.limit);
     const ids = foods.map(food => food._id)

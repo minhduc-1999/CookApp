@@ -81,13 +81,11 @@ export class SendMessageCommandHandler
       }
     }
 
-
     if (commentReq.to === "BOT") {
       const botRes = await this._nlpService.detectIntent(command.commentReq.message, commentReq.botSessionID)
       let response: BotResponse
       if (botRes.endInteraction) {
         const foodId = await this._foodSeService.findOneByName(botRes.parameters.fields.food.stringValue)
-        console.log(foodId)
         let attachment: (Ingredient | RecipeStep)[]
         let attachmentType: MessageContentType
         switch (botRes.action) {

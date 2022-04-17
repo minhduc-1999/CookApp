@@ -9,6 +9,10 @@ export class Conversation extends Audit {
 
   lastMessage: Message
 
+  cover: string
+
+  name: string
+
   constructor(conversation: Partial<Conversation>) {
     super(conversation)
     this.type = conversation?.type
@@ -22,6 +26,11 @@ export class Conversation extends Audit {
     if (!lastSeenMsg)
       return false
     return lastSeenMsg.id === this.lastMessage.id
+  }
+
+  fillNameAndCover(members: User[]) {
+    this.cover = members[0].avatar.url
+    this.name = members[0].displayName
   }
 }
 
