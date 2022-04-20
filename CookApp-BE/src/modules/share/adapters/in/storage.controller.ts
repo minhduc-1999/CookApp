@@ -1,13 +1,13 @@
-import { Body, Controller, Post, Req } from "@nestjs/common";
+import { Body, Controller, Post } from "@nestjs/common";
 import { QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKListResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
-import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/social/user.dto";
+} from "decorators/apiSuccessResponse.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
+import { User } from "domains/social/user.domain";
 import { GetUploadPresignedLinkQuery } from "modules/share/useCases/getUploadPresignedLink";
 import { PreSignedLinkRequest } from "modules/share/useCases/getUploadPresignedLink/presignedLinkRequest";
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
@@ -27,7 +27,7 @@ export class StorageController {
   )
   async getPresignedLinks(
     @Body() body: PreSignedLinkRequest,
-    @User() user: UserDTO
+    @HttpUserReq() user: User
   ): Promise<Result<PreSignedLinkResponse[]>> {
     const query = new GetUploadPresignedLinkQuery(body, user.id);
     const result = await this._queryBus.execute(query);

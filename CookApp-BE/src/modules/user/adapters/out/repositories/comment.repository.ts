@@ -1,75 +1,87 @@
 import { Injectable } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import {
-  Comment,
-  CommentDocument,
-} from "domains/schemas/social/comment.schema";
-import { ClientSession, Model } from "mongoose";
-import { CommentDTO } from "dtos/social/comment.dto";
+import { Comment } from "domains/social/comment.domain";
 import { BaseRepository } from "base/repository.base";
-import { plainToClass } from "class-transformer";
-import { CommentPageOption } from "modules/user/useCases/getPostComments";
+import { CommentEntity } from "entities/social/comment.entity";
+import { PageOptionsDto } from "base/pageOptions.base";
+import { ICommentRepository } from "modules/user/interfaces/repositories/comment.interface";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { InjectRepository } from "@nestjs/typeorm";
+import { QueryRunner, Repository } from "typeorm";
 
-export interface ICommentRepository {
-  createComment(comment: CommentDTO): Promise<CommentDTO>;
-  setSession(session: ClientSession): ICommentRepository;
-  getCommentById(id: string): Promise<CommentDTO>;
-  getPostComments(
-    postId: string,
-    query: CommentPageOption
-  ): Promise<CommentDTO[]>;
-  getTotalReply(parentId: string): Promise<number>;
-}
 
 @Injectable()
 export class CommentRepository
   extends BaseRepository
-  implements ICommentRepository
-{
+  implements ICommentRepository {
   constructor(
-    @InjectModel(Comment.name) private _commentModel: Model<CommentDocument>
+    @InjectRepository(CommentEntity)
+    private _commentRepo: Repository<CommentEntity>
   ) {
-    super();
+    super()
   }
-  async getTotalReply(parentId: string): Promise<number> {
-    const total = await this._commentModel.count({
-      path: new RegExp(`,${parentId},$`),
-    });
-    return total;
-  }
-  async getPostComments(
-    postId: string,
-    query: CommentPageOption
-  ): Promise<CommentDTO[]> {
-    const commentDocs = await this._commentModel
-      .find({
-        postId: postId,
-        path: new RegExp(`,${query.parent},$`),
-      })
-      .sort({ createdAt: 1 })
-      .skip(query.offset * query.limit)
-      .limit(query.limit)
-      .exec();
-    return plainToClass(CommentDTO, commentDocs, {
-      excludeExtraneousValues: true,
-    });
+  async countComments(target: IInteractable): Promise<number> {
+    const total = await this._commentRepo
+      .createQueryBuilder("comment")
+      .where("comment.target_id = :targetId", { targetId: target.id })
+      .getCount()
+    return total
   }
 
-  async getCommentById(id: string): Promise<CommentDTO> {
-    const commentDoc = await this._commentModel.findById(id).exec();
-    if (!commentDoc) {
-      return null;
-    }
-    return plainToClass(CommentDTO, commentDoc, {
-      excludeExtraneousValues: true,
-    });
+  async getReplies(parent: Comment, queryOpt: PageOptionsDto): Promise<[Comment[], number]> {
+    const [entities, total] = await this._commentRepo
+      .createQueryBuilder("comment")
+      .leftJoinAndSelect("comment.user", "user")
+      .leftJoinAndSelect("comment.medias", "media")
+      .where("comment.parent_id = :parentId", { parentId: parent.id })
+      .select(["comment", "user", "media"])
+      .skip(queryOpt.limit * queryOpt.offset)
+      .take(queryOpt.limit)
+      .getManyAndCount()
+    return [entities?.map(entity => entity.toDomain()), total]
   }
-  async createComment(comment: CommentDTO): Promise<CommentDTO> {
-    const creatingComment = new this._commentModel(new Comment(comment));
-    const commentDoc = await creatingComment.save({ session: this.session });
-    if (!commentDoc) return null;
-    return plainToClass(CommentDTO, commentDoc, {
-      excludeExtraneousValues: true,
-    });
+
+  async countReply(commentId: string): Promise<number> {
+    const total = await this._commentRepo
+      .createQueryBuilder("comment")
+      .where("comment.parent_id = :commentId", { commentId })
+      .getCount()
+    return total
+  }
+
+  async createComment(comment: Comment): Promise<Comment> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      const entity = new CommentEntity(comment)
+      if (comment?.parent) {
+        entity.parent = new CommentEntity(comment.parent)
+      }
+      const commentEntity = await queryRunner.manager.save<CommentEntity>(entity)
+      return commentEntity?.toDomain()
+    }
+    return null
+  }
+
+  async getCommentById(id: string): Promise<Comment> {
+    const entity = await this._commentRepo
+      .createQueryBuilder("comment")
+      .where("comment.id = :id", { id })
+      .select(["comment"])
+      .getOne()
+    return entity?.toDomain()
+  }
+
+  async getComments(target: IInteractable, query: PageOptionsDto): Promise<[Comment[], number]> {
+    const [entities, total] = await this._commentRepo
+      .createQueryBuilder("comment")
+      .leftJoinAndSelect("comment.user", "user")
+      .leftJoinAndSelect("comment.medias", "media")
+      .where("comment.target_id = :targetId", { targetId: target.id })
+      .andWhere("comment.parent_id IS NULL")
+      .select(["comment", "user", "media"])
+      .skip(query.limit * query.offset)
+      .take(query.limit)
+      .getManyAndCount()
+
+    return [entities?.map(entity => entity.toDomain()), total]
   }
 }

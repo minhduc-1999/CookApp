@@ -1,4 +1,4 @@
-import { Body, Controller, HttpCode, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, HttpCode, Post, UseGuards } from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import {
   ApiBearerAuth,
@@ -10,36 +10,33 @@ import {
 import { Public } from "decorators/public.decorator";
 import { RegisterCommand } from "modules/auth/useCases/register";
 import { Result } from "base/result.base";
-import { BasicAuthGuard } from "guards/basic_auth.guard";
 import { LoginCommand } from "modules/auth/useCases/login";
 import {
   ApiFailResponseCustom,
   ApiCreatedResponseCustom,
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
-} from "../../../../decorators/ApiSuccessResponse.decorator";
+} from "../../../../decorators/apiSuccessResponse.decorator";
 import { LoginRequest } from "modules/auth/useCases/login/loginRequest";
 import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
 import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
-import { UserDTO } from "dtos/social/user.dto";
-import { Transaction } from "decorators/transaction.decorator";
-import { MongooseSession } from "decorators/mongooseSession.decorator";
-import { ClientSession } from "mongoose";
-import { User } from "decorators/user.decorator";
-import { GoogleSignInRequest } from "modules/auth/useCases/loginWithGoogle/googleSignInRequest";
-import { GoogleSignInCommand } from "modules/auth/useCases/loginWithGoogle";
-import { GoogleSignInResponse } from "modules/auth/useCases/loginWithGoogle/googleSignInResponse";
+import { User } from "domains/social/user.domain";
+import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
 import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmailRequest";
 import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
 import { ResendEmailVerificationRequest } from "modules/auth/useCases/resendEmailVerification/resendEmailVerificationRequest";
 import { ResendEmailVerificationCommand } from "modules/auth/useCases/resendEmailVerification";
-import { NotRequireEmailVerification } from "decorators/not_require_email_verification.decorator";
+import { NotRequireEmailVerification } from "decorators/notRequireEmailVerification.decorator";
+import { BasicAuthGuard } from "guards/basicAuth.guard";
+import { GoogleAuthGuard } from "guards/jwtAuth.guard";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 @Controller()
 @ApiTags("Authentication")
 export class AuthController {
-  constructor(private _commandBus: CommandBus) {}
+  constructor(private _commandBus: CommandBus) { }
 
   @Post("register")
   @Public()
@@ -47,15 +44,15 @@ export class AuthController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(RegisterResponse, "Register successfully")
   @ApiConflictResponse()
-  @Transaction()
+  @HttpRequestTransaction()
   async register(
     @Body() body: RegisterRequest,
-    @MongooseSession() session: ClientSession
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<RegisterResponse>> {
-    const registerCommand = new RegisterCommand(body, session);
-    const user = (await this._commandBus.execute(registerCommand)) as UserDTO;
+    const registerCommand = new RegisterCommand(body, tx);
+    const user = (await this._commandBus.execute(registerCommand)) as User;
     return Result.ok(
-      { id: user.id, username: user.username },
+      { id: user.id },
       { messages: ["Register successfully"] }
     );
   }
@@ -70,31 +67,40 @@ export class AuthController {
   @ApiOKResponseCustom(LoginResponse, "Login successfully")
   @Public()
   @NotRequireEmailVerification()
-  async login(@User() user: UserDTO): Promise<Result<LoginResponse>> {
+  async login(@HttpUserReq() user: User): Promise<Result<LoginResponse>> {
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
     return Result.ok(result, { messages: ["Login successfully"] });
   }
 
-  @Post("google/callback")
-  @HttpCode(200)
+  @Get("google")
   @Public()
   @NotRequireEmailVerification()
-  @ApiOKResponseCustom(GoogleSignInResponse, "Authenticate successfully")
-  async loginWithGoogleCallback(
-    @Body() body: GoogleSignInRequest
-  ): Promise<Result<GoogleSignInResponse>> {
-    let command = new GoogleSignInCommand(null, body);
-    const jwt = await this._commandBus.execute(command);
-    return Result.ok(jwt, { messages: ["Authenticate successfully"] });
+  @UseGuards(GoogleAuthGuard)
+  async googleAuth() { }
+
+  @Get("google/redirect")
+  @UseGuards(GoogleAuthGuard)
+  @Public()
+  @NotRequireEmailVerification()
+  async googleAuthRedirect(
+    @HttpUserReq() user: User,
+  ) {
+    const loginCommand = new LoginCommand(null, user);
+    const result = await this._commandBus.execute(loginCommand);
+    return Result.ok(result, { messages: ["Login successfully"] });
   }
 
   @Post("email-verification/callback")
   @Public()
   @NotRequireEmailVerification()
   @ApiOkResponse({ description: "Confirm email successfully" })
-  async verifyEmailCallback(@Body() body: VerifyEmailRequest): Promise<string> {
-    let command = new VerifyEmailCommand(body, null);
+  @HttpRequestTransaction()
+  async verifyEmailCallback(
+    @Body() body: VerifyEmailRequest,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<string> {
+    let command = new VerifyEmailCommand(body, tx);
     await this._commandBus.execute(command);
     return "Confirm email successfully";
   }
@@ -105,7 +111,7 @@ export class AuthController {
   @ApiOKResponseCustomWithoutData("Resend email verification successfully")
   async resendEmailVerificationCallback(
     @Body() body: ResendEmailVerificationRequest,
-    @User() user: UserDTO
+    @HttpUserReq() user: User
   ): Promise<Result<void>> {
     let command = new ResendEmailVerificationCommand(body, user, null);
     await this._commandBus.execute(command);

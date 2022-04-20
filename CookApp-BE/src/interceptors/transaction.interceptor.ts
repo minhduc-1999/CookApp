@@ -1,50 +1,71 @@
-import { CallHandler, ExecutionContext, Injectable, Logger, NestInterceptor } from "@nestjs/common";
-import { InjectConnection } from "@nestjs/mongoose";
-import { catchError, Observable, tap } from "rxjs";
-import { Reflector } from "@nestjs/core";
-import { ClientSession, Connection } from "mongoose";
+import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from "@nestjs/common";
+import { TypeOrmTransactionAdapter } from "adapters/typeormTransaction.adapter";
+import { Socket } from "net";
+import { Observable } from "rxjs";
+import { tap, catchError } from "rxjs/operators";
+import { Connection } from "typeorm"
 
 @Injectable()
-export class TransactionInterceptor implements NestInterceptor {
-  private logger: Logger = new Logger(TransactionInterceptor.name)
+export class HttpTransactionInterceptor implements NestInterceptor {
+
   constructor(
-    @InjectConnection() private readonly _connection: Connection,
-    private _reflector: Reflector
-  ) {}
+    private connection: Connection
+  ) { }
 
-  async intercept(
-    context: ExecutionContext,
-    next: CallHandler
-  ): Promise<Observable<any>> {
-    const hasTransaction = this._reflector.get<boolean>(
-      "hasTransaction",
-      context.getHandler()
-    );
-    let session: ClientSession;
-    if (hasTransaction) {
-      const request = context.switchToHttp().getRequest();
-      session = await this._connection.startSession();
-      this.logger.log("create transaction");
-      request.mongooseSession = session;
-      session.startTransaction();
-    }
+  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+    const tx = new TypeOrmTransactionAdapter(this.connection)
 
-    return next.handle().pipe(
-      tap(async () => {
-        if (hasTransaction) {
-          this.logger.log("commit transaction");
-          await session.commitTransaction();
-          session.endSession();
-        }
-      }),
-      catchError(async (err) => {
-        if (hasTransaction) {
-          this.logger.log("abort transaction");
-          await session.abortTransaction();
-          session.endSession();
-        }
-        throw err;
-      })
-    );
+    await tx.beginTransaction()
+
+    context.switchToHttp().getRequest().transaction = tx
+
+    return next.handle()
+      .pipe(
+        tap(async () => {
+          await tx.commit()
+          await tx.release()
+          console.log("commit tx")
+        }),
+        catchError(async e => {
+          await tx.rollback()
+          await tx.release()
+          console.log("rollback tx")
+          throw e
+        }),
+      )
+  }
+}
+
+
+@Injectable()
+export class WsTransactionInterceptor implements NestInterceptor {
+
+  constructor(
+    private connection: Connection
+  ) { }
+
+  async intercept(context: ExecutionContext, next: CallHandler): Promise<Observable<any>> {
+    const tx = new TypeOrmTransactionAdapter(this.connection)
+
+    await tx.beginTransaction()
+
+    const client = context.switchToWs().getClient<Socket>();
+
+    // client.handshake.auth.transaction = tx
+
+    return next.handle()
+      .pipe(
+        tap(async () => {
+          await tx.commit()
+          await tx.release()
+          console.log("commit tx")
+        }),
+        catchError(async e => {
+          await tx.rollback()
+          await tx.release()
+          console.log("rollback tx")
+          throw e
+        }),
+      )
   }
 }

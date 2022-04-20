@@ -5,20 +5,20 @@ import {
 } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
 import { ResendEmailVerificationRequest } from "./resendEmailVerificationRequest";
 import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 export class ResendEmailVerificationCommand extends BaseCommand {
   requestDto: ResendEmailVerificationRequest;
   constructor(
     requestDto: ResendEmailVerificationRequest,
-    user: UserDTO,
-    session: ClientSession
+    user: User,
+    tx: ITransaction
   ) {
-    super(session, user);
+    super(tx, user);
     this.requestDto = requestDto;
   }
 }
@@ -32,12 +32,12 @@ export class ResendEmailVerificationCommandHandler
   ) {}
   async execute(command: ResendEmailVerificationCommand): Promise<void> {
     const { user, requestDto } = command;
-    if (user.email !== requestDto.email) {
+    if (user.account.email !== requestDto.email) {
       throw new ForbiddenException(
         ResponseDTO.fail("Cannot verify email of other user")
       );
     }
-    if (user.emailVerified) {
+    if (user.account.emailVerified) {
       throw new BadRequestException(
         ResponseDTO.fail("Email has already verified")
       );

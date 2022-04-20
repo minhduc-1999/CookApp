@@ -1,45 +1,85 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { Injectable } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
-import { plainToClass } from "class-transformer";
-import { Food, FoodDocument } from "domains/schemas/core/food.schema";
-import { FoodDTO } from "dtos/core/food.dto";
-import { ClientSession, Model } from "mongoose";
+import { Food } from "domains/core/food.domain";
+import { Ingredient } from "domains/core/ingredient.domain";
+import { RecipeStep } from "domains/core/recipeStep.domain";
+import { FoodEntity } from "entities/core/food.entity";
+import { In, Repository } from "typeorm";
 
 export interface IFoodRepository {
-  getFoods(query: PageOptionsDto): Promise<FoodDTO[]>;
-  getTotalFoods(query: PageOptionsDto): Promise<number>;
-  setSession(session: ClientSession): IFoodRepository;
+  getFoods(query: PageOptionsDto): Promise<[Food[], number]>;
+  setTransaction(tx: ITransaction): IFoodRepository
+  getById(id: string): Promise<Food>
+  getByIds(ids: string[]): Promise<Food[]>
+  getSteps(foodId: string): Promise<RecipeStep[]>
+  getIngredients(foodId: string): Promise<Ingredient[]>
 }
 
 @Injectable()
 export class FoodRepository extends BaseRepository implements IFoodRepository {
-  private logger: Logger = new Logger(FoodRepository.name);
-  constructor(@InjectModel(Food.name) private _foodModel: Model<FoodDocument>) {
+  constructor(
+    @InjectRepository(FoodEntity)
+    private _foodRepo: Repository<FoodEntity>
+  ) {
     super();
   }
 
-  async getTotalFoods(query: PageOptionsDto): Promise<number> {
-    let textSearch = {};
-    if (query.q == "") textSearch = {};
-    else textSearch = { $text: { $search: query.q } };
-    return this._foodModel.count(textSearch).exec();
+  async getIngredients(foodId: string): Promise<Ingredient[]> {
+    const entity = await this._foodRepo.findOne({
+      relations: ["ingredients"],
+      where: {
+        id: foodId
+      }
+    })
+    return entity?.toDomain().ingredients
   }
 
-  async getFoods(query: PageOptionsDto): Promise<FoodDTO[]> {
-    let textSearch = {};
-    if (query.q == "") textSearch = {};
-    else textSearch = { $text: { $search: query.q } };
-    const foods = await this._foodModel
-      .find(textSearch)
-      .skip(query.limit * query.offset)
-      .limit(query.limit);
-    if (foods.length < 1) return [];
-    return foods.map((food) =>
-      plainToClass(FoodDTO, food, {
-        excludeExtraneousValues: true,
-      })
-    );
+  async getSteps(foodId: string): Promise<RecipeStep[]> {
+    const entity = await this._foodRepo.findOne({
+      relations: ["steps"],
+      where: {
+        id: foodId
+      }
+    })
+    return entity?.toDomain().steps
+  }
+
+  async getByIds(ids: string[]): Promise<Food[]> {
+    const entities = await this._foodRepo.find({
+      relations: ["medias"],
+      where: {
+        id: In(ids)
+      }
+    })
+    return entities?.map(entity => entity.toDomain())
+  }
+
+  async getById(id: string): Promise<Food> {
+    const entity = await this._foodRepo
+      .createQueryBuilder("food")
+      .leftJoinAndSelect("food.ingredients", "ingredient")
+      .leftJoinAndSelect("food.medias", "media")
+      .leftJoinAndSelect("food.steps", "step")
+      .leftJoinAndSelect("step.interaction", "stepInter")
+      .leftJoinAndSelect("step.medias", "stepMedia")
+      .where("food.id = :id", { id })
+      .select(["food", "ingredient", "step", "media", "stepInter", "stepMedia"])
+      .getOne()
+
+    return entity?.toDomain()
+  }
+  async getFoods(query: PageOptionsDto): Promise<[Food[], number]> {
+    const [foodEntities, total] = await this._foodRepo.findAndCount({
+      relations: ["medias"],
+      skip: query.limit * query.offset,
+      take: query.limit
+    })
+    return [
+      foodEntities?.map(entity => entity.toDomain()),
+      total
+    ]
   }
 }

@@ -1,14 +1,17 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { MediaType } from "enums/mediaType.enum";
 import _ = require("lodash");
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
 import { ConfigService } from "nestjs-config";
+import { Bucket } from "@google-cloud/storage";
 import {
   addFilePrefix,
   getMimeType,
   getNameFromPath,
 } from "utils";
 import { IStorageProvider } from "./provider.service";
+import { CommentMedia, Media } from "domains/social/media.domain";
+import { MediaType } from "enums/social.enum";
+import { isNil } from "lodash";
 
 export interface IStorageService {
   getUploadSignedLink(fileName: string): Promise<PreSignedLinkResponse>;
@@ -18,13 +21,13 @@ export interface IStorageService {
     userId: string
   ): Promise<PreSignedLinkResponse[]>;
   makePublic(objectNames: string[], mediaType: MediaType): Promise<string[]>;
-  getDownloadUrls(objectNames: string[]): Promise<string[]>;
+  getDownloadUrls(mediaArr: CommentMedia[]): Promise<CommentMedia[]>;
   replaceFiles(
-    oldObjects: string[],
-    newObjects: string[],
+    oldMediaArr: CommentMedia[],
+    newKeys: string[],
     mediaType: MediaType
   ): Promise<string[]>;
-  deleteFiles(urls: string[]): Promise<string[]>;
+  deleteFiles(medias: Media[]): Promise<Media[]>;
 }
 
 export type ObjectMetadata = {
@@ -37,79 +40,78 @@ export class FireBaseService implements IStorageService {
   private logger: Logger = new Logger(FireBaseService.name);
 
   private readonly storageTree = {
-    postImages: "images/posts/",
-    avatar: "images/avatar/",
+    image: "images/",
+    video: "videos/",
+    audio: "audios/",
     temp: "temp/",
   };
+  private bucket: Bucket
 
   constructor(
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
-  ) {}
-  async deleteFiles(urls: string[]): Promise<string[]> {
-    const deleteTasks: Promise<string>[] = [];
-    const bucket = await this._provider.getBucket();
-    // const objectNameList = urls.map((url) =>
-    //   retrieveObjectNameFromUrl(
-    //     url,
-    //     this._configService.get("storage.publicUrl")
-    //   )
-    // );
-    const objectNameList = urls;
-    for (let i = 0; i < objectNameList.length; i++) {
-      const file = bucket.file(objectNameList[i]);
+  ) {
+    this.bucket = this._provider.getBucket()
+  }
+  async deleteFiles(medias: Media[]): Promise<Media[]> {
+    const deleteTasks: Promise<Media>[] = [];
+    for (let media of medias) {
+      const file = this.bucket.file(media.key);
       deleteTasks.push(
         file
           .delete({ ignoreNotFound: true })
           .then((res) => {
-            if (res[0].statusCode === 204) return objectNameList[i];
-            else return "";
+            if (res[0].statusCode === 204) return media;
+            else return null
           })
           .catch((err) => {
             this.logger.error(err);
-            return "";
+            return null
           })
       );
     }
     return Promise.all(deleteTasks).then((objs) => {
-      return objs.filter((objName) => {
-        return objName !== "";
+      return objs.filter((obj) => {
+        return !isNil(obj);
       });
     });
   }
 
   async replaceFiles(
-    oldObjects: string[],
+    oldMediaArr: CommentMedia[],
     newObjects: string[],
     mediaType: MediaType
   ): Promise<string[]> {
-    const bucket = await this._provider.getBucket();
-    let basePath;
+    let basePath: string;
     switch (mediaType) {
-      case MediaType.POST_IMAGES:
-        basePath = this.storageTree.postImages;
+      case MediaType.IMAGE:
+        basePath = this.storageTree.image;
         break;
-      case MediaType.AVATAR:
-        basePath = this.storageTree.avatar;
+      case MediaType.VIDEO:
+        basePath = this.storageTree.video;
+        break;
+      case MediaType.AUDIO:
+        basePath = this.storageTree.audio;
         break;
       default:
         break;
     }
     const moveTasks: Promise<string>[] = [];
-    oldObjects.forEach(async (oldObj) => {
-      const oldFile = bucket.file(oldObj);
-      oldFile
-        .delete({ ignoreNotFound: true })
-        .catch((err) => this.logger.error(err));
-    });
+    // oldMediaArr.forEach(async (oldMedia) => {
+    //   if (!oldMedia) return;
+    //   const oldFile = this.bucket.file(oldMedia.key);
+    //   oldFile
+    //     .delete({ ignoreNotFound: true })
+    //     .catch((err) => this.logger.error(err));
+    // });
     for (let newObj of newObjects) {
-      const newFile = bucket.file(newObj);
+      const newFile = this.bucket.file(newObj);
       if ((await newFile.exists())[0]) {
         moveTasks.push(
           newFile
             .move(basePath + getNameFromPath(newObj))
             .then((movedFile) => {
-              movedFile[0].makePublic().catch((err) => this.logger.error(err));
+              movedFile[0].makePublic().catch((err: Error) => this.logger.error(err));
               return movedFile[0].name;
             })
             .catch((err) => {
@@ -126,29 +128,38 @@ export class FireBaseService implements IStorageService {
     });
   }
 
-  async getDownloadUrls(objectNames: string[]): Promise<string[]> {
-    return objectNames.map(
-      (objName) => this._configService.get("storage.publicUrl") + objName
+  async getDownloadUrls(mediaArr: CommentMedia[]): Promise<CommentMedia[]> {
+    if (!mediaArr) return []
+    return mediaArr.map(
+      (media) => {
+        if (!media.key) return null
+        media.url = this._configService.get("storage.publicUrl") + media.key
+        return media
+      }
     );
   }
 
   async makePublic(
-    objectNames: string[],
+    objectKeys: string[],
     mediaType: MediaType
   ): Promise<string[]> {
-    const bucket = await this._provider.getBucket();
-    const tasks: Promise<string>[] = [];
-    for (const name of objectNames) {
-      const file = bucket.file(name);
+    if (!objectKeys || objectKeys.length === 0) return []
+    const tasks = [];
+    const result: string[] = []
+    for (const name of objectKeys) {
+      const file = this.bucket.file(name);
       const fileExited = (await file.exists())[0];
       if (fileExited) {
         let basePath = "";
         switch (mediaType) {
-          case MediaType.POST_IMAGES:
-            basePath = this.storageTree.postImages;
+          case MediaType.IMAGE:
+            basePath = this.storageTree.image;
             break;
-          case MediaType.AVATAR:
-            basePath = this.storageTree.avatar;
+          case MediaType.VIDEO:
+            basePath = this.storageTree.video;
+            break;
+          case MediaType.AUDIO:
+            basePath = this.storageTree.audio;
             break;
           default:
             break;
@@ -157,37 +168,34 @@ export class FireBaseService implements IStorageService {
           file
             .move(basePath + getNameFromPath(name))
             .then((movedFile) => {
-              movedFile[0].makePublic().catch((err) => this.logger.error(err));
-              return movedFile[0].name;
+              movedFile[0].makePublic().catch((err: unknown) => this.logger.error(err));
+              result.push(movedFile[0].name)
             })
             .catch((err) => {
               this.logger.error(err);
-              return "";
             })
         );
       }
     }
-    return Promise.all(tasks).then((objectNames) =>
-      objectNames.filter((objName) => {
-        return objName !== "";
-      })
+    return Promise.all(tasks).then(() => {
+      return result
+    }
     );
   }
 
   async setMetadata(objectName: string, meta: ObjectMetadata): Promise<any> {
-    const bucket = await this._provider.getBucket();
-    const response = bucket.file(objectName).setMetadata(meta);
+    const response = this.bucket.file(objectName).setMetadata(meta);
     return response;
   }
+
   async getUploadSignedLink(
     objectName: string
   ): Promise<PreSignedLinkResponse> {
     const mimeType = getMimeType(objectName);
-    const bucket = await this._provider.getBucket();
     const expiredIn: number = this._configService.get(
       "storage.presignedLinkExpiration"
     );
-    const signedLink = await bucket.file(objectName).getSignedUrl({
+    const signedLink = await this.bucket.file(objectName).getSignedUrl({
       version: "v4",
       action: "write",
       expires: Date.now() + expiredIn * 60 * 1000,
@@ -213,8 +221,7 @@ export class FireBaseService implements IStorageService {
   }
 
   async getDownLoadSignedLink(objectName: string): Promise<string> {
-    const bucket = await this._provider.getBucket();
-    const signedLink = await bucket.file(objectName).getSignedUrl({
+    const signedLink = await this.bucket.file(objectName).getSignedUrl({
       action: "read",
       expires:
         _.now() +

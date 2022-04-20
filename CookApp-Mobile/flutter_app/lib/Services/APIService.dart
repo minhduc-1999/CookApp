@@ -5,14 +5,17 @@ import 'dart:io';
 
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
+import 'package:tastify/Model/EditPostRequestModel.dart';
 import 'package:tastify/Model/EditProfileRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
+import 'package:tastify/Model/FoodInstructionRespondModel.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
 import 'package:tastify/Model/LoginRequestModel.dart';
 import 'package:tastify/Model/LoginRespondModel.dart';
 import 'package:tastify/Model/MessageRequestModel.dart';
 import 'package:tastify/Model/MessageRespondModel.dart';
+import 'package:tastify/Model/MultiImagesRespondModel.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/Model/PostDetailsRespondModel.dart';
 import 'package:tastify/Model/PostRequestModel.dart';
@@ -27,6 +30,7 @@ import 'package:tastify/Model/ResendEmailRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Model/UserWallRespondModel.dart';
 import 'package:tastify/Model/WallPostRespondModel.dart';
+import '../MultiImagesDetailScreen/MultiImagesDetailActivity.dart';
 import 'package:tastify/NewFeedScreen/UserDelegateModel.dart';
 
 import 'package:tastify/config.dart';
@@ -183,8 +187,8 @@ class APIService {
     return newFeedRespondModel(respone.body);
   }
 
-  static Future<bool> react(String postID, ReactRequestModel model) async {
-    var url = Uri.parse(Config.apiURL + Config.postDetails + postID + "/react");
+  static Future<bool> react(ReactRequestModel model) async {
+    var url = Uri.parse(Config.apiURL + Config.reactAPI);
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.post(url,
@@ -200,9 +204,9 @@ class APIService {
     }
   }
 
-  static Future<bool> comment(String postID, CommentRequestModel model) async {
+  static Future<bool> comment(CommentRequestModel model) async {
     var url =
-        Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
+        Uri.parse(Config.apiURL + Config.commentAPI);
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.post(url,
@@ -219,18 +223,24 @@ class APIService {
   }
 
   static Future<CommentRespondModel> getComment(
-      String postID, String parentID) async {
+      String targetId, String targetType, String replyOf) async {
     var url =
-        Uri.parse(Config.apiURL + Config.postDetails + postID + "/comments");
-    if (parentID != "") {
+        Uri.parse(Config.apiURL + Config.commentAPI);
+    if (replyOf != "" && replyOf != null) {
       url = url.replace(queryParameters: <String, String>{
         'offset': '0',
         'limit': '10',
-        'parent': parentID
+        'targetId': targetId,
+        'targetType': targetType,
+        'replyOf': replyOf
       });
-    } else if (parentID == "" || parentID == null) {
-      url = url.replace(
-          queryParameters: <String, String>{'offset': '0', 'limit': '10'});
+    } else{
+      url = url.replace(queryParameters: <String, String>{
+        'offset': '0',
+        'limit': '10',
+        'targetId': targetId,
+        'targetType': targetType,
+      });
     }
 
     print("url: " + url.toString());
@@ -239,9 +249,8 @@ class APIService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
-    print("code: " + respone.body);
-    var respondModel = commentRespondModel(respone.body);
-    print("respond: " + respondModel.data.comments.length.toString());
+
+
     return commentRespondModel(respone.body);
   }
 
@@ -296,6 +305,29 @@ class APIService {
     return editProfileRespondJson(respone.body);
   }
 
+  static Future<bool> editPost(EditPostRequestModel model, String postId) async {
+    var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.patch(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+    return respone.statusCode == 200;
+  }
+  static Future<FoodInstructionRespondModel> getFoodInstruction(String id) async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI + "/" + id);
+
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return foodInstructionRespondModel(respone.body);
+  }
   static Future<FoodRespondModel> getFood(int offset) async {
     var url = Uri.parse(Config.apiURL + Config.foodAPI)
         .replace(queryParameters: <String, String>{
@@ -375,5 +407,15 @@ class APIService {
     } else {
       return false;
     }
+  }
+
+  static Future<MultiImagesRespondModel> getPostDetail(String postId) async {
+    var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId + "/detail");
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return multiImageRespondModel(respone.body);
   }
 }

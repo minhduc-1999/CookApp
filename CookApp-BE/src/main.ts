@@ -13,7 +13,7 @@ import * as helmet from "helmet";
 import * as cookieParser from "cookie-parser";
 import { TransformResponse } from "./interceptors/transform.interceptor";
 import { ErrorsInterceptor } from "./interceptors/errors.interceptor";
-import { HttpExceptionFilter } from "exception_filter/http-exception.filter";
+import { HttpExceptionFilter } from "exception_filter/httpException.filter";
 
 const morganFormat =
   ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
@@ -24,11 +24,12 @@ async function bootstrap() {
     new ExpressAdapter(),
     {
       cors: {
-        origin: [],
+        origin: ["http://localhost:8080"],
         credentials: true,
       },
     }
   );
+
   const configService = app.get(ConfigService);
 
   const APP_HOST = configService.get("app.host");

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
@@ -107,7 +108,7 @@ class _LoginActivityState extends State<LoginActivity> {
           height: size.height * 0.04,
         ),
         FormHelper.inputFieldWidget(
-            context, const Icon(Icons.person), "username", "Username",
+            context, "username", "Username",
             (onValidateVal) {
           if (onValidateVal.isEmpty) {
             return "Username can\'t be empty";
@@ -116,6 +117,7 @@ class _LoginActivityState extends State<LoginActivity> {
         }, (onSavedVal) {
           username = onSavedVal;
         },
+            prefixIcon: const Icon(Icons.person),
             prefixIconColor: appPrimaryColor,
             borderRadius: 10,
             textColor: Colors.black,
@@ -125,7 +127,7 @@ class _LoginActivityState extends State<LoginActivity> {
           height: size.height * 0.015,
         ),
         FormHelper.inputFieldWidget(
-            context, const Icon(Icons.vpn_key_rounded), "password", "Password",
+            context,  "password", "Password",
             (onValidateVal) {
           if (onValidateVal.isEmpty) {
             return "Password can\'t be empty";
@@ -137,6 +139,7 @@ class _LoginActivityState extends State<LoginActivity> {
         }, (onSavedVal) {
           password = onSavedVal;
         },
+            prefixIcon: const Icon(Icons.vpn_key_rounded),
             prefixIconColor: appPrimaryColor,
             borderRadius: 10,
             textColor: Colors.black,
@@ -165,60 +168,80 @@ class _LoginActivityState extends State<LoginActivity> {
                 setState(() {
                   isAPIcallProcess = true;
                 });
-                LoginRequestModel model =
-                    LoginRequestModel(username: username, password: password);
-                APIService.login(model).then((response) async => {
-
-                      if (response.data.emailVerified)
-                        {
-                          await SharedService.setLoginDetails(response),
-                          setState(() {
-                            isAPIcallProcess = false;
-                          }),
-                          Navigator.pushAndRemoveUntil(context,
-                              MaterialPageRoute(
-                            builder: (context) {
-                              return HomeActivity(
-                                auth: auth,
-                              );
-                            },
-                          ), (route) => false)
-                        }
-                      else if (!response.data.emailVerified)
-                        {
-                          setState(() {
-                            isAPIcallProcess = false;
-                          }),
-                          showDialog(
-                            context: context,
-                            builder: (_) => new AlertDialog(
-                              title: new Text("NOTIFICATION"),
-                              content: new Text("Please confirm your email first!"),
-                              actions: <Widget>[
-                                TextButton(
-                                  child: Text(
-                                    "RESEND",
-                                    style: TextStyle(color: appPrimaryColor),
-                                  ),
-                                  onPressed: () {
-                                    APIService.resendEmail(ResendEmailRequestModel(email: response.data.email), response.data.accessToken);
-
-                                  },
-                                ),
-                                TextButton(
-                                  child: Text(
-                                    "OK",
-                                    style: TextStyle(color: appPrimaryColor),
-                                  ),
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                  },
-                                )
-                              ],
-                            ),
-                          )
-                        }
+                LoginRequestModel model = LoginRequestModel(username: username, password: password);
+                var response = await APIService.login(model);
+                if (response.meta.ok) {
+                  if (response.data.emailVerified) {
+                    //await auth.signInFirebaseWithToken(response.data.loginToken);
+                    await SharedService.setLoginDetails(response);
+                    setState(() {
+                      isAPIcallProcess = false;
                     });
+                    Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
+                      builder: (context) {
+                        return HomeActivity(
+                          auth: auth,
+                        );
+                      },
+                    ), (route) => false);
+                  } else if (!response.data.emailVerified) {
+                    setState(() {
+                      isAPIcallProcess = false;
+                    });
+                    showDialog(
+                      context: context,
+                      builder: (_) => new AlertDialog(
+                        title: new Text("NOTIFICATION"),
+                        content: new Text("Please confirm your email first!"),
+                        actions: <Widget>[
+                          TextButton(
+                            child: Text(
+                              "RESEND",
+                              style: TextStyle(color: appPrimaryColor),
+                            ),
+                            onPressed: () {
+                              APIService.resendEmail(
+                                  ResendEmailRequestModel(
+                                      email: response.data.email),
+                                  response.data.accessToken);
+                            },
+                          ),
+                          TextButton(
+                            child: Text(
+                              "OK",
+                              style: TextStyle(color: appPrimaryColor),
+                            ),
+                            onPressed: () {
+                              Navigator.of(context).pop();
+                            },
+                          )
+                        ],
+                      ),
+                    );
+                  }
+                } else {
+                  showDialog(
+                    context: context,
+                    builder: (_) => new AlertDialog(
+                      title: new Text("ERROR!!!"),
+                      content: new Text("There're some error"),
+                      actions: <Widget>[
+                        FlatButton(
+                          child: Text(
+                            "OK",
+                            style: TextStyle(color: appPrimaryColor),
+                          ),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                            setState(() {
+                              isAPIcallProcess = false;
+                            });
+                          },
+                        )
+                      ],
+                    ),
+                  );
+                }
               }
             },
           ),
@@ -233,9 +256,9 @@ class _LoginActivityState extends State<LoginActivity> {
           child: LoginButton(
             text: "Log in by Google",
             press: () async {
-              String idToken = await _signInWithGoogle();
+              String authCode = await _signInWithGoogle();
               var response = await APIService.loginByGoogle(
-                  LoginByGoogleRequestModel(idToken: idToken));
+                  LoginByGoogleRequestModel(code: authCode));
               if (response) {
                 Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
                   builder: (context) {
@@ -302,161 +325,3 @@ class _LoginActivityState extends State<LoginActivity> {
     }
   }
 }
-
-/*class LoginActivity extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Body(),
-    );
-  }
-}
-
-class Body extends StatelessWidget {
-  String username;
-  String password;
-  @override
-  Widget build(BuildContext context) {
-    Size size = MediaQuery.of(context).size;
-    return Container(
-      height: size.height,
-      width: double.infinity,
-      child: Stack(
-        alignment: Alignment.center,
-        children: <Widget>[
-          SingleChildScrollView(
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                SizedBox(
-                  height: size.height * 0.06,
-                ),
-                Text(
-                  "Log in",
-                  style: TextStyle(
-                      fontSize: size.height * 0.03, color: Colors.black),
-                ),
-                SizedBox(
-                  height: size.height * 0.06,
-                ),
-                FormHelper.inputFieldWidget(context, const Icon(Icons.person), "username", "username",
-                    (onValidateVal){
-                      if(onValidateVal.isEmpty){
-                        return "Username can\'t be empty";
-                      }
-                      return null;
-                    },
-                    (onSavedVal){
-                      username = onSavedVal;
-                    },
-                    prefixIconColor: appPrimaryColor,
-                    borderRadius: 10,
-                  textColor: Colors.black,
-                  hintColor: Colors.black,
-                  borderFocusColor: appPrimaryColor
-                ),
-
-                SizedBox(
-                  height: size.height * 0.01,
-                ),
-                TextFieldContainer(
-                  child: RoundedPasswordField(
-                    hintText: "Password",
-                    controller: passwordController,
-                  ),
-                ),
-                SizedBox(
-                  height: size.height * 0.01,
-                ),
-                Container(
-                  child: Text(
-                    "Forgot Password?",
-                    style: TextStyle(fontSize: 16.0, color: appPrimaryColor),
-                  ),
-                ),
-                SizedBox(
-                  height: size.height * 0.03,
-                ),
-                LoginButton(
-                  text: "Log in",
-                  press: () {
-                    LoginRequestModel model = LoginRequestModel(
-                        username: usernameController.value.text,
-                        password: passwordController.value.text);
-                    APIService.login(model).then((response) => {
-                          if (response)
-                            {
-                              Navigator.pushAndRemoveUntil(context,
-                                  MaterialPageRoute(
-                                builder: (context) {
-                                  return HomeActivity();
-                                },
-                              ), (route) => false)
-                            }
-                          else
-                            {
-                              showDialog(
-                                context: context,
-                                builder: (_) => new AlertDialog(
-                                  title: new Text("ERROR!!!"),
-                                  content: new Text(
-                                      "Wrong email or password"),
-                                  actions: <Widget>[
-                                    FlatButton(
-                                      child: Text(
-                                        "OK",
-                                        style:
-                                            TextStyle(color: appPrimaryColor),
-                                      ),
-                                      onPressed: () {
-                                        Navigator.of(context).pop();
-                                      },
-                                    )
-                                  ],
-                                ),
-                              )
-                            }
-                        });
-                  },
-                ),
-                SizedBox(
-                  height: size.height * 0.01,
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      "Don't have an account? ",
-                      style: TextStyle(color: Colors.black),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                        Navigator.push(context, MaterialPageRoute(
-                          builder: (context) {
-                            return SignUpActivity();
-                          },
-                        ));
-                      },
-                      child: Text(
-                        "Sign up",
-                        style:
-                            TextStyle(fontSize: 16.0, color: appPrimaryColor),
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(
-                  height: size.height * 0.05,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  TextEditingController usernameController = new TextEditingController();
-  TextEditingController passwordController = new TextEditingController();
-}*/

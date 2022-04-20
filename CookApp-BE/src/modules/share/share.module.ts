@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from "nestjs-config";
 import { join } from "path";
 import { StorageController } from "./adapters/in/storage.controller";
 import { MailService } from "./adapters/out/services/mail.service";
+import { DialogflowService } from "./adapters/out/services/nlp.service";
 import { FirebaseStorageProvider } from "./adapters/out/services/provider.service";
 import { FireBaseService } from "./adapters/out/services/storage.service";
 import { GetUploadPresignedLinkQueryHandler } from "./useCases/getUploadPresignedLink";
@@ -24,16 +25,27 @@ const handler = [GetUploadPresignedLinkQueryHandler];
     ConfigModule,
     MailerModule.forRootAsync({
       useFactory: async (config: ConfigService): Promise<MailerOptions> => {
+        const env = config.get("app.env")
+        let auth: any;
+        if (env === "development")
+          auth = {}
+        else {
+          auth = {
+            type: "oauth2",
+            clientId: config.get("mail.clientId"),
+            clientSecret: config.get("mail.clientSecret"),
+            user: config.get("mail.user"),
+            refreshToken: config.get("mail.refreshToken"),
+            accessToken: config.get("mail.accessToken")
+          }
+        }
         return {
           transport: {
             host: config.get("mail.host"),
             port: config.get("mail.port"),
             ignoreTLS: false,
             secure: false,
-            auth: {
-              user: config.get("mail.user"),
-              pass: config.get("mail.password"),
-            },
+            auth
           },
           defaults: {
             from: config.get("mail.defaultFrom"),
@@ -69,13 +81,17 @@ const handler = [GetUploadPresignedLinkQueryHandler];
       provide: "IMailService",
       useClass: MailService,
     },
+    {
+      provide: "INlpService",
+      useClass: DialogflowService,
+    },
     ...handler,
   ],
-  exports: ["IStorageService", "IMailService"],
+  exports: ["IStorageService", "IMailService", "INlpService"],
 })
 export class ShareModule {
   static register(options: { storage: StorageOptions }): DynamicModule {
-    let storageClass;
+    let storageClass: any
     switch (options.storage.provider) {
       case ThirdPartyProviders.FIREBASE:
         storageClass = FirebaseStorageProvider;
@@ -92,6 +108,7 @@ export class ShareModule {
           useClass: storageClass,
         },
       ],
+      exports: ["IStorageProvider"]
     };
   }
 }

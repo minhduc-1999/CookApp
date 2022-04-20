@@ -1,11 +1,11 @@
 import { HttpService } from "@nestjs/axios";
 import { Injectable, Logger } from "@nestjs/common";
-import { NotificationDTO } from "dtos/social/notification.dto";
+import { Notification } from "domains/social/notification.domain";
 import { ConfigService } from "nestjs-config";
 
 export interface INotificationService {
-  sendNotificationToSegment(message: NotificationDTO): Promise<void>;
-  sendNotificationToUser(message: NotificationDTO): Promise<void>;
+  sendNotificationToSegment(message: Notification): Promise<void>;
+  sendNotificationToUser(message: Notification): Promise<void>;
 }
 
 type OneSignalPayload = {
@@ -25,17 +25,17 @@ export class NotificationService implements INotificationService {
   private apiKey: string;
   private apiUrl: string;
   private appID: string;
-  private _logger = new Logger(NotificationDTO.name);
+  private _logger = new Logger(Notification.name);
   constructor(
     private _configService: ConfigService,
     private readonly _httpService: HttpService
   ) {
-    this.apiKey = _configService.get("notification.apiKey");
-    this.appID = _configService.get("notification.appID");
+    this.apiKey = this._configService.get("notification.apiKey");
+    this.appID = this._configService.get("notification.appID");
     this.apiUrl =
       _configService.get("notification.apiBaseUrl") + "v1/notifications";
   }
-  sendNotificationToSegment(message: NotificationDTO): Promise<void> {
+  sendNotificationToSegment(message: Notification): Promise<void> {
     const headers = {
       "Content-Type": "application/json; charset=utf-8",
       Authorization: `Basic ${this.apiKey}`,
@@ -63,7 +63,7 @@ export class NotificationService implements INotificationService {
     });
     return;
   }
-  sendNotificationToUser(message: NotificationDTO): Promise<void> {
+  sendNotificationToUser(message: Notification): Promise<void> {
     const headers = {
       "Content-Type": "application/json; charset=utf-8",
       Authorization: `Basic ${this.apiKey}`,

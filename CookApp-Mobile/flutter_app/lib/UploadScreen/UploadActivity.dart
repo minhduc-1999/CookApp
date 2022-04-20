@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
@@ -8,7 +9,8 @@ import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:uuid/uuid.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart' as loca;
 
 import '../constants.dart';
 
@@ -32,7 +34,7 @@ class _UploadActivityState extends State<UploadActivity> {
   int currentPage = 0;
   int lastPage;
   int maxSelection = 1;
-
+  Placemark userLocation;
   _handleScrollEvent(ScrollNotification scroll) {
     if (scroll.metrics.pixels / scroll.metrics.maxScrollExtent > 0.33) {
       if (currentPage != lastPage) {
@@ -73,11 +75,58 @@ class _UploadActivityState extends State<UploadActivity> {
   @override
   initState() {
     //variables with location assigned as 0.0
-
     super.initState();
+    _initLocation();
     _fetchPhotos();
   }
+  _initLocation() async {
+    Position position = await _determinePosition();
+    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
 
+    setState(() {
+      userLocation = placemarks[0];
+    });
+  }
+  Future<Position> _determinePosition() async {
+    bool serviceEnabled;
+    LocationPermission permission;
+    loca.Location location = new loca.Location();
+    // Test if location services are enabled.
+    serviceEnabled = await location.serviceEnabled();
+    if (!serviceEnabled) {
+      // Location services are not enabled don't continue
+      // accessing the position and request users of the
+      // App to enable the location services.
+      serviceEnabled = await location.requestService();
+
+      if (!serviceEnabled) {
+        return Future.error('Location services are disabled.');
+      }
+    }
+
+    permission = await Geolocator.checkPermission();
+    if (permission == LocationPermission.denied) {
+      permission = await Geolocator.requestPermission();
+      if (permission == LocationPermission.denied) {
+        // Permissions are denied, next time you could try
+        // requesting permissions again (this is also where
+        // Android's shouldShowRequestPermissionRationale
+        // returned true. According to Android guidelines
+        // your App should show an explanatory UI now.
+        return Future.error('Location permissions are denied');
+      }
+    }
+
+    if (permission == LocationPermission.deniedForever) {
+      // Permissions are denied forever, handle appropriately.
+      return Future.error(
+          'Location permissions are permanently denied, we cannot request permissions.');
+    }
+
+    // When we reach here, permissions are granted and we can
+    // continue accessing the position of the device.
+    return await Geolocator.getCurrentPosition();
+  }
   @override
   Widget build(BuildContext context) {
     return files.length == 0
@@ -154,8 +203,7 @@ class _UploadActivityState extends State<UploadActivity> {
                     return _photoList[index];
                   }),
             ))
-        : SafeArea(
-          child: Scaffold(
+        : Scaffold(
               resizeToAvoidBottomInset: false,
               appBar: AppBar(
                   backgroundColor: appPrimaryColor,
@@ -188,7 +236,7 @@ class _UploadActivityState extends State<UploadActivity> {
                             List<String> video = [];
                             var response = await APIService.getPresignedLink(
                                 PresignedLinkedRequestModel(fileNames: names));
-                            uploadImage(response, objectName);
+                            //uploadImage(response, objectName);
                             for (int i = 0; i < response.data.items.length; i++) {
                               await APIService.uploadImage(
                                   files[i], response.data.items[i].signedLink);
@@ -198,7 +246,10 @@ class _UploadActivityState extends State<UploadActivity> {
                             await APIService.uploadPost(PostRequestModel(
                                 content: descriptionController.text,
                                 images: objectName,
-                                videos: video));
+                                videos: video,
+                                location: locationController.text,
+                                kind: "MOMENT",
+                                name: "string"));
                             setState(() {
                               isAPIcallProcess = false;
                             });
@@ -219,8 +270,7 @@ class _UploadActivityState extends State<UploadActivity> {
                 key: UniqueKey(),
                 opacity: 0.3,
               )
-            ),
-        );
+            );
 
   }
   Widget _uploadUI(BuildContext context){
@@ -233,6 +283,18 @@ class _UploadActivityState extends State<UploadActivity> {
           loading: uploading,
         ),
         Divider(),
+        (userLocation == null) ? Container()
+            :  SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: EdgeInsets.only(right: 5.0, left: 5.0),
+            child: Row(
+              children: <Widget>[
+                //buildLocationButton(location.street),
+                buildLocationButton(userLocation.locality),
+                buildLocationButton(userLocation.administrativeArea),
+                buildLocationButton(userLocation.country),
+              ],
+            ))
       ],
     );
   }
@@ -380,6 +442,7 @@ class PostForm extends StatelessWidget {
             ),
           ),
         )
+
       ],
     );
   }

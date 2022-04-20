@@ -3,25 +3,25 @@ import {
   Get,
   Query,
 } from "@nestjs/common";
-import { CommandBus, QueryBus } from "@nestjs/cqrs";
+import { QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
-import { User } from "decorators/user.decorator";
-import { UserDTO } from "dtos/social/user.dto";
+} from "decorators/apiSuccessResponse.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
+import { User } from "domains/social/user.domain";
 import { GetFeedPostsQuery } from "modules/user/useCases/getFeedPosts";
 import { GetFeedPostsResponse } from "modules/user/useCases/getFeedPosts/getFeedPostsResponse";
-import { ParsePaginationPipe } from "pipes/parsePagination.pipe";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/feeds")
 @ApiTags("User/Feed")
 @ApiBearerAuth()
 export class FeedController {
-  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
+  constructor(private _queryBus: QueryBus) {}
 
   @Get('posts')
   @ApiFailResponseCustom()
@@ -30,8 +30,8 @@ export class FeedController {
     "Get feed's posts successfully"
   )
   async getFeedPosts(
-    @Query(ParsePaginationPipe) query: PageOptionsDto,
-    @User() user: UserDTO
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @HttpUserReq() user: User
   ): Promise<Result<GetFeedPostsResponse>> {
     const postsQuery = new GetFeedPostsQuery(user, query);
     const result = await this._queryBus.execute(postsQuery);

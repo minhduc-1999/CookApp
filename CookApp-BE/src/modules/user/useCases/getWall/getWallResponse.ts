@@ -1,20 +1,9 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
-import { Type } from "class-transformer";
-import { WallDTO } from "dtos/social/wall.dto";
+import { AuthorResponse, ConversationResponse } from "base/dtos/response.dto";
+import { Conversation } from "domains/social/conversation.domain";
+import { User } from "domains/social/user.domain";
 
-class User {
-  @ApiResponseProperty({ type: String })
-  avatar: string;
-  @ApiResponseProperty({ type: String })
-  displayName: string;
-  @ApiResponseProperty({ type: String })
-  id: string;
-}
-
-export class GetWallResponse {
-  @Type(() => User)
-  @ApiResponseProperty({ type: User })
-  user: User;
+export class GetWallResponse extends AuthorResponse {
 
   @ApiResponseProperty({ type: Number })
   numberOfPost: number;
@@ -28,15 +17,15 @@ export class GetWallResponse {
   @ApiResponseProperty({ type: Boolean })
   isFollowed?: boolean;
 
-  constructor(wall: WallDTO, isFollowed: boolean = null) {
-    this.user = {
-      avatar: wall.user.avatar,
-      id: wall.user.id,
-      displayName: wall.user.displayName,
-    };
-    this.numberOfFollower = wall.numberOfFollower;
-    this.numberOfFollowing = wall.numberOfFollowing;
-    this.numberOfPost = wall.numberOfPost;
+  @ApiResponseProperty({ type: ConversationResponse })
+  conversation?: ConversationResponse
+
+  constructor(user: User, isFollowed: boolean, conv: Conversation) {
+    super(user)
+    this.numberOfFollower = user.nFollowers;
+    this.numberOfFollowing = user.nFollowees;
+    this.numberOfPost = user.nPosts;
     this.isFollowed = isFollowed;
+    this.conversation = conv && new ConversationResponse(conv)
   }
 }

@@ -1,9 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:tastify/Model/PostDetailsRespondModel.dart';
+import 'package:tastify/NewFeedScreen/PostDetail.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
-import 'package:tastify/StaticComponent/Post.dart';
+import '../NewFeedScreen/Post.dart';
 import 'package:timeago/timeago.dart' as timeago;
 
 import '../constants.dart';
@@ -157,22 +158,8 @@ class _NotificationWidgetState extends State<NotificationWidget> {
       });
     }
     if (templateID == "new_post" || templateID == "react" || templateID == "comment") {
-      PostDetailsRespondModel res = await APIService.getDetailsPost(
-          data['postId']);
-      Post post = Post(
-        id: res.data.id,
-        userId: res.data.author.id,
-        location: "Quang Binh",
-        content: res.data.content,
-        images: res.data.images,
-        avatar: res.data.author.avatar,
-        displayName: res.data.author.displayName,
-        dateTime: DateTime.fromMillisecondsSinceEpoch(res.data.createdAt),
-        numOfComment: res.data.numOfComment,
-        numOfReaction: res.data.numOfReaction,
-        isLike: res.data.reaction != null,
-      );
-      openImagePost(context, post);
+
+      openImagePost(context, data['postID']);
     } else if (templateID == "new_follower"){
       Navigator.push(
           context,
@@ -184,33 +171,10 @@ class _NotificationWidgetState extends State<NotificationWidget> {
     }
   }
 
-  void openImagePost(BuildContext context, Post post) {
-    Navigator.of(context)
-        .push(MaterialPageRoute<bool>(builder: (BuildContext context) {
-      return Center(
-        child: Scaffold(
-            appBar: AppBar(
-              automaticallyImplyLeading: true,
-              brightness: Brightness.dark,
-              flexibleSpace: Container(
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.centerLeft,
-                    end: Alignment.centerRight,
-                    colors: <Color>[appPrimaryColor, appPrimaryColor],
-                  ),
-                ),
-              ),
-              title: Text('Post'),
-            ),
-            body: ListView(
-              children: <Widget>[
-                Container(
-                  child: post,
-                ),
-              ],
-            )),
-      );
-    }));
+  void openImagePost(BuildContext context, String id) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PostDetail(id: id)),
+    );
   }
 }

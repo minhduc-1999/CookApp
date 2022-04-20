@@ -3,3 +3,5 @@
 crawl
 **/*.zip
 **/**.env
+ws-client/
+db/

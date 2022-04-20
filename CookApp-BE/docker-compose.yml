@@ -3,18 +3,18 @@ services:
   mongo:
     image: mongo:latest
     restart: always
-    env_file: .docker.env
+    env_file: .mongo.env
     ports:
       - 27017:27017
     volumes:
-      - tastify-db:/data/db
+      - tastify-se:/data/db
 
   mongo-express:
     image: mongo-express
     restart: always
     ports:
       - 8081:8081
-    env_file: .me-docker.env
+    env_file: .mongoex.env
 
   mailhog:
     image: mailhog/mailhog
@@ -22,5 +22,15 @@ services:
       - 1025:1025
       - 8025:8025
 
+  postgres:
+    image: postgres:latest
+    restart: always
+    volumes:
+      - pg-tastify:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    env_file: 
+      - .postgres.env
 volumes:
-  tastify-db:
+  pg-tastify:
+  tastify-se:

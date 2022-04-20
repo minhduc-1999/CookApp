@@ -2,9 +2,10 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tastify/EditPostScreen/EditPostActivity.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/NewFeedScreen/SearchUserDelegate.dart';
-import '../StaticComponent/Post.dart';
+import 'Post.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/SharedService.dart';
 import 'package:tastify/UploadScreen/UploadActivity.dart';
@@ -110,8 +111,11 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
   void openUploadActivity() {
     Route route = MaterialPageRoute(builder: (context) => UploadActivity());
     Navigator.push(context, route).then(onGoBack);
-  }
 
+  }
+  reloadFunction(){
+    fetchData();
+  }
   Future<void> _refresh() async {
     fetchData();
     return;
@@ -128,15 +132,18 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
       tempData.add(Post(
           id: i.id,
           userId: i.author.id,
-          location: "Quang Binh",
+          location: i.location,
           content: i.content,
-          images: i.images,
-          avatar: i.author.avatar,
+          medias: i.medias,
+          avatar: i.author.avatar.url,
           displayName: i.author.displayName,
           numOfReaction: i.numOfReaction,
           numOfComment: i.numOfComment,
           dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
-          isLike: i.reaction != null));
+          isLike: i.reaction != null,
+      saved: i.saved,
+      reloadFunction: onGoBack,),
+          );
     }
     setState(() {
       if (listPosts.data.posts.length > 0) {
@@ -156,19 +163,22 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
       tempData.add(Post(
           id: i.id,
           userId: i.author.id,
-          location: "Quang Binh",
+          location: i.location,
           content: i.content,
-          images: i.images,
-          avatar: i.author.avatar,
+          medias: i.medias,
+          avatar: i.author.avatar.url,
           displayName: i.author.displayName,
           numOfReaction: i.numOfReaction,
           numOfComment: i.numOfComment,
           dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
-          isLike: i.reaction != null));
+          isLike: i.reaction != null,
+      saved: i.saved,
+      reloadFunction: onGoBack,));
     }
     setState(() {
       feedData.addAll(tempData);
       offset++;
     });
   }
+
 }

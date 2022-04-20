@@ -1,9 +1,11 @@
 *.rest
 dist/
 **/credential.json
+service-account/
 .env.staging
-node_modules/
+neo4j-db/
 stack/
+data/
 *.env
 attachments/
 .docker.env

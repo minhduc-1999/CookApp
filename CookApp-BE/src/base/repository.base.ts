@@ -1,10 +1,10 @@
-import { ClientSession } from "mongoose";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 export abstract class BaseRepository {
-  protected session: ClientSession;
+  protected tx: ITransaction;
 
-  public setSession(session: ClientSession) {
-    this.session = session;
+  public setTransaction(tx: ITransaction) {
+    this.tx = tx;
     return this;
   }
 }

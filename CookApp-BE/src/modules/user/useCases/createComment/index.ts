@@ -1,27 +1,32 @@
-import { Inject } from "@nestjs/common";
+import { BadRequestException, Inject, InternalServerErrorException, NotFoundException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
-import { ICommentRepository } from "modules/user/adapters/out/repositories/comment.repository";
 import { CreateCommentRequest } from "./createCommentRequest";
 import { CreateCommentResponse } from "./createCommentResponse";
-import { CommentDTO } from "dtos/social/comment.dto";
 import { ICommentService } from "modules/user/services/comment.service";
-import { IPostRepository } from "modules/user/adapters/out/repositories/post.repository";
-import { IFeedRepository } from "modules/user/adapters/out/repositories/feed.repository";
-import { CommentPostEvent } from "modules/notification/usecases/CommentNotification";
 import { IPostService } from "modules/user/services/post.service";
+import { CommentPostEvent } from "modules/notification/events/CommentNotification";
+import { ResponseDTO } from "base/dtos/response.dto";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { IInteractable } from "domains/interfaces/IInteractable.interface";
+import { Post } from "domains/social/post.domain";
+import { InteractiveTargetType, MediaType } from "enums/social.enum";
+import { IPostMediaRepository } from "modules/user/interfaces/repositories/postMedia.interface";
+import { CommentMedia, Image } from "domains/social/media.domain";
+import { IStorageService } from "modules/share/adapters/out/services/storage.service";
+import { IFoodRecipeService } from "modules/core/services/recipeStep.service";
+import { IAlbumMediaRepository } from "modules/user/interfaces/repositories/albumMedia.interface";
 
 export class CreateCommentCommand extends BaseCommand {
-  commentDto: CreateCommentRequest;
+  commentReq: CreateCommentRequest;
   constructor(
-    user: UserDTO,
-    comment: CreateCommentRequest,
-    session?: ClientSession
+    user: User,
+    request: CreateCommentRequest,
+    tx: ITransaction
   ) {
-    super(session, user);
-    this.commentDto = comment;
+    super(tx, user);
+    this.commentReq = request;
   }
 }
 
@@ -30,37 +35,72 @@ export class CreateCommentCommandHandler
   implements ICommandHandler<CreateCommentCommand>
 {
   constructor(
-    @Inject("ICommentRepository")
-    private _commentRepo: ICommentRepository,
     @Inject("ICommentService")
     private _commentService: ICommentService,
-    @Inject("IPostRepository")
-    private _postRepo: IPostRepository,
-    @Inject("IFeedRepository")
-    private _feedRepo: IFeedRepository,
     private _eventBus: EventBus,
+    @Inject("IPostMediaRepository")
+    private _postMediaRepo: IPostMediaRepository,
+    @Inject("IStorageService")
+    private _storageService: IStorageService,
+    @Inject("IFoodRecipeService")
+    private _recipeService : IFoodRecipeService,
+    @Inject("IAlbumMediaRepository")
+    private _albumMediaRepo: IAlbumMediaRepository,
     @Inject("IPostService")
     private _postService: IPostService
-  ) {}
+  ) { }
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
-    const { commentDto, user, session } = command;
-    const post = await this._postService.getPostDetail(commentDto.postId);
-    const parentComment = commentDto.parentId
-      ? await this._commentService.getComment(commentDto.parentId)
-      : commentDto.postId;
-    const comment = CommentDTO.create({
-      ...commentDto,
-      user,
-    }).setParent(parentComment);
-    const createdComment = await this._commentRepo
-      .setSession(session)
-      .createComment(comment);
-    return await Promise.all([
-      this._feedRepo.updateNumComment(commentDto.postId, 1),
-      this._postRepo.updateNumComment(commentDto.postId, 1),
-    ]).then(() => {
-      this._eventBus.publish(new CommentPostEvent(post, user));
-      return createdComment;
-    });
+    const { commentReq, user, tx } = command;
+
+    if (commentReq.images?.length > 0) {
+      commentReq.images = await this._storageService.makePublic(
+        commentReq.images,
+        MediaType.IMAGE
+      );
+    }
+
+    let target: IInteractable
+
+    switch (commentReq.targetType) {
+      case InteractiveTargetType.POST:
+        [target] = await this._postService.getPostDetail(commentReq.targetId);
+        this._eventBus.publish(new CommentPostEvent(target as Post, user));
+        break;
+      case InteractiveTargetType.POST_MEDIA:
+        target = await this._postMediaRepo.getMedia(commentReq.targetId)
+        if (!target) {
+          throw new NotFoundException(
+            ResponseDTO.fail("Media not found")
+          );
+        }
+        break;
+      case InteractiveTargetType.RECIPE_STEP:
+        target = await this._recipeService.getStepById(commentReq.targetId)
+        break;
+      case InteractiveTargetType.ALBUM_MEDIA:
+        target = await this._albumMediaRepo.getMedia(commentReq.targetId)
+        if (!target) {
+          throw new NotFoundException(
+            ResponseDTO.fail("Media not found")
+          );
+        }
+        break;
+      default:
+        throw new BadRequestException(ResponseDTO.fail("Target type not valid"))
+    }
+
+    let medias: CommentMedia[]
+    if (commentReq.images?.length > 0) {
+      medias = commentReq.images?.map(image => new Image({ key: image }))
+    }
+
+    const parentComment = await this._commentService.getCommentBy(commentReq.replyFor)
+    let comment = user.comment(target, commentReq.content, medias, parentComment)
+    let createdComment = await this._commentService.createComment(comment, tx)
+    if (!createdComment) {
+      throw new InternalServerErrorException()
+    }
+
+    return new CreateCommentResponse(createdComment);
   }
 }

@@ -1,7 +1,7 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
 export class MetaDTO {
-  constructor(ok: boolean = true, message?: string | [string], errorCode?: ErrorCode) {
+  constructor(ok: boolean = true, message?: string | [string], errorCode?: UserErrorCode) {
     if (typeof message === "string") this.messages = [message];
     else this.messages = message;
     this.ok = ok;
@@ -13,6 +13,6 @@ export class MetaDTO {
   @ApiProperty({ type: Boolean })
   ok: boolean;
 
-  @ApiPropertyOptional({ enum: ErrorCode, writeOnly: true })
-  errorCode?: ErrorCode;
+  @ApiPropertyOptional({ enum: UserErrorCode, writeOnly: true })
+  errorCode?: UserErrorCode;
 }

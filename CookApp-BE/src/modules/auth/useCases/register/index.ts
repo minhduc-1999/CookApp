@@ -1,24 +1,24 @@
-import { Inject } from "@nestjs/common";
+import { ConflictException, Inject, InternalServerErrorException } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { BaseCommand } from "base/cqrs/command.base";
-import _ = require("lodash");
-import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
-import { ClientSession } from "mongoose";
 import { RegisterRequest } from "./registerRequest";
 import { RegisterResponse } from "./registerResponse";
 import * as bcrypt from "bcrypt";
-import { WallDTO } from "dtos/social/wall.dto";
-import { UserDTO } from "dtos/social/user.dto";
-import { FeedDTO } from "dtos/social/feed.dto";
-import { IWallRepository } from "modules/auth/adapters/out/repositories/wall.repository";
-import { IFeedRepository } from "modules/auth/adapters/out/repositories/feed.repository";
-import { generateDisplayName } from "utils";
+import { User } from "domains/social/user.domain";
 import { IMailService } from "modules/share/adapters/out/services/mail.service";
+import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
+import { TypeormException } from "exception_filter/postgresException.filter";
+import { ResponseDTO } from "base/dtos/response.dto";
+import { UserErrorCode } from "enums/errorCode.enum";
+import { Account } from "domains/social/account.domain";
+import { BaseCommand } from "base/cqrs/command.base";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { IUserService } from "modules/auth/services/user.service";
+import { ConfigService } from "nestjs-config";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
-  constructor(registerDto: RegisterRequest, session: ClientSession) {
-    super(session);
+  constructor(registerDto: RegisterRequest, tx: ITransaction) {
+    super(tx)
     this.registerDto = registerDto;
   }
 }
@@ -27,36 +27,41 @@ export class RegisterCommandHandler
   implements ICommandHandler<RegisterCommand>
 {
   constructor(
-    @Inject("IUserRepository") private _userRepo: IUserRepository,
-    @Inject("IWallRepository") private _wallRepo: IWallRepository,
-    @Inject("IFeedRepository") private _feedRepo: IFeedRepository,
+    @Inject("IUserService") private _userService: IUserService,
     @Inject("IMailService")
-    private _mailService: IMailService
-  ) {}
+    private _mailService: IMailService,
+    @Inject("IConfigurationService")
+    private _configurationService: IConfigurationService,
+    private _configService: ConfigService
+  ) { }
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
-    const { registerDto, session } = command;
-    const hashedPassword = await bcrypt.hashSync(registerDto.password, 10);
-    const newUserDto = UserDTO.create({
+    const { registerDto, tx } = command;
+    const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
+    const account = new Account({
       ...registerDto,
       password: hashedPassword,
-      displayName: generateDisplayName(),
-      emailVerified: false
-    });
-    const createdUser = await this._userRepo
-      .setSession(session)
-      .createUser(newUserDto);
-    const wallDto = WallDTO.create({
-      user: createdUser,
+      emailVerified: !this._configService.get("app.emailVerificationRequire")
+    })
+
+    const newUser = new User({
+      account
     });
 
-    await this._wallRepo.setSession(session).createWall(wallDto);
-    const feedDto = FeedDTO.create({
-      user: createdUser,
-    });
-    await this._feedRepo.setSession(session).createFeed(feedDto);
+    let createdUser: User;
+
+    try {
+      createdUser = await this._userService.createNewUser(newUser, tx)
+    } catch (err) {
+      console.error(err)
+      if (err instanceof TypeormException) {
+        throw new ConflictException(ResponseDTO.fail("Account has been existed", UserErrorCode.ACCOUNT_ALREADY_EXISTED))
+      }
+      throw new InternalServerErrorException()
+    }
+    await this._configurationService.setupConfigForNewUser(createdUser)
     this._mailService.sendEmailAddressVerification(
       createdUser.id,
-      createdUser.email
+      createdUser.account.email
     );
     return createdUser;
   }

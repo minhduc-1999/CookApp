@@ -1,150 +1,59 @@
-import { Injectable, Logger } from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
+import { Injectable } from "@nestjs/common";
 import { BaseRepository } from "base/repository.base";
-import { plainToClass } from "class-transformer";
-import { Post, PostDocument } from "domains/schemas/social/post.schema";
-import { PostDTO } from "dtos/social/post.dto";
-import { ReactionDTO } from "dtos/social/reaction.dto";
-import { ClientSession, Model } from "mongoose";
-
-export interface IPostRepository {
-  createPost(post: PostDTO): Promise<PostDTO>;
-  getPostById(postId: string): Promise<PostDTO>;
-  getPostByIds(postId: string[]): Promise<PostDTO[]>;
-  updatePost(post: Partial<PostDTO>): Promise<PostDTO>;
-  reactPost(react: ReactionDTO, userId: string): Promise<boolean>;
-  deleteReact(userId: string, postId: string): Promise<boolean>;
-  getReactionByUserId(userId: string, postId: string): Promise<ReactionDTO>;
-  setSession(session: ClientSession): IPostRepository;
-  updateNumComment(postId: string, delta: number): Promise<void>;
-  deleteImages(postId: string, changedImages: string[]): Promise<PostDTO>;
-  pushImages(postId: string, changedImages: string[]): Promise<PostDTO>;
-}
+import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
+import { InjectRepository } from "@nestjs/typeorm";
+import { PostEntity } from "entities/social/post.entity";
+import { QueryRunner, Repository } from "typeorm";
+import { InteractionEntity } from "entities/social/interaction.entity";
+import { Post } from "domains/social/post.domain";
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
-  private logger: Logger = new Logger(PostRepository.name);
-  constructor(@InjectModel(Post.name) private _postModel: Model<PostDocument>) {
-    super();
+  constructor(
+    @InjectRepository(PostEntity)
+    private _postRepo: Repository<PostEntity>,
+  ) {
+    super()
   }
-  async getPostByIds(postId: string[]): Promise<PostDTO[]> {
-    const posts = await this._postModel.find({
-      id: { $in: postId },
-    });
-    return plainToClass(PostDTO, posts, { excludeExtraneousValues: true });
+  async createPost(post: Post): Promise<Post> {
+    if (!post) return null
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      const postInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(post))
+      const postEntity = await queryRunner.manager.save<PostEntity>(new PostEntity(post, postInteraction))
+      return postEntity?.toDomain()
+    }
+    return null
   }
-  async pushImages(postId: string, changedImages: string[]): Promise<PostDTO> {
-    const updatedPost = await this._postModel.findOneAndUpdate(
-      { _id: postId },
-      { $push: { images: changedImages } },
-      { new: true, session: this.session }
-    );
-    return plainToClass(PostDTO, updatedPost, {
-      excludeExtraneousValues: true,
-    });
+  async getPostById(postId: string): Promise<Post> {
+    const postEntity = await this._postRepo
+      .createQueryBuilder("post")
+      .leftJoinAndSelect("post.interaction", "interaction")
+      .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("post.medias", "media")
+      .leftJoinAndSelect("media.interaction", "mediaInter")
+      .where("post.id = :id", { id: postId })
+      .select(["post", "interaction", "author", "media", "mediaInter"])
+      .getOne()
+    return postEntity?.toDomain()
   }
-  async deleteImages(
-    postId: string,
-    changedImages: string[]
-  ): Promise<PostDTO> {
-    const updatedPost = await this._postModel.findOneAndUpdate(
-      { _id: postId },
-      { $pullAll: { images: changedImages } },
-      { new: true, session: this.session }
-    );
-    return plainToClass(PostDTO, updatedPost, {
-      excludeExtraneousValues: true,
-    });
+  async getPostByIds(postIds: string[]): Promise<Post[]> {
+    const postEntities = await this._postRepo.findByIds(postIds, {
+      relations: ["interaction", "author"]
+    })
+    return postEntities?.map(entity => entity.toDomain())
   }
-  async updateNumComment(postId: string, delta: number): Promise<void> {
-    await this._postModel.updateOne(
-      {
-        id: postId,
-      },
-      {
-        $inc: { numOfComment: delta },
-      },
-      {
-        session: this.session,
-      }
-    );
-  }
-
-  async updatePost(post: Partial<PostDTO>): Promise<PostDTO> {
-    const updatedPost = await this._postModel.findOneAndUpdate(
-      { _id: post.id },
-      { $set: post },
-      { new: true, session: this.session }
-    );
-    return plainToClass(PostDTO, updatedPost, {
-      excludeExtraneousValues: true,
-    });
-  }
-  async getPostById(postId: string): Promise<PostDTO> {
-    const postDoc = await this._postModel.findById(postId);
-    if (!postDoc) return null;
-    return plainToClass(PostDTO, postDoc, {
-      excludeExtraneousValues: true,
-      groups: ["post"],
-    });
-  }
-
-  async createPost(post: PostDTO): Promise<PostDTO> {
-    const creatingPost = new this._postModel(new Post(post));
-    const postDoc = await creatingPost.save({ session: this.session });
-    if (!postDoc) return null;
-    return plainToClass(PostDTO, postDoc, { excludeExtraneousValues: true });
-  }
-
-  async reactPost(react: ReactionDTO, postId: string): Promise<boolean> {
-    const result = await this._postModel.updateOne(
-      {
-        _id: postId,
-      },
-      {
-        $push: { reactions: react },
-        $inc: { numOfReaction: 1 },
-      },
-      {
-        session: this.session,
-      }
-    );
-    return result.modifiedCount === 1;
-  }
-
-  async deleteReact(userId: string, postId: any): Promise<boolean> {
-    const result = await this._postModel.updateOne(
-      {
-        _id: postId,
-        "reactions.userId": userId,
-      },
-      {
-        $pull: { reactions: { userId: userId } },
-        $inc: { numOfReaction: -1 },
-      },
-      {
-        session: this.session,
-      }
-    );
-    return result.modifiedCount !== 0;
-  }
-
-  async getReactionByUserId(
-    userId: string,
-    postId: string
-  ): Promise<ReactionDTO> {
-    const result = await this._postModel
-      .findOne(
-        {
-          _id: postId,
-          "reactions.userId": userId,
-        },
-        { "reactions.$": 1 }
-      )
-      .exec();
-    if (!result) return null;
-    return plainToClass(ReactionDTO, result.reactions[0], {
-      excludeExtraneousValues: true,
-    });
+  async updatePost(post: Post, data: Partial<Post>): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      const entity = new PostEntity(post)
+      const updateData = entity.update(data)
+      await queryRunner.manager.createQueryBuilder()
+        .update(InteractionEntity)
+        .set({ updatedAt: new Date() })
+        .where("id = :id", { id: post.id })
+        .execute()
+      await queryRunner.manager.update<PostEntity>(PostEntity, entity, updateData)
+    }
   }
 }

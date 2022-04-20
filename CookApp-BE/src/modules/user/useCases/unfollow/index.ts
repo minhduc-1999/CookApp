@@ -1,18 +1,17 @@
 import { BadRequestException, Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
-import { UserDTO } from "dtos/social/user.dto";
+import { User } from "domains/social/user.domain";
 import { UnfollowResponse } from "./followResponse";
 import { BaseCommand } from "base/cqrs/command.base";
-import { ClientSession } from "mongoose";
-import { IWallRepository } from "modules/user/adapters/out/repositories/wall.repository";
-import { FollowType } from "enums/follow.enum";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { IUserService } from "modules/auth/services/user.service";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { IFollowRepository } from "modules/user/interfaces/repositories/follow.interface";
 
 export class UnfolllowCommand extends BaseCommand {
   targetId: string;
-  constructor(user: UserDTO, targetId: string, session?: ClientSession) {
-    super(session, user);
+  constructor(user: User, targetId: string, tx: ITransaction) {
+    super(tx, user);
     this.targetId = targetId;
   }
 }
@@ -22,13 +21,13 @@ export class UnfolllowCommandHandler
   implements ICommandHandler<UnfolllowCommand>
 {
   constructor(
-    @Inject("IWallRepository")
-    private _wallRepo: IWallRepository,
+    @Inject("IFollowRepository")
+    private _followRepo: IFollowRepository,
     @Inject("IUserService")
     private _userService: IUserService
-  ) {}
+  ) { }
   async execute(command: UnfolllowCommand): Promise<UnfollowResponse> {
-    const { targetId, user } = command;
+    const { targetId, user, tx } = command;
     if (user.id === targetId) {
       throw new BadRequestException(
         ResponseDTO.fail("Cannot unfollow yourself")
@@ -37,14 +36,10 @@ export class UnfolllowCommandHandler
 
     await this._userService.getUserById(targetId);
 
-    const isFollowed = await this._wallRepo.isFollowed(user.id, targetId);
-    if (!isFollowed)
+    const follow = await this._followRepo.getFollow(user.id, targetId);
+    if (!follow)
       throw new BadRequestException(ResponseDTO.fail("Not follow yet"));
-    const tasks = [];
-    tasks.push(
-      this._wallRepo.updateFollowing(user.id, targetId, FollowType.Unfollow),
-      this._wallRepo.updateFollowers(targetId, user.id, FollowType.Unfollow)
-    );
-    return Promise.all(tasks).then(() => new UnfollowResponse());
+    this._followRepo.setTransaction(tx).deleteFollower(follow)
+    return new UnfollowResponse();
   }
 }

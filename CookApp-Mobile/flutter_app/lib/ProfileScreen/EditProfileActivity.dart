@@ -50,8 +50,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
-    return SafeArea(
-      child: Scaffold(
+    return Scaffold(
         appBar: AppBar(
           brightness: Brightness.dark,
           automaticallyImplyLeading: false,
@@ -123,8 +122,8 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
           key: UniqueKey(),
           opacity: 0.3,
         )
-      ),
-    );
+      );
+
   }
   Widget _editProfileUI (BuildContext context){
     return Container(
@@ -241,7 +240,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(25.0),
-        color: appPrimaryColor,
+        color: customYellowColor,
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -263,7 +262,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
     fToast.showToast(
       child: toast,
       gravity: ToastGravity.BOTTOM,
-      toastDuration: Duration(seconds: 6),
+      toastDuration: Duration(seconds: 3),
     );
   }
   void fetchData() async {

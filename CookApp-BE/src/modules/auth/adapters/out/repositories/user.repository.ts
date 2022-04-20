@@ -1,130 +1,111 @@
-import {
-  BadRequestException,
-  ConflictException,
-  Injectable,
-  InternalServerErrorException,
-  Logger,
-} from "@nestjs/common";
-import { InjectModel } from "@nestjs/mongoose";
-import { ClientSession, Model } from "mongoose";
-import { ErrorCode } from "enums/errorCode.enum";
-import { MongoErrorCode } from "enums/mongoErrorCode.enum";
-import { ResponseDTO } from "base/dtos/response.dto";
-import { UserDTO } from "dtos/social/user.dto";
-import { User, UserDocument } from "domains/schemas/social/user.schema";
-import { plainToClass } from "class-transformer";
-import { BaseRepository } from "base/repository.base";
+import { Injectable, InternalServerErrorException, NotImplementedException } from "@nestjs/common";
+import { InjectRepository } from "@nestjs/typeorm";
 import { PageOptionsDto } from "base/pageOptions.base";
-
-export interface IUserRepository {
-  createUser(userData: UserDTO): Promise<UserDTO>;
-  getUserByEmail(email: string): Promise<UserDTO>;
-  getUserByUsername(username: string): Promise<UserDTO>;
-  getUserById(id: string): Promise<UserDTO>;
-  updateUserProfile(
-    userId: string,
-    profile: Partial<UserDTO>
-  ): Promise<UserDTO>;
-  setSession(session: ClientSession): IUserRepository;
-  getUsers(query: PageOptionsDto): Promise<UserDTO[]>;
-  countUsers(query: PageOptionsDto): Promise<number>;
-}
+import { BaseRepository } from "base/repository.base";
+import { User } from "domains/social/user.domain";
+import { UserEntity } from "entities/social/user.entity";
+import { TypeormException } from "exception_filter/postgresException.filter";
+import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
+import { QueryRunner, Repository, QueryFailedError, In } from "typeorm";
 
 @Injectable()
 export class UserRepository extends BaseRepository implements IUserRepository {
-  private _logger = new Logger(UserRepository.name)
-  constructor(@InjectModel(User.name) private _userModel: Model<UserDocument>) {
-    super();
+  constructor(
+    @InjectRepository(UserEntity)
+    private _repo: Repository<UserEntity>
+  ) {
+    super()
   }
-  async countUsers(query: PageOptionsDto): Promise<number> {
-    let textSearch = {};
-    if (query.q !== "") {
-      const regex = new RegExp(query.q, "gi");
-      textSearch = { displayName: regex };
-    }
-    return this._userModel.count(textSearch).exec();
+
+  async existAll(userIds: string[]): Promise<boolean> {
+    if (userIds.length === 0) return false
+    const count = await this._repo.count({
+      where: {
+        id: In(userIds)
+      }
+    })
+    return count === userIds.length
   }
-  async getUsers(query: PageOptionsDto): Promise<UserDTO[]> {
-    let textSearch = {};
-    if (query.q !== "") {
-      const regex = new RegExp(query.q, "gi");
-      textSearch = { displayName: regex };
+  
+  async getProfile(userId: string): Promise<User> {
+    const user = await this._repo
+      .createQueryBuilder("user")
+      .where("user.id = :id", { id: userId })
+      .getOne()
+    return user?.toDomain()
+  }
+  async createUser(userData: User): Promise<User> {
+    let userEntity = new UserEntity(userData)
+    const queryRunner = this.tx.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      try {
+        userEntity = await queryRunner.manager.save<UserEntity>(userEntity)
+      } catch (err) {
+        if (err instanceof QueryFailedError)
+          throw new TypeormException(err)
+        throw err
+      }
+    } else {
+      userEntity = null
     }
-    const users = await this._userModel
-      .find(textSearch)
+    return userEntity?.toDomain()
+  }
+
+  async getUserByEmail(email: string): Promise<User> {
+    const user = await this._repo
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.account", "account")
+      .where("account.email = :email", { email })
+      .select(["account", "user.id", "user.displayName", "user.avatar"])
+      .getOne()
+    return user?.toDomain()
+  }
+
+  async getUserByUsername(username: string): Promise<User> {
+    const user = await this._repo
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.account", "account")
+      .where("account.username = :username", { username })
+      .select(["user.id", "user.displayName", "user.avatar", "account"])
+      .getOne()
+    return user?.toDomain()
+  }
+
+  async getUserById(id: string): Promise<User> {
+    const user = await this._repo
+      .createQueryBuilder("user")
+      .leftJoinAndSelect("user.account", "account")
+      .where("user.id = :id", { id })
+      .select(["user.id", "user.displayName", "user.avatar", "account"])
+      .getOne()
+    return user?.toDomain()
+  }
+  async updateUserProfile(user: User): Promise<void> {
+    const queryRunner = this.tx?.getRef() as QueryRunner
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.update(
+        UserEntity,
+        { id: user.id },
+        (new UserEntity(user)).update()
+      )
+    } else {
+      throw new InternalServerErrorException()
+    }
+  }
+
+  async getUsers(query: PageOptionsDto): Promise<[User[], number]> {
+    const [entities, total] = await this._repo.createQueryBuilder("user")
       .skip(query.limit * query.offset)
-      .limit(query.limit);
-    if (users.length < 1) return [];
-    return users.map((food) =>
-      plainToClass(UserDTO, food, {
-        excludeExtraneousValues: true,
-      })
-    );
+      .take(query.limit)
+      .getManyAndCount()
+    return [
+      entities?.map(entity => entity.toDomain()),
+      total
+    ]
   }
 
-  async updateUserProfile(
-    userId: string,
-    profile: Partial<UserDTO>
-  ): Promise<UserDTO> {
-    try {
-      const userDoc = await this._userModel.findByIdAndUpdate(
-        userId,
-        { $set: profile },
-        {
-          new: true,
-          session: this.session,
-        }
-      );
-      return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
-    } catch (error) {
-      this._logger.error(error);
-      if (error.code === MongoErrorCode.DUPLICATE_KEY)
-        throw new ConflictException(
-          ResponseDTO.fail(
-            "This display name is already in use",
-            ErrorCode.DISPLAY_NAME_ALREADY_IN_USE
-          )
-        );
-      throw new InternalServerErrorException();
-    }
-  }
-
-  async getUserById(id: string): Promise<UserDTO> {
-    const userDoc = await this._userModel.findById(id).exec();
-    if (!userDoc) return null;
-    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
-  }
-
-  async getUserByEmail(email: string): Promise<UserDTO> {
-    const userDoc = await this._userModel.findOne({ email: email }).exec();
-    if (!userDoc) return null;
-    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
-  }
-
-  async getUserByUsername(username: string): Promise<UserDTO> {
-    const userDoc = await this._userModel
-      .findOne({ username: username })
-      .exec();
-    if (!userDoc) return null;
-    return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
-  }
-
-  async createUser(userData: UserDTO): Promise<UserDTO> {
-    const createdUser = new this._userModel(new User(userData));
-    try {
-      const userDoc = await createdUser.save({ session: this.session });
-      if (!userDoc) return null;
-      return plainToClass(UserDTO, userDoc, { excludeExtraneousValues: true });
-    } catch (error) {
-      this._logger.error(error);
-      if (error.code === MongoErrorCode.DUPLICATE_KEY)
-        throw new ConflictException(
-          ResponseDTO.fail(
-            "This user is already existed",
-            ErrorCode.ACCOUNT_ALREADY_EXISTED
-          )
-        );
-      throw new InternalServerErrorException();
-    }
+  async updateStatus(user: User, statusID?: string): Promise<void> {
+    throw new NotImplementedException()
   }
 }
+

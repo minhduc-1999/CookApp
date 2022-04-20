@@ -5,18 +5,19 @@ import {
 } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { BaseCommand } from "base/cqrs/command.base";
-import { IUserRepository } from "modules/auth/adapters/out/repositories/user.repository";
-import { ClientSession } from "mongoose";
 import { VerifyEmailRequest } from "./verifyEmailRequest";
 import { JwtService } from "@nestjs/jwt";
 import { ConfigService } from "nestjs-config";
 import { ResponseDTO } from "base/dtos/response.dto";
-import { ErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "enums/errorCode.enum";
+import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { IAccountRepository } from "modules/auth/interfaces/repositories/account.interface";
 
 export class VerifyEmailCommand extends BaseCommand {
   requestDto: VerifyEmailRequest;
-  constructor(requestDto: VerifyEmailRequest, session: ClientSession) {
-    super(session);
+  constructor(requestDto: VerifyEmailRequest, tx: ITransaction) {
+    super(tx);
     this.requestDto = requestDto;
   }
 }
@@ -26,20 +27,21 @@ export class VerifyEmailCommandHandler
 {
   constructor(
     @Inject("IUserRepository") private _userRepo: IUserRepository,
+    @Inject("IAccountRepository") private _accountRepo: IAccountRepository,
     private _jwtService: JwtService,
     private _configService: ConfigService
-  ) {}
+  ) { }
   async execute(command: VerifyEmailCommand): Promise<void> {
-    const email = this.decodeVerificationToken(command.requestDto.token);
+    const { tx, requestDto } = command
+    const email = this.decodeVerificationToken(requestDto.token);
     const user = await this._userRepo.getUserByEmail(email);
-    if (user.emailVerified) {
+    if (user.account.emailVerified) {
       throw new BadRequestException(
         ResponseDTO.fail("Email has already been verified")
       );
     }
-    await this._userRepo.updateUserProfile(user.id, {
-      emailVerified: true,
-    });
+    user.account.verify()
+    await this._accountRepo.setTransaction(tx).update(user.account, user.account)
     return;
   }
 
@@ -62,7 +64,7 @@ export class VerifyEmailCommandHandler
     }
 
     throw new UnauthorizedException(
-      ResponseDTO.fail("Invalid ID", ErrorCode.INVALID_TOKEN)
+      ResponseDTO.fail("Invalid ID", UserErrorCode.INVALID_TOKEN)
     );
   }
 }

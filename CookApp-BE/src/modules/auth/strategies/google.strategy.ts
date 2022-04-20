@@ -1,45 +1,68 @@
-// import { Injectable } from '@nestjs/common';
-// import { PassportStrategy } from '@nestjs/passport';
-// import { OAuth2Strategy } from 'passport-oauth';
-// import AuthConfig from '../../../config/auth';
-// import { UserService } from '../services/user.service';
-// @Injectable()
-// export class OTableStrategy extends PassportStrategy(OAuth2Strategy, 'otable') {
-//   constructor(
-//     private readonly _userService: UserService,
-//     private readonly _otableAuthService: OTableAuthService,
-//   ) {
-//     super({
-//       authorizationURL: AuthConfig.authorizationURL,
-//       tokenURL: AuthConfig.tokenURL,
-//       clientID: AuthConfig.clientID,
-//       clientSecret: AuthConfig.clientSecret,
-//       callbackURL: AuthConfig.callbackURL,
-//       state: 'pulsely123', // ? why?,
-//       scope: ['user'],
-//       passReqToCallback: true,
-//     });
-//   }
+import { Inject, Injectable } from '@nestjs/common';
+import { PassportStrategy } from '@nestjs/passport';
+import { User } from 'domains/social/user.domain';
+import { ExternalProviderType } from 'enums/externalProvider.enum';
+import { Strategy, VerifyCallback } from "passport-google-oauth20"
+import AuthConfig from "../../../config/auth"
+import { IUserRepository } from '../interfaces/repositories/user.interface';
+import { Connection } from "typeorm"
+import { TypeOrmTransactionAdapter } from 'adapters/typeormTransaction.adapter';
+import { Account, ExternalProvider } from 'domains/social/account.domain';
 
-//   async validate(
-//     request: any,
-//     accessToken: string,
-//     refreshToken: string,
-//     profile,
-//     done: Function,
-//   ) {
-//     return this._otableAuthService
-//       .getUserInfo(accessToken)
-//       .then(async (userInfo) => {
-//         let res = await this._userService.getUserByUsername(
-//           userInfo.data.username,
-//         );
-//         if (!res) {
-//           // create new user
-//           res = await this._userService.createNewUser(userInfo.data);
-//         }
-//         return res;
-//       })
-//       .catch(console.error);
-//   }
-// }
+@Injectable()
+export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
+  constructor(
+    @Inject("IUserRepository")
+    private _userRepo: IUserRepository,
+    private _connection: Connection
+  ) {
+    super({
+      clientID: AuthConfig.googleClientID,
+      clientSecret: AuthConfig.googleClientSecret,
+      callbackURL: AuthConfig.googleCallbackUrl,
+      scope: ['email', 'profile'],
+    });
+  }
+
+  async validate(
+    accessToken: string,
+    refreshToken: string,
+    profile: any,
+    done: VerifyCallback,
+  ) {
+    const { name, emails, photos, id, displayName } = profile
+    const account = new Account({
+      email: emails[0].value,
+      externalProvider: new ExternalProvider({
+        externalID: id,
+        type: ExternalProviderType.GOOGLE,
+      }),
+      emailVerified: true
+    })
+    const user: User = new User({
+      avatar: photos[0].value,
+      firstName: name.givenName,
+      lastName: name.familyName,
+      displayName: displayName,
+      account
+    });
+    let res = await this._userRepo.getUserByEmail(user.account.email);
+
+    if (!res) {
+      // create new user
+      const tx = new TypeOrmTransactionAdapter(this._connection)
+      try {
+        res = await this._userRepo.setTransaction(tx).createUser(user);
+        await tx.commit()
+      } catch (err) {
+        await tx.rollback()
+        done(err, null)
+      }
+      finally {
+        await tx.release()
+      }
+    }
+
+    done(null, res)
+  }
+}

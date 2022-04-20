@@ -2,20 +2,20 @@ class PostRequestModel {
   String content;
   List<String> images;
   List<String> videos;
+  String kind;
+  String name;
+  String location;
+  PostRequestModel({this.content, this.images, this.videos, this.kind, this.name, this.location});
 
-  PostRequestModel({this.content, this.images, this.videos});
-
-  PostRequestModel.fromJson(Map<String, dynamic> json) {
-    content = json['content'];
-    images = json['images'].cast<String>();
-    videos = json['videos'].cast<String>();
-  }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['content'] = this.content;
     data['images'] = this.images;
     data['videos'] = this.videos;
+    data['kind'] = this.kind;
+    data['name'] = this.name;
+    data['location'] = this.location;
     return data;
   }
 }

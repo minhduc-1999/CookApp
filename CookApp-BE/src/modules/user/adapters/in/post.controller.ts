@@ -1,57 +1,62 @@
-import { Body, Controller, Get, Param, Patch, Post } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
+import { ApiBearerAuth, ApiConflictResponse, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
-} from "decorators/ApiSuccessResponse.decorator";
-import { MongooseSession } from "decorators/mongooseSession.decorator";
-import { Transaction } from "decorators/transaction.decorator";
-import { User } from "decorators/user.decorator";
-import { PostDTO } from "dtos/social/post.dto";
-import { UserDTO } from "dtos/social/user.dto";
+  ApiOKResponseCustom,
+  ApiOKResponseCustomWithoutData,
+} from "decorators/apiSuccessResponse.decorator";
+import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
+import { HttpUserReq } from "decorators/user.decorator";
+import { Post } from "domains/social/post.domain";
+import { User } from "domains/social/user.domain";
 import { CreatePostCommand } from "modules/user/useCases/createPost";
 import { CreatePostRequest } from "modules/user/useCases/createPost/createPostRequest";
 import { CreatePostResponse } from "modules/user/useCases/createPost/createPostResponse";
+import { DeleteSavedPostCommand } from "modules/user/useCases/deleteSavedPost";
+import { DeleteSavedPostRequest } from "modules/user/useCases/deleteSavedPost/deleteSavedPostRequest";
 import { EditPostCommand } from "modules/user/useCases/editPost";
 import { EditPostRequest } from "modules/user/useCases/editPost/editPostRequest";
 import { EditPostResponse } from "modules/user/useCases/editPost/editPostResponse";
-import { GetPostDetailQuery } from "modules/user/useCases/getPostById";
-import { GetPostResponse } from "modules/user/useCases/getPostById/getPostResponse";
-import { ReactPostCommand } from "modules/user/useCases/reactPost";
-import { ReactPostRequest } from "modules/user/useCases/reactPost/reactPostRequest";
-import { ClientSession } from "mongoose";
-import { ParseObjectIdPipe } from "pipes/parseMongoId.pipe";
-import { retrieveObjectNameFromUrl } from "utils";
+import { GetPostDetailQuery } from "modules/user/useCases/getPostDetail";
+import { GetPostResponse } from "modules/user/useCases/getPostDetail/getPostResponse";
+import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
+import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
+import { SavePostCommand } from "modules/user/useCases/savePost";
+import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/posts")
 @ApiTags("User/Post")
 @ApiBearerAuth()
 export class PostController {
-  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
+  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
 
-  @Post()
+  @PostHttp()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
-  @Transaction()
+  @HttpRequestTransaction()
   async createPost(
     @Body() post: CreatePostRequest,
-    @User() user: UserDTO,
-    @MongooseSession() session: ClientSession
-  ): Promise<Result<PostDTO>> {
-    const createPostCommand = new CreatePostCommand(user, post, session);
+    @HttpUserReq() user: User,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<Post>> {
+    const createPostCommand = new CreatePostCommand(user, post, tx);
     const createdPost = await this._commandBus.execute(createPostCommand);
     return Result.ok(createdPost, { messages: ["Create post successfully"] });
   }
 
-  @Get(":postId")
+  @Get(":postId/detail")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
   async getPostById(
-    @Param("postId", ParseObjectIdPipe) postId: string,
-    @User() user: UserDTO
+    @Param("postId", ParseUUIDPipe) postId: string,
+    @HttpUserReq() user: User
   ): Promise<Result<GetPostResponse>> {
     const query = new GetPostDetailQuery(user, postId);
     const post = await this._queryBus.execute(query);
@@ -61,28 +66,73 @@ export class PostController {
   @Patch(":postId")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
+  @HttpRequestTransaction()
+  @ApiNotFoundResponse({ description: "Post not found" })
   async editPost(
     @Body() post: EditPostRequest,
-    @User() user: UserDTO,
-    @Param("postId", ParseObjectIdPipe) postId: string
+    @HttpUserReq() user: User,
+    @Param("postId", ParseUUIDPipe) postId: string,
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<EditPostResponse>> {
     post.id = postId;
-    const editPostCommand = new EditPostCommand(null, user, post);
+    const editPostCommand = new EditPostCommand(tx, user, post);
     const updatedPost = await this._commandBus.execute(editPostCommand);
     return Result.ok(updatedPost, { messages: ["Edit post successfully"] });
   }
 
-  @Post(":postId/react")
-  async reactPost(
-    @User() user: UserDTO,
-    @Body() body: ReactPostRequest,
-    @Param("postId", ParseObjectIdPipe) postId: string
-  ) {
-    body.postId = postId;
-    const reactCommand = new ReactPostCommand(null, user, body);
-    const result = await this._commandBus.execute(reactCommand);
+  @PostHttp(":postId/save")
+  @HttpRequestTransaction()
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Save post successfully")
+  @ApiConflictResponse({ description: "Post have been saved already" })
+  @ApiNotFoundResponse({ description: "Post not found" })
+  async savePost(
+    @HttpUserReq() user: User,
+    @Param("postId", ParseUUIDPipe) postID: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    const savePostReq = new SavePostRequest(postID)
+    const savePostCommand = new SavePostCommand(savePostReq, user, tx);
+    await this._commandBus.execute(savePostCommand);
+    return Result.ok(null, {
+      messages: ["Save post successfully"],
+    });
+  }
+
+
+  @Delete(":postId/save")
+  @HttpRequestTransaction()
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Delete saved post successfully")
+  @ApiConflictResponse({ description: "Post have not been saved yet" })
+  @ApiNotFoundResponse({ description: "Post not found" })
+  async deleteSavedPost(
+    @HttpUserReq() user: User,
+    @Param("postId", ParseUUIDPipe) postID: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    const dto = new DeleteSavedPostRequest(postID)
+    const deleteSavedPostCommand = new DeleteSavedPostCommand(dto, user, tx);
+    await this._commandBus.execute(deleteSavedPostCommand);
+    return Result.ok(null, {
+      messages: ["Delete saved post successfully"],
+    });
+  }
+
+  @Get('save')
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(
+    GetSavedPostsResponse,
+    "Get saved posts successfully"
+  )
+  async getSavedPosts(
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetSavedPostsResponse>> {
+    const savedPostsQuery = new GetSavedPostsQuery(user, query);
+    const result = await this._queryBus.execute(savedPostsQuery);
     return Result.ok(result, {
-      messages: ["Update react status successfully"],
+      messages: ["Get saved posts successfully"],
     });
   }
 }

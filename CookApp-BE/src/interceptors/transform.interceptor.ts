@@ -16,9 +16,9 @@ export class TransformResponse implements NestInterceptor {
     return next.handle().pipe(
       map((data) => {
         if (data instanceof Result) {
-          return classToPlain(data.getResponseDTO());
+          return classToPlain(clean(data.getResponseDTO()));
         }
-        return classToPlain(data);
+        return classToPlain(clean(data));
         // if (data instanceof Result) {
         //   return clean(classToPlain(data.getResponseDTO()));
         // }

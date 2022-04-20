@@ -87,7 +87,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
               height: size.height * 0.04,
             ),
             FormHelper.inputFieldWidget(
-                context, const Icon(Icons.person), "username", "Username",
+                context, "username", "Username",
                     (onValidateVal) {
                   if (onValidateVal.isEmpty) {
                     return "Username can\'t be empty";
@@ -96,6 +96,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                 }, (onSavedVal) {
               username = onSavedVal;
             },
+                prefixIcon: const Icon(Icons.person),
                 prefixIconColor: appPrimaryColor,
                 borderRadius: 10,
                 textColor: Colors.black,
@@ -105,7 +106,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
               height: size.height * 0.015,
             ),
             FormHelper.inputFieldWidget(
-                context, const Icon(Icons.vpn_key_rounded), "password", "Password",
+                context, "password", "Password",
                     (onValidateVal) {
                   if (onValidateVal.isEmpty) {
                     return "Password can\'t be empty";
@@ -117,6 +118,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                 }, (onSavedVal) {
               password = onSavedVal;
             },
+                prefixIcon: const Icon(Icons.vpn_key_rounded),
                 prefixIconColor: appPrimaryColor,
                 borderRadius: 10,
                 textColor: Colors.black,
@@ -138,7 +140,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
               height: size.height * 0.015,
             ),
             FormHelper.inputFieldWidget(
-                context, const Icon(Icons.email), "email", "Email",
+                context, "email", "Email",
                     (onValidateVal) {
                   if (onValidateVal.isEmpty) {
                     return "Email can\'t be empty";
@@ -147,6 +149,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                 }, (onSavedVal) {
               email = onSavedVal;
             },
+                prefixIcon: const Icon(Icons.email),
                 prefixIconColor: appPrimaryColor,
                 borderRadius: 10,
                 textColor: Colors.black,

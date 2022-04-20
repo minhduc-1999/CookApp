@@ -1,4 +1,4 @@
-import { url } from "inspector";
+import { isFunction } from "lodash";
 import _ = require("lodash");
 const randomWords = require("random-words");
 
@@ -25,7 +25,6 @@ export function createUpdatingNestedObject<T, R>(
 
 export function createUpdatingObject<T>(
   updateObj: T,
-  updateBy: string
 ): Partial<T> {
   const keys = Object.keys(updateObj).filter(
     (key) => updateObj[key] !== null && updateObj[key] !== undefined
@@ -34,9 +33,6 @@ export function createUpdatingObject<T>(
   keys.forEach((key) => {
     updatingObj[key] = updateObj[key];
   });
-  updatingObj["updatedAt"] = _.now();
-  updatingObj["updatedBy"] = updateBy;
-
   return updatingObj;
 }
 
@@ -59,8 +55,8 @@ export function getNameFromPath(filePath: string): string {
   return filePath.slice(filePath.lastIndexOf("/") + 1);
 }
 
-export function clean(obj) {
-  if (obj === null || obj === undefined) return null;
+export function clean<T>(obj: T): T {
+  if (obj === null || obj === undefined) return undefined;
   for (const propName of Object.keys(obj)) {
     if (typeof obj[propName] === "object") {
       obj[propName] = clean(obj[propName]);
@@ -91,8 +87,7 @@ export function generateDisplayName() {
   );
 }
 
-export function retrieveObjectNameFromUrl(
-  url: string,
+export function retrieveObjectNameFromUrl(url: string,
   eliminatedSeed: string
 ): string {
   const a = url.slice(url.indexOf(eliminatedSeed) + eliminatedSeed.length);
@@ -107,13 +102,46 @@ export function retrieveUsernameFromEmail(emailAddress: string): string {
   return emailAddress.slice(0, emailAddress.indexOf("@"));
 }
 
-export function sleep(ms) {
+export function sleep(ms: number) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms);
   });
 }
 
-export function isImageKey(sample: string) {
-  const regex = /^(\w{1,256}\/){0,256}\w{1,256}\.(png|jpg|jpeg|PNG|JPG|JPEG)$/;
-  return regex.test(sample);
+export function inspectObj(obj: any) {
+  const util = require('util')
+  console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }))
+}
+
+export function mapWsPayload(payload: unknown): { data: any; ack?: Function } {
+  if (!Array.isArray(payload)) {
+    if (isFunction(payload)) {
+      return { data: undefined, ack: payload as Function };
+    }
+    return { data: payload };
+  }
+  const lastElement = payload[payload.length - 1];
+  const isAck = isFunction(lastElement);
+  if (isAck) {
+    const size = payload.length - 1;
+    return {
+      data: size === 1 ? payload[0] : payload.slice(0, size),
+      ack: lastElement,
+    };
+  }
+  return { data: payload };
+}
+
+export function mapWsAck(payload: unknown): Function {
+  if (!Array.isArray(payload)) {
+    if (isFunction(payload)) {
+      return payload as Function
+    }
+    return null
+  }
+  const lastElement = payload[payload.length - 1];
+  if (isFunction(lastElement)) {
+    return lastElement
+  }
+  return null
 }
