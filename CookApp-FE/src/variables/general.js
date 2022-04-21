@@ -389,3 +389,32 @@ export const olderTransactions = [
     logo: FaArrowDown,
   },
 ];
+
+export const usersData = [
+  {
+    "id": "f9576098-a15a-466d-a643-1bc9f0f084cb",
+    "avatar": {
+      "url": "https://storage.googleapis.com/cookapp-3ae24.appspot.com/images/avatar-default.png",
+      "type": "IMAGE"
+    },
+    "displayName": "made_capital.261",
+    "email": "example@gmail.com",
+    "phone": "0293482414",
+    "createdAt": 1650330379008,
+    "username": "user1",
+    "emailVerification": true
+  },
+  {
+    "id": "f9576098-a15a-466d-a643-1bc9fbi312a",
+    "avatar": {
+      "url": "https://storage.googleapis.com/cookapp-3ae24.appspot.com/images/avatar-default.png",
+      "type": "IMAGE"
+    },
+    "displayName": "made_capital.261",
+    "email": "example@gmail.com",
+    "phone": "0293482414",
+    "createdAt": 1650330379008,
+    "username": "user1",
+    "emailVerification": false
+  }
+]

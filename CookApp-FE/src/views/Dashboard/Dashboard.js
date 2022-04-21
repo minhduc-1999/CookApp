@@ -1,12 +1,9 @@
 // Chakra imports
 import {
   Box,
-  Button,
   Flex,
   Grid,
   Icon,
-  Image,
-  Portal,
   Progress,
   SimpleGrid,
   Spacer,
@@ -23,9 +20,6 @@ import {
   useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
-// assets
-import peopleImage from "assets/img/people-image.png";
-import logoChakra from "assets/svg/logo-white.svg";
 // Custom components
 import Card from "components/Card/Card.js";
 import CardBody from "components/Card/CardBody.js";

@@ -1,10 +1,13 @@
 import { createIcon, Icon } from "@chakra-ui/icons";
 import { MdFastfood } from "react-icons/md"
 import { HiOutlineNewspaper } from "react-icons/hi"
+import { BsThreeDots } from "react-icons/bs"
 
 export const FoodIcon = () => <Icon as={MdFastfood} color="white" />
 
 export const PostIcon = () => <Icon as={HiOutlineNewspaper} color="white" />
+
+export const OptionIcon = () => <Icon as={BsThreeDots} color="black" />
 
 export const AdobexdLogo = createIcon({
   displayName: "AdobexdLogo",
