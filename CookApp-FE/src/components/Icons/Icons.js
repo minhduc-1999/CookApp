@@ -1,13 +1,18 @@
 import { createIcon, Icon } from "@chakra-ui/icons";
-import { MdFastfood } from "react-icons/md"
-import { HiOutlineNewspaper } from "react-icons/hi"
-import { BsThreeDots } from "react-icons/bs"
+import { MdFastfood } from "react-icons/md";
+import { HiOutlineNewspaper } from "react-icons/hi";
+import { BsThreeDots } from "react-icons/bs";
+import { useColorModeValue } from "@chakra-ui/color-mode";
 
-export const FoodIcon = () => <Icon as={MdFastfood} color="white" />
+export const FoodIcon = () => <Icon as={MdFastfood} color="white" />;
 
-export const PostIcon = () => <Icon as={HiOutlineNewspaper} color="white" />
+export const PostIcon = () => <Icon as={HiOutlineNewspaper} color="white" />;
 
-export const OptionIcon = () => <Icon as={BsThreeDots} color="black" />
+export const OptionIcon = () => {
+  let color = useColorModeValue("gray.700", "gray.200");
+
+  return <Icon as={BsThreeDots} color={color} />;
+};
 
 export const AdobexdLogo = createIcon({
   displayName: "AdobexdLogo",

@@ -17,7 +17,6 @@ import {
   Th,
   Thead,
   Tr,
-  useColorMode,
   useColorModeValue,
 } from "@chakra-ui/react";
 // Custom components
@@ -38,36 +37,20 @@ import {
 } from "components/Icons/Icons.js";
 import DashboardTableRow from "components/Tables/DashboardTableRow";
 import TimelineRow from "components/Tables/TimelineRow";
-import React, { useState } from "react";
+import React  from "react";
 // react icons
-import { BsArrowRight } from "react-icons/bs";
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
 import { dashboardTableData, timelineData } from "variables/general";
 
 export default function Dashboard() {
-  const value = "$100.000";
   // Chakra Color Mode
-  const { colorMode, toggleColorMode } = useColorMode();
   const iconTeal = useColorModeValue("teal.300", "teal.300");
   const iconBoxInside = useColorModeValue("white", "white");
   const textColor = useColorModeValue("gray.700", "white");
-  const [series, setSeries] = useState([
-    {
-      type: "area",
-      name: "Mobile apps",
-      data: [190, 220, 205, 350, 370, 450, 400, 360, 210, 250, 292, 150],
-    },
-    {
-      type: "area",
-      name: "Websites",
-      data: [400, 291, 121, 117, 25, 133, 121, 211, 147, 25, 201, 203],
-    },
-  ]);
-  const overlayRef = React.useRef();
 
   return (
     <Flex flexDirection="column" pt={{ base: "120px", md: "75px" }}>
-      <SimpleGrid columns={{ sm: 1, md: 2, xl: 4 }} spacing="24px">
+      <SimpleGrid columns={{ sm: 1, md: 2, xl: 3 }} spacing="24px">
         <Card minH="83px">
           <CardBody>
             <Flex flexDirection="row" align="center" justify="center" w="100%">
@@ -170,41 +153,6 @@ export default function Dashboard() {
               <Spacer />
               <IconBox as="box" h={"45px"} w={"45px"} bg={iconTeal}>
                 <FoodIcon h={"24px"} w={"24px"} color={iconBoxInside} />
-              </IconBox>
-            </Flex>
-          </CardBody>
-        </Card>
-        <Card minH="83px">
-          <CardBody>
-            <Flex flexDirection="row" align="center" justify="center" w="100%">
-              <Stat me="auto">
-                <StatLabel
-                  fontSize="sm"
-                  color="gray.400"
-                  fontWeight="bold"
-                  pb=".1rem"
-                >
-                  Total Sales
-                </StatLabel>
-                <Flex>
-                  <StatNumber fontSize="lg" color={textColor} fontWeight="bold">
-                    $173,000
-                  </StatNumber>
-                  <StatHelpText
-                    alignSelf="flex-end"
-                    justifySelf="flex-end"
-                    m="0px"
-                    color="green.400"
-                    fontWeight="bold"
-                    ps="3px"
-                    fontSize="md"
-                  >
-                    +8%
-                  </StatHelpText>
-                </Flex>
-              </Stat>
-              <IconBox as="box" h={"45px"} w={"45px"} bg={iconTeal}>
-                <CartIcon h={"24px"} w={"24px"} color={iconBoxInside} />
               </IconBox>
             </Flex>
           </CardBody>

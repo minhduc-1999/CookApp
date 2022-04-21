@@ -1,6 +1,5 @@
 import {
   Avatar,
-  Badge,
   Flex,
   Td,
   Text,
@@ -16,23 +15,24 @@ import { OptionIcon } from "components/Icons/Icons";
 import React from "react";
 import { calendarTime } from "utils/time";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons"
+import { durationFormat } from "utils/time";
+import PropTypes from "prop-types";
 
-function AccountRow(props) {
-  const { id, username, email, phone, emailVerification, createdAt, displayName, avatar } = props.data;
+function FoodRow(props) {
+  const {name, createdAt, totalTime, servings, photos} = props.data;
+  const index = props.index + 1
   const textColor = useColorModeValue("gray.700", "white");
-  const bgStatus = useColorModeValue("gray.400", "#1a202c");
-  const colorStatus = useColorModeValue("white", "gray.400");
 
   return (
     <Tr>
       <Td pl="0px">
         <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
-          {id}
+          {index}
         </Text>
       </Td>
       <Td minWidth={{ sm: "250px" }}>
         <Flex align="center" py=".8rem" minWidth="100%" flexWrap="nowrap">
-          <Avatar src={avatar.url} w="50px" borderRadius="12px" me="18px" />
+          <Avatar src={photos[0].url} w="50px" borderRadius="12px" me="18px" />
           <Flex direction="column">
             <Text
               fontSize="md"
@@ -40,10 +40,7 @@ function AccountRow(props) {
               fontWeight="bold"
               minWidth="100%"
             >
-              {displayName}
-            </Text>
-            <Text fontSize="sm" color="gray.400" fontWeight="normal">
-              {email}
+              {name}
             </Text>
           </Flex>
         </Flex>
@@ -51,13 +48,13 @@ function AccountRow(props) {
 
       <Td>
         <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
-          {username}
+          {servings}
         </Text>
       </Td>
 
       <Td>
         <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
-          {phone}
+          {durationFormat(totalTime)}
         </Text>
       </Td>
 
@@ -68,31 +65,6 @@ function AccountRow(props) {
       </Td>
 
       <Td>
-        <Badge
-          bg={emailVerification ? "green.400" : bgStatus}
-          color={emailVerification ? "white" : colorStatus}
-          fontSize="16px"
-          p="3px 10px"
-          borderRadius="8px"
-        >
-          {emailVerification ? "Đã xác thực" : "Chưa xác thực"}
-        </Badge>
-      </Td>
-
-      <Td>
-        {
-          /* 
-          <Button p="0px" bg="transparent" variant="no-hover">
-              <Text
-                fontSize="md"
-                color="gray.400"
-                fontWeight="bold"
-                cursor="pointer">
-                Edit
-              </Text>
-            </Button>
-          */
-        }
         <Menu>
           <MenuButton
             as={IconButton}
@@ -114,4 +86,9 @@ function AccountRow(props) {
   );
 }
 
-export default AccountRow;
+FoodRow.propTypes = {
+  index: PropTypes.number,
+  data: PropTypes.object
+};
+
+export default FoodRow;
