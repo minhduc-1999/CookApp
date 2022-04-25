@@ -23,15 +23,16 @@ export class EditPostCommand extends BaseCommand {
 
 @CommandHandler(EditPostCommand)
 export class EditPostCommandHandler
-  implements ICommandHandler<EditPostCommand> {
+  implements ICommandHandler<EditPostCommand>
+{
   constructor(
     @Inject("IPostService")
     private _postService: IPostService,
     @Inject("IStorageService")
     private _storageService: IStorageService,
     @Inject("IPostMediaRepository")
-    private _postMediaRepo: IPostMediaRepository,
-  ) { }
+    private _postMediaRepo: IPostMediaRepository
+  ) {}
   async execute(command: EditPostCommand): Promise<EditPostResponse> {
     const { user, tx, req } = command;
     const [existedPost] = await this._postService.getPostDetail(req.id);
@@ -44,29 +45,34 @@ export class EditPostCommandHandler
         )
       );
 
-    let deleteMedias = await this._postMediaRepo.getMedias(req.deleteImages)
+    let deleteMedias = await this._postMediaRepo.getMedias(req.deleteImages);
 
     // Delete images
     if (req.deleteImages?.length > 0) {
-      deleteMedias = await this._storageService.deleteFiles(deleteMedias)
+      deleteMedias = await this._storageService.deleteFiles(deleteMedias);
     }
 
     // Add new images
     if (req.addImages && req.addImages.length > 0) {
       const keys = await this._storageService.makePublic(
         command.req.addImages,
-        MediaType.IMAGE
+        MediaType.IMAGE,
+        "post"
       );
-      req.addImages = keys
+      req.addImages = keys;
     }
-    
 
     let updateData: Partial<Post> = existedPost.update({
       ...req,
-      medias: req.addImages?.map(image => new Image({ key: image }))
-    })
+      medias: req.addImages?.map((image) => new Image({ key: image })),
+    });
 
-    await this._postService.updatePost(existedPost, updateData, tx, deleteMedias?.map(media => media.id))
+    await this._postService.updatePost(
+      existedPost,
+      updateData,
+      tx,
+      deleteMedias?.map((media) => media.id)
+    );
     return new EditPostResponse();
   }
 }

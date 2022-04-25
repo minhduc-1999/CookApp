@@ -39,14 +39,16 @@ export class CreatePostCommandHandler
     if (req.images?.length > 0) {
       req.images = await this._storageService.makePublic(
         req.images,
-        MediaType.IMAGE
+        MediaType.IMAGE,
+        "post"
       );
     }
 
     if (req.videos?.length > 0) {
       req.videos = await this._storageService.makePublic(
         req.images,
-        MediaType.VIDEO
+        MediaType.VIDEO,
+        "post"
       );
     }
 

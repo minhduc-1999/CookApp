@@ -33,29 +33,41 @@ export class CreateFoodCommandHandler
     private _foodRepo: IFoodRepository,
     @Inject("IFoodSeService")
     private _foodSeService: IFoodSeService
-  ) { }
+  ) {}
   async execute(command: CreateFoodCommand): Promise<CreateFoodResponse> {
     const { req, user, tx } = command;
 
-    // if (req.photos?.length > 0) {
-    //   req.photos = await this._storageService.makePublic(
-    //     req.photos,
-    //     MediaType.IMAGE
-    //   );
-    // }
+    if (req.photos?.length > 0) {
+      req.photos = await this._storageService.makePublic(
+        req.photos,
+        MediaType.IMAGE,
+        "food"
+      );
+    }
 
     const foodMedias = req.photos?.map((image) => new Image({ key: image }));
 
-    let steps: RecipeStep[] = []
+    let steps: RecipeStep[] = [];
     for (let step of req.steps) {
-      // step.photos = step.photos && await this._storageService.makePublic(step.photos, MediaType.IMAGE)
+      step.photos =
+        step.photos &&
+        (await this._storageService.makePublic(
+          step.photos,
+          MediaType.IMAGE,
+          "recipe-step"
+        ));
       const item = new RecipeStep({
         content: step.content,
-        photos: step.photos && step.photos.map(photo => new Image({
-          key: photo
-        }))
-      })
-      steps.push(item)
+        photos:
+          step.photos &&
+          step.photos.map(
+            (photo) =>
+              new Image({
+                key: photo,
+              })
+          ),
+      });
+      steps.push(item);
     }
 
     const food = new Food({
@@ -74,9 +86,9 @@ export class CreateFoodCommandHandler
 
     const savedFood = await this._foodRepo.setTransaction(tx).insertFood(food);
 
-    console.log(savedFood)
+    console.log(savedFood);
 
-    await this._foodSeService.insertNewFood(savedFood)
+    await this._foodSeService.insertNewFood(savedFood);
 
     return new CreateFoodResponse(savedFood.id);
   }

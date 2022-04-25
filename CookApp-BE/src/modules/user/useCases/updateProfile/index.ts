@@ -36,12 +36,9 @@ export class UpdateProfileCommandHandler
     const { user } = command
     if (command.updateProfileReq.avatar) {
       const { avatar } = command.updateProfileReq;
-      const result = await this._storageService.replaceFiles(
-        [user.avatar],
-        [avatar],
-        MediaType.IMAGE
-      );
-      command.updateProfileReq.avatar = result[0];
+      const [ key ] = await this._storageService.makePublic([avatar], MediaType.IMAGE, "avatar")
+      command.updateProfileReq.avatar = key 
+      await this._storageService.deleteFiles([user.avatar])
     }
     const userProfile = await this._userRepo.getProfile(user.id)
 

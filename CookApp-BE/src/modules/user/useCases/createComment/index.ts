@@ -55,7 +55,8 @@ export class CreateCommentCommandHandler
     if (commentReq.images?.length > 0) {
       commentReq.images = await this._storageService.makePublic(
         commentReq.images,
-        MediaType.IMAGE
+        MediaType.IMAGE,
+        "comment"
       );
     }
 

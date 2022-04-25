@@ -58,7 +58,8 @@ export class EditAlbumCommandHandler
     if (req.addImages && req.addImages.length > 0) {
       const keys = await this._storageService.makePublic(
         command.req.addImages,
-        MediaType.IMAGE
+        MediaType.IMAGE,
+        "album"
       );
       req.addImages = keys
     }
