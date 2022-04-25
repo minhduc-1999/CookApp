@@ -10,7 +10,7 @@ export class UpdateProfileRequest {
   @IsValidDisplayName()
   @IsOptional()
   @IsNotEmpty()
-  @Length(2, 16)
+  @Length(2, 100)
   @ApiPropertyOptional({ type: String })
   displayName: string;
 
@@ -40,7 +40,7 @@ export class UpdateProfileRequest {
   @IsValidDisplayName()
   @IsOptional()
   @IsNotEmpty()
-  @Length(2, 16)
+  @Length(2, 50)
   @ApiPropertyOptional({ type: String })
   firstName?: string;
 
@@ -48,7 +48,7 @@ export class UpdateProfileRequest {
   @IsValidDisplayName()
   @IsOptional()
   @IsNotEmpty()
-  @Length(2, 16)
+  @Length(2, 50)
   @ApiPropertyOptional({ type: String })
   lastName?: string;
 

@@ -1,11 +1,16 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Type } from "class-transformer";
 import {
+    ArrayMaxSize,
+  ArrayMinSize,
+  ArrayUnique,
   IsArray,
   IsNotEmpty,
   IsNumber,
   IsOptional,
   IsString,
   Min,
+  ValidateNested,
 } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
@@ -13,6 +18,7 @@ import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
 class IngredientRequest {
   @IsMeaningfulString(1)
   @ApiProperty({ type: String })
+  @IsString()
   name: string;
 
   @IsOptional()
@@ -21,16 +27,18 @@ class IngredientRequest {
 
   @IsOptional()
   @ApiPropertyOptional({ type: Number })
+  @Min(0)
   quantity: number;
 }
 
 class RecipeStepRequest {
-  @ApiProperty({ type: String})
+  @ApiProperty({ type: String })
   @IsString()
-  content: string
+  content: string;
 
   @ApiProperty({ type: [String] })
   @IsArray()
+  @ArrayMinSize(1)
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
   @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"], { each: true })
@@ -50,10 +58,19 @@ export class CreateFoodRequest {
 
   @IsArray()
   @ApiProperty({ type: [RecipeStepRequest] })
+  @Type(() => RecipeStepRequest)
+  @ValidateNested()
+  @ArrayMinSize(1)
+  @ArrayMaxSize(30)
   steps: RecipeStepRequest[];
 
   @ApiProperty({ type: [IngredientRequest] })
   @IsArray()
+  @Type(() => IngredientRequest)
+  @ValidateNested()
+  @ArrayMinSize(1)
+  @ArrayUnique((item) => item.name)
+  @ArrayMaxSize(50)
   ingredients: IngredientRequest[];
 
   @ApiPropertyOptional({ type: String })
@@ -78,6 +95,7 @@ export class CreateFoodRequest {
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
   @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"], { each: true })
+  @ArrayMinSize(1)
   photos?: string[];
 
   @IsOptional()
