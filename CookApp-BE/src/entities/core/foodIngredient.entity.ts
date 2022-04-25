@@ -1,9 +1,7 @@
 import { Column, Entity, JoinColumn, ManyToOne } from 'typeorm';
 import { AbstractEntity } from '../../base/entities/base.entity';
-import { Food } from '../../domains/core/food.domain';
 import { FoodEntity } from './food.entity';
 import { Ingredient } from '../../domains/core/ingredient.domain';
-import { Audit } from '../../domains/audit.domain';
 
 @Entity({ name: 'food_ingredients' })
 export class FoodIngredientEntity extends AbstractEntity {
@@ -21,11 +19,10 @@ export class FoodIngredientEntity extends AbstractEntity {
   @JoinColumn({ name: "food_id" })
   food: FoodEntity
 
-  constructor(food: Food, ingre: Ingredient, audit?: Audit) {
-    super(audit)
+  constructor(ingre: Ingredient) {
+    super(ingre)
     this.quantity = ingre?.quantity
     this.unit = ingre?.unit
-    this.food = food && new FoodEntity(food)
     this.ingredient = ingre?.name
   }
 

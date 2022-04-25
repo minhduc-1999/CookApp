@@ -6,7 +6,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { FoodEntity, FoodMediaEntity } from "entities/core/food.entity";
 import { FoodIngredientEntity } from "entities/core/foodIngredient.entity";
-import { RecipeStepEntity, RecipeStepMediaEntity } from "entities/core/recipeStep.entity";
+import {
+  RecipeStepEntity,
+  RecipeStepMediaEntity,
+} from "entities/core/recipeStep.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ShareModule } from "modules/share/share.module";
 import { UserModule } from "modules/user/user.module";
@@ -17,14 +20,12 @@ import { RecipeStepRepository } from "./adapters/out/repositories/recipeStep.rep
 import { FoodSeService } from "./adapters/out/services/foodSe.service";
 import { FoodModel } from "./entities/se/food.schema";
 import { FoodRecipeService } from "./services/recipeStep.service";
+import { CreateFoodCommandHandler } from "./useCases/createFood";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
 import { GetFoodsQueryHandler } from "./useCases/getFoods";
 
-const commandHandlers = [];
-const queryHandlers = [
-  GetFoodsQueryHandler,
-  GetFoodDetailQueryHandler
-];
+const commandHandlers = [CreateFoodCommandHandler];
+const queryHandlers = [GetFoodsQueryHandler, GetFoodDetailQueryHandler];
 
 const services = [
   {
@@ -60,12 +61,10 @@ const controller = [FoodController];
       FoodMediaEntity,
       FoodIngredientEntity,
       RecipeStepEntity,
-      RecipeStepMediaEntity
+      RecipeStepMediaEntity,
     ]),
     forwardRef(() => UserModule),
-    MongooseModule.forFeature([
-      FoodModel
-    ])
+    MongooseModule.forFeature([FoodModel]),
   ],
   controllers: controller,
   providers: [
@@ -74,10 +73,6 @@ const controller = [FoodController];
     ...repositories,
     ...queryHandlers,
   ],
-  exports: [
-    "IFoodRecipeService",
-    "IFoodRepository",
-    "IFoodSeService"
-  ]
+  exports: ["IFoodRecipeService", "IFoodRepository", "IFoodSeService"],
 })
-export class CoreModule { }
+export class CoreModule {}

@@ -6,6 +6,7 @@ import { Sex } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { FollowEntity } from './follow.entity';
 import { ConversationMemberEntity } from './conversation.entity';
+import { FoodEntity } from '../../entities/core/food.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends AbstractEntity {
@@ -61,6 +62,10 @@ export class UserEntity extends AbstractEntity {
 
   @OneToMany(() => ConversationMemberEntity , member => member.user)
   memberOf: ConversationMemberEntity[]
+
+
+  @OneToMany(() => FoodEntity, food => food.author)
+  foods: FoodEntity[]
 
   constructor(user: User) {
     super(user)
