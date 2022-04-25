@@ -98,6 +98,102 @@ export class AuthorResponse {
   }
 }
 
+export class IngredientResponse {
+
+  @ApiResponseProperty({ type: String })
+  name: string
+
+  @ApiResponseProperty({ type: Number })
+  quantity: number
+
+  @ApiResponseProperty({ type: String })
+  unit: string
+
+  constructor(ingre: Ingredient) {
+    this.name = ingre?.name
+    this.quantity = ingre?.quantity
+    this.unit = ingre?.unit
+  }
+}
+
+export class RecipeStepResponse {
+  @ApiResponseProperty({ type: String })
+  content: string
+
+  @ApiResponseProperty({ type: MediaResponse })
+  photos: MediaResponse[]
+
+  @ApiResponseProperty({ type: String })
+  id: string
+
+  @ApiResponseProperty({ type: Number })
+  numberOfComment: number
+
+  @ApiResponseProperty({ type: Number })
+  numberOfReaction: number
+
+  @ApiResponseProperty({ enum: ReactionType })
+  reaction: ReactionType
+
+  constructor(step: RecipeStep, reaction?: Reaction) {
+    this.content = step?.content
+    this.photos = step?.photos?.map(photo => new MediaResponse(photo))
+    this.id = step?.id
+    this.numberOfComment = step?.nComments
+    this.numberOfReaction = step?.nReactions
+    this.reaction = reaction?.type
+  }
+}
+export class FoodResponse extends AuditResponse {
+  @ApiResponseProperty({ type: Number })
+  servings: number;
+
+  @ApiResponseProperty({ type: String })
+  name: string;
+
+  @ApiResponseProperty({ type: String })
+  description: string;
+
+  @ApiResponseProperty({ type: MediaResponse })
+  photos: MediaResponse[];
+
+  @ApiResponseProperty({ type: Number })
+  totalTime: number;
+
+  @ApiResponseProperty({ type: [String] })
+  cookingMethod: string[];
+
+  @ApiResponseProperty({ type: String })
+  group: string;
+
+  @ApiResponseProperty({ type: [RecipeStepResponse] })
+  steps: RecipeStepResponse[];
+
+  @ApiResponseProperty({ type: [IngredientResponse] })
+  ingredients: IngredientResponse[]
+
+  @ApiResponseProperty({ type: String })
+  origin: string;
+
+  @ApiResponseProperty({ type: String })
+  videoUrl: string;
+
+  constructor(food: Food, steps?: RecipeStepResponse[]) {
+    super(food)
+    this.servings = food?.servings
+    this.name = food?.name
+    this.description = food?.description
+    this.photos = food?.photos.map(photo => new MediaResponse(photo));
+    this.totalTime = food?.totalTime
+    this.steps = steps ? steps
+      : food?.steps.map(step => new RecipeStepResponse(step))
+    this.ingredients = food?.ingredients.map(ingredient =>
+      new IngredientResponse(ingredient)
+    )
+    this.videoUrl = food?.videoUrl
+  }
+}
+
 export class PostResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   content: string;
@@ -129,6 +225,9 @@ export class PostResponse extends AuditResponse {
   @ApiResponseProperty({ type: Boolean })
   saved?: boolean
 
+  @ApiResponseProperty({ type: FoodResponse})
+  ref?: FoodResponse
+
   constructor(post: Post, reaction?: Reaction, saved?: boolean) {
     super(post)
     this.author = post?.author && new AuthorResponse(post?.author)
@@ -143,6 +242,7 @@ export class PostResponse extends AuditResponse {
       case PostType.MOMENT:
         const moment = post as Moment
         this.content = moment?.content
+        this.ref = moment?.ref && new FoodResponse(moment.ref)
         break;
     }
   }
@@ -257,102 +357,7 @@ export class AlbumResponse extends AuditResponse {
   }
 }
 
-export class IngredientResponse {
 
-  @ApiResponseProperty({ type: String })
-  name: string
-
-  @ApiResponseProperty({ type: Number })
-  quantity: number
-
-  @ApiResponseProperty({ type: String })
-  unit: string
-
-  constructor(ingre: Ingredient) {
-    this.name = ingre?.name
-    this.quantity = ingre?.quantity
-    this.unit = ingre?.unit
-  }
-}
-
-export class RecipeStepResponse {
-  @ApiResponseProperty({ type: String })
-  content: string
-
-  @ApiResponseProperty({ type: MediaResponse })
-  photos: MediaResponse[]
-
-  @ApiResponseProperty({ type: String })
-  id: string
-
-  @ApiResponseProperty({ type: Number })
-  numberOfComment: number
-
-  @ApiResponseProperty({ type: Number })
-  numberOfReaction: number
-
-  @ApiResponseProperty({ enum: ReactionType })
-  reaction: ReactionType
-
-  constructor(step: RecipeStep, reaction?: Reaction) {
-    this.content = step?.content
-    this.photos = step?.photos?.map(photo => new MediaResponse(photo))
-    this.id = step?.id
-    this.numberOfComment = step?.nComments
-    this.numberOfReaction = step?.nReactions
-    this.reaction = reaction?.type
-  }
-}
-
-export class FoodResponse extends AuditResponse {
-  @ApiResponseProperty({ type: Number })
-  servings: number;
-
-  @ApiResponseProperty({ type: String })
-  name: string;
-
-  @ApiResponseProperty({ type: String })
-  description: string;
-
-  @ApiResponseProperty({ type: MediaResponse })
-  photos: MediaResponse[];
-
-  @ApiResponseProperty({ type: Number })
-  totalTime: number;
-
-  @ApiResponseProperty({ type: [String] })
-  cookingMethod: string[];
-
-  @ApiResponseProperty({ type: String })
-  group: string;
-
-  @ApiResponseProperty({ type: [RecipeStepResponse] })
-  steps: RecipeStepResponse[];
-
-  @ApiResponseProperty({ type: [IngredientResponse] })
-  ingredients: IngredientResponse[]
-
-  @ApiResponseProperty({ type: String })
-  origin: string;
-
-  @ApiResponseProperty({ type: String })
-  videoUrl: string;
-
-  constructor(food: Food, steps?: RecipeStepResponse[]) {
-    super(food)
-    this.servings = food?.servings
-    this.name = food?.name
-    this.description = food?.description
-    this.photos = food?.photos.map(photo => new MediaResponse(photo));
-    this.totalTime = food?.totalTime
-    this.steps = steps ? steps
-      : food?.steps.map(step => new RecipeStepResponse(step))
-    this.ingredients = food?.ingredients.map(ingredient =>
-      new IngredientResponse(ingredient)
-    )
-    this.videoUrl = food?.videoUrl
-  }
-}
 
 @ApiExtraModels(RecipeStepResponse, IngredientResponse)
 export class BotResponse {

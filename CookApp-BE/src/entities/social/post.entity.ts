@@ -61,7 +61,8 @@ export class PostEntity {
           content: this.content,
           medias: this.medias?.filter(media => !isNil(media.interaction)).map(media => media.toDomain()),
           author: this.author.toDomain(),
-          location: this.location
+          location: this.location,
+          ref: this.foodRef?.toDomain()
         })
     }
   }
