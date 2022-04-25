@@ -6,11 +6,12 @@ import { Moment, Post } from '../../domains/social/post.domain';
 import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
 import { isNil } from 'lodash';
+import { FoodEntity } from '../../entities/core/food.entity';
 
 @Entity({ name: 'posts' })
 export class PostEntity {
 
-  @OneToOne(() => InteractionEntity, it => it.post, { primary: true })
+  @OneToOne(() => InteractionEntity, it => it.post, { primary: true, cascade: ["insert"] })
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 
@@ -35,12 +36,17 @@ export class PostEntity {
   })
   kind: PostType
 
+  @ManyToOne(() => FoodEntity, food => food.referredPosts)
+  @JoinColumn({ name: "food_ref_id"})
+  foodRef: FoodEntity
+
   constructor(post: Post, interaction?: InteractionEntity) {
     this.interaction = interaction ? interaction : new InteractionEntity(post)
     this.author = new UserEntity(post?.author)
     this.content = post?.content
     this.kind = post?.type
     this.location = post?.location
+    this.foodRef = post?.ref && new FoodEntity(post.ref)
   }
 
   toDomain(): Post {

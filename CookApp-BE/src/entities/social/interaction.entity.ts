@@ -2,7 +2,7 @@ import { AbstractEntity } from "../../base/entities/base.entity";
 import { Column, Entity, OneToOne } from "typeorm";
 import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
 import { PostEntity } from "./post.entity";
-import { RecipeStepEntity } from "entities/core/recipeStep.entity";
+import { RecipeStepEntity } from "../../entities/core/recipeStep.entity";
 
 @Entity({ name: "interactions" })
 export class InteractionEntity extends AbstractEntity {

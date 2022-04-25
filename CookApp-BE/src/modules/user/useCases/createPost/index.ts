@@ -1,4 +1,4 @@
-import { BadRequestException, Inject } from "@nestjs/common";
+import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
@@ -13,6 +13,9 @@ import { IPostService } from "modules/user/services/post.service";
 import { NewPostEvent } from "modules/notification/events/NewPostNotification";
 import { MediaType, PostType } from "enums/social.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
+import { Food } from "domains/core/food.domain";
+import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
+import { UserErrorCode } from "enums/errorCode.enum";
 
 export class CreatePostCommand extends BaseCommand {
   req: CreatePostRequest;
@@ -31,6 +34,8 @@ export class CreatePostCommandHandler
     private _postService: IPostService,
     @Inject("IStorageService")
     private _storageService: IStorageService,
+    @Inject("IFoodRepository")
+    private _foodRepo: IFoodRepository,
     private _eventBus: EventBus,
   ) { }
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
@@ -62,11 +67,18 @@ export class CreatePostCommandHandler
 
     switch (req.kind) {
       case PostType.MOMENT: {
+        let foodRef: Food
+        if (req.foodRefId) {
+          foodRef = await this._foodRepo.getById(req.foodRefId)
+          if (!foodRef)
+            throw new NotFoundException(ResponseDTO.fail("Food not found", UserErrorCode.FOOD_NOT_FOUND))
+        }
         creatingPost = new Moment({
           author: user,
           content: req.content,
           medias,
           location: req.location,
+          ref: foodRef
         });
       }
       default: {

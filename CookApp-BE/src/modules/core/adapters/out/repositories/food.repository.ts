@@ -10,7 +10,6 @@ import { FoodEntity } from "entities/core/food.entity";
 import { RecipeStepEntity } from "entities/core/recipeStep.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { In, QueryRunner, Repository } from "typeorm";
-import { inspectObj } from "utils";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<[Food[], number]>;

@@ -1,3 +1,4 @@
+import { Food } from "../../domains/core/food.domain";
 import { Audit } from "../../domains/audit.domain";
 import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
 import { PostType } from "../../enums/social.enum";
@@ -49,10 +50,14 @@ export class Moment extends PostBase {
   }
 
   medias?: CommentMedia[]
+
+  ref?: Food
+
   constructor(post: Partial<Moment>) {
     super(post)
     this.medias = post.medias ?? []
     this.type = PostType.MOMENT
+    this.ref = post?.ref
   }
 }
 

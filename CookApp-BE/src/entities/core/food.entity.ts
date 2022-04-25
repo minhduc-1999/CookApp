@@ -6,6 +6,7 @@ import { Food } from "../../domains/core/food.domain";
 import { FoodIngredientEntity } from "./foodIngredient.entity";
 import { RecipeStepEntity } from "./recipeStep.entity";
 import { UserEntity } from "../../entities/social/user.entity";
+import { PostEntity } from "../../entities/social/post.entity";
 
 @Entity({ name: "foods" })
 export class FoodEntity extends AbstractEntity {
@@ -43,6 +44,9 @@ export class FoodEntity extends AbstractEntity {
   @ManyToOne(() => UserEntity, (user) => user.foods, { nullable: true })
   @JoinColumn({ name: "author_id" })
   author: UserEntity;
+
+  @OneToMany(() => PostEntity, post => post.foodRef)
+  referredPosts: PostEntity[]
 
   constructor(food: Food) {
     super(food);
