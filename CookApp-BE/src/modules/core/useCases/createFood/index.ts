@@ -11,7 +11,7 @@ import { CreateFoodRequest } from "./createFoodRequest";
 import { Food } from "domains/core/food.domain";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { RecipeStep } from "domains/core/recipeStep.domain";
-import { Ingredient } from "domains/core/ingredient.domain";
+import { FoodIngredient } from "domains/core/ingredient.domain";
 import { IFoodSeService } from "modules/core/adapters/out/services/foodSe.service";
 
 export class CreateFoodCommand extends BaseCommand {
@@ -78,7 +78,7 @@ export class CreateFoodCommandHandler
       totalTime: req.totalTime,
       steps,
       ingredients:
-        req?.ingredients && req.ingredients.map((ing) => new Ingredient(ing)),
+        req?.ingredients && req.ingredients.map((ing) => new FoodIngredient(ing)),
       videoUrl: req?.videoUrl,
       url: req?.url,
       author: user,

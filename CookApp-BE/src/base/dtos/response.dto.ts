@@ -22,7 +22,7 @@ import {
 } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
-import { Ingredient } from "domains/core/ingredient.domain";
+import { FoodIngredient } from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { Album } from "domains/social/album.domain";
 import { Conversation, Message } from "domains/social/conversation.domain";
@@ -121,7 +121,7 @@ export class IngredientResponse {
   @ApiResponseProperty({ type: String })
   unit: string;
 
-  constructor(ingre: Ingredient) {
+  constructor(ingre: FoodIngredient) {
     this.name = ingre?.name;
     this.quantity = ingre?.quantity;
     this.unit = ingre?.unit;
@@ -410,7 +410,7 @@ export class BotResponse {
     text: string,
     end: boolean,
     sessionID?: string,
-    attach?: RecipeStep[] | Ingredient[],
+    attach?: RecipeStep[] | FoodIngredient[],
     attachType?: MessageContentType
   ) {
     this.text = text;
@@ -421,7 +421,7 @@ export class BotResponse {
       };
     }
 
-    if (attach && attach[0] instanceof Ingredient) {
+    if (attach && attach[0] instanceof FoodIngredient) {
       this.attachment = {
         ...this.attachment,
         ingredients: attach.map((at) => new IngredientResponse(at)),

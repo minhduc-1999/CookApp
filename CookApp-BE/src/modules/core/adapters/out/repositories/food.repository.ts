@@ -4,7 +4,7 @@ import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { Food } from "domains/core/food.domain";
-import { Ingredient } from "domains/core/ingredient.domain";
+import { FoodIngredient } from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { FoodEntity } from "entities/core/food.entity";
 import { RecipeStepEntity } from "entities/core/recipeStep.entity";
@@ -17,7 +17,7 @@ export interface IFoodRepository {
   getById(id: string): Promise<Food>;
   getByIds(ids: string[]): Promise<Food[]>;
   getSteps(foodId: string): Promise<RecipeStep[]>;
-  getIngredients(foodId: string): Promise<Ingredient[]>;
+  getIngredients(foodId: string): Promise<FoodIngredient[]>;
   insertFood(food: Food): Promise<Food>;
 }
 
@@ -47,7 +47,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     return null;
   }
 
-  async getIngredients(foodId: string): Promise<Ingredient[]> {
+  async getIngredients(foodId: string): Promise<FoodIngredient[]> {
     const entity = await this._foodRepo.findOne({
       relations: ["ingredients"],
       where: {

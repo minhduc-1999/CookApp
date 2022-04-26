@@ -2,7 +2,7 @@ import { Inject } from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { BaseCommand } from "base/cqrs/command.base";
-import { Ingredient } from "domains/core/ingredient.domain";
+import { FoodIngredient } from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { User } from "domains/social/user.domain";
 import { BotActionType, MessageContentType } from "enums/social.enum";
@@ -44,7 +44,7 @@ export class SpeakToBotCommandHandler
     let response: SpeakToBotResponse
     if (botRes.endInteraction) {
       const foodId = await this._foodSeService.findOneByName(botRes.parameters.fields.food.stringValue)
-      let attachment: Ingredient[] | RecipeStep[]
+      let attachment: FoodIngredient[] | RecipeStep[]
       let attachmentType: MessageContentType
       switch (botRes.action) {
         case BotActionType.SHOW_INGREDIENT: {

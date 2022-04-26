@@ -1,7 +1,7 @@
 import { User } from "domains/social/user.domain";
 import { Audit } from "../../domains/audit.domain";
 import { Image, Video } from "../../domains/social/media.domain";
-import { Ingredient } from "./ingredient.domain";
+import { FoodIngredient } from "./ingredient.domain";
 import { RecipeStep } from "./recipeStep.domain";
 
 export class Food extends Audit {
@@ -17,7 +17,7 @@ export class Food extends Audit {
 
   steps: RecipeStep[];
 
-  ingredients: Ingredient[];
+  ingredients: FoodIngredient[];
 
   videoUrl: string;
 
