@@ -22,7 +22,7 @@ import {
 } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
-import { FoodIngredient } from "domains/core/ingredient.domain";
+import { FoodIngredient, Ingredient, Unit } from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { Album } from "domains/social/album.domain";
 import { Conversation, Message } from "domains/social/conversation.domain";
@@ -111,7 +111,25 @@ export class AuthorResponse {
   }
 }
 
+export class UnitResponse {
+  @ApiResponseProperty({type: String})
+  name: string
+
+  constructor(unit: Unit) {
+    this.name = unit?.name
+  }
+}
+
 export class IngredientResponse {
+  @ApiResponseProperty({type: String})
+  name: string
+
+  constructor(ing: Ingredient) {
+    this.name = ing?.name
+  }
+}
+
+export class FoodIngredientResponse {
   @ApiResponseProperty({ type: String })
   name: string;
 
@@ -181,8 +199,8 @@ export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: [RecipeStepResponse] })
   steps: RecipeStepResponse[];
 
-  @ApiResponseProperty({ type: [IngredientResponse] })
-  ingredients: IngredientResponse[];
+  @ApiResponseProperty({ type: [FoodIngredientResponse] })
+  ingredients: FoodIngredientResponse[];
 
   @ApiResponseProperty({ type: String })
   origin: string;
@@ -201,7 +219,7 @@ export class FoodResponse extends AuditResponse {
       ? steps
       : food?.steps.map((step) => new RecipeStepResponse(step));
     this.ingredients = food?.ingredients.map(
-      (ingredient) => new IngredientResponse(ingredient)
+      (ingredient) => new FoodIngredientResponse(ingredient)
     );
     this.videoUrl = food?.videoUrl;
   }
@@ -370,7 +388,7 @@ export class AlbumResponse extends AuditResponse {
   }
 }
 
-@ApiExtraModels(RecipeStepResponse, IngredientResponse)
+@ApiExtraModels(RecipeStepResponse, FoodIngredientResponse)
 export class BotResponse {
   @ApiResponseProperty({ type: String })
   text: string;
@@ -387,14 +405,14 @@ export class BotResponse {
       ingredients: {
         type: "array",
         items: {
-          $ref: getSchemaPath(IngredientResponse),
+          $ref: getSchemaPath(FoodIngredientResponse),
         },
       },
     },
   })
   attachment: {
     recipes: RecipeStepResponse[];
-    ingredients: IngredientResponse[];
+    ingredients: FoodIngredientResponse[];
   };
 
   @ApiResponseProperty({ enum: MessageContentType })
@@ -424,7 +442,7 @@ export class BotResponse {
     if (attach && attach[0] instanceof FoodIngredient) {
       this.attachment = {
         ...this.attachment,
-        ingredients: attach.map((at) => new IngredientResponse(at)),
+        ingredients: attach.map((at) => new FoodIngredientResponse(at)),
       };
     }
     this.type = attachType;
