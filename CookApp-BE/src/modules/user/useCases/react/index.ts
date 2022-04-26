@@ -15,6 +15,7 @@ import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Post } from "domains/social/post.domain";
 import { IFoodRecipeService } from "modules/core/services/recipeStep.service";
 import { IAlbumMediaRepository } from "modules/user/interfaces/repositories/albumMedia.interface";
+import { IAlbumService } from "modules/user/services/album.service";
 export class ReactCommand extends BaseCommand {
   reactReq: ReactRequest;
   constructor(
@@ -43,6 +44,8 @@ export class ReactCommandHandler
     private _eventBus: EventBus,
     @Inject("IReactionRepository")
     private _reactionRepo: IReactionRepository,
+    @Inject("IAlbumService")
+    private _albumService: IAlbumService
   ) { }
   async execute(command: ReactCommand): Promise<ReactResponse> {
     const { user, reactReq, tx } = command;
@@ -75,6 +78,8 @@ export class ReactCommandHandler
             ResponseDTO.fail("Media not found")
           );
         }
+      case InteractiveTargetType.ALBUM:
+        target = await this._albumService.getAlbumDetail(reactReq.targetId)
         break;
       default:
         throw new BadRequestException(ResponseDTO.fail("Target type not valid"))

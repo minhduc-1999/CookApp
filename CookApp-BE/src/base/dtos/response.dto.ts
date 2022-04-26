@@ -383,12 +383,24 @@ export class AlbumResponse extends AuditResponse {
   @ApiResponseProperty({ type: AuthorResponse })
   owner: AuthorResponse;
 
-  constructor(album: Album) {
+  @ApiResponseProperty({ type: Number })
+  numOfReaction: number;
+
+  @ApiResponseProperty({ type: Number })
+  numOfComment: number;
+
+  @ApiResponseProperty({ enum: ReactionType })
+  reaction?: ReactionType;
+
+  constructor(album: Album, reaction?: Reaction) {
     super(album);
     this.name = album?.name;
     this.medias = album?.medias.map((media) => new MediaResponse(media));
     this.owner = album?.owner && new AuthorResponse(album.owner);
     this.description = album?.description;
+    this.numOfComment = album?.nComments
+    this.numOfReaction = album?.nReactions
+    this.reaction = reaction?.type
   }
 }
 
