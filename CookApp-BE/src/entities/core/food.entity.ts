@@ -41,7 +41,7 @@ export class FoodEntity extends AbstractEntity {
   })
   medias: FoodMediaEntity[];
 
-  @ManyToOne(() => UserEntity, (user) => user.foods, { nullable: true })
+  @ManyToOne(() => UserEntity, (user) => user.foods, { nullable: false })
   @JoinColumn({ name: "author_id" })
   author: UserEntity;
 

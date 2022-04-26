@@ -208,6 +208,9 @@ export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   videoUrl: string;
 
+  @ApiResponseProperty({ type: AuthorResponse})
+  author: AuthorResponse
+
   constructor(food: Food, steps?: RecipeStepResponse[]) {
     super(food);
     this.servings = food?.servings;
@@ -222,6 +225,7 @@ export class FoodResponse extends AuditResponse {
       (ingredient) => new FoodIngredientResponse(ingredient)
     );
     this.videoUrl = food?.videoUrl;
+    this.author = food?.author && new AuthorResponse(food.author)
   }
 }
 

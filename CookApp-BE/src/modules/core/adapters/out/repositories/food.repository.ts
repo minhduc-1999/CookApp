@@ -69,7 +69,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
 
   async getByIds(ids: string[]): Promise<Food[]> {
     const entities = await this._foodRepo.find({
-      relations: ["medias"],
+      relations: ["medias", "author"],
       where: {
         id: In(ids),
       },
@@ -81,19 +81,20 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     const entity = await this._foodRepo
       .createQueryBuilder("food")
       .leftJoinAndSelect("food.ingredients", "ingredient")
+      .leftJoinAndSelect("food.author", "author")
       .leftJoinAndSelect("food.medias", "media")
       .leftJoinAndSelect("food.steps", "step")
       .leftJoinAndSelect("step.interaction", "stepInter")
       .leftJoinAndSelect("step.medias", "stepMedia")
       .where("food.id = :id", { id })
-      .select(["food", "ingredient", "step", "media", "stepInter", "stepMedia"])
+      .select(["food", "ingredient", "step","author", "media", "stepInter", "stepMedia"])
       .getOne();
 
     return entity?.toDomain();
   }
   async getFoods(query: PageOptionsDto): Promise<[Food[], number]> {
     const [foodEntities, total] = await this._foodRepo.findAndCount({
-      relations: ["medias"],
+      relations: ["medias", "author"],
       skip: query.limit * query.offset,
       take: query.limit,
     });
