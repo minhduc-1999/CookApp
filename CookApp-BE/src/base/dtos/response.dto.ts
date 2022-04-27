@@ -26,6 +26,7 @@ import { FoodIngredient, Ingredient, Unit } from "domains/core/ingredient.domain
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { Album } from "domains/social/album.domain";
 import { Conversation, Message } from "domains/social/conversation.domain";
+import { FoodVote } from "domains/core/foodVote.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -143,6 +144,23 @@ export class FoodIngredientResponse {
     this.name = ingre?.name;
     this.quantity = ingre?.quantity;
     this.unit = ingre?.unit;
+  }
+}
+
+export class FoodVoteResponse {
+  @ApiResponseProperty({ type: Number })
+  star: number;
+
+  @ApiResponseProperty({ type: String })
+  comment: string;
+
+  @ApiResponseProperty({ type: AuthorResponse})
+  author: AuthorResponse
+
+  constructor(vote: FoodVote) {
+    this.star = vote?.star
+    this.comment = vote?.comment
+    this.author = vote?.author && new AuthorResponse(vote.author)
   }
 }
 

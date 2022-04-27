@@ -6,6 +6,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { FoodEntity, FoodMediaEntity } from "entities/core/food.entity";
 import { FoodIngredientEntity } from "entities/core/foodIngredient.entity";
+import { FoodVoteEntity } from "entities/core/foodVote.entity";
 import { IngredientEntity, UnitEntity } from "entities/core/ingredient.entity";
 import {
   RecipeStepEntity,
@@ -19,6 +20,7 @@ import { FoodController } from "./adapters/in/food.controller";
 import { IngredientController } from "./adapters/in/ingredient.controller";
 import { UnitController } from "./adapters/in/unit.controller";
 import { FoodRepository } from "./adapters/out/repositories/food.repository";
+import { FoodVoteRepository } from "./adapters/out/repositories/foodVote.repository";
 import { IngredientRepository } from "./adapters/out/repositories/ingredient.repository";
 import { RecipeStepRepository } from "./adapters/out/repositories/recipeStep.repository";
 import { UnitRepository } from "./adapters/out/repositories/unit.repository";
@@ -28,15 +30,18 @@ import { FoodRecipeService } from "./services/recipeStep.service";
 import { CreateFoodCommandHandler } from "./useCases/createFood";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
 import { GetFoodsQueryHandler } from "./useCases/getFoods";
+import { GetFoodVotesQueryHandler } from "./useCases/getFoodVotes";
 import { GetIngredientsQueryHandler } from "./useCases/getIngredients";
 import { GetUnitsQueryHandler } from "./useCases/getUnits";
+import { VoteFoodCommandHandler } from "./useCases/voteFood";
 
-const commandHandlers = [CreateFoodCommandHandler];
+const commandHandlers = [CreateFoodCommandHandler, VoteFoodCommandHandler];
 const queryHandlers = [
   GetFoodsQueryHandler,
   GetFoodDetailQueryHandler,
   GetUnitsQueryHandler,
   GetIngredientsQueryHandler,
+  GetFoodVotesQueryHandler
 ];
 
 const services = [
@@ -66,6 +71,10 @@ const repositories = [
     provide: "IIngredientRepository",
     useClass: IngredientRepository,
   },
+  {
+    provide: "IFoodVoteRepository",
+    useClass: FoodVoteRepository,
+  },
 ];
 const controller = [FoodController, IngredientController, UnitController];
 @Module({
@@ -84,6 +93,7 @@ const controller = [FoodController, IngredientController, UnitController];
       RecipeStepMediaEntity,
       UnitEntity,
       IngredientEntity,
+      FoodVoteEntity
     ]),
     forwardRef(() => UserModule),
     MongooseModule.forFeature([FoodModel]),

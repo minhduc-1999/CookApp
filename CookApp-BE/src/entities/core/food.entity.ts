@@ -7,6 +7,7 @@ import { FoodIngredientEntity } from "./foodIngredient.entity";
 import { RecipeStepEntity } from "./recipeStep.entity";
 import { UserEntity } from "../../entities/social/user.entity";
 import { PostEntity } from "../../entities/social/post.entity";
+import { FoodVoteEntity } from "./foodVote.entity";
 
 @Entity({ name: "foods" })
 export class FoodEntity extends AbstractEntity {
@@ -47,6 +48,9 @@ export class FoodEntity extends AbstractEntity {
 
   @OneToMany(() => PostEntity, post => post.foodRef)
   referredPosts: PostEntity[]
+
+  @OneToMany(() => FoodVoteEntity, vote => vote.food)
+  votes: FoodVoteEntity[]
 
   constructor(food: Food) {
     super(food);
