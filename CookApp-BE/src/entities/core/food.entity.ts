@@ -29,6 +29,9 @@ export class FoodEntity extends AbstractEntity {
   @Column({ name: "video_url", nullable: true })
   videoUrl: string;
 
+  @Column({name: "rating", nullable: true, type: "float4"})
+  rating: number
+  
   @OneToMany(() => FoodIngredientEntity, (foodIng) => foodIng.food, {
     cascade: ["insert"],
   })
@@ -75,7 +78,7 @@ export class FoodEntity extends AbstractEntity {
       photos: this.medias?.map((media) => media.toDomain()),
       steps: this.steps?.map((step) => step.toDomain()),
       ingredients: this.ingredients?.map((ing) => ing.toDomain()),
-      author: this.author?.toDomain(),
+      author: this.author?.toDomain()
     });
   }
 
