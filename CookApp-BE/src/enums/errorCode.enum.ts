@@ -13,5 +13,6 @@ export enum UserErrorCode {
   FOOD_NOT_FOUND = "food_not_found",
   ALBUM_NOT_FOUND = "album_not_found",
   CONVERSATION_NOT_FOUND = "conversation_not_found",
-  MESSAGE_NOT_FOUND = "message_not_found"
+  MESSAGE_NOT_FOUND = "message_not_found",
+  VOTE_NOT_FOUND = "vote_not_found",
 }

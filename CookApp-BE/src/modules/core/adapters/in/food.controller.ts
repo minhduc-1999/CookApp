@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   ParseUUIDPipe,
+  Patch,
   Post,
   Query,
 } from "@nestjs/common";
@@ -27,6 +28,8 @@ import { User } from "domains/social/user.domain";
 import { CreateFoodCommand } from "modules/core/useCases/createFood";
 import { CreateFoodRequest } from "modules/core/useCases/createFood/createFoodRequest";
 import { CreateFoodResponse } from "modules/core/useCases/createFood/createFoodResponse";
+import { EditVoteCommand } from "modules/core/useCases/editVote";
+import { EditVoteRequest } from "modules/core/useCases/editVote/editVoteRequest";
 import { GetFoodDetailQuery } from "modules/core/useCases/getFoodDetail";
 import { GetFoodDetailResponse } from "modules/core/useCases/getFoodDetail/getFoodDetailResponse";
 import { GetFoodsQuery } from "modules/core/useCases/getFoods";
@@ -116,5 +119,21 @@ export class FoodController {
     const voteFoodCommand = new VoteFoodCommand(tx, user, req);
     await this._commandBus.execute(voteFoodCommand);
     return Result.ok(null, { messages: ["Vote food successfully"] });
+  }
+
+  @Patch(":foodId/ratings")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Edit vote successfully")
+  @HttpRequestTransaction()
+  async editVote(
+    @Body() req: EditVoteRequest,
+    @HttpUserReq() user: User,
+    @Param("foodId", ParseUUIDPipe) foodId: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    req.foodId = foodId;
+    const voteFoodCommand = new EditVoteCommand(tx, user, req);
+    await this._commandBus.execute(voteFoodCommand);
+    return Result.ok(null, { messages: ["Edit vote successfully"] });
   }
 }

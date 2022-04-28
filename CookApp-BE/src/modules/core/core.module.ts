@@ -28,6 +28,7 @@ import { FoodSeService } from "./adapters/out/services/foodSe.service";
 import { FoodModel } from "./entities/se/food.schema";
 import { FoodRecipeService } from "./services/recipeStep.service";
 import { CreateFoodCommandHandler } from "./useCases/createFood";
+import { EditVoteCommandHandler } from "./useCases/editVote";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
 import { GetFoodsQueryHandler } from "./useCases/getFoods";
 import { GetFoodVotesQueryHandler } from "./useCases/getFoodVotes";
@@ -35,13 +36,17 @@ import { GetIngredientsQueryHandler } from "./useCases/getIngredients";
 import { GetUnitsQueryHandler } from "./useCases/getUnits";
 import { VoteFoodCommandHandler } from "./useCases/voteFood";
 
-const commandHandlers = [CreateFoodCommandHandler, VoteFoodCommandHandler];
+const commandHandlers = [
+  CreateFoodCommandHandler,
+  VoteFoodCommandHandler,
+  EditVoteCommandHandler,
+];
 const queryHandlers = [
   GetFoodsQueryHandler,
   GetFoodDetailQueryHandler,
   GetUnitsQueryHandler,
   GetIngredientsQueryHandler,
-  GetFoodVotesQueryHandler
+  GetFoodVotesQueryHandler,
 ];
 
 const services = [
@@ -93,7 +98,7 @@ const controller = [FoodController, IngredientController, UnitController];
       RecipeStepMediaEntity,
       UnitEntity,
       IngredientEntity,
-      FoodVoteEntity
+      FoodVoteEntity,
     ]),
     forwardRef(() => UserModule),
     MongooseModule.forFeature([FoodModel]),

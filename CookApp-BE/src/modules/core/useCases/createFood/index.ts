@@ -86,8 +86,6 @@ export class CreateFoodCommandHandler
 
     const savedFood = await this._foodRepo.setTransaction(tx).insertFood(food);
 
-    console.log(savedFood);
-
     await this._foodSeService.insertNewFood(savedFood);
 
     return new CreateFoodResponse(savedFood.id);

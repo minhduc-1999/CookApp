@@ -1,3 +1,5 @@
+import { Type } from "@nestjs/common";
+import { IUpdatable } from "domains/interfaces/IUpdatable.interface";
 import { isFunction } from "lodash";
 import _ = require("lodash");
 const randomWords = require("random-words");
@@ -144,4 +146,13 @@ export function mapWsAck(payload: unknown): Function {
     return lastElement
   }
   return null
+}
+
+export function loadUpdateData<T extends IUpdatable<T>>(object: any, target: T): Partial<T>{
+  const keys = target.getUpdatableFields()
+  const updatePayload: Partial<T> = {}
+  for (let key of keys)  {
+      updatePayload[key] = object[key] ?? target[key]
+  }
+  return updatePayload
 }

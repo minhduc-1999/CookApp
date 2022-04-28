@@ -14,6 +14,10 @@ export interface IFoodVoteRepository {
   insertVote(vote: FoodVote): Promise<FoodVote>;
   findVote(user: User, food: Food): Promise<FoodVote>;
   getVotes(food: Food, query: PageOptionsDto): Promise<[FoodVote[], number]>;
+  updateVote(
+    vote: FoodVote,
+    partialData: Partial<FoodVote>
+  ): Promise<void>;
 }
 
 @Injectable()
@@ -26,6 +30,22 @@ export class FoodVoteRepository
     private _foodVoteRepo: Repository<FoodVoteEntity>
   ) {
     super();
+  }
+  async updateVote(
+    vote: FoodVote,
+    partialData: Partial<FoodVote>
+  ): Promise<void> {
+    if (!vote) return;
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.update<FoodVoteEntity>(
+        FoodVoteEntity,
+        {
+          id: vote.id,
+        },
+        FoodVoteEntity.getUpdatePayload(partialData)
+      );
+    }
   }
 
   async getVotes(
@@ -64,9 +84,7 @@ export class FoodVoteRepository
     const queryRunner = this.tx.getRef() as QueryRunner;
     if (queryRunner && !queryRunner.isReleased) {
       const voteEntity = new FoodVoteEntity(vote);
-      const result = await queryRunner.manager.save<FoodVoteEntity>(
-        voteEntity
-      );
+      const result = await queryRunner.manager.save<FoodVoteEntity>(voteEntity);
       return result.toDomain();
     }
     return null;

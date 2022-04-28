@@ -38,4 +38,11 @@ export class FoodVoteEntity extends AbstractEntity {
       food: this.food?.toDomain()
     });
   }
+
+  static getUpdatePayload(foodVote: Partial<FoodVote>) : Partial<FoodVoteEntity>{
+    return {
+      star: foodVote.star,
+      comment: foodVote.comment
+    }
+  }
 }
