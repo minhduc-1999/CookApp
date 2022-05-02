@@ -13,10 +13,10 @@ import {
   ValidateNested,
 } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-import { WordMaxLength } from "decorators/wordMaxLength.decorator";
+import { WordLength } from "decorators/wordLength.decorator";
 
 class IngredientRequest {
-  @WordMaxLength(1)
+  @WordLength(1)
   @ApiProperty({ type: String })
   @IsString()
   name: string;
@@ -79,14 +79,14 @@ export class CreateFoodRequest {
   @IsFileExtensions(["mp4"])
   videoUrl?: string;
 
-  @WordMaxLength(1)
+  @WordLength(1)
   @ApiProperty({ type: String, description: "Food's name" })
   name: string;
 
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String })
   @IsString()
-  @WordMaxLength(1)
+  @WordLength(1)
   @IsOptional()
   description?: string;
 
