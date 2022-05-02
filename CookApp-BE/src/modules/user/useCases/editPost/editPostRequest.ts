@@ -35,5 +35,12 @@ export class EditPostRequest {
   @IsOptional()
   deleteImages?: string[];
 
+  @IsArray()
+  @ApiPropertyOptional({ type: [String] })
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @IsOptional()
+  tags: string[];
+
   id: string
 }

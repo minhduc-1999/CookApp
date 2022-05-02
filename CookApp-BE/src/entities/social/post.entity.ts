@@ -40,6 +40,9 @@ export class PostEntity {
   @JoinColumn({ name: "food_ref_id"})
   foodRef: FoodEntity
 
+  @Column({ type: "jsonb", nullable: true})
+  tags: string[]
+
   constructor(post: Post, interaction?: InteractionEntity) {
     this.interaction = interaction ? interaction : new InteractionEntity(post)
     this.author = new UserEntity(post?.author)
@@ -47,6 +50,7 @@ export class PostEntity {
     this.kind = post?.type
     this.location = post?.location
     this.foodRef = post?.ref && new FoodEntity(post.ref)
+    this.tags = post?.tags
   }
 
   toDomain(): Post {
@@ -59,18 +63,20 @@ export class PostEntity {
           nComments,
           nReactions,
           content: this.content,
-          medias: this.medias?.filter(media => !isNil(media.interaction)).map(media => media.toDomain()),
-          author: this.author.toDomain(),
+          medias: this.medias && this.medias.filter(media => !isNil(media.interaction)).map(media => media.toDomain()),
+          author: this.author && this.author.toDomain(),
           location: this.location,
-          ref: this.foodRef?.toDomain()
+          ref:  this.foodRef && this.foodRef.toDomain(),
+          tags: this.tags
         })
     }
   }
 
   update(data: Partial<Post>): Partial<PostEntity> {
     return {
-      content: data.content ?? this.content,
-      location: data.location ?? this.location,
+      content: data?.content ?? this.content,
+      location: data?.location ?? this.location,
+      tags: data?.tags ?? this.tags
     }
   }
 }

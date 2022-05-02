@@ -14,6 +14,7 @@ export abstract class PostBase extends Audit implements IInteractable {
     this.author = post?.author
     this.content = post?.content
     this.location = post?.location
+    this.tags = post?.tags
   }
 
   nReactions: number;
@@ -28,6 +29,8 @@ export abstract class PostBase extends Audit implements IInteractable {
 
   location: string
 
+  tags: string[]
+
   abstract canCreate(): boolean
 
   abstract update(data: Partial<PostBase>): Partial<PostBase>
@@ -39,7 +42,8 @@ export class Moment extends PostBase {
     return {
       content: data.content ?? this.content,
       location: data.location ?? this.location,
-      medias: data.medias ?? this.medias
+      medias: data.medias ?? this.medias,
+      tags: data.tags ?? this.tags
     }
   }
 
@@ -55,7 +59,7 @@ export class Moment extends PostBase {
 
   constructor(post: Partial<Moment>) {
     super(post)
-    this.medias = post.medias ?? []
+    this.medias = post?.medias
     this.type = PostType.MOMENT
     this.ref = post?.ref
   }

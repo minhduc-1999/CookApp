@@ -49,4 +49,10 @@ export class CreatePostRequest {
   @IsOptional()
   @ApiPropertyOptional({ type: String })
   foodRefId?: string;
+
+  @IsArray()
+  @ApiProperty({ type: [String] })
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  tags: string[];
 }

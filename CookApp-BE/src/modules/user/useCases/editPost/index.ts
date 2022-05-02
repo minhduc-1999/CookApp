@@ -62,10 +62,14 @@ export class EditPostCommandHandler
       req.addImages = keys;
     }
 
+    console.log(req)
+
     let updateData: Partial<Post> = existedPost.update({
       ...req,
       medias: req.addImages?.map((image) => new Image({ key: image })),
     });
+
+      console.log(updateData)
 
     await this._postService.updatePost(
       existedPost,

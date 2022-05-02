@@ -285,6 +285,9 @@ export class PostResponse extends AuditResponse {
   @ApiResponseProperty({ type: FoodResponse })
   ref?: FoodResponse;
 
+  @ApiResponseProperty({ type: [String]})
+  tags: string[]
+
   constructor(post: Post, reaction?: Reaction, saved?: boolean) {
     super(post);
     this.author = post?.author && new AuthorResponse(post?.author);
@@ -292,9 +295,10 @@ export class PostResponse extends AuditResponse {
     this.numOfReaction = post?.nReactions;
     this.kind = post?.type;
     this.location = post?.location;
-    this.medias = post?.medias.map((media) => new MediaResponse(media));
+    this.medias = post?.medias?.map((media) => new MediaResponse(media));
     this.reaction = reaction?.type;
     this.saved = saved;
+    this.tags = post?.tags
     switch (post?.type) {
       case PostType.MOMENT:
         const moment = post as Moment;
