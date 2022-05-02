@@ -5,7 +5,7 @@ import {
   ApiResponseProperty,
   getSchemaPath,
 } from "@nestjs/swagger";
-import { Moment, Post } from "domains/social/post.domain";
+import { FoodShare, Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { MetaDTO } from "./responseMeta.dto";
@@ -22,7 +22,11 @@ import {
 } from "enums/social.enum";
 import { Audit } from "domains/audit.domain";
 import { Reaction } from "domains/social/reaction.domain";
-import { FoodIngredient, Ingredient, Unit } from "domains/core/ingredient.domain";
+import {
+  FoodIngredient,
+  Ingredient,
+  Unit,
+} from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { Album } from "domains/social/album.domain";
 import { Conversation, Message } from "domains/social/conversation.domain";
@@ -113,20 +117,20 @@ export class AuthorResponse {
 }
 
 export class UnitResponse {
-  @ApiResponseProperty({type: String})
-  name: string
+  @ApiResponseProperty({ type: String })
+  name: string;
 
   constructor(unit: Unit) {
-    this.name = unit?.name
+    this.name = unit?.name;
   }
 }
 
 export class IngredientResponse {
-  @ApiResponseProperty({type: String})
-  name: string
+  @ApiResponseProperty({ type: String })
+  name: string;
 
   constructor(ing: Ingredient) {
-    this.name = ing?.name
+    this.name = ing?.name;
   }
 }
 
@@ -154,13 +158,13 @@ export class FoodVoteResponse {
   @ApiResponseProperty({ type: String })
   comment: string;
 
-  @ApiResponseProperty({ type: AuthorResponse})
-  author: AuthorResponse
+  @ApiResponseProperty({ type: AuthorResponse })
+  author: AuthorResponse;
 
   constructor(vote: FoodVote) {
-    this.star = vote?.star
-    this.comment = vote?.comment
-    this.author = vote?.author && new AuthorResponse(vote.author)
+    this.star = vote?.star;
+    this.comment = vote?.comment;
+    this.author = vote?.author && new AuthorResponse(vote.author);
   }
 }
 
@@ -226,11 +230,11 @@ export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   videoUrl: string;
 
-  @ApiResponseProperty({ type: AuthorResponse})
-  author: AuthorResponse
+  @ApiResponseProperty({ type: AuthorResponse })
+  author: AuthorResponse;
 
-  @ApiResponseProperty({ type: Number})
-  rating: number
+  @ApiResponseProperty({ type: Number })
+  rating: number;
 
   constructor(food: Food, steps?: RecipeStepResponse[]) {
     super(food);
@@ -246,8 +250,8 @@ export class FoodResponse extends AuditResponse {
       (ingredient) => new FoodIngredientResponse(ingredient)
     );
     this.videoUrl = food?.videoUrl;
-    this.author = food?.author && new AuthorResponse(food.author)
-    this.rating = food?.rating
+    this.author = food?.author && new AuthorResponse(food.author);
+    this.rating = food?.rating;
   }
 }
 
@@ -276,17 +280,17 @@ export class PostResponse extends AuditResponse {
   @ApiResponseProperty({ enum: PostType })
   kind: PostType;
 
-  @ApiResponseProperty({ type: String })
-  location: string;
-
   @ApiResponseProperty({ type: Boolean })
   saved?: boolean;
 
   @ApiResponseProperty({ type: FoodResponse })
   ref?: FoodResponse;
 
-  @ApiResponseProperty({ type: [String]})
-  tags: string[]
+  @ApiResponseProperty({ type: [String] })
+  tags: string[];
+
+  @ApiResponseProperty({ type: String })
+  location: string;
 
   constructor(post: Post, reaction?: Reaction, saved?: boolean) {
     super(post);
@@ -294,17 +298,19 @@ export class PostResponse extends AuditResponse {
     this.numOfComment = post?.nComments;
     this.numOfReaction = post?.nReactions;
     this.kind = post?.type;
-    this.location = post?.location;
     this.medias = post?.medias?.map((media) => new MediaResponse(media));
     this.reaction = reaction?.type;
     this.saved = saved;
-    this.tags = post?.tags
+    this.tags = post?.tags;
+    this.content = post?.content;
     switch (post?.type) {
       case PostType.MOMENT:
         const moment = post as Moment;
-        this.content = moment?.content;
-        this.ref = moment?.ref && new FoodResponse(moment.ref);
+        this.location = moment?.location;
         break;
+      case PostType.FOOD_SHARE:
+        const foodShare = post as FoodShare;
+        this.ref = foodShare?.ref && new FoodResponse(foodShare.ref);
     }
   }
 }
@@ -361,41 +367,6 @@ export class ProfileResponse {
   }
 }
 
-export class MomentResponse extends AuditResponse {
-  @ApiResponseProperty({ type: String })
-  content: string;
-
-  @ApiResponseProperty({ type: [MediaResponse] })
-  medias?: MediaResponse[];
-
-  @ApiResponseProperty({ enum: ["Moment"] })
-  kind: "Moment";
-
-  @ApiResponseProperty({ type: AuthorResponse })
-  author: AuthorResponse;
-
-  @ApiResponseProperty({ type: Number })
-  numOfReaction: number;
-
-  @ApiResponseProperty({ type: Number })
-  numOfComment: number;
-
-  @ApiResponseProperty({ type: String })
-  id: string;
-
-  @ApiResponseProperty({ type: Number })
-  createdAt: number;
-
-  constructor(post: Moment) {
-    super(post);
-    this.content = post?.content;
-    this.medias = post?.medias.map((media) => new MediaResponse(media));
-    this.author = new AuthorResponse(post?.author);
-    this.numOfReaction = post?.nReactions;
-    this.numOfComment = post?.nComments;
-  }
-}
-
 export class AlbumResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string;
@@ -424,9 +395,9 @@ export class AlbumResponse extends AuditResponse {
     this.medias = album?.medias.map((media) => new MediaResponse(media));
     this.owner = album?.owner && new AuthorResponse(album.owner);
     this.description = album?.description;
-    this.numOfComment = album?.nComments
-    this.numOfReaction = album?.nReactions
-    this.reaction = reaction?.type
+    this.numOfComment = album?.nComments;
+    this.numOfReaction = album?.nReactions;
+    this.reaction = reaction?.type;
   }
 }
 

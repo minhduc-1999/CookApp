@@ -3,7 +3,9 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
+import { FoodShare } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
+import { PostType } from "enums/social.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { ISavedPostRepository } from "modules/user/interfaces/repositories/savedPost.interface";
@@ -32,12 +34,16 @@ export class GetSavedPostsQueryHandler
     const [posts, total] = await this._savedPostRepo.getSavedPosts(user, queryOptions);
 
     for (let item of posts) {
-      const { post } = item
+      let { post } = item
       post.medias = await this._storageService.getDownloadUrls(post.medias);
       if (post.author?.avatar) {
         post.author.avatar = (
           await this._storageService.getDownloadUrls([post.author.avatar])
         )[0];
+      }
+      if (post.type === PostType.FOOD_SHARE) {
+        post = <FoodShare>post
+        post.ref.photos = await this._storageService.getDownloadUrls(post.ref.photos)
       }
     }
 

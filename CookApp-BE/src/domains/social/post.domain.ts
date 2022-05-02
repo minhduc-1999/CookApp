@@ -13,8 +13,8 @@ export abstract class PostBase extends Audit implements IInteractable {
     this.nReactions = post?.nReactions
     this.author = post?.author
     this.content = post?.content
-    this.location = post?.location
     this.tags = post?.tags
+    this.medias = post?.medias
   }
 
   nReactions: number;
@@ -27,9 +27,9 @@ export abstract class PostBase extends Audit implements IInteractable {
 
   type: PostType
 
-  location: string
-
   tags: string[]
+
+  medias?: PostMedia[]
 
   abstract canCreate(): boolean
 
@@ -53,19 +53,42 @@ export class Moment extends PostBase {
     return true
   }
 
-  medias?: PostMedia[]
-
-  ref?: Food
+  location: string
 
   constructor(post: Partial<Moment>) {
     super(post)
-    this.medias = post?.medias
     this.type = PostType.MOMENT
+    this.location = post?.location
+  }
+}
+
+export class FoodShare extends PostBase {
+
+  update(data: Partial<FoodShare>): Partial<FoodShare> {
+    return {
+      content: data.content ?? this.content,
+      medias: data.medias ?? this.medias,
+      tags: data.tags ?? this.tags,
+      ref: data?.ref ?? this.ref
+    }
+  }
+
+  canCreate(): boolean {
+    if (!this.content)
+      return false
+    return true
+  }
+
+  ref: Food
+
+  constructor(post: Partial<FoodShare>) {
+    super(post)
+    this.type = PostType.FOOD_SHARE
     this.ref = post?.ref
   }
 }
 
-export type Post = Moment
+export type Post = Moment | FoodShare
 
 export class SavedPost extends Audit {
   saver: User

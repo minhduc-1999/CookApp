@@ -36,7 +36,7 @@ export class PostService implements IPostService {
     await this._postRepo.setTransaction(tx).updatePost(post, data)
   }
 
-  async createPost(post: Moment, tx: ITransaction): Promise<Moment> {
+  async createPost(post: Moment, tx: ITransaction): Promise<Post> {
     const postResult = await this._postRepo.setTransaction(tx).createPost(post)
     if (post.medias.length > 0) {
       let medias = await this._postMediaRepo.setTransaction(tx).addMedias(post.medias, postResult)
