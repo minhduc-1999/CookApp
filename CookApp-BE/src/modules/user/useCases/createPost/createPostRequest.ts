@@ -8,21 +8,21 @@ import {
   IsUUID,
 } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
+import { WordMaxLength } from "decorators/wordMaxLength.decorator";
 import { PostType } from "enums/social.enum";
 
 export class CreatePostRequest {
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String, description: "Moment's content" })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordMaxLength(1)
   @IsOptional()
   content?: string;
 
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordMaxLength(1)
   @IsOptional()
   location?: string;
 

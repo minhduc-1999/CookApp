@@ -3,20 +3,20 @@ import {
 } from "@nestjs/swagger";
 import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
+import { WordMaxLength } from "decorators/wordMaxLength.decorator";
 
 export class EditAlbumRequest {
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordMaxLength(1)
   @IsOptional()
   name: string;
 
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String  })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordMaxLength(1)
   @IsOptional()
   description?: string;
 

@@ -24,8 +24,8 @@ export class IsMeaningfulStringConstrain
   }
 }
 
-export function IsMeaningfulString(
-  minWords?: number,
+export function WordMaxLength(
+  maxLength?: number,
   validationOptions?: ValidationOptions,
 ) {
   return function (object: Object, propertyName: string) {
@@ -33,7 +33,7 @@ export function IsMeaningfulString(
       target: object.constructor,
       propertyName: propertyName,
       options: validationOptions,
-      constraints: [minWords],
+      constraints: [maxLength],
       validator: IsMeaningfulStringConstrain,
     });
   };

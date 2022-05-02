@@ -357,6 +357,9 @@ export class ProfileResponse {
   @ApiResponseProperty({ enum: Sex })
   sex?: Sex;
 
+  @ApiResponseProperty({ type: String })
+  bio?: string;
+
   constructor(profile: User) {
     this.height = profile?.height;
     this.weight = profile?.weight;
@@ -364,6 +367,7 @@ export class ProfileResponse {
     this.firstName = profile?.firstName;
     this.lastName = profile?.lastName;
     this.sex = profile?.sex;
+    this.bio = profile?.bio
   }
 }
 
