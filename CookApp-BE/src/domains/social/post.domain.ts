@@ -2,7 +2,7 @@ import { Food } from "../../domains/core/food.domain";
 import { Audit } from "../../domains/audit.domain";
 import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
 import { PostType } from "../../enums/social.enum";
-import { CommentMedia } from "./media.domain";
+import { PostMedia } from "./media.domain";
 import { User } from "./user.domain";
 
 export abstract class PostBase extends Audit implements IInteractable {
@@ -53,7 +53,7 @@ export class Moment extends PostBase {
     return true
   }
 
-  medias?: CommentMedia[]
+  medias?: PostMedia[]
 
   ref?: Food
 

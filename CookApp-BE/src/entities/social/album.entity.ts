@@ -9,7 +9,7 @@ import {
 } from "typeorm";
 import { InteractionEntity } from "./interaction.entity";
 import { MediaType } from "../../enums/social.enum";
-import { Image, CommentMedia, Video } from "../../domains/social/media.domain";
+import { Image, Video, PostMedia } from "../../domains/social/media.domain";
 import { Audit } from "../../domains/audit.domain";
 import { Album } from "../../domains/social/album.domain";
 import { isNil } from "lodash";
@@ -87,13 +87,13 @@ export class AlbumMediaEntity {
   @Column({ name: "key", nullable: false })
   key: string;
 
-  constructor(media: CommentMedia, interaction?: InteractionEntity) {
+  constructor(media: PostMedia, interaction?: InteractionEntity) {
     this.key = media?.key;
     this.type = media?.type;
     this.interaction = interaction ? interaction : new InteractionEntity(media);
   }
 
-  toDomain(): CommentMedia {
+  toDomain(): PostMedia {
     const { nReactions, nComments } = this.interaction;
     switch (this.type) {
       case MediaType.IMAGE:

@@ -3,7 +3,7 @@ import { OneToMany, OneToOne, ManyToOne, Column, Entity, JoinColumn } from 'type
 import { InteractionEntity } from './interaction.entity';
 import { MediaType, PostType } from '../../enums/social.enum';
 import { Moment, Post } from '../../domains/social/post.domain';
-import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
+import { Image, Video, PostMedia } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
 import { isNil } from 'lodash';
 import { FoodEntity } from '../../entities/core/food.entity';
@@ -103,13 +103,13 @@ export class PostMediaEntity {
   @Column({ name: 'key', nullable: false })
   key: string
 
-  constructor(media: CommentMedia, interaction?: InteractionEntity) {
+  constructor(media: PostMedia, interaction?: InteractionEntity) {
     this.key = media?.key
     this.type = media?.type
     this.interaction = interaction ? interaction : new InteractionEntity(media)
   }
 
-  toDomain(): CommentMedia {
+  toDomain(): PostMedia {
     const { nReactions, nComments} = this.interaction
     switch (this.type) {
       case MediaType.IMAGE:
