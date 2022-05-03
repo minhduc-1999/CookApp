@@ -1,17 +1,17 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { IsArray, IsNotEmpty, IsOptional, IsString } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
+import { WordLength } from "decorators/wordLength.decorator";
 
 export class CreateAlbumRequest {
-  @IsMeaningfulString(1)
+  @WordLength(1)
   @ApiProperty({ type: String, description: "Album's name" })
   name: string
 
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String  })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordLength(1)
   @IsOptional()
   description?: string;
 

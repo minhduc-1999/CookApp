@@ -1,6 +1,14 @@
 import { ApiPropertyOptional } from "@nestjs/swagger";
-import { IsEnum, IsNotEmpty, IsOptional, IsString, Length, Min } from "class-validator";
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  Length,
+  Min,
+} from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
+import { WordLength } from "decorators/wordLength.decorator";
 import { IsValidDisplayName } from "decorators/isValidDisplayName.decorator";
 import { Sex } from "enums/social.enum";
 import _ = require("lodash");
@@ -32,7 +40,7 @@ export class UpdateProfileRequest {
   weight?: number;
 
   @IsOptional()
-  @ApiPropertyOptional({ type: Number, default: _.now()})
+  @ApiPropertyOptional({ type: Number })
   @Min(0)
   birthDate?: number;
 
@@ -40,15 +48,22 @@ export class UpdateProfileRequest {
   @IsValidDisplayName()
   @IsOptional()
   @IsNotEmpty()
-  @Length(2, 50)
+  @WordLength(2, 50)
   @ApiPropertyOptional({ type: String })
   firstName?: string;
+
+  @IsString()
+  @IsOptional()
+  @IsNotEmpty()
+  @ApiPropertyOptional({ type: String })
+  @WordLength(1, 200)
+  bio?: string;
 
   @IsString()
   @IsValidDisplayName()
   @IsOptional()
   @IsNotEmpty()
-  @Length(2, 50)
+  @WordLength(2, 50)
   @ApiPropertyOptional({ type: String })
   lastName?: string;
 
@@ -56,5 +71,4 @@ export class UpdateProfileRequest {
   @IsEnum(Sex)
   @IsOptional()
   sex?: Sex;
-
 }

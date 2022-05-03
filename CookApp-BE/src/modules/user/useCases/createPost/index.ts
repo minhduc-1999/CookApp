@@ -1,6 +1,6 @@
 import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
-import { Moment, Post } from "domains/social/post.domain";
+import { FoodShare, Moment, Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { CreatePostRequest } from "./createPostRequest";
 import { CreatePostResponse } from "./createPostResponse";
@@ -67,19 +67,31 @@ export class CreatePostCommandHandler
 
     switch (req.kind) {
       case PostType.MOMENT: {
+        creatingPost = new Moment({
+          author: user,
+          content: req.content,
+          medias,
+          location: req.location,
+          tags: req.tags
+        });
+        break;
+      }
+      case PostType.FOOD_SHARE: {
         let foodRef: Food
         if (req.foodRefId) {
           foodRef = await this._foodRepo.getById(req.foodRefId)
           if (!foodRef)
             throw new NotFoundException(ResponseDTO.fail("Food not found", UserErrorCode.FOOD_NOT_FOUND))
         }
-        creatingPost = new Moment({
+        creatingPost = new FoodShare({
           author: user,
           content: req.content,
           medias,
-          location: req.location,
-          ref: foodRef
+          ref: foodRef,
+          tags: req.tags,
+          location: req.location
         });
+        break;
       }
       default: {
         break;

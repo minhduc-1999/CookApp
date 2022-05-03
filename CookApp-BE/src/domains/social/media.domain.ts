@@ -61,6 +61,8 @@ export class Audio extends MediaBase {
   }
 }
 
+export type AvatarMedia = Image
+
 export type CommentMedia = Image | Video
 
 export type PostMedia = Image | Video

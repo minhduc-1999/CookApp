@@ -7,7 +7,7 @@ import {
 } from "class-validator";
 
 @ValidatorConstraint({ name: "fileExtension", async: false })
-export class IsMeaningfullStringConstrain
+export class IsFileExtensionConstrain
   implements ValidatorConstraintInterface {
   validate(text: string, args: ValidationArguments) {
     const extensions: string[] = args.constraints[0];
@@ -32,7 +32,7 @@ export function IsFileExtensions(
       propertyName: propertyName,
       options: validationOptions,
       constraints: [extentsion],
-      validator: IsMeaningfullStringConstrain,
+      validator: IsFileExtensionConstrain,
     });
   };
 }

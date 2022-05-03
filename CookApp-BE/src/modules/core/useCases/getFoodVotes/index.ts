@@ -8,6 +8,7 @@ import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { IFoodVoteRepository } from "modules/core/adapters/out/repositories/foodVote.repository";
+import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { GetFoodVotesResponse } from "./getFoodVotesResponse";
 
 export class GetFoodVotesQuery extends BaseQuery {
@@ -16,7 +17,7 @@ export class GetFoodVotesQuery extends BaseQuery {
   constructor(user: User, foodId: string, queryOptions?: PageOptionsDto) {
     super(user);
     this.queryOptions = queryOptions;
-    this.foodId = foodId
+    this.foodId = foodId;
   }
 }
 
@@ -28,7 +29,9 @@ export class GetFoodVotesQueryHandler
     @Inject("IFoodVoteRepository")
     private _foodVoteRepo: IFoodVoteRepository,
     @Inject("IFoodRepository")
-    private _foodRepo: IFoodRepository
+    private _foodRepo: IFoodRepository,
+    @Inject("IStorageService")
+    private _storageService: IStorageService
   ) {}
   async execute(query: GetFoodVotesQuery): Promise<GetFoodVotesResponse> {
     const { queryOptions, foodId } = query;
@@ -42,6 +45,12 @@ export class GetFoodVotesQueryHandler
       food,
       queryOptions
     );
+
+    for (let vote of votes) {
+      [vote.author.avatar] = await this._storageService.getDownloadUrls([
+        vote.author?.avatar,
+      ]);
+    }
 
     let meta: PageMetadata;
 

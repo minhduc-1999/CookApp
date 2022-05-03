@@ -28,6 +28,7 @@ import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
 import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";
 import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
+import { ParseCreatePostRequestPipe } from "pipes/parsePostRequest.pipe";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/posts")
@@ -41,7 +42,7 @@ export class PostController {
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
   @HttpRequestTransaction()
   async createPost(
-    @Body() post: CreatePostRequest,
+    @Body(ParseCreatePostRequestPipe) post: CreatePostRequest,
     @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<Post>> {

@@ -68,11 +68,12 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         .set({ updatedAt: new Date() })
         .where("id = :id", { id: post.id })
         .execute();
-      await queryRunner.manager.update<PostEntity>(
-        PostEntity,
-        entity,
-        updateData
-      );
+
+      await queryRunner.manager.createQueryBuilder()
+      .update(PostEntity)
+      .set(updateData)
+      .where("id = :postId", { postId: post.id})
+      .execute()
     }
   }
 }

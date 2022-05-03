@@ -3,20 +3,20 @@ import {
 } from "@nestjs/swagger";
 import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
+import { WordLength } from "decorators/wordLength.decorator";
 
 export class EditPostRequest {
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordLength(1)
   @IsOptional()
   content: string;
 
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String  })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordLength(1)
   @IsOptional()
   location?: string;
 
@@ -34,6 +34,13 @@ export class EditPostRequest {
   @IsNotEmpty({ each: true })
   @IsOptional()
   deleteImages?: string[];
+
+  @IsArray()
+  @ApiPropertyOptional({ type: [String] })
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @IsOptional()
+  tags: string[];
 
   id: string
 }
