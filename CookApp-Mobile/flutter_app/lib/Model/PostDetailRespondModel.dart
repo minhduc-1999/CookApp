@@ -1,17 +1,19 @@
 import 'dart:convert';
 
+import 'NewFeedRespondModel.dart';
 
 
-MultiImagesRespondModel multiImageRespondModel(String str) =>
-    MultiImagesRespondModel.fromJson(json.decode(str));
 
-class MultiImagesRespondModel {
+PostDetailRespondModel postDetailRespondModel(String str) =>
+    PostDetailRespondModel.fromJson(json.decode(str));
+
+class PostDetailRespondModel {
   Meta meta;
   Data data;
 
-  MultiImagesRespondModel({this.meta, this.data});
+  PostDetailRespondModel({this.meta, this.data});
 
-  MultiImagesRespondModel.fromJson(Map<String, dynamic> json) {
+  PostDetailRespondModel.fromJson(Map<String, dynamic> json) {
     meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
@@ -182,8 +184,8 @@ class Medias {
     type = json['type'];
     id = json['id'];
     reaction = json['reaction'];
-    numberOfComment = json['numberOfComment'];
-    numberOfReaction = json['numberOfReaction'];
+    numberOfComment = json['numberOfComment'] != null ? json['numberOfComment'] : 0;
+    numberOfReaction = json['numberOfReaction'] != null ? json['numberOfReaction'] : 0;
   }
 
   Map<String, dynamic> toJson() {

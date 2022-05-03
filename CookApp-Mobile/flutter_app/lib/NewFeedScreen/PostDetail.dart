@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:tastify/Model/PostDetailsRespondModel.dart';
+
+import 'package:tastify/Model/PostDetailRespondModel.dart';
+
 import 'package:tastify/Services/APIService.dart';
 import '../constants.dart';
 import 'Post.dart';
@@ -52,19 +54,22 @@ class _PostDetailState extends State<PostDetail> {
   }
 
   void fetchData() async {
-    PostDetailsRespondModel res = await APIService.getDetailsPost(id);
+    PostDetailRespondModel res = await APIService.getPostDetail(id);
+
     Post temp = Post(
       id: res.data.id,
       userId: res.data.author.id,
-      location: "Quang Binh",
+      location: res.data.location,
       content: res.data.content,
       //images: res.data.images,
-      avatar: res.data.author.avatar,
+      medias: res.data.medias,
+      avatar: res.data.author.avatar.url,
       displayName: res.data.author.displayName,
       dateTime: DateTime.fromMillisecondsSinceEpoch(res.data.createdAt),
       numOfComment: res.data.numOfComment,
       numOfReaction: res.data.numOfReaction,
       isLike: res.data.reaction != null,
+      saved: res.data.saved,
     );
     setState(() {
       post = temp;

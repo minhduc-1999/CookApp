@@ -1,8 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_client_sse/flutter_client_sse.dart';
+import 'package:tastify/FoodScreen/CreateFoodActivity.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:tastify/Services/APIService.dart';
 
+import '../main.dart';
 import 'FoodWidget.dart';
 
 import '../config.dart';
@@ -16,6 +21,7 @@ class FoodActivity extends StatefulWidget {
 class _FoodActivityState extends State<FoodActivity> {
   FoodRespondModel food;
   List<FoodWidget> foodData = [];
+
   bool circular = true;
   int offset = 0;
   int offsetQuery = 0;
@@ -65,6 +71,25 @@ class _FoodActivityState extends State<FoodActivity> {
                       EdgeInsets.only(left: 15, bottom: 5, top: 5, right: 15),
                 ),
               )),
+          actions: [
+            IconButton(
+              onPressed: () {
+                Navigator.push(
+                    context,
+                    PageRouteBuilder(
+                        pageBuilder: (context, animation, secondaryAnimation) =>
+                            CreateFoodActivity(),
+                        transitionsBuilder:
+                            (context, animation, secondaryAnimation, child) {
+                          return FadeTransition(
+                            opacity: animation,
+                            child: child,
+                          );
+                        }));
+              },
+              icon: Icon(Icons.add_circle_rounded),
+            )
+          ],
           flexibleSpace: Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -118,7 +143,8 @@ class _FoodActivityState extends State<FoodActivity> {
         offset++;
       });
     } else {
-      var temp = await APIService.getFoodByQuery(offsetQuery, _foodController.text);
+      var temp =
+          await APIService.getFoodByQuery(offsetQuery, _foodController.text);
       for (var i in temp.data.foods) {
         tempFoodData.add(FoodWidget(
           food: i,
@@ -131,7 +157,7 @@ class _FoodActivityState extends State<FoodActivity> {
     }
   }
 
-  void queryData(String text) async{
+  void queryData(String text) async {
     setState(() {
       circular = true;
       offsetQuery = 0;
@@ -141,15 +167,15 @@ class _FoodActivityState extends State<FoodActivity> {
       var temp = await APIService.getFoodByQuery(offsetQuery, text);
       List<FoodWidget> tempFoodData = [];
       for (var i in temp.data.foods) {
-            tempFoodData.add(FoodWidget(
-              food: i,
-            ));
-          }
+        tempFoodData.add(FoodWidget(
+          food: i,
+        ));
+      }
       setState(() {
-            foodData = tempFoodData;
-            circular = false;
-            offsetQuery++;
-          });
+        foodData = tempFoodData;
+        circular = false;
+        offsetQuery++;
+      });
     } else {
       var temp = await APIService.getFood(offset);
       List<FoodWidget> tempFoodData = [];
@@ -165,5 +191,4 @@ class _FoodActivityState extends State<FoodActivity> {
       });
     }
   }
-
 }

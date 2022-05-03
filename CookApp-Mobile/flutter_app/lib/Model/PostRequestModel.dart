@@ -5,7 +5,8 @@ class PostRequestModel {
   String kind;
   String name;
   String location;
-  PostRequestModel({this.content, this.images, this.videos, this.kind, this.name, this.location});
+  String foodRefId;
+  PostRequestModel({this.content, this.images, this.videos, this.kind, this.name, this.location, this.foodRefId});
 
 
   Map<String, dynamic> toJson() {
@@ -16,6 +17,9 @@ class PostRequestModel {
     data['kind'] = this.kind;
     data['name'] = this.name;
     data['location'] = this.location;
+    if(foodRefId != null ){
+      data['foodRefId'] = this.foodRefId;
+    }
     return data;
   }
 }

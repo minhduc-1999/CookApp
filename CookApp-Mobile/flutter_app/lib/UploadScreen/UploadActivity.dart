@@ -335,8 +335,6 @@ class _UploadActivityState extends State<UploadActivity> {
     }
   }
 
-  void uploadImage(
-      PresignedLinkedRespondModel response, List<String> objectName) {}
 }
 
 class PhotoPickerItem extends StatefulWidget {

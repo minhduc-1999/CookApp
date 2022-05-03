@@ -19,6 +19,7 @@ class Config {
   static const String followerAPI = "/walls/followers";
   static const String endUserWallFollowAPI = "/walls/followers";
   static const String endUserWallPostAPI = "/walls/posts";
+  static const String endUserWallAlbumAPI = "/walls/albums";
   static const String postDetails = "/api/users/posts/";
   static const String commentAPI = "/api/users/comments";
 
@@ -28,14 +29,21 @@ class Config {
   static const String userFeedAPI = "/api/users/feeds/posts";
   static const String foodAPI = "/api/foods";
   static const String resendEmailAPI = "/api/resend-email-verification";
-  //urlChatbot
-  static const String apiURLChatBot = "http://yourchatstarter.xyz";
-  static const String sendMessage = "/api/send_message";
-  static const String tokenChatbot = "9bdf793944b54a2f49f67113de076366";
+
+  static const String ingredientsAPI = "/api/ingredients";
+  static const String unitsAPI = "/api/units";
+  static const String statusMessagesAPI = "/api/messages/status";
+  static const String conversationsAPI = "/api/conversations";
+  static const String savedPostsAPI = "/api/users/posts/save";
+
+  static const String albumAPI = "/api/users/albums";
+
+  static const String sendMessage = "/api/messages";
+
   //string
   static const String postCommentsType = "POST";
   static const String stepCommentsType = "RECIPE_STEP";
   static const String postReactType = "POST";
   static const String imageReactType = "POST_MEDIA";
-
+  static const String albumReactType = "ALBUM";
 }

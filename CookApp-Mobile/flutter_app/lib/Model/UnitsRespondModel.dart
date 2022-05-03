@@ -1,13 +1,13 @@
 import 'dart:convert';
-UserDelegateModel userDelegateModel(String str) =>
-    UserDelegateModel.fromJson(json.decode(str));
-class UserDelegateModel {
+UnitsRespondModel unitsRespondModel(String str) =>
+    UnitsRespondModel.fromJson(json.decode(str));
+class UnitsRespondModel {
   Meta meta;
   Data data;
 
-  UserDelegateModel({this.meta, this.data});
+  UnitsRespondModel({this.meta, this.data});
 
-  UserDelegateModel.fromJson(Map<String, dynamic> json) {
+  UnitsRespondModel.fromJson(Map<String, dynamic> json) {
     meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
@@ -44,16 +44,16 @@ class Meta {
 }
 
 class Data {
-  List<Users> users;
+  List<Units> units;
   Metadata metadata;
 
-  Data({this.users, this.metadata});
+  Data({this.units, this.metadata});
 
   Data.fromJson(Map<String, dynamic> json) {
-    if (json['users'] != null) {
-      users = new List<Users>();
-      json['users'].forEach((v) {
-        users.add(new Users.fromJson(v));
+    if (json['units'] != null) {
+      units = <Units>[];
+      json['units'].forEach((v) {
+        units.add(new Units.fromJson(v));
       });
     }
     metadata = json['metadata'] != null
@@ -63,8 +63,8 @@ class Data {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.users != null) {
-      data['users'] = this.users.map((v) => v.toJson()).toList();
+    if (this.units != null) {
+      data['units'] = this.units.map((v) => v.toJson()).toList();
     }
     if (this.metadata != null) {
       data['metadata'] = this.metadata.toJson();
@@ -73,53 +73,22 @@ class Data {
   }
 }
 
-class Users {
-  String id;
-  Avatar avatar;
-  String displayName;
+class Units {
+  String name;
 
-  Users({this.id, this.avatar, this.displayName});
+  Units({this.name});
 
-  Users.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
-    displayName = json['displayName'];
+  Units.fromJson(Map<String, dynamic> json) {
+    name = json['name'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    if (this.avatar != null) {
-      data['avatar'] = this.avatar.toJson();
-    }
-    data['displayName'] = this.displayName;
+    data['name'] = this.name;
     return data;
   }
 }
-class Avatar {
-  String id;
-  String url;
-  String type;
-  String reaction;
 
-  Avatar({this.id, this.url, this.type, this.reaction});
-
-  Avatar.fromJson(Map<String, dynamic> json) {
-    id = json['id'] != null ? json['id'] : null;
-    url = json['url'];
-    type = json['type'];
-    reaction = json['reaction'] != null ? json['reaction'] : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['url'] = this.url;
-    data['type'] = this.type;
-    data['reaction'] = this.reaction;
-    return data;
-  }
-}
 class Metadata {
   int page;
   int pageSize;

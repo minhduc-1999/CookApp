@@ -2,9 +2,11 @@ import 'dart:async';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_client_sse/flutter_client_sse.dart';
 import 'package:tastify/EditPostScreen/EditPostActivity.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/NewFeedScreen/SearchUserDelegate.dart';
+import '../main.dart';
 import 'Post.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/SharedService.dart';
@@ -38,12 +40,14 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
     });
   }
 
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         automaticallyImplyLeading: false,
         brightness: Brightness.dark,
+
         title: Text(
           Config.appName,
           style: TextStyle(
@@ -142,7 +146,13 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
           dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
           isLike: i.reaction != null,
       saved: i.saved,
-      reloadFunction: onGoBack,),
+        foodRefId: i.ref != null ? i.ref.id : "",
+        totalTime: i.ref != null ? i.ref.totalTime : 0,
+        servings: i.ref != null ? i.ref.servings : 0,
+        foodName: i.ref != null ? i.ref.name : "",
+        foodDescription: i.ref != null ? i.ref.description : "",
+        foodImage: i.ref != null ? i.ref.photos[0].url : "",
+     ),
           );
     }
     setState(() {
@@ -173,7 +183,13 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
           dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
           isLike: i.reaction != null,
       saved: i.saved,
-      reloadFunction: onGoBack,));
+        foodRefId: i.ref != null ? i.ref.id : "",
+        totalTime: i.ref != null ? i.ref.totalTime : 0,
+        servings: i.ref != null ? i.ref.servings : 0,
+        foodName: i.ref != null ? i.ref.name : "",
+        foodDescription: i.ref != null ? i.ref.description : "",
+        foodImage: i.ref != null ? i.ref.photos[0].url : "",
+      ));
     }
     setState(() {
       feedData.addAll(tempData);

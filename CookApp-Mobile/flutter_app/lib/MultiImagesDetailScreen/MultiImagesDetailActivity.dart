@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:tastify/CommentScreen/CommentActivity.dart';
-import 'package:tastify/Model/MultiImagesRespondModel.dart';
+import 'package:tastify/Model/PostDetailRespondModel.dart';
 import 'package:tastify/Model/ReactRequestModel.dart';
 
 import 'package:tastify/Services/APIService.dart';
@@ -276,6 +276,7 @@ class _MultiImagesDetailActivityState extends State<MultiImagesDetailActivity> {
                       ),
                     ),
                     ListView(
+                      padding: EdgeInsets.only(top:15),
                       children: images,
                       shrinkWrap: true,
                       physics: NeverScrollableScrollPhysics(),

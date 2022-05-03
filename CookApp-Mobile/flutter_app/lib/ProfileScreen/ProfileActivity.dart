@@ -1,13 +1,22 @@
 import 'dart:async';
 
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
+import 'package:tastify/MessageScreen/ConversationsActivity.dart';
+import 'package:tastify/MessageScreen/MessageActivity.dart';
+import 'package:tastify/Model/AlbumRespondModel.dart';
+import 'package:tastify/Model/CreateConversationRequestModel.dart';
+import 'package:tastify/ProfileScreen/AlbumDetailsActivity.dart';
+import 'package:tastify/ProfileScreen/CreateAlbumActivity.dart';
+import 'package:tastify/SavedPostScreen/SavedPostActivity.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
 import 'package:tastify/SettingsScreen/SettingsActivity.dart';
 import '../NewFeedScreen/PostDetail.dart';
 import '../NewFeedScreen/Post.dart';
-import 'package:tastify/Model/PostDetailsRespondModel.dart';
+
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Model/UserWallRespondModel.dart';
 import 'package:tastify/Model/WallPostRespondModel.dart';
@@ -15,6 +24,7 @@ import 'package:tastify/Services/APIService.dart';
 
 import '../constants.dart';
 import '../main.dart';
+import 'Album.dart';
 import 'EditProfileActivity.dart';
 
 class ProfileActivity extends StatefulWidget {
@@ -29,9 +39,14 @@ class ProfileActivity extends StatefulWidget {
 
 class _ProfileActivityState extends State<ProfileActivity> {
   final String profileId;
-
+  ScrollController _scrollController = ScrollController();
   UserWallRespondModel user;
-  WallPostRespondModel posts;
+  List<Posts> posts;
+  int offsetPost = 0;
+  int offsetAlbum = 0;
+  int totalPagePost = 1000;
+  int totalPageAlbum = 1000;
+  List<Album> albums;
   bool isFollowing = false;
   String view = "grid";
   int postCount = 0;
@@ -67,23 +82,64 @@ class _ProfileActivityState extends State<ProfileActivity> {
     super.initState();
 
     fetchData();
-  }
-
-  void fetchData() async {
-    var response = await APIService.getUserWall(profileId);
-    var listPosts = await APIService.getUserWallPosts(profileId);
-
-    setState(() {
-      isFollowing = response.data.isFollowed;
-      user = response;
-      posts = listPosts;
-      postCount = listPosts.data.posts.length;
-      followerCount = user.data.numberOfFollower;
-      followingCount = user.data.numberOfFollowing;
-      circular = false;
+    _scrollController.addListener(() {
+      if (_scrollController.position.pixels ==
+          _scrollController.position.maxScrollExtent) {
+        _getMoreData();
+      }
     });
   }
 
+  void fetchData() async {
+
+    var response = await APIService.getUserWall(profileId);
+    var listPosts = await APIService.getUserWallPosts(profileId,offsetPost);
+    var listAlbum = await APIService.getAlbum(profileId,offsetAlbum);
+    List<Album> temp = [];
+    if (response.data.id == currentUserId) {
+      temp.add(Album(isCreateItem: true, id: "", name: "", url: ""));
+    }
+
+    for (var i in listAlbum.data.albums) {
+      temp.add(Album(
+          isCreateItem: false, id: i.id, name: i.name, url: i.medias[0].url));
+    }
+    print('ln');
+    setState(() {
+      if (listPosts.data.posts.length > 0) {
+        totalPagePost = listPosts.data.metadata.totalPage;
+      }
+      if (listAlbum.data.albums.length > 0) {
+        totalPageAlbum = listAlbum.data.metadata.totalPage;
+      }
+      isFollowing = response.data.isFollowed;
+      user = response;
+      posts = listPosts.data.posts;
+      albums = temp;
+      postCount = response.data.numberOfPost;
+      followerCount = user.data.numberOfFollower;
+      followingCount = user.data.numberOfFollowing;
+      circular = false;
+      offsetAlbum++;
+      offsetPost++;
+    });
+  }
+  FutureOr reloadAlbum (dynamic value) async{
+    var listAlbum = await APIService.getAlbum(profileId,0);
+    List<Album> temp = [];
+    temp.add(Album(isCreateItem: true, id: "", name: "", url: ""));
+    for (var i in listAlbum.data.albums) {
+      temp.add(Album(
+          isCreateItem: false, id: i.id, name: i.name, url: i.medias[0].url));
+    }
+    setState(() {
+      albums = temp;
+      offsetAlbum = 1;
+      if (listAlbum.data.albums.length > 0) {
+        totalPageAlbum = listAlbum.data.metadata.totalPage;
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -115,7 +171,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
         Color backgroundcolor,
         Color textColor,
         Color borderColor,
-        Function function}) {
+        Function function,
+        bool isUser}) {
       return Container(
         padding: EdgeInsets.only(top: 2.0),
         child: FlatButton(
@@ -129,13 +186,13 @@ class _ProfileActivityState extends State<ProfileActivity> {
               child: Text(text,
                   style:
                       TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              width: size.width * 0.6,
+              width: isUser ? size.width * 0.6 : size.width * 0.25,
               height: 27.0,
             )),
       );
     }
 
-    Container buildProfileFollowButton(BuildContext _context) {
+    Widget buildProfileFollowButton(BuildContext _context) {
       if (currentUserId == profileId) {
         print("Build edit button");
         return buildFollowButton(
@@ -144,25 +201,52 @@ class _ProfileActivityState extends State<ProfileActivity> {
           textColor: Colors.black,
           borderColor: Colors.grey,
           function: openEditProfilePage,
+          isUser: true,
         );
       }
       if (isFollowing) {
-        return buildFollowButton(
-          text: "Unfollow",
-          backgroundcolor: Colors.white,
-          textColor: Colors.black,
-          borderColor: Colors.grey,
-          function: unfollowUser,
+        return Row(
+          children: [
+            buildFollowButton(
+              text: "Unfollow",
+              backgroundcolor: Colors.white,
+              textColor: Colors.black,
+              borderColor: Colors.grey,
+              function: unfollowUser,
+              isUser: false,
+            ),
+            buildFollowButton(
+              text: "Message",
+              backgroundcolor: Colors.white,
+              textColor: Colors.black,
+              borderColor: Colors.grey,
+              function: openMessage,
+              isUser: false,
+            )
+          ],
         );
       }
 
       if (!isFollowing) {
-        return buildFollowButton(
-          text: "Follow",
-          backgroundcolor: Colors.blue,
-          textColor: Colors.white,
-          borderColor: Colors.blue,
-          function: followUser,
+        return Row(
+          children: [
+            buildFollowButton(
+              text: "Follow",
+              backgroundcolor: Colors.blue,
+              textColor: Colors.white,
+              borderColor: Colors.blue,
+              function: followUser,
+              isUser: false,
+            ),
+            buildFollowButton(
+              text: "Message",
+              backgroundcolor: Colors.white,
+              textColor: Colors.black,
+              borderColor: Colors.grey,
+              function: openMessage,
+              isUser: false,
+            )
+          ],
         );
       }
 
@@ -170,7 +254,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
           text: "loading...",
           backgroundcolor: Colors.white,
           textColor: Colors.black,
-          borderColor: Colors.grey);
+          borderColor: Colors.grey,
+          isUser: false);
     }
 
     Row buildImageViewButtonBar() {
@@ -211,45 +296,83 @@ class _ProfileActivityState extends State<ProfileActivity> {
     }
 
     Widget buildUserPosts() {
-      return posts.data.posts.length == 0
-          ? Center(
-              child: Padding(
-                padding: const EdgeInsets.only(top: 20),
-                child: Text(
-                  "Nothing to show!",
-                  style: TextStyle(fontSize: 16),
-                ),
-              ),
-            )
-          : view == "grid"
-              ? GridView.count(
+      return view == "grid"
+          ? posts.length == 0
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Text(
+                      "Nothing to show!",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                )
+              : GridView.count(
                   crossAxisCount: 3,
                   childAspectRatio: 1.0,
                   padding: const EdgeInsets.all(0.5),
                   mainAxisSpacing: 1.5,
                   crossAxisSpacing: 1.5,
+                  controller: _scrollController,
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
-                  children: List.generate(posts.data.posts.length, (index) {
-                    return ImageTile(posts.data.posts[index]);
+                  children: List.generate(posts.length, (index) {
+                    if(index == posts.length){
+                      return offsetPost < totalPagePost
+                          ? CupertinoActivityIndicator()
+                          : SizedBox(
+                        height: 8,
+                      );
+                    }
+                    return ImageTile(posts[index]);
                   }))
-              : Column(
-                  children: List.generate(posts.data.posts.length, (index) {
-                    return ImageTile(posts.data.posts[index]);
-                  }),
-                );
+
+          : albums.length == 0
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.only(top: 20),
+                    child: Text(
+                      "Nothing to show!",
+                      style: TextStyle(fontSize: 16),
+                    ),
+                  ),
+                )
+              : GridView.count(
+                  crossAxisCount: 2,
+                  childAspectRatio: 0.9,
+                  padding: const EdgeInsets.all(10),
+                  mainAxisSpacing: 15,
+                  crossAxisSpacing: 15,
+                  controller: _scrollController,
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  children: List.generate(albums.length, (index) {
+                    if(index == albums.length){
+                      return offsetAlbum < totalPageAlbum
+                          ? CupertinoActivityIndicator()
+                          : SizedBox(
+                        height: 8,
+                      );
+                    }
+                    return AlbumTile(
+                      album: albums[index],
+                      reloadFunction: reloadAlbum,
+                      userId: user.data.id,
+                    );
+                  }));
     }
+
     Widget buildMoreVert() {
       return DraggableScrollableSheet(
-        maxChildSize: 0.5,
-        minChildSize: 0.3,
-        initialChildSize: 0.5,
+        maxChildSize: 0.3,
+        minChildSize: 0.2,
+        initialChildSize: 0.3,
         builder: (_, controller) => Container(
           decoration: BoxDecoration(
             color: Colors.white,
             borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
           ),
-          padding: EdgeInsets.only(top: 10, left: 5,bottom: 10,right: 5),
+          padding: EdgeInsets.only(top: 10, left: 5, bottom: 10, right: 5),
           child: ListView(
             controller: controller,
             children: [
@@ -257,13 +380,12 @@ class _ProfileActivityState extends State<ProfileActivity> {
                 leading: Icon(
                   Icons.settings_outlined,
                   color: Colors.black,
-
                 ),
                 title: Text(
                   "Settings",
                   style: TextStyle(fontSize: 16),
                 ),
-                onTap: (){
+                onTap: () {
                   Navigator.of(context).pop();
                   Navigator.push(
                     context,
@@ -280,6 +402,14 @@ class _ProfileActivityState extends State<ProfileActivity> {
                   "Saved",
                   style: TextStyle(fontSize: 16),
                 ),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => SavedPostActivity()),
+                  );
+                },
               ),
               ListTile(
                 leading: Icon(
@@ -307,6 +437,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
         ),
       );
     }
+
     return Scaffold(
       appBar: AppBar(
         brightness: Brightness.dark,
@@ -328,7 +459,6 @@ class _ProfileActivityState extends State<ProfileActivity> {
                   fontStyle: FontStyle.italic)),
         ),
         actions: [
-
           profileId == currentUserId
               ? IconButton(
                   onPressed: () {
@@ -358,12 +488,12 @@ class _ProfileActivityState extends State<ProfileActivity> {
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              (user.data.user.avatar != null)
+                              (user.data.avatar.url != null)
                                   ? CircleAvatar(
                                       radius: size.width * 0.11,
                                       backgroundColor: Colors.grey,
                                       backgroundImage:
-                                          NetworkImage(user.data.user.avatar),
+                                          NetworkImage(user.data.avatar.url),
                                     )
                                   : CircleAvatar(
                                       /*child: Image.asset("assets/images/default_avatar.png",
@@ -405,7 +535,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
                               alignment: Alignment.centerLeft,
                               padding: const EdgeInsets.only(top: 15.0),
                               child: Text(
-                                user.data.user.displayName,
+                                user.data.displayName,
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               )),
                         ],
@@ -438,6 +568,18 @@ class _ProfileActivityState extends State<ProfileActivity> {
     });
   }
 
+  openMessage() async {
+    if (user.data.conversation == null) {
+      CreateConversationRequestModel model = CreateConversationRequestModel(
+          members: [currentUserId, profileId], type: "DIRECT");
+      await APIService.createConversation(model);
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => ConversationsActivity()),
+    );
+  }
+
   changeView(String viewName) {
     setState(() {
       view = viewName;
@@ -451,7 +593,17 @@ class _ProfileActivityState extends State<ProfileActivity> {
     });
   }
 
-
+  void _getMoreData() async {
+    print("get more");
+    var listPosts = await APIService.getUserWallPosts(profileId,offsetPost);
+    setState(() {
+      if (listPosts.data.posts.length > 0) {
+        totalPagePost = listPosts.data.metadata.totalPage;
+      }
+      posts.addAll(listPosts.data.posts);
+      offsetPost++;
+    });
+  }
 }
 
 class ImageTile extends StatelessWidget {
@@ -466,7 +618,98 @@ class ImageTile extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
         onTap: () => clickedImage(context),
-        child: Image.network(posts.images[0], fit: BoxFit.cover));
+        child: CachedNetworkImage(
+
+          imageUrl: posts.medias[0].url,
+          imageBuilder: (context, imageProvider) => Container(
+            decoration: BoxDecoration(
+              image: DecorationImage(
+                image: imageProvider,
+                fit: BoxFit.cover,
+              ),
+            ),
+          ),
+          placeholder: (context, url) => Center(child: CircularProgressIndicator(color: Colors.white30,)),
+          errorWidget: (context, url, error) => Icon(Icons.error),
+        ),);
+
+  }
+}
+
+class AlbumTile extends StatefulWidget {
+  final Album album;
+  final Function reloadFunction;
+  final String userId;
+  const AlbumTile({Key key, this.album, this.reloadFunction, this.userId}) : super(key: key);
+
+  @override
+  State<AlbumTile> createState() =>
+      _AlbumTileState(name: album.name, url: album.url);
+}
+
+class _AlbumTileState extends State<AlbumTile> {
+  String url;
+  String name;
+
+  _AlbumTileState({this.name, this.url});
+
+  @override
+  Widget build(BuildContext context) {
+    return widget.album.isCreateItem
+        ? GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => CreateAlbumActivity()),
+              ).then(widget.reloadFunction);
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(
+                  child: Container(
+                    decoration: BoxDecoration(
+                        border: Border.all(color: appPrimaryColor)),
+                    child: Center(
+                      child: IconButton(
+                        icon: Icon(Icons.add, color: appPrimaryColor),
+                        iconSize: 30,
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  "Create album",
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                ),
+              ],
+            ))
+        : GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => AlbumDetailsActivity(userId: widget.userId, albumId: widget.album.id, name: widget.album.name,)),
+              );
+            },
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: Container( width: 1000, height: 1000,child: Image.network(url, fit: BoxFit.cover))),
+                SizedBox(
+                  height: 5,
+                ),
+                Text(
+                  name,
+                  overflow: TextOverflow.ellipsis,
+                  maxLines: 1,
+                )
+              ],
+            ));
+    ;
   }
 }
 

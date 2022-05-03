@@ -1,13 +1,15 @@
 import 'dart:convert';
-WallPostRespondModel wallPostRespondModel(String str) =>
-    WallPostRespondModel.fromJson(json.decode(str));
-class WallPostRespondModel {
+
+
+AlbumRespondModel albumRespondModel(String str) =>
+    AlbumRespondModel.fromJson(json.decode(str));
+class AlbumRespondModel {
   Meta meta;
   Data data;
 
-  WallPostRespondModel({this.meta, this.data});
+  AlbumRespondModel({this.meta, this.data});
 
-  WallPostRespondModel.fromJson(Map<String, dynamic> json) {
+  AlbumRespondModel.fromJson(Map<String, dynamic> json) {
     meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
@@ -44,16 +46,15 @@ class Meta {
 }
 
 class Data {
-  List<Posts> posts;
+  List<Albums> albums;
   Metadata metadata;
-
-  Data({this.posts, this.metadata});
+  Data({this.albums,this.metadata});
 
   Data.fromJson(Map<String, dynamic> json) {
-    if (json['posts'] != null) {
-      posts = <Posts>[];
-      json['posts'].forEach((v) {
-        posts.add(new Posts.fromJson(v));
+    if (json['albums'] != null) {
+      albums = <Albums>[];
+      json['albums'].forEach((v) {
+        albums.add(new Albums.fromJson(v));
       });
     }
     metadata = json['metadata'] != null
@@ -63,8 +64,8 @@ class Data {
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.posts != null) {
-      data['posts'] = this.posts.map((v) => v.toJson()).toList();
+    if (this.albums != null) {
+      data['albums'] = this.albums.map((v) => v.toJson()).toList();
     }
     if (this.metadata != null) {
       data['metadata'] = this.metadata.toJson();
@@ -73,37 +74,57 @@ class Data {
   }
 }
 
-class Posts {
+class Albums {
   String id;
   int createdAt;
-  String content;
+  int updatedAt;
+  String name;
+  String description;
   List<Medias> medias;
-  String kind;
+  Owner owner;
+  int numOfComment;
+  int numOfReaction;
+  Albums(
+      {this.id,
+        this.createdAt,
+        this.updatedAt,
+        this.name,
+        this.description,
+        this.medias,
+        this.owner});
 
-  Posts({this.id, this.createdAt, this.content, this.medias, this.kind});
-
-  Posts.fromJson(Map<String, dynamic> json) {
+  Albums.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     createdAt = json['createdAt'];
-    content = json['content'];
+    updatedAt = json['updatedAt'];
+    name = json['name'];
+    description = json['description'];
     if (json['medias'] != null) {
       medias = <Medias>[];
       json['medias'].forEach((v) {
         medias.add(new Medias.fromJson(v));
       });
     }
-    kind = json['kind'];
+    owner = json['owner'] != null ? new Owner.fromJson(json['owner']) : null;
+    numOfComment = json['numOfComment'];
+    numOfReaction = json['numOfReaction'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
     data['createdAt'] = this.createdAt;
-    data['content'] = this.content;
+    data['updatedAt'] = this.updatedAt;
+    data['name'] = this.name;
+    data['description'] = this.description;
     if (this.medias != null) {
       data['medias'] = this.medias.map((v) => v.toJson()).toList();
     }
-    data['kind'] = this.kind;
+    if (this.owner != null) {
+      data['owner'] = this.owner.toJson();
+    }
+    data['numOfComment'] = this.numOfComment;
+    data['numOfReaction'] = this.numOfReaction;
     return data;
   }
 }
@@ -133,6 +154,30 @@ class Medias {
   }
 }
 
+class Owner {
+  String id;
+  Medias avatar;
+  String displayName;
+
+  Owner({this.id, this.avatar, this.displayName});
+
+  Owner.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    avatar =
+    json['avatar'] != null ? new Medias.fromJson(json['avatar']) : null;
+    displayName = json['displayName'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    if (this.avatar != null) {
+      data['avatar'] = this.avatar.toJson();
+    }
+    data['displayName'] = this.displayName;
+    return data;
+  }
+}
 class Metadata {
   int totalPage;
   int page;
@@ -157,4 +202,3 @@ class Metadata {
     return data;
   }
 }
-

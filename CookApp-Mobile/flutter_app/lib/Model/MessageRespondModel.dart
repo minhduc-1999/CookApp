@@ -1,52 +1,26 @@
 import 'dart:convert';
 
-import 'MessageRequestModel.dart';
+
 
 MessageRespondModel messageRespondModel(String str) =>
     MessageRespondModel.fromJson(json.decode(str));
 
 class MessageRespondModel {
-  String response;
-  Context context;
-  Action action;
-
-  MessageRespondModel({this.response, this.context});
-
-  MessageRespondModel.fromJson(Map<String, dynamic> json) {
-    response = json['response'];
-    context =
-        json['context'] != null ? new Context.fromJson(json['context']) : null;
-    action =
-        json['action'] != null ? new Action.fromJson(json['action']) : null;
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['response'] = this.response;
-    if (this.context != null) {
-      data['context'] = this.context.toJson();
-    }
-    if (this.action != null) {
-      data['action'] = this.action.toJson();
-    }
-    return data;
-  }
-}
-
-class Action {
-  String action;
+  Meta meta;
   Data data;
 
-  Action({this.action, this.data});
+  MessageRespondModel({this.meta, this.data});
 
-  Action.fromJson(Map<String, dynamic> json) {
-    action = json['action'];
+  MessageRespondModel.fromJson(Map<String, dynamic> json) {
+    meta = json['meta'] != null ? new Meta.fromJson(json['meta']) : null;
     data = json['data'] != null ? new Data.fromJson(json['data']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['action'] = this.action;
+    if (this.meta != null) {
+      data['meta'] = this.meta.toJson();
+    }
     if (this.data != null) {
       data['data'] = this.data.toJson();
     }
@@ -54,30 +28,170 @@ class Action {
   }
 }
 
-class Data {
-  String message;
-  String time;
-  String type;
+class Meta {
+  List<String> messages;
+  bool ok;
 
-  Data({this.message, this.time, this.type});
+  Meta({this.messages, this.ok});
 
-  Data.fromJson(Map<String, dynamic> json) {
-    message = json['message'] != null ? json['message'] : null;
-    time = json['time'] != null ? json['time'] : null;
-    type = json['type'] != null ? json['type'] : null;
+  Meta.fromJson(Map<String, dynamic> json) {
+    messages = json['messages'].cast<String>();
+    ok = json['ok'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    if (this.message != null) {
-      data['message'] = this.message;
+    data['messages'] = this.messages;
+    data['ok'] = this.ok;
+    return data;
+  }
+}
+
+class Data {
+  List<Messages> messages;
+  Metadata metadata;
+
+  Data({this.messages, this.metadata});
+
+  Data.fromJson(Map<String, dynamic> json) {
+    if (json['messages'] != null) {
+      messages = <Messages>[];
+      json['messages'].forEach((v) {
+        messages.add(new Messages.fromJson(v));
+      });
     }
-    if (this.time != null) {
-      data['time'] = this.time;
+    metadata = json['metadata'] != null
+        ? new Metadata.fromJson(json['metadata'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.messages != null) {
+      data['messages'] = this.messages.map((v) => v.toJson()).toList();
     }
-    if (this.type != null) {
-      data['type'] = this.type;
+    if (this.metadata != null) {
+      data['metadata'] = this.metadata.toJson();
     }
+    return data;
+  }
+}
+
+class Messages {
+  String id;
+  int createdAt;
+  int updatedAt;
+  String content;
+  String type;
+  Sender sender;
+  String to;
+
+  Messages(
+      {this.id,
+        this.createdAt,
+        this.updatedAt,
+        this.content,
+        this.type,
+        this.sender,
+        this.to});
+
+  Messages.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    createdAt = json['createdAt'];
+    updatedAt = json['updatedAt'];
+    content = json['content'];
+    type = json['type'];
+    sender =
+    json['sender'] != null ? new Sender.fromJson(json['sender']) : null;
+    to = json['to'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['createdAt'] = this.createdAt;
+    data['updatedAt'] = this.updatedAt;
+    data['content'] = this.content;
+    data['type'] = this.type;
+    if (this.sender != null) {
+      data['sender'] = this.sender.toJson();
+    }
+    data['to'] = this.to;
+    return data;
+  }
+}
+
+class Sender {
+  String id;
+  Avatar avatar;
+  String displayName;
+
+  Sender({this.id, this.avatar, this.displayName});
+
+  Sender.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    avatar =
+    json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
+    displayName = json['displayName'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    if (this.avatar != null) {
+      data['avatar'] = this.avatar.toJson();
+    }
+    data['displayName'] = this.displayName;
+    return data;
+  }
+}
+
+class Avatar {
+  String id;
+  String url;
+  String type;
+  String reaction;
+
+  Avatar({this.id, this.url, this.type, this.reaction});
+
+  Avatar.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    url = json['url'];
+    type = json['type'];
+    reaction = json['reaction'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['url'] = this.url;
+    data['type'] = this.type;
+    data['reaction'] = this.reaction;
+    return data;
+  }
+}
+
+class Metadata {
+  int totalPage;
+  int page;
+  int pageSize;
+  int totalCount;
+
+  Metadata({this.totalPage, this.page, this.pageSize, this.totalCount});
+
+  Metadata.fromJson(Map<String, dynamic> json) {
+    totalPage = json['totalPage'];
+    page = json['page'];
+    pageSize = json['pageSize'];
+    totalCount = json['totalCount'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['totalPage'] = this.totalPage;
+    data['page'] = this.page;
+    data['pageSize'] = this.pageSize;
+    data['totalCount'] = this.totalCount;
     return data;
   }
 }
