@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:tastify/Model/PostDetailsRespondModel.dart';
+
 import 'package:tastify/NewFeedScreen/PostDetail.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';

@@ -3,21 +3,31 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:tastify/Model/AlbumDetailsRespondModel.dart';
+import 'package:tastify/Model/AlbumRespondModel.dart';
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
+import 'package:tastify/Model/ConversationDetailRespondModel.dart';
+import 'package:tastify/Model/ConversationsRespondModel.dart';
+import 'package:tastify/Model/CreateAlbumRequestModel.dart';
+import 'package:tastify/Model/CreateConversationRequestModel.dart';
+import 'package:tastify/Model/CreateFoodRequestModel.dart';
+import 'package:tastify/Model/CreateFoodRespondModel.dart';
 import 'package:tastify/Model/EditPostRequestModel.dart';
 import 'package:tastify/Model/EditProfileRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
 import 'package:tastify/Model/FoodInstructionRespondModel.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
+import 'package:tastify/Model/IngredientsRespondModel.dart';
 import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
 import 'package:tastify/Model/LoginRequestModel.dart';
 import 'package:tastify/Model/LoginRespondModel.dart';
 import 'package:tastify/Model/MessageRequestModel.dart';
 import 'package:tastify/Model/MessageRespondModel.dart';
-import 'package:tastify/Model/MultiImagesRespondModel.dart';
+
 import 'package:tastify/Model/NewFeedRespondModel.dart';
-import 'package:tastify/Model/PostDetailsRespondModel.dart';
+import 'package:tastify/Model/PostDetailRespondModel.dart';
+
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
@@ -27,6 +37,9 @@ import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/RegisterRequestModel.dart';
 import 'package:tastify/Model/RegisterRespondModel.dart';
 import 'package:tastify/Model/ResendEmailRequestModel.dart';
+import 'package:tastify/Model/SavedPostRespondModel.dart';
+import 'package:tastify/Model/TotalNewMessageRespondModel.dart';
+import 'package:tastify/Model/UnitsRespondModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Model/UserWallRespondModel.dart';
 import 'package:tastify/Model/WallPostRespondModel.dart';
@@ -122,6 +135,7 @@ class APIService {
           'Authorization': 'Bearer ${loginDetails.data.accessToken}',
         },
         body: jsonEncode(model.toJson()));
+    print('ln');
     return true;
   }
 
@@ -145,13 +159,13 @@ class APIService {
     return userRespondModel(respone.body);
   }
 
-  static Future<WallPostRespondModel> getUserWallPosts(String userId) async {
+  static Future<WallPostRespondModel> getUserWallPosts(String userId, int offset) async {
     var url = Uri.parse(Config.apiURL +
             Config.preUserWallAPI +
             userId +
             Config.endUserWallPostAPI)
         .replace(
-            queryParameters: <String, String>{'offset': '0', 'limit': '40'});
+            queryParameters: <String, String>{'offset': offset.toString(), 'limit': '48', 'kind' : 'MOMENT'});
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{
@@ -160,17 +174,37 @@ class APIService {
     });
     return wallPostRespondModel(respone.body);
   }
-
-  static Future<PostDetailsRespondModel> getDetailsPost(String postID) async {
-    var url = Uri.parse(Config.apiURL + Config.postDetails + postID);
+  static Future<AlbumRespondModel> getAlbum(String userId,int offset) async {
+    var url = Uri.parse(Config.apiURL +
+        Config.preUserWallAPI +
+        userId +
+        Config.endUserWallAlbumAPI)
+        .replace(
+        queryParameters: <String, String>{'offset': offset.toString(), 'limit': '40'});
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
-    return postDetailsRespondModel(respone.body);
+    return albumRespondModel(respone.body);
   }
+  static Future<AlbumDetailsRespondModel> getAlbumDetails(String albumId) async {
+    var url = Uri.parse(Config.apiURL +
+        Config.albumAPI +
+        "/" +
+    albumId)
+        .replace(
+        queryParameters: <String, String>{'offset': '0', 'limit': '40'});
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return albumDetailsRespondModel(respone.body);
+  }
+
 
   static Future<NewFeedRespondModel> getNewFeed(int offset) async {
     var url = Uri.parse(Config.apiURL + Config.userFeedAPI).replace(
@@ -229,7 +263,7 @@ class APIService {
     if (replyOf != "" && replyOf != null) {
       url = url.replace(queryParameters: <String, String>{
         'offset': '0',
-        'limit': '10',
+        'limit': '50',
         'targetId': targetId,
         'targetType': targetType,
         'replyOf': replyOf
@@ -237,7 +271,7 @@ class APIService {
     } else{
       url = url.replace(queryParameters: <String, String>{
         'offset': '0',
-        'limit': '10',
+        'limit': '50',
         'targetId': targetId,
         'targetType': targetType,
       });
@@ -380,12 +414,12 @@ class APIService {
 
   static Future<MessageRespondModel> sendMessage(
       MessageRequestModel model) async {
-    var url = Uri.parse(Config.apiURLChatBot + Config.sendMessage);
+    var url = Uri.parse(Config.apiURL + Config.sendMessage);
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.post(url,
         headers: <String, String>{
           'Content-Type': 'application/json',
-          'x-access-token': Config.tokenChatbot,
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
         },
         body: jsonEncode(model.toJson()));
     return messageRespondModel(respone.body);
@@ -409,13 +443,193 @@ class APIService {
     }
   }
 
-  static Future<MultiImagesRespondModel> getPostDetail(String postId) async {
+  static Future<PostDetailRespondModel> getPostDetail(String postId) async {
     var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId + "/detail");
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
-    return multiImageRespondModel(respone.body);
+    return postDetailRespondModel(respone.body);
+  }
+
+  static Future<bool> savePost(String postId) async {
+    var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId + "/save");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        );
+    return respone.statusCode == 200;
+  }
+  static Future<bool> deleteSavedPost(String postId) async {
+    var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId + "/save");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.delete(url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+      },
+    );
+    return respone.statusCode == 200;
+  }
+
+  static Future<SavedPostRespondModel> getSavedPosts() async {
+    var url = Uri.parse(Config.apiURL + Config.savedPostsAPI).replace(
+        queryParameters: <String, String>{
+          'offset': '0',
+          'limit': '30',
+
+        });
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return savedPostRespondModel(respone.body);
+  }
+
+  static Future<TotalNewMessageRespondModel> getTotalNewMessage() async {
+    var url = Uri.parse(Config.apiURL + Config.statusMessagesAPI);
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return totalNewMessageRespondModel(respone.body);
+  }
+  static Future<ConversationsRespondModel> getConversations() async {
+    var url = Uri.parse(Config.apiURL + Config.conversationsAPI);
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return conversationsRespondModel(respone.body);
+  }
+  static Future<ConversationDetailRespondModel> getConversationsById(String conversationId) async {
+    var url = Uri.parse(Config.apiURL + Config.conversationsAPI + "/" + conversationId);
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return conversationDetailRespondModel(respone.body);
+  }
+  static Future<MessageRespondModel> getMessages(String conversationId) async {
+    var url = Uri.parse(Config.apiURL + Config.conversationsAPI + "/" +conversationId + "/messages").replace(
+        queryParameters: <String, String>{
+          'offset': '0',
+          'limit': '50',
+
+        });
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },);
+    return messageRespondModel(respone.body);
+  }
+  static Future<bool> seen(String conversationId, messageId) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.conversationsAPI + "/" + conversationId + "/messages/" + messageId + "/seen");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+      },
+    );
+    if (respone.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  static Future<bool> createConversation(CreateConversationRequestModel model) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.conversationsAPI);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+      },
+        body: jsonEncode(model.toJson()));
+
+    if (respone.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  static Future<bool> createAlbum(CreateAlbumRequestModel model) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.albumAPI);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+
+    if (respone.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+  static Future<IngredientsRespondModel> getIngredients(int offset) async {
+    var url = Uri.parse(Config.apiURL +
+        Config.ingredientsAPI)
+        .replace(
+        queryParameters: <String, String>{'offset': '0', 'limit': '40'});
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return ingredientsRespondModel(respone.body);
+  }
+  static Future<UnitsRespondModel> getUnits(int offset) async {
+    var url = Uri.parse(Config.apiURL +
+        Config.unitsAPI)
+        .replace(
+        queryParameters: <String, String>{'offset': '0', 'limit': '40'});
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return unitsRespondModel(respone.body);
+  }
+  static Future<CreateFoodRespondModel> createFood(CreateFoodRequestModel model) async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI);
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+
+
+    return createFoodRespondModel(respone.body);
+
   }
 }

@@ -90,14 +90,14 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                   EditUserRequestModel profile = EditUserRequestModel(
                       displayName: displayNameController.text,
                       avatar: file != null ? objectName : user.data.avatar,
-                      profile: new Profile(
-                        height: int.parse(heightController.text),
-                        weight: int.parse(weightController.text),
+
+                        height: int.parse(heightController.text != "" ? heightController.text : "0"),
+                        weight: int.parse(weightController.text != "" ? weightController.text : "0"),
                         birthDate: DateTime.now().microsecondsSinceEpoch,
                         firstName: firstNameController.text,
                         lastName: lastNameController.text,
                         sex: _groupsexual,
-                      ));
+                      );
                   EditProfileRespondModel response = await APIService.editProfile(profile);
 
                   setState(() {
@@ -157,7 +157,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                             image: file != null
                                 ? new FileImage(file)
                                 : user.data.avatar != null
-                                ? NetworkImage(user.data.avatar)
+                                ? NetworkImage(user.data.avatar.url)
                                 : AssetImage(
                                 'assets/images/default_avatar.png'))),
                   ),
@@ -291,9 +291,9 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
         weightController.text = user.data.profile.weight.toString();
       }
       if (user.data.profile.sex != null){
-        if(user.data.profile.sex == "male"){
+        if(user.data.profile.sex == "MALE"){
           _groupsexual = "male";
-        }else if (user.data.profile.sex == "female"){
+        }else if (user.data.profile.sex == "FEMALE"){
           _groupsexual = "female";
         }
       }
@@ -369,7 +369,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                 width: 20,
               ),
               Radio(
-                value: "male",
+                value: "MALE",
                 groupValue: _groupsexual,
                 onChanged: (value) {
                   setState(() {
@@ -388,7 +388,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                 width: 40,
               ),
               Radio(
-                value: "female",
+                value: "FEMALE",
                 groupValue: _groupsexual,
                 onChanged: (value) {
                   setState(() {
@@ -448,14 +448,14 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
     EditUserRequestModel profile = EditUserRequestModel(
         displayName: displayNameController.text,
         avatar: file != null ? objectName : user.data.avatar,
-        profile: new Profile(
+
           height: int.parse(heightController.text),
           weight: int.parse(weightController.text),
           birthDate: DateTime.now().microsecondsSinceEpoch,
           firstName: firstNameController.text,
           lastName: lastNameController.text,
           sex: _groupsexual,
-        ));
+        );
     EditProfileRespondModel response = await APIService.editProfile(profile);
 
     setState(() {

@@ -1,16 +1,20 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter/foundation.dart';
 //import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_observer/Observable.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
+import 'dart:convert';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tastify/UploadScreen/UploadActivity.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
 import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:web_socket_channel/io.dart';
+import 'Model/LoginRespondModel.dart';
 import 'ProfileScreen/EditProfileActivity.dart';
 import 'Services/Auth.dart';
 import 'Services/SharedService.dart';
@@ -19,6 +23,8 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 String currentUserId;
 Stream<SSEModel> sseModel;
+
+LoginRespondModel loginDetail;
 Widget _defaultHome = LoginActivity(
   auth: Auth(),
 );
@@ -60,7 +66,10 @@ Future<void> main() async {
     socket.on("disconnect", (data) =>  print("socket: disconnect"));
     socket.connect();*/
     await SharedService.chatSSEService();
-
+    sseModel.listen((event) {
+      Map<dynamic,dynamic> data = json.decode(event.data);
+      Observable.instance.notifyObservers(["_MessageActivityState","HomeActivityState","_ConversationsActivityState"], notifyName: "new_message",map: data);
+    });
     _defaultHome = HomeActivity(
       auth: Auth(),
     );

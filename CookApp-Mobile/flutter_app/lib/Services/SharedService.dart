@@ -4,6 +4,7 @@ import 'package:api_cache_manager/api_cache_manager.dart';
 import 'package:api_cache_manager/models/cache_db_model.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
+import 'package:flutter_observer/Observable.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:tastify/Model/LoginRespondModel.dart';
 import 'package:tastify/config.dart';
@@ -34,11 +35,12 @@ class SharedService {
   }
 
   static Future<void> chatSSEService() async{
-    var loginDetails = await SharedService.loginDetails();
+    loginDetail = await SharedService.loginDetails();
+
     sseModel = SSEClient.subscribeToSSE(url: Config.sseAPI,
         header: {
           "Accept": "text/event-stream",
-          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+          'Authorization': 'Bearer ${loginDetail.data.accessToken}',
         });
 
   }
