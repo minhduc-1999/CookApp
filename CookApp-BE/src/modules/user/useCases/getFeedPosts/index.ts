@@ -47,10 +47,11 @@ export class GetFeedPostsQueryHandler
       switch (post.type) {
         case PostType.FOOD_SHARE:
           post = post as FoodShare;
-          if (post.ref) {
-            post.ref.photos = await this._storageService.getDownloadUrls(
-              post.ref.photos
-            );
+          if ((<FoodShare>post).ref) {
+            (<FoodShare>post).ref.photos =
+              await this._storageService.getDownloadUrls(
+                (<FoodShare>post).ref.photos
+              );
           }
           break;
         case PostType.MOMENT:

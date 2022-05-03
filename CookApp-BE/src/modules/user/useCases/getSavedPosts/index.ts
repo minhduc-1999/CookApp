@@ -42,8 +42,7 @@ export class GetSavedPostsQueryHandler
         )[0];
       }
       if (post.type === PostType.FOOD_SHARE) {
-        post = <FoodShare>post
-        post.ref.photos = await this._storageService.getDownloadUrls(post.ref.photos)
+        (<FoodShare>post).ref.photos = await this._storageService.getDownloadUrls((<FoodShare>post).ref.photos)
       }
     }
 

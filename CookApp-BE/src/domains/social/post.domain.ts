@@ -53,7 +53,7 @@ export class Moment extends PostBase {
     return true
   }
 
-  location: string
+  location?: string
 
   constructor(post: Partial<Moment>) {
     super(post)
@@ -81,10 +81,13 @@ export class FoodShare extends PostBase {
 
   ref: Food
 
+  location?: string
+
   constructor(post: Partial<FoodShare>) {
     super(post)
     this.type = PostType.FOOD_SHARE
     this.ref = post?.ref
+    this.location = post?.location
   }
 }
 

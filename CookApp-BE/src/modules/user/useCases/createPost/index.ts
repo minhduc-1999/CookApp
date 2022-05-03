@@ -88,7 +88,8 @@ export class CreatePostCommandHandler
           content: req.content,
           medias,
           ref: foodRef,
-          tags: req.tags
+          tags: req.tags,
+          location: req.location
         });
         break;
       }

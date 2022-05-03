@@ -36,12 +36,13 @@ class RecipeStepRequest {
   @IsString()
   content: string;
 
-  @ApiProperty({ type: [String] })
+  @ApiPropertyOptional({ type: [String] })
   @IsArray()
   @ArrayMinSize(1)
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
   @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"], { each: true })
+  @IsOptional()
   photos?: string[];
 }
 

@@ -5,7 +5,6 @@ import { MediaResponse } from "base/dtos/response.dto";
 import { FoodShare } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { PostType } from "enums/social.enum";
-import { defaults } from "lodash";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { IPostService } from "modules/user/services/post.service";
@@ -48,11 +47,11 @@ export class GetPostDetailQueryHandler
 
     switch (post.type) {
       case PostType.FOOD_SHARE:
-        post = post as FoodShare;
-        if (post.ref)
-          post.ref.photos = await this._storageService.getDownloadUrls(
-            post.ref.photos
-          );
+        if ((<FoodShare>post).ref)
+          (<FoodShare>post).ref.photos =
+            await this._storageService.getDownloadUrls(
+              (<FoodShare>post).ref.photos
+            );
         break;
       case PostType.MOMENT:
         break;
