@@ -1,6 +1,7 @@
 *.rest
 dist/
 **/credential.json
+service-account/
 .env.staging
 neo4j-db/
 stack/

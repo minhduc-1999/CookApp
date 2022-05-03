@@ -35,7 +35,7 @@ export class CommentRepository
       .where("comment.parent_id = :parentId", { parentId: parent.id })
       .select(["comment", "user", "media"])
       .skip(queryOpt.limit * queryOpt.offset)
-      .limit(queryOpt.limit)
+      .take(queryOpt.limit)
       .getManyAndCount()
     return [entities?.map(entity => entity.toDomain()), total]
   }
@@ -79,7 +79,7 @@ export class CommentRepository
       .andWhere("comment.parent_id IS NULL")
       .select(["comment", "user", "media"])
       .skip(query.limit * query.offset)
-      .limit(query.limit)
+      .take(query.limit)
       .getManyAndCount()
 
     return [entities?.map(entity => entity.toDomain()), total]

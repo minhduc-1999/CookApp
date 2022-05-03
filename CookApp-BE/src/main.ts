@@ -29,6 +29,7 @@ async function bootstrap() {
       },
     }
   );
+
   const configService = app.get(ConfigService);
 
   const APP_HOST = configService.get("app.host");

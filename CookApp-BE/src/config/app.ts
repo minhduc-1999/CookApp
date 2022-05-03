@@ -5,5 +5,6 @@ export default {
   host: UtilsService.getConfig('APP_HOST', '0.0.0.0'),
   port: UtilsService.getConfig('PORT', 3000),
   env: UtilsService.getConfig('APP_ENV', 'development'),
-  stagingUrl: UtilsService.getConfig("STAGING_URL")
+  stagingUrl: UtilsService.getConfig("STAGING_URL"),
+  emailVerificationRequire: UtilsService.getConfig("EMAIL_VERIFICATION_REQUIRE", true)
 };

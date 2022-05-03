@@ -12,14 +12,41 @@ export interface IMessageRepository {
   createMessage(message: Message): Promise<Message>
   setTransaction(tx: ITransaction): IMessageRepository
   getMessages(convId: string, queryOpt: PageOptionsDto): Promise<[Message[], number]>
+  findById(msgId: string): Promise<Message>
+  findLastSeenMessage(userId: string, convId: string): Promise<Message>
 }
 @Injectable()
 export class MessageRepository extends BaseRepository implements IMessageRepository {
   constructor(
     @InjectRepository(MessageEntity)
     private _messageRepo: Repository<MessageEntity>,
+    @InjectRepository(ConversationMemberEntity)
+    private _convMemberRepo: Repository<ConversationMemberEntity>,
   ) {
     super()
+  }
+
+  async findLastSeenMessage(userId: string, convId: string): Promise<Message> {
+    const entity = await this._convMemberRepo.findOne({
+      relations: ["lastSeenMessage"],
+      where: {
+        user: {
+          id: userId
+        },
+        conversation: {
+          id: convId
+        }
+      }
+    })
+
+    return entity?.toDomain().lastSeenMessage
+  }
+
+  async findById(msgId: string): Promise<Message> {
+    const entity = await this._messageRepo.findOne(msgId, {
+      relations: ["sender", "sender.user"],
+    })
+    return entity?.toDomain()
   }
 
   async getMessages(convId: string, queryOpt: PageOptionsDto): Promise<[Message[], number]> {

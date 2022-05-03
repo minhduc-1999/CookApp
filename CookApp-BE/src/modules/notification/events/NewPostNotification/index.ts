@@ -8,6 +8,7 @@ import { IConfigurationService } from "modules/configuration/adapters/out/servic
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
 import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 import { IFollowRepository } from "modules/user/interfaces/repositories/follow.interface";
+
 export class NewPostEvent {
   post: Post;
   author: User;

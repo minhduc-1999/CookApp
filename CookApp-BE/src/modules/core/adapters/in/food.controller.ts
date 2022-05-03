@@ -1,14 +1,31 @@
-import { Controller, Get, Param, ParseUUIDPipe, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
+  ApiCreatedResponseCustom,
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
+import {
+  HttpParamTransaction,
+  HttpRequestTransaction,
+} from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
+import { CreateFoodCommand } from "modules/core/useCases/createFood";
+import { CreateFoodRequest } from "modules/core/useCases/createFood/createFoodRequest";
+import { CreateFoodResponse } from "modules/core/useCases/createFood/createFoodResponse";
 import { GetFoodDetailQuery } from "modules/core/useCases/getFoodDetail";
 import { GetFoodDetailResponse } from "modules/core/useCases/getFoodDetail/getFoodDetailResponse";
 import { GetFoodsQuery } from "modules/core/useCases/getFoods";
@@ -19,13 +36,14 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @ApiTags("Foods")
 @ApiBearerAuth()
 export class FoodController {
-  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
+  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
   @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodsResponse, "Get foods successfully")
   async getFoods(
-    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
+    query: PageOptionsDto,
     @HttpUserReq() user: User
   ): Promise<Result<GetFoodsResponse>> {
     const foodQuery = new GetFoodsQuery(user, query);
@@ -47,5 +65,19 @@ export class FoodController {
     return Result.ok(result, {
       messages: ["Get food successfully"],
     });
+  }
+
+  @Post()
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustom(CreateFoodResponse, "Create food successfully")
+  @HttpRequestTransaction()
+  async createPost(
+    @Body() req: CreateFoodRequest,
+    @HttpUserReq() user: User,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<string>> {
+    const createPostCommand = new CreateFoodCommand(user, req, tx);
+    const newFoodId = await this._commandBus.execute(createPostCommand);
+    return Result.ok(newFoodId, { messages: ["Create food successfully"] });
   }
 }

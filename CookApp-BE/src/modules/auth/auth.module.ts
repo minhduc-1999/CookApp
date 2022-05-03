@@ -5,7 +5,7 @@ import { CqrsModule } from "@nestjs/cqrs";
 import { JwtModule } from "@nestjs/jwt";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
-import { AccountEntity } from "entities/social/account.entity";
+import { AccountEntity, AccountRoleEntity } from "entities/social/account.entity";
 import { ProviderEntity } from "entities/social/provider.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
@@ -16,6 +16,7 @@ import { ShareModule } from "modules/share/share.module";
 import { ConfigModule, ConfigService } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
 import { AccountRepository } from "./adapters/out/repositories/account.repository";
+import { RoleRepository } from "./adapters/out/repositories/role.repository";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
@@ -66,7 +67,8 @@ const globalGuards = [
     TypeOrmModule.forFeature([
       UserEntity,
       AccountEntity,
-      ProviderEntity
+      ProviderEntity,
+      AccountRoleEntity
     ])
   ],
   controllers: [AuthController],
@@ -82,6 +84,10 @@ const globalGuards = [
     {
       provide: "IAccountRepository",
       useClass: AccountRepository,
+    },
+    {
+      provide: "IRoleRepository",
+      useClass: RoleRepository,
     },
     {
       provide: "IAuthentication",

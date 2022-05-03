@@ -11,7 +11,7 @@ import { isNil } from 'lodash';
 @Entity({ name: 'albums' })
 export class AlbumEntity extends AbstractEntity {
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "owner_id" })
   owner: UserEntity;
 
@@ -57,7 +57,7 @@ export class AlbumMediaEntity {
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 
-  @ManyToOne(() => AlbumEntity, album => album.medias)
+  @ManyToOne(() => AlbumEntity, album => album.medias, { nullable: false })
   @JoinColumn({ name: "album_id" })
   album: AlbumEntity;
 

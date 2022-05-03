@@ -40,6 +40,8 @@ export class GetPostDetailQueryHandler
       )[0];
     }
 
+    if (post.ref) post.ref.photos = await this._storageService.getDownloadUrls(post.ref.photos)
+
     const result = new GetPostResponse(post, reaction, saved ? true : false);
 
     const task = post.medias?.map(async media => {

@@ -14,16 +14,16 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
     @InjectRepository(FeedEntity)
     private _feedRepo: Repository<FeedEntity>
   ) {
-    super()
+    super();
   }
 
   async pushNewPost(post: Post, users: User[]): Promise<void> {
-    const queryRunner = this.tx?.getRef() as QueryRunner
-    const entities = users.map(user => new FeedEntity(user, post))
+    const queryRunner = this.tx?.getRef() as QueryRunner;
+    const entities = users.map((user) => new FeedEntity(user, post));
     if (queryRunner && !queryRunner.isReleased) {
-      await queryRunner.manager.save<FeedEntity>(entities)
+      await queryRunner.manager.save<FeedEntity>(entities);
     } else {
-      await this._feedRepo.save(entities)
+      await this._feedRepo.save(entities);
     }
   }
 
@@ -35,20 +35,25 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       .leftJoinAndSelect("post.interaction", "interaction")
       .leftJoinAndSelect("post.medias", "media")
       .leftJoinAndSelect("media.interaction", "mediaInter")
+      .leftJoinAndSelect("post.foodRef", "foodRef")
+      .leftJoinAndSelect("foodRef.medias", "foodRefPhoto")
       .where("feed.user_id = :userId", { userId: user.id })
+      .orderBy("feed.updatedAt", "DESC")
       .select([
         "feed",
         "post",
-        "interaction", 
-        "author.id", 
-        "author.displayName", 
+        "interaction",
+        "author.id",
+        "author.displayName",
         "author.avatar",
         "media",
-        "mediaInter"
+        "mediaInter",
+        "foodRef",
+        "foodRefPhoto"
       ])
       .skip(query.limit * query.offset)
-      .limit(query.limit)
-      .getManyAndCount()
-    return [entities?.map(entity => entity.toDomain()), total]
+      .take(query.limit)
+      .getManyAndCount();
+    return [entities?.map((entity) => entity.toDomain()), total];
   }
 }

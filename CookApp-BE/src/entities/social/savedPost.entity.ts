@@ -9,18 +9,18 @@ import { InteractionEntity } from './interaction.entity';
 @Entity({ name: 'saved_posts' })
 export class SavedPostEntity extends AbstractEntity {
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user: UserEntity
 
-  @ManyToOne(() => PostEntity)
+  @ManyToOne(() => PostEntity, { nullable: false })
   @JoinColumn({ name: 'post_id' })
   post: PostEntity;
 
   constructor(item: SavedPost) {
     super(item)
-    this.user = new UserEntity(item?.saver)
-    this.post = new PostEntity(item?.post, new InteractionEntity(item?.post))
+    this.user = item?.saver && new UserEntity(item?.saver)
+    this.post = item?.post && new PostEntity(item?.post, new InteractionEntity(item?.post))
   }
 
   toDomain(): SavedPost {

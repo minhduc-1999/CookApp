@@ -46,10 +46,12 @@ export class SavedPostRepository extends BaseRepository implements ISavedPostRep
       .createQueryBuilder("saved")
       .innerJoin("saved.user", "user")
       .leftJoinAndSelect("saved.post", "post")
+      .leftJoinAndSelect("post.medias", "media")
+      .leftJoinAndSelect("post.interaction", "interaction")
+      .leftJoinAndSelect("post.author", "author")
       .where("user.id = :userId", { userId: user.id })
-      .select(["saved", "post"])
       .skip(queryOpt.limit * queryOpt.offset)
-      .limit(queryOpt.limit)
+      .take(queryOpt.limit)
       .getManyAndCount()
     return [entities?.map(entity => entity.toDomain()), total]
   }

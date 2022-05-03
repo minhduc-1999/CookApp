@@ -1,4 +1,8 @@
-import { ConflictException, Inject, InternalServerErrorException } from "@nestjs/common";
+import {
+  ConflictException,
+  Inject,
+  InternalServerErrorException,
+} from "@nestjs/common";
 import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
 import { RegisterRequest } from "./registerRequest";
 import { RegisterResponse } from "./registerResponse";
@@ -13,11 +17,13 @@ import { Account } from "domains/social/account.domain";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { IUserService } from "modules/auth/services/user.service";
+import { ConfigService } from "nestjs-config";
+import { IRoleRepository } from "modules/auth/adapters/out/repositories/role.repository";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
   constructor(registerDto: RegisterRequest, tx: ITransaction) {
-    super(tx)
+    super(tx);
     this.registerDto = registerDto;
   }
 }
@@ -30,30 +36,43 @@ export class RegisterCommandHandler
     @Inject("IMailService")
     private _mailService: IMailService,
     @Inject("IConfigurationService")
-    private _configurationService: IConfigurationService
-  ) { }
+    private _configurationService: IConfigurationService,
+    private _configService: ConfigService,
+    @Inject("IRoleRepository")
+    private _roleRepo: IRoleRepository
+  ) {}
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
     const { registerDto, tx } = command;
     const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
+    const userRole = await this._roleRepo.getRole("user");
     const account = new Account({
       ...registerDto,
       password: hashedPassword,
-      emailVerified: true
-    })
-    const newUser = new User({
-      account
+      emailVerified: !this._configService.get("app.emailVerificationRequire"),
+      role: userRole,
     });
+
+    const newUser = new User({
+      account,
+    });
+
     let createdUser: User;
+
     try {
-      createdUser = await this._userService.createNewUser(newUser, tx)
+      createdUser = await this._userService.createNewUser(newUser, tx);
     } catch (err) {
-      console.error(err)
+      console.error(err);
       if (err instanceof TypeormException) {
-        throw new ConflictException(ResponseDTO.fail("Account has been existed", UserErrorCode.ACCOUNT_ALREADY_EXISTED))
+        throw new ConflictException(
+          ResponseDTO.fail(
+            "Account has been existed",
+            UserErrorCode.ACCOUNT_ALREADY_EXISTED
+          )
+        );
       }
-      throw new InternalServerErrorException()
+      throw new InternalServerErrorException();
     }
-    await this._configurationService.setupConfigForNewUser(createdUser)
+    await this._configurationService.setupConfigForNewUser(createdUser);
     this._mailService.sendEmailAddressVerification(
       createdUser.id,
       createdUser.account.email

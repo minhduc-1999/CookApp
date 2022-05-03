@@ -9,11 +9,11 @@ import { InteractionEntity } from './interaction.entity';
 @Entity({ name: 'feeds' })
 export class FeedEntity extends AbstractEntity {
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user: UserEntity
 
-  @ManyToOne(() => PostEntity)
+  @ManyToOne(() => PostEntity, { nullable: false })
   @JoinColumn({ name: 'post_id' })
   post: PostEntity;
 

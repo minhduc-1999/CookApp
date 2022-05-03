@@ -1,5 +1,12 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
-import { IsArray, IsEnum, IsNotEmpty, IsOptional, IsString } from "class-validator";
+import {
+  IsArray,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
 import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
 import { PostType } from "enums/social.enum";
@@ -13,7 +20,7 @@ export class CreatePostRequest {
   content?: string;
 
   @IsNotEmpty()
-  @ApiPropertyOptional({ type: String  })
+  @ApiPropertyOptional({ type: String })
   @IsString()
   @IsMeaningfulString(1)
   @IsOptional()
@@ -36,6 +43,10 @@ export class CreatePostRequest {
 
   @IsEnum(PostType)
   @ApiProperty({ enum: PostType })
-  kind: PostType
-}
+  kind: PostType;
 
+  @IsUUID()
+  @IsOptional()
+  @ApiPropertyOptional({ type: String })
+  foodRefId?: string;
+}

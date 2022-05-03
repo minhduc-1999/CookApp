@@ -42,6 +42,9 @@ export class GetFeedPostsQueryHandler
           await this._storageService.getDownloadUrls([post.author.avatar])
         )[0];
       }
+      if (post.ref) {
+        post.ref.photos = await this._storageService.getDownloadUrls(post.ref.photos)
+      }
     }
 
     let meta: PageMetadata;

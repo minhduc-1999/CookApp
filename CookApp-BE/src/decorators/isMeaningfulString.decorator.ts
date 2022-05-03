@@ -12,6 +12,7 @@ export class IsMeaningfulStringConstrain
   private minWords: number;
   validate(text: string, args: ValidationArguments) {
     this.minWords = Math.max(args.constraints[0] || 1, 1);
+    if (!text) return false
     const words = text.trim().split(' ');
     return words[0] ? words.length >= this.minWords : false;
   }
@@ -19,7 +20,7 @@ export class IsMeaningfulStringConstrain
   defaultMessage(args: ValidationArguments) {
     return `${args.property} must have at least ${this.minWords} ${
       this.minWords === 1 ? 'word' : 'words'
-    }!`;
+    }`;
   }
 }
 

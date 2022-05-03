@@ -1,8 +1,8 @@
 import { Injectable, NestInterceptor, ExecutionContext, CallHandler } from "@nestjs/common";
 import { TypeOrmTransactionAdapter } from "adapters/typeormTransaction.adapter";
+import { Socket } from "net";
 import { Observable } from "rxjs";
 import { tap, catchError } from "rxjs/operators";
-import { Socket } from "socket.io";
 import { Connection } from "typeorm"
 
 @Injectable()
@@ -51,7 +51,7 @@ export class WsTransactionInterceptor implements NestInterceptor {
 
     const client = context.switchToWs().getClient<Socket>();
 
-    client.handshake.auth.transaction = tx
+    // client.handshake.auth.transaction = tx
 
     return next.handle()
       .pipe(

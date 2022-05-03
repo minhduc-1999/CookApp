@@ -49,7 +49,7 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
         .where("follow.followee_id = :userId", { userId })
         .select(["follow", "follower"])
         .skip(query.limit * query.offset)
-        .limit(query.limit)
+        .take(query.limit)
         .getManyAndCount()
     } else {
       [entities, total] = await this._followRepo
@@ -72,7 +72,7 @@ export class FollowRepository extends BaseRepository implements IFollowRepositor
         .where("follow.follower_id = :userId", { userId })
         .select(["follow", "followee"])
         .skip(query.limit * query.offset)
-        .limit(query.limit)
+        .take(query.limit)
         .getManyAndCount()
     } else {
       [entities, total] = await this._followRepo

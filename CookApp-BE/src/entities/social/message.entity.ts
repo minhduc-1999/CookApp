@@ -1,10 +1,9 @@
 import { Column, Entity, ManyToOne, JoinColumn } from 'typeorm';
 import { MessageContentType } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
-import { Message, MessageContent } from 'domains/social/conversation.domain';
-import { Audit } from 'domains/audit.domain';
+import { Message, MessageContent } from '../../domains/social/conversation.domain';
+import { Audit } from '../../domains/audit.domain';
 import { ConversationEntity, ConversationMemberEntity } from './conversation.entity';
-
 
 @Entity({ name: 'messages' })
 export class MessageEntity extends AbstractEntity {
@@ -15,11 +14,11 @@ export class MessageEntity extends AbstractEntity {
   @Column({ type: "enum", enum: MessageContentType, name: "content_type", nullable: false })
   contentType: MessageContentType
 
-  @ManyToOne(() => ConversationEntity, conversation => conversation.messages)
+  @ManyToOne(() => ConversationEntity, conversation => conversation.messages, { nullable: false })
   @JoinColumn({ name: "conversation_id" })
   conversation: ConversationEntity
 
-  @ManyToOne(() => ConversationMemberEntity)
+  @ManyToOne(() => ConversationMemberEntity, { nullable: false })
   @JoinColumn({ name: "sender_id" })
   sender: ConversationMemberEntity
 
@@ -35,7 +34,7 @@ export class MessageEntity extends AbstractEntity {
     return new Message({
       ...audit,
       to: this.conversation?.toDomain(),
-      sender: this.sender?.toDomain()[1],
+      sender: this.sender?.toDomain().user,
       message: new MessageContent(this.content, this.contentType)
     })
   }

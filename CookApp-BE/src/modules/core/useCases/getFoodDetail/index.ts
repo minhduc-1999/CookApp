@@ -27,27 +27,33 @@ export class GetFoodDetailQueryHandler
     @Inject("IReactionRepository")
     private _reacRepo: IReactionRepository,
     @Inject("IStorageService") private _storageService: IStorageService
-  ) { }
+  ) {}
   async execute(query: GetFoodDetailQuery): Promise<GetFoodDetailResponse> {
-    const { foodId, user } = query
+    const { foodId, user } = query;
 
-    const food = await this._foodRepo.getById(foodId)
+    const food = await this._foodRepo.getById(foodId);
 
     if (!food) {
-      throw new NotFoundException(ResponseDTO.fail("Food not found", UserErrorCode.FOOD_NOT_FOUND))
+      throw new NotFoundException(
+        ResponseDTO.fail("Food not found", UserErrorCode.FOOD_NOT_FOUND)
+      );
     }
 
-    food.photos = (await this._storageService.getDownloadUrls(food.photos))
-    let stepsResponse: RecipeStepResponse[]
+    food.photos = await this._storageService.getDownloadUrls(food.photos);
+    if (food.author?.avatar?.key)
+      [food.author.avatar] = await this._storageService.getDownloadUrls([
+        food.author.avatar,
+      ]);
+    let stepsResponse: RecipeStepResponse[];
     if (food.steps.length > 0) {
       stepsResponse = await Promise.all(
         food.steps.map(async (step) => {
-          const react = await this._reacRepo.findById(user.id, step.id)
+          const react = await this._reacRepo.findById(user.id, step.id);
           const temp = {
             ...step,
-            photos: (await this._storageService.getDownloadUrls(step.photos))
+            photos: await this._storageService.getDownloadUrls(step.photos),
           };
-          return new RecipeStepResponse(temp, react)
+          return new RecipeStepResponse(temp, react);
         })
       );
     }

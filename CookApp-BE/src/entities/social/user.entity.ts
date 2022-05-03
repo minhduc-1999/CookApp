@@ -6,6 +6,7 @@ import { Sex } from '../../enums/social.enum';
 import { AbstractEntity } from '../../base/entities/base.entity';
 import { FollowEntity } from './follow.entity';
 import { ConversationMemberEntity } from './conversation.entity';
+import { FoodEntity } from '../../entities/core/food.entity';
 
 @Entity({ name: 'users' })
 export class UserEntity extends AbstractEntity {
@@ -44,14 +45,11 @@ export class UserEntity extends AbstractEntity {
   @Column({ name: "n_posts", default: 0 })
   nPosts: number
 
-  @Column({ name: 'avatar', default: "images/avatar-default.jpg" })
+  @Column({ name: 'avatar', default: "images/avatar-default.png" })
   avatar: string;
 
   @Column({ name: 'display_name' })
   displayName: string;
-
-  @Column({ name: 'status', default: "" })
-  status: string;
 
   @OneToOne(() => AccountEntity, account => account.user)
   account: AccountEntity
@@ -64,6 +62,10 @@ export class UserEntity extends AbstractEntity {
 
   @OneToMany(() => ConversationMemberEntity , member => member.user)
   memberOf: ConversationMemberEntity[]
+
+
+  @OneToMany(() => FoodEntity, food => food.author)
+  foods: FoodEntity[]
 
   constructor(user: User) {
     super(user)
@@ -79,7 +81,6 @@ export class UserEntity extends AbstractEntity {
     this.avatar = user?.avatar?.key
     this.displayName = user?.displayName
     this.account = user?.account && new AccountEntity(user.account)
-    this.status = user?.status
   }
 
   toDomain(): User {

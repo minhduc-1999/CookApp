@@ -6,15 +6,16 @@ import { Moment, Post } from '../../domains/social/post.domain';
 import { Image, CommentMedia, Video } from '../../domains/social/media.domain';
 import { Audit } from '../../domains/audit.domain';
 import { isNil } from 'lodash';
+import { FoodEntity } from '../../entities/core/food.entity';
 
 @Entity({ name: 'posts' })
 export class PostEntity {
 
-  @OneToOne(() => InteractionEntity, it => it.post, { primary: true })
+  @OneToOne(() => InteractionEntity, it => it.post, { primary: true, cascade: ["insert"] })
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 
-  @ManyToOne(() => UserEntity)
+  @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "author_id" })
   author: UserEntity;
 
@@ -35,16 +36,21 @@ export class PostEntity {
   })
   kind: PostType
 
+  @ManyToOne(() => FoodEntity, food => food.referredPosts)
+  @JoinColumn({ name: "food_ref_id"})
+  foodRef: FoodEntity
+
   constructor(post: Post, interaction?: InteractionEntity) {
     this.interaction = interaction ? interaction : new InteractionEntity(post)
     this.author = new UserEntity(post?.author)
     this.content = post?.content
     this.kind = post?.type
     this.location = post?.location
+    this.foodRef = post?.ref && new FoodEntity(post.ref)
   }
 
   toDomain(): Post {
-    const audit = new Audit(this.interaction)
+    const audit = this.interaction && new Audit(this.interaction)
     const { nReactions, nComments} = this.interaction
     switch (this.kind) {
       case PostType.MOMENT:
@@ -55,7 +61,8 @@ export class PostEntity {
           content: this.content,
           medias: this.medias?.filter(media => !isNil(media.interaction)).map(media => media.toDomain()),
           author: this.author.toDomain(),
-          location: this.location
+          location: this.location,
+          ref: this.foodRef?.toDomain()
         })
     }
   }
@@ -75,7 +82,7 @@ export class PostMediaEntity {
   @JoinColumn({ name: "id", referencedColumnName: "id" })
   interaction: InteractionEntity
 
-  @ManyToOne(() => PostEntity, post => post.medias)
+  @ManyToOne(() => PostEntity, post => post.medias, { nullable: false })
   @JoinColumn({ name: "post_id" })
   post: PostEntity;
 
