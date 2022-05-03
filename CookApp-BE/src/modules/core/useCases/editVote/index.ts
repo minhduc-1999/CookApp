@@ -35,11 +35,14 @@ export class EditVoteCommandHandler
       throw new NotFoundException(
         ResponseDTO.fail("Food not found", UserErrorCode.FOOD_NOT_FOUND)
       );
+
     const vote = await this._foodVoteRepo.findVote(user, food);
+
     if (!vote)
       throw new NotFoundException(
         ResponseDTO.fail("Vote not found", UserErrorCode.VOTE_NOT_FOUND)
       );
+
     const partialData = loadUpdateData(req, vote)
     await this._foodVoteRepo.setTransaction(tx).updateVote(vote, partialData);
     return;

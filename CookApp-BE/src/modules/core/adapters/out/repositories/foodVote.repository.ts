@@ -67,6 +67,7 @@ export class FoodVoteRepository
 
   async findVote(user: User, food: Food): Promise<FoodVote> {
     const vote = await this._foodVoteRepo.findOne({
+      relations: ["author"],
       where: {
         author: {
           id: user.id,

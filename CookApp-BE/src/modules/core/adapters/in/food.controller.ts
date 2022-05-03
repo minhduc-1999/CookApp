@@ -36,6 +36,8 @@ import { GetFoodsQuery } from "modules/core/useCases/getFoods";
 import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
 import { GetFoodVotesQuery } from "modules/core/useCases/getFoodVotes";
 import { GetFoodVotesResponse } from "modules/core/useCases/getFoodVotes/getFoodVotesResponse";
+import { GetVoteQuery } from "modules/core/useCases/getVote";
+import { GetVoteResponse } from "modules/core/useCases/getVote/getVoteResponse";
 import { VoteFoodCommand } from "modules/core/useCases/voteFood";
 import { VoteFoodRequest } from "modules/core/useCases/voteFood/voteFoodRequest";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
@@ -61,6 +63,19 @@ export class FoodController {
     });
   }
 
+  @Get(":foodId/vote")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(GetVoteQuery, "Get food vote successfully")
+  async getVote(
+    @Param("foodId", ParseUUIDPipe) foodId: string,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetVoteResponse>> {
+    const getVoteQuery = new GetVoteQuery(user, foodId);
+    const result = await this._queryBus.execute(getVoteQuery);
+    return Result.ok(result, {
+      messages: ["Get food vote successfully"],
+    });
+  }
   @Get(":foodId/votes")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodVotesResponse, "Get food votes successfully")

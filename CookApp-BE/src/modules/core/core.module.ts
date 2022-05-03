@@ -34,6 +34,7 @@ import { GetFoodsQueryHandler } from "./useCases/getFoods";
 import { GetFoodVotesQueryHandler } from "./useCases/getFoodVotes";
 import { GetIngredientsQueryHandler } from "./useCases/getIngredients";
 import { GetUnitsQueryHandler } from "./useCases/getUnits";
+import { GetVoteQueryHandler } from "./useCases/getVote";
 import { VoteFoodCommandHandler } from "./useCases/voteFood";
 
 const commandHandlers = [
@@ -47,6 +48,7 @@ const queryHandlers = [
   GetUnitsQueryHandler,
   GetIngredientsQueryHandler,
   GetFoodVotesQueryHandler,
+  GetVoteQueryHandler
 ];
 
 const services = [
