@@ -12,6 +12,7 @@ import { InteractionEntity } from "entities/social/interaction.entity";
 import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
 import { ReactionEntity } from "entities/social/reaction.entity";
 import { SavedPostEntity } from "entities/social/savedPost.entity";
+import { TopicEntity, UserTopicEntity } from "entities/social/topic.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { UserRepository } from "modules/auth/adapters/out/repositories/user.repository";
@@ -25,6 +26,7 @@ import { CommentController } from "./adapters/in/comment.controller";
 import { FeedController } from "./adapters/in/feed.controller";
 import { PostController } from "./adapters/in/post.controller";
 import { ReactionController } from "./adapters/in/reaction.controller";
+import { TopicController } from "./adapters/in/topic.controller";
 import { UserController } from "./adapters/in/user.controller";
 import { WallController } from "./adapters/in/wall.controller";
 import { AlbumRepository } from "./adapters/out/repositories/album.repository";
@@ -37,6 +39,7 @@ import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { PostMediaRepository } from "./adapters/out/repositories/postMedia.repository";
 import { ReactionRepository } from "./adapters/out/repositories/reaction.repository";
 import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
+import { TopicRepository } from "./adapters/out/repositories/topic.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { NewPostEventHandler } from "./events/propagateNewPost";
 import { AlbumService } from "./services/album.service";
@@ -56,6 +59,7 @@ import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
 import { GetPostDetailQueryHandler } from "./useCases/getPostDetail";
 import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { GetSavedPostsQueryHandler } from "./useCases/getSavedPosts";
+import { GetTopicsQueryHandler } from "./useCases/getTopics";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { GetWallQueryHandler } from "./useCases/getWall";
 import { GetWallPostsQueryHandler } from "./useCases/getWallPosts";
@@ -90,7 +94,8 @@ const queryHandlers = [
   GetUsersQueryHandler,
   GetSavedPostsQueryHandler,
   GetAlbumsQueryHandler,
-  GetAlbumDetailQueryHandler
+  GetAlbumDetailQueryHandler,
+  GetTopicsQueryHandler
 ];
 const services = [
   {
@@ -159,6 +164,10 @@ const repositories = [
     provide: "IAlbumMediaRepository",
     useClass: AlbumMediaRepository,
   },
+  {
+    provide: "ITopicRepository",
+    useClass: TopicRepository ,
+  },
 ];
 
 @Module({
@@ -183,7 +192,9 @@ const repositories = [
       CommentEntity,
       CommentMediaEntity,
       AlbumEntity,
-      AlbumMediaEntity
+      AlbumMediaEntity,
+      TopicEntity,
+      UserTopicEntity
     ]),
     forwardRef(() => CommunicationModule),
     forwardRef(() => CoreModule)
@@ -196,6 +207,7 @@ const repositories = [
     CommentController,
     UserController,
     ReactionController,
+    TopicController
   ],
   providers: [
     ...commandHandlers,

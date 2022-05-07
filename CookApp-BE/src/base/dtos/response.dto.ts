@@ -6,7 +6,7 @@ import {
   getSchemaPath,
 } from "@nestjs/swagger";
 import { FoodShare, Moment, Post } from "domains/social/post.domain";
-import { User } from "domains/social/user.domain";
+import { Topic, User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { MetaDTO } from "./responseMeta.dto";
 import { Comment } from "domains/social/comment.domain";
@@ -367,7 +367,17 @@ export class ProfileResponse {
     this.firstName = profile?.firstName;
     this.lastName = profile?.lastName;
     this.sex = profile?.sex;
-    this.bio = profile?.bio
+    this.bio = profile?.bio;
+  }
+}
+
+export class TopicResponse extends AuditResponse {
+  @ApiResponseProperty({ type: String })
+  title: string;
+
+  constructor(topic: Topic) {
+    super(topic);
+    this.title = topic?.title;
   }
 }
 

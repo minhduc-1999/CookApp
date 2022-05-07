@@ -22,7 +22,7 @@ import { FollowCommand } from "modules/user/useCases/follow";
 import { FollowResponse } from "modules/user/useCases/follow/followResponse";
 import { GetAlbumsQuery } from "modules/user/useCases/getAlbums";
 import { GetAlbumsResponse } from "modules/user/useCases/getAlbums/getAlbumResponse";
-import { GetAlbumsRequest } from "modules/user/useCases/getAlbums/getWallPostsRequest";
+import { GetAlbumsRequest } from "modules/user/useCases/getAlbums/getAlbumsRequest";
 import { GetWallQuery } from "modules/user/useCases/getWall";
 import { GetWallResponse } from "modules/user/useCases/getWall/getWallResponse";
 import { GetWallPostsQuery } from "modules/user/useCases/getWallPosts";

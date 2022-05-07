@@ -10,6 +10,15 @@ import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Comment } from "./comment.domain";
 import { Conversation, Message, MessageContent } from "./conversation.domain";
 
+export class Topic extends Audit {
+  title: string;
+
+  constructor(topic: Partial<Topic>) {
+    super(topic);
+    this.title = topic?.title;
+  }
+}
+
 export class User extends Audit {
   id: string;
 
@@ -37,7 +46,9 @@ export class User extends Audit {
 
   account?: Account;
 
-  bio?: string
+  bio?: string;
+
+  interestedTopics: Topic[];
 
   constructor(user: Partial<User>) {
     super(user);
@@ -53,7 +64,8 @@ export class User extends Audit {
     this.nPosts = user?.nPosts;
     this.nFollowees = user?.nFollowees;
     this.nFollowers = user?.nFollowers;
-    this.bio = user?.bio
+    this.bio = user?.bio;
+    this.interestedTopics = user?.interestedTopics;
   }
 
   follow(followee: User): Follow {

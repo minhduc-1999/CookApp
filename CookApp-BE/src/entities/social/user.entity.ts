@@ -8,6 +8,7 @@ import { FollowEntity } from "./follow.entity";
 import { ConversationMemberEntity } from "./conversation.entity";
 import { FoodEntity } from "../../entities/core/food.entity";
 import { FoodVoteEntity } from "../core/foodVote.entity";
+import { UserTopicEntity } from "./topic.entity";
 
 @Entity({ name: "users" })
 export class UserEntity extends AbstractEntity {
@@ -71,6 +72,9 @@ export class UserEntity extends AbstractEntity {
 
   @OneToMany(() => FoodVoteEntity, (vote) => vote.author)
   vote: FoodVoteEntity;
+
+  @OneToMany(() => UserTopicEntity, (userTopic) => userTopic.topic)
+  userTopics: UserTopicEntity[];
 
   constructor(user: User) {
     super(user);
