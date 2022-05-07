@@ -45,6 +45,7 @@ import { NewPostEventHandler } from "./events/propagateNewPost";
 import { AlbumService } from "./services/album.service";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
+import { ChooseInterestsCommandHandler } from "./useCases/chooseInterests";
 import { CreateAlbumCommandHandler } from "./useCases/createAlbum";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
@@ -82,7 +83,8 @@ const commandHandlers = [
   SavePostCommandHandler,
   DeleteSavedPostCommandHandler,
   CreateAlbumCommandHandler,
-  EditAlbumCommandHandler
+  EditAlbumCommandHandler,
+  ChooseInterestsCommandHandler
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,

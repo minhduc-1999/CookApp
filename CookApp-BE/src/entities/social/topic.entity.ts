@@ -1,6 +1,6 @@
 import { Column, Entity, JoinColumn, ManyToOne, OneToMany } from "typeorm";
 import { AbstractEntity } from "../../base/entities/base.entity";
-import { Topic } from "../../domains/social/user.domain";
+import { Topic, User } from "../../domains/social/user.domain";
 import { UserEntity } from "./user.entity";
 
 @Entity({ name: "topics" })
@@ -36,4 +36,14 @@ export class UserTopicEntity extends AbstractEntity {
   @ManyToOne(() => UserEntity, (user) => user.userTopics, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user: UserEntity;
+
+  toDomain(): Topic {
+    return this.topic?.toDomain()
+  }
+
+  constructor(user: User, topic: Topic) {
+    super(null)
+    this.user = new UserEntity(user)
+    this.topic = new TopicEntity(topic)
+  }
 }
