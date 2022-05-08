@@ -1,6 +1,9 @@
 import { Inject } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { InterestsChosenEvent, UserProfileUpdatedEvent } from "domains/social/events/user.event";
+import {
+  InterestsChosenEvent,
+  UserProfileUpdatedEvent,
+} from "domains/social/events/user.event";
 import { IUserSeService } from "modules/auth/adapters/out/services/userSe.service";
 
 @EventsHandler(InterestsChosenEvent)
@@ -14,7 +17,7 @@ export class InterestsChosenEventHandler
 
   async handle(event: InterestsChosenEvent): Promise<void> {
     const { user } = event;
-    console.log(user)
+    console.log(user);
     this._userSeService.updateUserDoc(user);
   }
 }
@@ -25,11 +28,11 @@ export class UserProfileUpdatedEventHandler
 {
   constructor(
     @Inject("IUserSeService")
-    private _userSeService: IUserSeService,
-  ) { }
+    private _userSeService: IUserSeService
+  ) {}
 
   async handle(event: UserProfileUpdatedEvent): Promise<void> {
-    const { user } = event
-    this._userSeService.updateUserDoc(user)
+    const { user } = event;
+    this._userSeService.updateUserDoc(user);
   }
 }

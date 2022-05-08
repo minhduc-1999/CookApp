@@ -44,6 +44,8 @@ export class SpeakToBotCommandHandler
     let response: SpeakToBotResponse
     if (botRes.endInteraction) {
       const foodId = await this._foodSeService.findOneByName(botRes.parameters.fields.food.stringValue)
+      if (!foodId)
+        return new SpeakToBotResponse("Not found", true)
       let attachment: FoodIngredient[] | RecipeStep[]
       let attachmentType: MessageContentType
       switch (botRes.action) {

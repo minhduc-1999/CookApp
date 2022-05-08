@@ -25,41 +25,66 @@ export class FoodSeService implements IFoodSeService {
     await this._foodModel.insertMany([item]);
   }
 
-  async findOneByName(name: string): Promise<string> {
-    const food = await this._foodModel
-      .findOne(
-        {
-          $text: {
-            $search: name,
-          },
+  async findOneByName(term: string): Promise<string> {
+    const result = await this._foodModel.aggregate([
+      {
+        $search: {
+          index: "food_search_index",
+          text: {
+            query: term,
+            path: "name"
+          }
         }
-      )
-      .sort({
-        score: {
-          $meta: "textScore",
-        },
-      });
-    return food?._id;
+      },
+      { $limit: 1 },
+      { $project: { _id: 1 } },
+    ]);
+    if (result.length === 0)
+      return null
+    return result[0]?._id
   }
 
   async findManyByNameAndCount(
-    name: string,
+    term: string,
     opt: PageOptionsDto
   ): Promise<[string[], number]> {
-    const textSearch = {
-      $text: { $search: name },
-    };
-    const foods = await this._foodModel
-      .find(textSearch)
-      .sort({
-        score: {
-          $meta: "textScore",
+    const result = await this._foodModel.aggregate([
+      {
+        $search: {
+          index: "food_search_index",
+          compound: {
+            should: [
+              {
+                text: {
+                  query: term,
+                  path: "name",
+                },
+              },
+              {
+                text: {
+                  query: term,
+                  path: "description",
+                },
+              },
+            ],
+            minimumShouldMatch: 1,
+          },
         },
-      })
-      .skip(opt.limit * opt.offset)
-      .limit(opt.limit);
-    const ids = foods.map((food) => food._id);
-    const numOfFood = await this._foodModel.count(textSearch).exec();
-    return [ids, numOfFood];
+      },
+      {
+        $facet: {
+          metadata: [{ $count: "total" }],
+          data: [
+            { $skip: opt.limit * opt.offset },
+            { $limit: opt.limit },
+            { $project: { _id: 1 } },
+          ],
+        },
+      },
+    ]);
+    if (result[0].data.length === 0) return [[], 0];
+    const ids = result[0].data.map((user: any) => user._id);
+    const total = result[0].metadata[0].total;
+    return [ids, total];
   }
 }

@@ -10,12 +10,12 @@ import { Image, Video } from "domains/social/media.domain";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import _ = require("lodash");
 import { IPostService } from "modules/user/services/post.service";
-import { NewPostEvent } from "modules/notification/events/NewPostNotification";
 import { MediaType, PostType } from "enums/social.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { Food } from "domains/core/food.domain";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { UserErrorCode } from "enums/errorCode.enum";
+import { PostCreatedEvent } from "domains/social/events/post.event";
 
 export class CreatePostCommand extends BaseCommand {
   req: CreatePostRequest;
@@ -104,7 +104,7 @@ export class CreatePostCommandHandler
 
     const result = await this._postService.createPost(creatingPost, tx);
     if (req.kind === "MOMENT") {
-      this._eventBus.publish(new NewPostEvent(result, user))
+      this._eventBus.publish(new PostCreatedEvent(result, user))
     }
     return new CreatePostResponse(result);
   }

@@ -41,7 +41,7 @@ import { ReactionRepository } from "./adapters/out/repositories/reaction.reposit
 import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
 import { TopicRepository } from "./adapters/out/repositories/topic.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
-import { NewPostEventHandler } from "./events/propagateNewPost";
+import { PropagatePostCreatedEventHandler } from "./events/propagateNewPost";
 import { InterestsChosenEventHandler, UserProfileUpdatedEventHandler } from "./events/syncSeData";
 import { AlbumService } from "./services/album.service";
 import { CommentService } from "./services/comment.service";
@@ -71,7 +71,7 @@ import { UnfolllowCommandHandler } from "./useCases/unfollow";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 
 const eventHandlers = [
-  NewPostEventHandler,
+  PropagatePostCreatedEventHandler,
   InterestsChosenEventHandler,
   UserProfileUpdatedEventHandler
 ]
