@@ -39,7 +39,8 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
         queryOptions
       );
       totalCount = total;
-      foods = await this._foodRepo.getByIds(ids);
+      const queryResult = await this._foodRepo.getByIds(ids);
+      foods = ids.map((id) => queryResult.find((item) => item.id === id));
     } else {
       [foods, totalCount] = await this._foodRepo.getFoods(queryOptions);
     }

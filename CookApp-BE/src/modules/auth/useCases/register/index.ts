@@ -3,7 +3,7 @@ import {
   Inject,
   InternalServerErrorException,
 } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { RegisterRequest } from "./registerRequest";
 import { RegisterResponse } from "./registerResponse";
 import * as bcrypt from "bcrypt";
@@ -19,6 +19,7 @@ import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { IUserService } from "modules/auth/services/user.service";
 import { ConfigService } from "nestjs-config";
 import { IRoleRepository } from "modules/auth/adapters/out/repositories/role.repository";
+import { UserCreatedEvent } from "domains/social/events/user.event";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
@@ -39,7 +40,8 @@ export class RegisterCommandHandler
     private _configurationService: IConfigurationService,
     private _configService: ConfigService,
     @Inject("IRoleRepository")
-    private _roleRepo: IRoleRepository
+    private _roleRepo: IRoleRepository,
+    private _eventBus: EventBus
   ) {}
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
     const { registerDto, tx } = command;
@@ -77,6 +79,7 @@ export class RegisterCommandHandler
       createdUser.id,
       createdUser.account.email
     );
+    this._eventBus.publish(new UserCreatedEvent(createdUser))
     return createdUser;
   }
 }

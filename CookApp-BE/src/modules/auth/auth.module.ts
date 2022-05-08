@@ -3,6 +3,7 @@ import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { CqrsModule } from "@nestjs/cqrs";
 import { JwtModule } from "@nestjs/jwt";
+import { MongooseModule } from "@nestjs/mongoose";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AccountEntity, AccountRoleEntity } from "entities/social/account.entity";
@@ -18,6 +19,9 @@ import { AuthController } from "./adapters/in/auth.controller";
 import { AccountRepository } from "./adapters/out/repositories/account.repository";
 import { RoleRepository } from "./adapters/out/repositories/role.repository";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
+import { UserSeService } from "./adapters/out/services/userSe.service";
+import { UserModel } from "./entities/se/user.schema";
+import { SyncUserDataEventHandler } from "./events/userCreatedEventHandler";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
@@ -28,12 +32,16 @@ import { RegisterCommandHandler } from "./useCases/register";
 import { ResendEmailVerificationCommandHandler } from "./useCases/resendEmailVerification";
 import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
 
-const handlers = [
+const commandHandlers = [
   RegisterCommandHandler,
   LoginCommandHandler,
   VerifyEmailCommandHandler,
   ResendEmailVerificationCommandHandler,
 ];
+
+const eventHandlers = [
+  SyncUserDataEventHandler
+]
 
 const globalGuards = [
   {
@@ -69,7 +77,8 @@ const globalGuards = [
       AccountEntity,
       ProviderEntity,
       AccountRoleEntity
-    ])
+    ]),
+    MongooseModule.forFeature([UserModel]),
   ],
   controllers: [AuthController],
   providers: [
@@ -93,11 +102,16 @@ const globalGuards = [
       provide: "IAuthentication",
       useClass: AuthenticationService,
     },
+    {
+      provide: "IUserSeService",
+      useClass: UserSeService,
+    },
     BasicAuthStrategy,
     JwtStrategy,
     GoogleStrategy,
-    ...handlers,
+    ...commandHandlers,
     ...globalGuards,
+    ...eventHandlers
   ],
   exports: ["IUserService", JwtModule, "IUserRepository"],
 })
