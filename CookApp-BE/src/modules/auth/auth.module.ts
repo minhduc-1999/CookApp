@@ -24,7 +24,7 @@ import { RoleRepository } from "./adapters/out/repositories/role.repository";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
 import { UserSeService } from "./adapters/out/services/userSe.service";
 import { UserModel } from "./entities/se/user.schema";
-import { UserCreatedEventHandler, UserProfileUpdatedEventHandler } from "./events/userEvents";
+import { UserCreatedEventHandler } from "./events/userEvents";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
@@ -42,7 +42,7 @@ const commandHandlers = [
   ResendEmailVerificationCommandHandler,
 ];
 
-const eventHandlers = [UserCreatedEventHandler, UserProfileUpdatedEventHandler];
+const eventHandlers = [UserCreatedEventHandler];
 
 const globalGuards = [
   {

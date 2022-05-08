@@ -89,6 +89,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       .getOne();
     return user?.toDomain();
   }
+
   async updateUserProfile(user: User): Promise<void> {
     const queryRunner = this.tx?.getRef() as QueryRunner;
     if (queryRunner && !queryRunner.isReleased) {

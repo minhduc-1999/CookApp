@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -7,6 +7,7 @@ import { ChooseInterestsRequest } from "./chooseInterestsRequest";
 import { ITopicRepository } from "modules/user/adapters/out/repositories/topic.repository";
 import { ChooseInterestsResponse } from "./chooseInterestsResponse";
 import _ = require("lodash");
+import { InterestsChosenEvent } from "domains/social/events/user.event";
 
 export class ChooseInterestsCommand extends BaseCommand {
   req: ChooseInterestsRequest;
@@ -22,7 +23,8 @@ export class ChooseInterestsCommandHandler
 {
   constructor(
     @Inject("ITopicRepository")
-    private _topicRepo: ITopicRepository
+    private _topicRepo: ITopicRepository,
+    private _eventBus: EventBus
   ) {}
   async execute(
     command: ChooseInterestsCommand
@@ -49,6 +51,7 @@ export class ChooseInterestsCommandHandler
       return index === -1;
     });
 
+    this._eventBus.publish(new InterestsChosenEvent(user, reqTopics))
     return new ChooseInterestsResponse(wrongIds);
   }
 }

@@ -14,6 +14,9 @@ export class UserItem {
   @Prop()
   email: string;
 
+  @Prop({ type: [String] })
+  interests: string[];
+
   getUpdateData(): Partial<UserItem> {
     const { _id, ...rest } = this;
     return rest;
@@ -23,6 +26,7 @@ export class UserItem {
     this._id = user.id;
     this.displayName = user?.displayName;
     this.email = user?.account?.email;
+    this.interests = user?.interestedTopics?.map((t) => t.title);
   }
 }
 
