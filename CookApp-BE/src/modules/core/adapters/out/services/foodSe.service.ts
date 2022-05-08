@@ -11,7 +11,7 @@ export interface IFoodSeService {
     opt: PageOptionsDto
   ): Promise<[string[], number]>;
   findOneByName(name: string): Promise<string>;
-  insertNewFood(food: Food): Promise<void>;
+  insertNewFoodDoc(food: Food): Promise<void>;
 }
 
 @Injectable()
@@ -20,9 +20,9 @@ export class FoodSeService implements IFoodSeService {
     @InjectModel(FoodItem.name) private _foodModel: Model<FoodDocument>
   ) {}
 
-  async insertNewFood(food: Food): Promise<void> {
+  async insertNewFoodDoc(food: Food): Promise<void> {
     const item = new FoodItem(food);
-    await this._foodModel.insertMany([item]);
+    this._foodModel.insertMany([item]);
   }
 
   async findOneByName(term: string): Promise<string> {

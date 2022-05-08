@@ -20,12 +20,16 @@ export class FoodItem {
   @Prop({name: "total_time"})
   totalTime: number
 
+  @Prop()
+  description: string
+
   constructor(food:Food) {
-    this._id = food.id
-    this.name = food.name
-    this.ingredients = food.ingredients.map(ing => ing.name)
-    this.servings = food.servings
-    this.totalTime = food.totalTime
+    this._id = food?.id
+    this.name = food?.name
+    this.ingredients = food?.ingredients.map(ing => ing.name)
+    this.servings = food?.servings
+    this.totalTime = food?.totalTime
+    this.description = food?.description
   }
 }
 
