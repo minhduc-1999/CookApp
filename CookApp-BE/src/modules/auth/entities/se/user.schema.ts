@@ -14,6 +14,11 @@ export class UserItem {
   @Prop()
   email: string;
 
+  getUpdateData(): Partial<UserItem> {
+    const { _id, ...rest } = this;
+    return rest;
+  }
+
   constructor(user: User) {
     this._id = user.id;
     this.displayName = user?.displayName;

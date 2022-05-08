@@ -6,7 +6,10 @@ import { JwtModule } from "@nestjs/jwt";
 import { MongooseModule } from "@nestjs/mongoose";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
-import { AccountEntity, AccountRoleEntity } from "entities/social/account.entity";
+import {
+    AccountEntity,
+    AccountRoleEntity
+} from "entities/social/account.entity";
 import { ProviderEntity } from "entities/social/provider.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
@@ -21,7 +24,7 @@ import { RoleRepository } from "./adapters/out/repositories/role.repository";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
 import { UserSeService } from "./adapters/out/services/userSe.service";
 import { UserModel } from "./entities/se/user.schema";
-import { SyncUserDataEventHandler } from "./events/userCreatedEventHandler";
+import { UserCreatedEventHandler, UserProfileUpdatedEventHandler } from "./events/userEvents";
 import AuthenticationService from "./services/authentication.service";
 import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
@@ -39,9 +42,7 @@ const commandHandlers = [
   ResendEmailVerificationCommandHandler,
 ];
 
-const eventHandlers = [
-  SyncUserDataEventHandler
-]
+const eventHandlers = [UserCreatedEventHandler, UserProfileUpdatedEventHandler];
 
 const globalGuards = [
   {
@@ -76,7 +77,7 @@ const globalGuards = [
       UserEntity,
       AccountEntity,
       ProviderEntity,
-      AccountRoleEntity
+      AccountRoleEntity,
     ]),
     MongooseModule.forFeature([UserModel]),
   ],
@@ -111,8 +112,8 @@ const globalGuards = [
     GoogleStrategy,
     ...commandHandlers,
     ...globalGuards,
-    ...eventHandlers
+    ...eventHandlers,
   ],
-  exports: ["IUserService", JwtModule, "IUserRepository"],
+  exports: ["IUserService", JwtModule, "IUserRepository", "IUserSeService"],
 })
-export class AuthModule { }
+export class AuthModule {}

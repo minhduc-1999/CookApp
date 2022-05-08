@@ -12,6 +12,7 @@ export interface IUserSeService {
   ): Promise<[string[], number]>;
   findOne(name: string): Promise<string>;
   insertNewUserDoc(user: User): Promise<void>;
+  updateUserDoc(user: User): Promise<void>;
 }
 
 @Injectable()
@@ -19,6 +20,18 @@ export class UserSeService implements IUserSeService {
   constructor(
     @InjectModel(UserItem.name) private _userModel: Model<UserDocument>
   ) {}
+
+  async updateUserDoc(user: User): Promise<void> {
+    const item = new UserItem(user);
+    await this._userModel.updateOne(
+      {
+        _id: item._id,
+      },
+      {
+        $set: item.getUpdateData(),
+      }
+    );
+  }
 
   async insertNewUserDoc(user: User): Promise<void> {
     const item = new UserItem(user);

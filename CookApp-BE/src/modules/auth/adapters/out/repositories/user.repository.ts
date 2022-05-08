@@ -21,6 +21,11 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     super();
   }
 
+  async getUsersByIds(ids: string[]): Promise<User[]> {
+    const entities = await this._repo.findByIds(ids);
+    return entities?.map((e) => e.toDomain());
+  }
+
   async existAll(userIds: string[]): Promise<boolean> {
     if (userIds.length === 0) return false;
     const count = await this._repo.count({
