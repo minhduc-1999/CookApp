@@ -5,6 +5,8 @@ import 'dart:io';
 
 import 'package:tastify/Model/AlbumDetailsRespondModel.dart';
 import 'package:tastify/Model/AlbumRespondModel.dart';
+import 'package:tastify/Model/ChatBotRequestModel.dart';
+import 'package:tastify/Model/ChatBotRespondModel.dart';
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
 import 'package:tastify/Model/ConversationDetailRespondModel.dart';
@@ -16,6 +18,7 @@ import 'package:tastify/Model/CreateFoodRespondModel.dart';
 import 'package:tastify/Model/EditPostRequestModel.dart';
 import 'package:tastify/Model/EditProfileRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
+import 'package:tastify/Model/FoodDetailsRespondModel.dart';
 import 'package:tastify/Model/FoodInstructionRespondModel.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:tastify/Model/IngredientsRespondModel.dart';
@@ -33,6 +36,7 @@ import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
 import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
 import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
+import 'package:tastify/Model/RatingFoodRequestModel.dart';
 import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/RegisterRequestModel.dart';
 import 'package:tastify/Model/RegisterRespondModel.dart';
@@ -41,7 +45,9 @@ import 'package:tastify/Model/SavedPostRespondModel.dart';
 import 'package:tastify/Model/TotalNewMessageRespondModel.dart';
 import 'package:tastify/Model/UnitsRespondModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
+import 'package:tastify/Model/UserVoteRespondModel.dart';
 import 'package:tastify/Model/UserWallRespondModel.dart';
+import 'package:tastify/Model/VotesRespondModel.dart';
 import 'package:tastify/Model/WallPostRespondModel.dart';
 import '../MultiImagesDetailScreen/MultiImagesDetailActivity.dart';
 import 'package:tastify/NewFeedScreen/UserDelegateModel.dart';
@@ -394,6 +400,17 @@ class APIService {
     });
     return foodRespondModel(respone.body);
   }
+  static Future<FoodDetailsRespondModel> getFoodById(String foodId) async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI + "/" +foodId);
+
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return foodDetailsRespondModel(respone.body);
+  }
 
   static Future<UserDelegateModel> getUserByQuery(
       int offset, String query) async {
@@ -630,6 +647,87 @@ class APIService {
 
 
     return createFoodRespondModel(respone.body);
+
+  }
+  static Future<VotesRespondModel> getVotes(String foodId) async {
+    var url = Uri.parse(Config.apiURL +
+        Config.foodAPI + "/" + foodId + "/votes")
+        .replace(
+        queryParameters: <String, String>{'offset': '0', 'limit': '40'});
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return votesRespondModel(respone.body);
+  }
+  static Future<UserVoteRespondModel> getUserVote(String foodId) async {
+    var url = Uri.parse(Config.apiURL +
+        Config.foodAPI + "/" + foodId + "/vote")
+        .replace(
+        queryParameters: <String, String>{'offset': '0', 'limit': '40'});
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return userVoteRespondModel(respone.body);
+  }
+  static Future<bool> ratingFood(String foodId, RatingFoodRequestModel model) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.foodAPI + "/" + foodId + "/ratings");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+
+    if (respone.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+  static Future<bool> editRatingFood(String foodId, RatingFoodRequestModel model) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.foodAPI + "/" + foodId + "/ratings");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.patch(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+
+    if (respone.statusCode == 200) {
+      return true;
+    } else {
+      return false;
+    }
+
+  }
+
+  static Future<ChatBotRespondModel> chatWithBot(ChatBotRequestModel model) async {
+    var url = Uri.parse(Config.apiURL + Config.botAPI);
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+    var data = chatBotRespondModel(respone.body);
+    print('ln');
+    return chatBotRespondModel(respone.body);
 
   }
 }

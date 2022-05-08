@@ -86,6 +86,7 @@ class _FoodActivityState extends State<FoodActivity> {
                             child: child,
                           );
                         }));
+
               },
               icon: Icon(Icons.add_circle_rounded),
             )

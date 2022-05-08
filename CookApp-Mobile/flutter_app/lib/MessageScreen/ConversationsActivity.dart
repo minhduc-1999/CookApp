@@ -4,6 +4,7 @@ import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_observer/Observable.dart';
 import 'package:flutter_observer/Observer.dart';
+import 'package:tastify/MessageScreen/ChatBotActivity.dart';
 import 'package:tastify/MessageScreen/MessageActivity.dart';
 import 'package:tastify/Model/ConversationsRespondModel.dart';
 
@@ -160,7 +161,33 @@ class _ConversationsActivityState extends State<ConversationsActivity> with Obse
           ),
       floatingActionButton: FloatingActionButton(
         backgroundColor: appPrimaryColor,
-        onPressed: (){},
+        onPressed: (){
+          Navigator.push(
+              context,
+              PageRouteBuilder(
+                  pageBuilder: (context, animation,
+                      secondaryAnimation) =>
+                     ChatBotActivity(),
+                  transitionsBuilder: (context,
+                      animation,
+                      secondaryAnimation,
+                      child) {
+                    const begin = Offset(1.0, 0.0);
+                    const end = Offset.zero;
+                    const curve = Curves.easeOut;
+
+                    var tween = Tween(
+                        begin: begin, end: end)
+                        .chain(
+                        CurveTween(curve: curve));
+
+                    return SlideTransition(
+                      position:
+                      animation.drive(tween),
+                      child: child,
+                    );
+                  }));
+        },
         tooltip: 'Increment',
         child: Icon(Icons.message),
       ),
