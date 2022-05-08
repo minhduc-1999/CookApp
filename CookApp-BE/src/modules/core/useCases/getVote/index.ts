@@ -37,6 +37,9 @@ export class GetVoteQueryHandler implements IQueryHandler<GetVoteQuery> {
 
     const vote = await this._foodVoteRepo.findVote(user, food);
 
+    if (!vote)
+      throw new NotFoundException(ResponseDTO.fail("Vote not found"));
+
     [vote.author.avatar] = await this._storageService.getDownloadUrls([
       vote.author?.avatar,
     ]);

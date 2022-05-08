@@ -1,5 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import {
+    ArrayNotEmpty,
   IsArray,
   IsEnum,
   IsNotEmpty,
@@ -54,5 +55,6 @@ export class CreatePostRequest {
   @ApiProperty({ type: [String] })
   @IsString({ each: true })
   @IsNotEmpty({ each: true })
+  @ArrayNotEmpty()
   tags: string[];
 }
