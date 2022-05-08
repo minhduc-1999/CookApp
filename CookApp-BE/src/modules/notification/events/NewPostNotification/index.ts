@@ -2,6 +2,7 @@ import { Inject } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { PostCreatedEvent } from "domains/social/events/post.event";
 import { Notification } from "domains/social/notification.domain";
+import { Moment } from "domains/social/post.domain";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
@@ -41,7 +42,7 @@ export class NewPostEventHandler implements IEventHandler<PostCreatedEvent> {
       body: template.body.replace("$user", event.author.displayName),
       title: template.title,
       templateId: template.id,
-      image: event.post.medias.length > 0 ? event.post.medias[0].url : "",
+      image: (event.post as Moment).medias?.length > 0 ? (event.post as Moment).medias[0].url : "",
       targets: endFollowers,
       data: {
         postID: event.post.id,

@@ -298,7 +298,6 @@ export class PostResponse extends AuditResponse {
     this.numOfComment = post?.nComments;
     this.numOfReaction = post?.nReactions;
     this.kind = post?.type;
-    this.medias = post?.medias?.map((media) => new MediaResponse(media));
     this.reaction = reaction?.type;
     this.saved = saved;
     this.tags = post?.tags;
@@ -307,10 +306,14 @@ export class PostResponse extends AuditResponse {
       case PostType.MOMENT:
         const moment = post as Moment;
         this.location = moment?.location;
+        this.medias = moment?.medias?.map((media) => new MediaResponse(media));
         break;
       case PostType.FOOD_SHARE:
         const foodShare = post as FoodShare;
         this.ref = foodShare?.ref && new FoodResponse(foodShare.ref);
+        this.medias = foodShare?.medias?.map(
+          (media) => new MediaResponse(media)
+        );
     }
   }
 }
@@ -462,14 +465,14 @@ export class BotResponse {
     if (attach && attach[0] instanceof RecipeStep) {
       this.attachment = {
         ...this.attachment,
-        recipes: attach.map((at) => new RecipeStepResponse(at)),
+        recipes: attach.map((at: any) => new RecipeStepResponse(at)),
       };
     }
 
     if (attach && attach[0] instanceof FoodIngredient) {
       this.attachment = {
         ...this.attachment,
-        ingredients: attach.map((at) => new FoodIngredientResponse(at)),
+        ingredients: attach.map((at: any) => new FoodIngredientResponse(at)),
       };
     }
     this.type = attachType;

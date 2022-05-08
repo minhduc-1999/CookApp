@@ -10,6 +10,7 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { ISavedPostRepository } from "modules/user/interfaces/repositories/savedPost.interface";
+import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "../getPostDetail/getPostResponse";
 import { GetFeedPostsResponse } from "./getFeedPostsResponse";
 export class GetFeedPostsQuery extends BaseQuery {
@@ -27,39 +28,18 @@ export class GetFeedPostsQueryHandler
   constructor(
     @Inject("IFeedRepository")
     private _feedRepo: IFeedRepository,
-    @Inject("IStorageService") private _storageService: IStorageService,
     @Inject("IReactionRepository")
     private _reactionRepo: IReactionRepository,
     @Inject("ISavedPostRepository")
-    private _savedRepo: ISavedPostRepository
+    private _savedRepo: ISavedPostRepository,
+    @Inject("IPostService")
+    private _postService: IPostService
   ) {}
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { queryOptions, user } = query;
-    const [posts, total] = await this._feedRepo.getPosts(user, queryOptions);
+    let [posts, total] = await this._feedRepo.getPosts(user, queryOptions);
 
-    for (let post of posts) {
-      post.medias = await this._storageService.getDownloadUrls(post.medias);
-      if (post.author?.avatar) {
-        post.author.avatar = (
-          await this._storageService.getDownloadUrls([post.author.avatar])
-        )[0];
-      }
-      switch (post.type) {
-        case PostType.FOOD_SHARE:
-          post = post as FoodShare;
-          if ((<FoodShare>post).ref) {
-            (<FoodShare>post).ref.photos =
-              await this._storageService.getDownloadUrls(
-                (<FoodShare>post).ref.photos
-              );
-          }
-          break;
-        case PostType.MOMENT:
-          break;
-        default:
-          break;
-      }
-    }
+    posts = await this._postService.fulfillUrls(posts)
 
     let meta: PageMetadata;
     if (posts.length > 0) {

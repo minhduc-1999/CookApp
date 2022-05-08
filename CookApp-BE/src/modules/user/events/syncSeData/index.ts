@@ -17,7 +17,6 @@ export class InterestsChosenEventHandler
 
   async handle(event: InterestsChosenEvent): Promise<void> {
     const { user } = event;
-    console.log(user);
     this._userSeService.updateUserDoc(user);
   }
 }
