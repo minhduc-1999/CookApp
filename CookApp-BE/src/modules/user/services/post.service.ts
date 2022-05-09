@@ -4,11 +4,13 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { Reaction } from "domains/social/reaction.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { PostType } from "enums/social.enum";
+import { IFoodService } from "modules/core/services/food.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import {
   FoodShare,
   Moment,
   Post,
+  RecommendationPost,
   SavedPost,
 } from "../../../domains/social/post.domain";
 import { IPostRepository } from "../interfaces/repositories/post.interface";
@@ -28,7 +30,7 @@ export interface IPostService {
     tx: ITransaction,
     deleteMediaIds?: string[]
   ): Promise<void>;
-  fulfillUrls(posts: Post[]): Promise<Post[]>;
+  fulfillData(posts: Post[]): Promise<Post[]>;
 }
 
 @Injectable()
@@ -40,10 +42,12 @@ export class PostService implements IPostService {
     private _savedPostRepo: ISavedPostRepository,
     @Inject("IPostMediaRepository")
     private _postMediaRepo: IPostMediaRepository,
-    @Inject("IStorageService") private _storageService: IStorageService
+    @Inject("IStorageService") private _storageService: IStorageService,
+    @Inject("IFoodService")
+    private _foodService: IFoodService
   ) {}
 
-  async fulfillUrls(posts: Post[]): Promise<Post[]> {
+  async fulfillData(posts: Post[]): Promise<Post[]> {
     if (!posts || posts.length === 0) return [];
     const fulfillOneMedia = async (post: Moment | FoodShare) => {
       post.medias = await this._storageService.getDownloadUrls(post.medias);
@@ -67,7 +71,14 @@ export class PostService implements IPostService {
             );
           break;
         case PostType.RECOMMENDATION:
-          post = await fulfillOneMedia(post);
+          const { should, shouldNot } = (post as RecommendationPost)
+            .recommendation;
+          const shouldFoodIds = should.foods.map((f) => f.id);
+          const shouldNotFoodIds = shouldNot.foods.map((f) => f.id);
+          (post as RecommendationPost).recommendation.should.foods =
+            await this._foodService.getByIds(shouldFoodIds);
+          (post as RecommendationPost).recommendation.shouldNot.foods =
+            await this._foodService.getByIds(shouldNotFoodIds);
           break;
         default:
           continue;

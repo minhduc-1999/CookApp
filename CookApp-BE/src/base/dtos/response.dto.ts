@@ -5,7 +5,14 @@ import {
   ApiResponseProperty,
   getSchemaPath,
 } from "@nestjs/swagger";
-import { FoodShare, Moment, Post } from "domains/social/post.domain";
+import {
+  FoodShare,
+  Moment,
+  Post,
+  Recommendation,
+  RecommendationItem,
+  RecommendationPost,
+} from "domains/social/post.domain";
 import { Topic, User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { MetaDTO } from "./responseMeta.dto";
@@ -196,6 +203,7 @@ export class RecipeStepResponse {
     this.reaction = reaction?.type;
   }
 }
+
 export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: Number })
   servings: number;
@@ -255,7 +263,36 @@ export class FoodResponse extends AuditResponse {
   }
 }
 
+export class RecommendationItemResponse {
+  @ApiResponseProperty({ type: String })
+  advice: string;
+
+  @ApiResponseProperty({ type: [FoodResponse] })
+  foods: FoodResponse[];
+
+  constructor(item: RecommendationItem) {
+    this.advice = item?.advice;
+    this.foods = item?.foods?.map((food) => new FoodResponse(food));
+  }
+}
+
+export class RecommendationResponse {
+  @ApiResponseProperty({ type: RecommendationItemResponse })
+  should: RecommendationItemResponse;
+
+  @ApiResponseProperty({ type: RecommendationItemResponse })
+  shouldNot: RecommendationItemResponse;
+
+  constructor(rec: Recommendation) {
+    this.should = rec.should && new RecommendationItemResponse(rec.should);
+    this.shouldNot = rec.shouldNot && new RecommendationItemResponse(rec.shouldNot);
+  }
+}
+
 export class PostResponse extends AuditResponse {
+  @ApiResponseProperty({ type: RecommendationResponse })
+  recomendation: RecommendationResponse;
+
   @ApiResponseProperty({ type: String })
   content: string;
 
@@ -314,6 +351,13 @@ export class PostResponse extends AuditResponse {
         this.medias = foodShare?.medias?.map(
           (media) => new MediaResponse(media)
         );
+        break;
+      case PostType.RECOMMENDATION:
+        const recommendPost = post as RecommendationPost;
+        this.recomendation = recommendPost.recommendation && new RecommendationResponse(
+          recommendPost.recommendation
+        );
+        break;
     }
   }
 }

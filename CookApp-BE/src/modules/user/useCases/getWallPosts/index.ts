@@ -30,7 +30,7 @@ export class GetWallPostsQueryHandler
   async execute(query: GetWallPostsQuery): Promise<GetWallPostsResponse> {
     const { queryReq, targetId } = query;
     let [posts, total] = await this._wallRepo.getPosts(targetId, queryReq);
-    posts = await this._postService.fulfillUrls(posts)
+    posts = await this._postService.fulfillData(posts)
     let meta: PageMetadata;
     if (posts.length > 0) {
       meta = new PageMetadata(

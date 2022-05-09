@@ -35,7 +35,7 @@ export class GetPostDetailQueryHandler
       user.id
     );
 
-    [post] = await this._postService.fulfillUrls([post]);
+    [post] = await this._postService.fulfillData([post]);
 
     const result = new GetPostResponse(post, reaction, saved ? true : false);
 

@@ -37,7 +37,7 @@ export class GetSavedPostsQueryHandler
 
     for (let savedItem of posts) {
       let { post } = savedItem;
-      [post] = await this._postService.fulfillUrls([post]);
+      [post] = await this._postService.fulfillData([post]);
     }
 
     let meta: PageMetadata;
