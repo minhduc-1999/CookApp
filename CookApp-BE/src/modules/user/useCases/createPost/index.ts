@@ -1,4 +1,4 @@
-import { BadRequestException, Inject, NotFoundException, NotImplementedException } from "@nestjs/common";
+import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import {
   FoodShare,
@@ -23,7 +23,6 @@ import { Food } from "domains/core/food.domain";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { PostCreatedEvent } from "domains/social/events/post.event";
-import { inspectObj } from "utils";
 
 export class CreatePostCommand extends BaseCommand {
   req: CreatePostRequest;
@@ -109,14 +108,14 @@ export class CreatePostCommandHandler
         const shouldFoods = await this._foodRepo.getByIds(req.should.foodIds);
         if (!shouldFoods || shouldFoods.length === 0)
           throw new NotFoundException(
-            ResponseDTO.fail("All foods in should session not found")
+            ResponseDTO.fail(`All foods in "should" session not found`)
           );
         const shouldNotFoods = await this._foodRepo.getByIds(
           req.shouldNot.foodIds
         );
         if (!shouldNotFoods || shouldNotFoods.length === 0)
           throw new NotFoundException(
-            ResponseDTO.fail("All foods in shouldNot session not found")
+            ResponseDTO.fail(`All foods in "should not" session not found`)
           );
         const shouldRecommendItem: RecommendationItem = {
           advice: req.should.advice,

@@ -65,10 +65,12 @@ export class PostService implements IPostService {
           break;
         case PostType.FOOD_SHARE:
           post = await fulfillOneMedia(post);
-          (<FoodShare>post).ref.photos =
-            await this._storageService.getDownloadUrls(
-              (<FoodShare>post).ref.photos
-            );
+          if ((<FoodShare>post).ref) {
+            (<FoodShare>post).ref.photos =
+              await this._storageService.getDownloadUrls(
+                (<FoodShare>post).ref.photos
+              );
+          }
           break;
         case PostType.RECOMMENDATION:
           const { should, shouldNot } = (post as RecommendationPost)

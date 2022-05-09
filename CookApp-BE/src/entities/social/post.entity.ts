@@ -81,7 +81,10 @@ export class PostEntity {
   tags: string[];
 
   @Column({ type: "jsonb", nullable: true })
-  recommendation: RecommendationEntity;
+  recommendation?: RecommendationEntity;
+
+  @Column({ nullable: true })
+  title?: string;
 
   constructor(post: Post, interaction?: InteractionEntity) {
     this.interaction = interaction ? interaction : new InteractionEntity(post);
@@ -93,6 +96,7 @@ export class PostEntity {
       case PostType.FOOD_SHARE:
         this.foodRef =
           (<FoodShare>post)?.ref && new FoodEntity((<FoodShare>post).ref);
+        this.location = (post as FoodShare).location
         break;
       case PostType.MOMENT:
         this.location = (<Moment>post)?.location;
@@ -101,6 +105,7 @@ export class PostEntity {
         this.recommendation = new RecommendationEntity(
           (post as RecommendationPost).recommendation
         );
+        this.title = (post as RecommendationPost).title;
         break;
       default:
         break;
@@ -115,11 +120,6 @@ export class PostEntity {
       nComments,
       nReactions,
       content: this.content,
-      medias:
-        this.medias &&
-        this.medias
-          .filter((media) => !isNil(media.interaction))
-          .map((media) => media.toDomain()),
       author: this.author && this.author.toDomain(),
       tags: this.tags,
     };
@@ -128,15 +128,27 @@ export class PostEntity {
         return new Moment({
           ...common,
           location: this.location,
+          medias:
+            this.medias &&
+            this.medias
+              .filter((media) => !isNil(media.interaction))
+              .map((media) => media.toDomain()),
         });
       case PostType.FOOD_SHARE:
         return new FoodShare({
           ...common,
+          location: this.location,
           ref: this.foodRef && this.foodRef.toDomain(),
+          medias:
+            this.medias &&
+            this.medias
+              .filter((media) => !isNil(media.interaction))
+              .map((media) => media.toDomain()),
         });
       case PostType.RECOMMENDATION:
         return new RecommendationPost({
           ...common,
+          title: this.title,
           recommendation: new Recommendation(
             {
               advice: this.recommendation.should.advice,
@@ -169,6 +181,12 @@ export class PostEntity {
         return {
           content: temp1?.content ?? this.content,
           foodRef: temp1?.ref && new FoodEntity(temp1.ref),
+        };
+      case PostType.RECOMMENDATION:
+        const temp2 = data as Partial<RecommendationPost>;
+        return {
+          title: temp2?.title ?? this.title,
+          recommendation: temp2?.recommendation && new RecommendationEntity(temp2.recommendation)
         };
     }
   }

@@ -112,9 +112,20 @@ export class RecommendationPost extends PostBase {
   }
 
   update(data: Partial<RecommendationPost>): Partial<RecommendationPost> {
+    const newRecommendation = data?.recommendation;
     return {
+      content: data.content ?? this.content,
       title: data?.title ?? this.title,
-      recommendation: data?.recommendation ?? this.recommendation,
+      recommendation: {
+        should: {
+          advice: newRecommendation?.should?.advice ?? this.recommendation.should.advice,
+          foods: newRecommendation?.should?.foods ?? this.recommendation.should.foods
+        },
+        shouldNot: {
+          advice: newRecommendation?.shouldNot?.advice ?? this.recommendation.shouldNot.advice,
+          foods: newRecommendation?.shouldNot?.foods ?? this.recommendation.shouldNot.foods
+        }
+      }
     };
   }
 
