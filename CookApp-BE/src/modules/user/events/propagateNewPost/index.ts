@@ -31,10 +31,6 @@ export class PropagatePostCreatedEventHandler
       "id"
     );
 
-    console.log("follower", followers.map(f => f.id))
-    console.log("interest", relatedUser)
-    console.log("follower", receiver.map(f => f.id))
-
     this._feedRepository.pushNewPost(post, receiver);
   }
 }

@@ -18,7 +18,8 @@ export enum MediaType {
 
 export enum PostType {
   MOMENT = "MOMENT",
-  FOOD_SHARE = "FOOD_SHARE"
+  FOOD_SHARE = "FOOD_SHARE",
+  RECOMMENDATION = "RECOMMENDATION"
 }
 
 export enum Sex {

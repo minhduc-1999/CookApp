@@ -27,6 +27,7 @@ import { UnitRepository } from "./adapters/out/repositories/unit.repository";
 import { FoodSeService } from "./adapters/out/services/foodSe.service";
 import { FoodModel } from "./entities/se/food.schema";
 import { SyncFoodCreatedEventHandler } from "./events/syncSeData";
+import { FoodService } from "./services/food.service";
 import { FoodRecipeService } from "./services/recipeStep.service";
 import { CreateFoodCommandHandler } from "./useCases/createFood";
 import { EditVoteCommandHandler } from "./useCases/editVote";
@@ -64,6 +65,10 @@ const services = [
   {
     provide: "IFoodSeService",
     useClass: FoodSeService,
+  },
+  {
+    provide: "IFoodService",
+    useClass: FoodService,
   },
 ];
 const repositories = [
@@ -118,6 +123,6 @@ const controller = [FoodController, IngredientController, UnitController];
     ...queryHandlers,
     ...eventHandlers
   ],
-  exports: ["IFoodRecipeService", "IFoodRepository", "IFoodSeService"],
+  exports: ["IFoodRecipeService", "IFoodRepository", "IFoodSeService", "IFoodService"],
 })
 export class CoreModule {}

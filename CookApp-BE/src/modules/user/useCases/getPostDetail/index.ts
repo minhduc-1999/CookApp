@@ -2,10 +2,9 @@ import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { MediaResponse } from "base/dtos/response.dto";
-import { FoodShare } from "domains/social/post.domain";
+import { FoodShare, Moment } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
 import { PostType } from "enums/social.enum";
-import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
 import { IPostService } from "modules/user/services/post.service";
 import { GetPostResponse } from "./getPostResponse";
@@ -25,8 +24,6 @@ export class GetPostDetailQueryHandler
   constructor(
     @Inject("IPostService")
     private _postService: IPostService,
-    @Inject("IStorageService")
-    private _storageService: IStorageService,
     @Inject("IReactionRepository")
     private _reacRepo: IReactionRepository
   ) {}
@@ -38,35 +35,18 @@ export class GetPostDetailQueryHandler
       user.id
     );
 
-    post.medias = await this._storageService.getDownloadUrls(post.medias);
-    if (post.author?.avatar) {
-      post.author.avatar = (
-        await this._storageService.getDownloadUrls([post.author.avatar])
-      )[0];
-    }
-
-    switch (post.type) {
-      case PostType.FOOD_SHARE:
-        if ((<FoodShare>post).ref)
-          (<FoodShare>post).ref.photos =
-            await this._storageService.getDownloadUrls(
-              (<FoodShare>post).ref.photos
-            );
-        break;
-      case PostType.MOMENT:
-        break;
-      default:
-        break;
-    }
+    [post] = await this._postService.fulfillData([post]);
 
     const result = new GetPostResponse(post, reaction, saved ? true : false);
 
-    const task = post.medias?.map(async (media) => {
-      const mediaReaction = await this._reacRepo.findById(user.id, media.id);
-      return new MediaResponse(media, mediaReaction);
-    });
+    if (post.type === PostType.MOMENT || post.type === PostType.FOOD_SHARE) {
+      const task = (<Moment | FoodShare>post).medias?.map(async (media) => {
+        const mediaReaction = await this._reacRepo.findById(user.id, media.id);
+        return new MediaResponse(media, mediaReaction);
+      });
 
-    result.medias = await Promise.all(task);
+      result.medias = await Promise.all(task);
+    }
 
     return result;
   }

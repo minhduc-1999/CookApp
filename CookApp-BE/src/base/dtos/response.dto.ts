@@ -5,7 +5,14 @@ import {
   ApiResponseProperty,
   getSchemaPath,
 } from "@nestjs/swagger";
-import { FoodShare, Moment, Post } from "domains/social/post.domain";
+import {
+  FoodShare,
+  Moment,
+  Post,
+  Recommendation,
+  RecommendationItem,
+  RecommendationPost,
+} from "domains/social/post.domain";
 import { Topic, User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { MetaDTO } from "./responseMeta.dto";
@@ -196,6 +203,7 @@ export class RecipeStepResponse {
     this.reaction = reaction?.type;
   }
 }
+
 export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: Number })
   servings: number;
@@ -255,7 +263,36 @@ export class FoodResponse extends AuditResponse {
   }
 }
 
+export class RecommendationItemResponse {
+  @ApiResponseProperty({ type: String })
+  advice: string;
+
+  @ApiResponseProperty({ type: [FoodResponse] })
+  foods: FoodResponse[];
+
+  constructor(item: RecommendationItem) {
+    this.advice = item?.advice;
+    this.foods = item?.foods?.map((food) => new FoodResponse(food));
+  }
+}
+
+export class RecommendationResponse {
+  @ApiResponseProperty({ type: RecommendationItemResponse })
+  should: RecommendationItemResponse;
+
+  @ApiResponseProperty({ type: RecommendationItemResponse })
+  shouldNot: RecommendationItemResponse;
+
+  constructor(rec: Recommendation) {
+    this.should = rec.should && new RecommendationItemResponse(rec.should);
+    this.shouldNot = rec.shouldNot && new RecommendationItemResponse(rec.shouldNot);
+  }
+}
+
 export class PostResponse extends AuditResponse {
+  @ApiResponseProperty({ type: RecommendationResponse })
+  recomendation: RecommendationResponse;
+
   @ApiResponseProperty({ type: String })
   content: string;
 
@@ -298,7 +335,6 @@ export class PostResponse extends AuditResponse {
     this.numOfComment = post?.nComments;
     this.numOfReaction = post?.nReactions;
     this.kind = post?.type;
-    this.medias = post?.medias?.map((media) => new MediaResponse(media));
     this.reaction = reaction?.type;
     this.saved = saved;
     this.tags = post?.tags;
@@ -307,10 +343,21 @@ export class PostResponse extends AuditResponse {
       case PostType.MOMENT:
         const moment = post as Moment;
         this.location = moment?.location;
+        this.medias = moment?.medias?.map((media) => new MediaResponse(media));
         break;
       case PostType.FOOD_SHARE:
         const foodShare = post as FoodShare;
         this.ref = foodShare?.ref && new FoodResponse(foodShare.ref);
+        this.medias = foodShare?.medias?.map(
+          (media) => new MediaResponse(media)
+        );
+        break;
+      case PostType.RECOMMENDATION:
+        const recommendPost = post as RecommendationPost;
+        this.recomendation = recommendPost.recommendation && new RecommendationResponse(
+          recommendPost.recommendation
+        );
+        break;
     }
   }
 }
@@ -462,14 +509,14 @@ export class BotResponse {
     if (attach && attach[0] instanceof RecipeStep) {
       this.attachment = {
         ...this.attachment,
-        recipes: attach.map((at) => new RecipeStepResponse(at)),
+        recipes: attach.map((at: any) => new RecipeStepResponse(at)),
       };
     }
 
     if (attach && attach[0] instanceof FoodIngredient) {
       this.attachment = {
         ...this.attachment,
-        ingredients: attach.map((at) => new FoodIngredientResponse(at)),
+        ingredients: attach.map((at: any) => new FoodIngredientResponse(at)),
       };
     }
     this.type = attachType;
