@@ -6,14 +6,13 @@ import { PostMedia } from "./media.domain";
 import { User } from "./user.domain";
 
 export abstract class PostBase extends Audit implements IInteractable {
-
   constructor(post: Partial<PostBase>) {
-    super(post)
-    this.nComments = post?.nComments
-    this.nReactions = post?.nReactions
-    this.author = post?.author
-    this.content = post?.content
-    this.tags = post?.tags
+    super(post);
+    this.nComments = post?.nComments;
+    this.nReactions = post?.nReactions;
+    this.author = post?.author;
+    this.content = post?.content;
+    this.tags = post?.tags;
   }
 
   nReactions: number;
@@ -22,118 +21,124 @@ export abstract class PostBase extends Audit implements IInteractable {
 
   author: User;
 
-  content: string
+  content: string;
 
-  type: PostType
+  type: PostType;
 
-  tags: string[]
+  tags: string[];
 
+  abstract canCreate(): boolean;
 
-  abstract canCreate(): boolean
-
-  abstract update(data: Partial<PostBase>): Partial<PostBase>
+  abstract update(data: Partial<PostBase>): Partial<PostBase>;
 }
 
 export class Moment extends PostBase {
-
   update(data: Partial<Moment>): Partial<Moment> {
     return {
       content: data.content ?? this.content,
       location: data.location ?? this.location,
       medias: data.medias ?? this.medias,
-      tags: data.tags ?? this.tags
-    }
+      tags: data.tags ?? this.tags,
+    };
   }
 
   canCreate(): boolean {
-    if (!this.content)
-      return false
-    return true
+    if (!this.content) return false;
+    return true;
   }
 
-  location?: string
+  location?: string;
 
-  medias?: PostMedia[]
+  medias?: PostMedia[];
 
   constructor(post: Partial<Moment>) {
-    super(post)
-    this.type = PostType.MOMENT
-    this.location = post?.location
-    this.medias = post?.medias
+    super(post);
+    this.type = PostType.MOMENT;
+    this.location = post?.location;
+    this.medias = post?.medias;
   }
 }
 
 export class FoodShare extends PostBase {
-
   update(data: Partial<FoodShare>): Partial<FoodShare> {
     return {
       content: data.content ?? this.content,
       medias: data.medias ?? this.medias,
       tags: data.tags ?? this.tags,
-      ref: data?.ref ?? this.ref
-    }
+      ref: data?.ref ?? this.ref,
+    };
   }
 
   canCreate(): boolean {
-    if (!this.content)
-      return false
-    return true
+    if (!this.content) return false;
+    return true;
   }
 
-  ref: Food
+  ref: Food;
 
-  location?: string
+  location?: string;
 
-  medias?: PostMedia[]
+  medias?: PostMedia[];
 
   constructor(post: Partial<FoodShare>) {
-    super(post)
-    this.type = PostType.FOOD_SHARE
-    this.ref = post?.ref
-    this.location = post?.location
-    this.medias = post?.medias
+    super(post);
+    this.type = PostType.FOOD_SHARE;
+    this.ref = post?.ref;
+    this.location = post?.location;
+    this.medias = post?.medias;
   }
 }
 
-class RecommendPostItem {
-  content: string
-  foods: Food[]
+export type RecommendationItem = {
+  advice: string;
+  foods: Food[];
+};
+
+export class Recommendation {
+  should: RecommendationItem;
+
+  shouldNot: RecommendationItem;
+
+  constructor(should: RecommendationItem, shouldNot: RecommendationItem) {
+    this.should = should;
+    this.shouldNot = shouldNot;
+  }
 }
 
-export class RecommendPost extends PostBase {
-
+export class RecommendationPost extends PostBase {
   canCreate(): boolean {
-    if (this.title && this.should && this.shouldNot)
-      return true
-    return false
+    if (this.title && this.recommendation) return true;
+    return false;
   }
 
-  update(data: Partial<RecommendPost>): Partial<RecommendPost> {
+  update(data: Partial<RecommendationPost>): Partial<RecommendationPost> {
     return {
       title: data?.title ?? this.title,
-      should: data?.should ?? this.should,
-      shouldNot: data?.shouldNot ?? this.shouldNot
-    }
+      recommendation: data?.recommendation ?? this.recommendation,
+    };
   }
 
-  title: string
+  title: string;
 
-  should: RecommendPostItem
+  recommendation: Recommendation;
 
-  shouldNot: RecommendPostItem
-
+  constructor(post: Partial<RecommendationPost>) {
+    super(post);
+    this.title = post?.title;
+    this.recommendation = post?.recommendation;
+    this.type = PostType.RECOMMENDATION
+  }
 }
 
-export type Post = Moment | FoodShare | RecommendPost
+export type Post = Moment | FoodShare | RecommendationPost;
 
 export class SavedPost extends Audit {
-  saver: User
-  post: Post
+  saver: User;
+  post: Post;
 
   constructor(item: Partial<SavedPost>) {
-    super(item)
-    this.saver = item?.saver
-    this.post = item?.post
+    super(item);
+    this.saver = item?.saver;
+    this.post = item?.post;
   }
 }
-

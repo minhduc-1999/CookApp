@@ -66,7 +66,7 @@ export class PostService implements IPostService {
               (<FoodShare>post).ref.photos
             );
           break;
-        case PostType.RECOMMEND:
+        case PostType.RECOMMENDATION:
           post = await fulfillOneMedia(post);
           break;
         default:
@@ -111,7 +111,7 @@ export class PostService implements IPostService {
           }
         }
         break;
-      case PostType.RECOMMEND:
+      case PostType.RECOMMENDATION:
         break;
       default:
         throw new Error("Undefined post type");

@@ -13,11 +13,35 @@ import {
   FoodShare,
   Moment,
   Post,
+  Recommendation,
+  RecommendationPost,
 } from "../../domains/social/post.domain";
 import { Image, Video, PostMedia } from "../../domains/social/media.domain";
 import { Audit } from "../../domains/audit.domain";
 import { isNil } from "lodash";
 import { FoodEntity } from "../../entities/core/food.entity";
+import { Food } from "../../domains/core/food.domain";
+
+export class RecommendationEntity {
+  should: {
+    advice: string;
+    foodIds: string[];
+  };
+  shouldNot: {
+    advice: string;
+    foodIds: string[];
+  };
+  constructor(rec: Recommendation) {
+    this.should = {
+      advice: rec.should.advice,
+      foodIds: rec.should.foods.map((food) => food.id),
+    };
+    this.shouldNot = {
+      advice: rec.shouldNot.advice,
+      foodIds: rec.shouldNot.foods.map((food) => food.id),
+    };
+  }
+}
 
 @Entity({ name: "posts" })
 export class PostEntity {
@@ -56,6 +80,9 @@ export class PostEntity {
   @Column({ type: "jsonb", nullable: true })
   tags: string[];
 
+  @Column({ type: "jsonb", nullable: true })
+  recommendation: RecommendationEntity;
+
   constructor(post: Post, interaction?: InteractionEntity) {
     this.interaction = interaction ? interaction : new InteractionEntity(post);
     this.author = new UserEntity(post?.author);
@@ -64,10 +91,16 @@ export class PostEntity {
     this.tags = post?.tags;
     switch (post?.type) {
       case PostType.FOOD_SHARE:
-        this.foodRef = (<FoodShare>post)?.ref && new FoodEntity((<FoodShare>post).ref)
+        this.foodRef =
+          (<FoodShare>post)?.ref && new FoodEntity((<FoodShare>post).ref);
         break;
       case PostType.MOMENT:
         this.location = (<Moment>post)?.location;
+        break;
+      case PostType.RECOMMENDATION:
+        this.recommendation = new RecommendationEntity(
+          (post as RecommendationPost).recommendation
+        );
         break;
       default:
         break;
@@ -100,6 +133,24 @@ export class PostEntity {
         return new FoodShare({
           ...common,
           ref: this.foodRef && this.foodRef.toDomain(),
+        });
+      case PostType.RECOMMENDATION:
+        return new RecommendationPost({
+          ...common,
+          recommendation: new Recommendation(
+            {
+              advice: this.recommendation.should.advice,
+              foods: this.recommendation.should.foodIds.map(
+                (id) => new Food({ id })
+              ),
+            },
+            {
+              advice: this.recommendation.shouldNot.advice,
+              foods: this.recommendation.shouldNot.foodIds.map(
+                (id) => new Food({ id })
+              ),
+            }
+          ),
         });
     }
   }
