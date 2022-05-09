@@ -39,6 +39,7 @@ class Config {
   static const String albumAPI = "/api/users/albums";
 
   static const String sendMessage = "/api/messages";
+  static const String botAPI = "/api/messages/bot";
 
   //string
   static const String postCommentsType = "POST";
@@ -46,4 +47,5 @@ class Config {
   static const String postReactType = "POST";
   static const String imageReactType = "POST_MEDIA";
   static const String albumReactType = "ALBUM";
+  static const String textType = "TEXT";
 }

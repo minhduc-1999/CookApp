@@ -1,10 +1,14 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:rating_bar_flutter/rating_bar_flutter.dart';
 import 'package:readmore/readmore.dart';
 import 'package:tastify/FoodScreen/FoodInstructionWidget.dart';
+import 'package:tastify/FoodScreen/RatingActivity.dart';
 import 'package:tastify/FoodScreen/ShareFoodActivity.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/constants.dart';
 
 class FoodWidget extends StatefulWidget {
@@ -15,14 +19,21 @@ class FoodWidget extends StatefulWidget {
   });
 
   @override
-  _FoodWidgetState createState() => _FoodWidgetState(this.food);
+  _FoodWidgetState createState() => _FoodWidgetState(food: this.food,rating: this.food.rating.toDouble());
 }
 
 class _FoodWidgetState extends State<FoodWidget> {
   final Foods food;
+  double rating;
   String ingredients = "";
-  _FoodWidgetState(this.food);
-
+  _FoodWidgetState({this.food,this.rating});
+  FutureOr updateRating(dynamic value) async{
+    var data = await APIService.getFoodById(widget.food.id);
+    print("ln");
+    setState(() {
+      rating = data.data.rating.toDouble();
+    });
+  }
   @override
   Widget build(BuildContext context) {
     final double height = MediaQuery.of(context).size.height;
@@ -145,10 +156,37 @@ class _FoodWidgetState extends State<FoodWidget> {
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
                     GestureDetector(
+                      onTap: (){
+                        Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                                pageBuilder: (context, animation,
+                                    secondaryAnimation) =>
+                                    RatingActivity(foodId: widget.food.id, foodUrl: widget.food.photos[0].url,),
+                                transitionsBuilder: (context,
+                                    animation,
+                                    secondaryAnimation,
+                                    child) {
+                                  const begin = Offset(1.0, 0.0);
+                                  const end = Offset.zero;
+                                  const curve = Curves.easeOut;
+
+                                  var tween = Tween(
+                                      begin: begin, end: end)
+                                      .chain(
+                                      CurveTween(curve: curve));
+
+                                  return SlideTransition(
+                                    position:
+                                    animation.drive(tween),
+                                    child: child,
+                                  );
+                                })).then(updateRating);
+                      },
                       child: Row(
                         children: [
                           RatingBarFlutter.readOnly(
-                            initialRating: 3.5,
+                            initialRating: rating - rating.floor() > 0 ? rating.floor() + 0.5 : rating ,
                             isHalfAllowed: true,
                             aligns: Alignment.centerLeft,
                             halfFilledIcon: Icons.star_half,
@@ -159,7 +197,7 @@ class _FoodWidgetState extends State<FoodWidget> {
                             halfFilledColor: starColor,
                           ),
                           SizedBox(width: 5,),
-                          GestureDetector(child: Text("Rating")),
+                          GestureDetector(child: Text(rating.toStringAsPrecision(2))),
                         ],
                       ),
                     ),
