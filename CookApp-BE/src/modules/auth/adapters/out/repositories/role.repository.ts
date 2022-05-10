@@ -21,9 +21,9 @@ export class RoleRepository extends BaseRepository implements IRoleRepository {
     super();
   }
 
-  async getRole(slug: RoleType): Promise<Role> {
+  async getRole(sign: RoleType): Promise<Role> {
     const role = await this._repo.findOne({
-      where: { slug },
+      where: { sign },
     });
     return role?.toDomain();
   }

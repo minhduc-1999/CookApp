@@ -25,6 +25,7 @@ import {
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import {
   HttpParamTransaction,
   HttpRequestTransaction,
@@ -52,6 +53,7 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("users/posts")
 @ApiTags("User/Post")
 @ApiBearerAuth()
+@RequirePermissions("manage_post")
 export class PostController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
@@ -59,6 +61,7 @@ export class PostController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
   @HttpRequestTransaction()
+  @RequirePermissions("create_moment_post", "create_recommendation_post", "create_share_food_post")
   async createPost(
     @Body(ParseCreatePostRequestPipe) post: CreatePostRequest,
     @HttpUserReq() user: User,
@@ -73,6 +76,7 @@ export class PostController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
+  @RequirePermissions('read_post')
   async getPostById(
     @Param("postId", ParseUUIDPipe) postId: string,
     @HttpUserReq() user: User
@@ -87,6 +91,7 @@ export class PostController {
   @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
   @HttpRequestTransaction()
   @ApiNotFoundResponse({ description: "Post not found" })
+  @RequirePermissions("edit_post")
   async editPost(
     @Body() post: EditPostRequest,
     @HttpUserReq() user: User,
@@ -105,6 +110,7 @@ export class PostController {
   @ApiOKResponseCustomWithoutData("Save post successfully")
   @ApiConflictResponse({ description: "Post have been saved already" })
   @ApiNotFoundResponse({ description: "Post not found" })
+  @RequirePermissions("read_post")
   async savePost(
     @HttpUserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
@@ -124,6 +130,7 @@ export class PostController {
   @ApiOKResponseCustomWithoutData("Delete saved post successfully")
   @ApiConflictResponse({ description: "Post have not been saved yet" })
   @ApiNotFoundResponse({ description: "Post not found" })
+  @RequirePermissions("delete_post")
   async deleteSavedPost(
     @HttpUserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
@@ -140,6 +147,7 @@ export class PostController {
   @Get("save")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetSavedPostsResponse, "Get saved posts successfully")
+  @RequirePermissions("read_post")
   async getSavedPosts(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,

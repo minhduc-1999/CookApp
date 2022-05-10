@@ -7,6 +7,7 @@ import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import {
   HttpParamTransaction,
   HttpRequestTransaction,
@@ -25,12 +26,14 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("topics")
 @ApiTags("Topics")
 @ApiBearerAuth()
+@RequirePermissions("manage_topic")
 export class TopicController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
   @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetTopicsResponse, "Get topics successfully")
+  @RequirePermissions('read_topic')
   async getTopics(
     @Query(new ParseHttpRequestPipe<typeof GetTopicsRequest>())
     query: GetTopicsRequest,
@@ -47,6 +50,7 @@ export class TopicController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(ChooseInterestsResponse, "Successfully")
   @HttpRequestTransaction()
+  @RequirePermissions('read_topic')
   async chooseInterests(
     @Body() body: ChooseInterestsRequest,
     @HttpUserReq() user: User,

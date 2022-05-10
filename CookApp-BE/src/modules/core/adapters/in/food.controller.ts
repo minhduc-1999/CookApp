@@ -19,6 +19,7 @@ import {
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import {
   HttpParamTransaction,
   HttpRequestTransaction,
@@ -45,12 +46,14 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("foods")
 @ApiTags("Foods")
 @ApiBearerAuth()
+@RequirePermissions("manage_food")
 export class FoodController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
   @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodsResponse, "Get foods successfully")
+  @RequirePermissions("read_food")
   async getFoods(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,
@@ -66,6 +69,7 @@ export class FoodController {
   @Get(":foodId/vote")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetVoteQuery, "Get food vote successfully")
+  @RequirePermissions("read_food")
   async getVote(
     @Param("foodId", ParseUUIDPipe) foodId: string,
     @HttpUserReq() user: User
@@ -79,6 +83,7 @@ export class FoodController {
   @Get(":foodId/votes")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodVotesResponse, "Get food votes successfully")
+  @RequirePermissions("read_food")
   async getFoodVotes(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,
@@ -95,6 +100,7 @@ export class FoodController {
   @Get(":foodId")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodDetailResponse, "Get food successfully")
+  @RequirePermissions("read_food")
   async getFoodDetail(
     @HttpUserReq() user: User,
     @Param("foodId", ParseUUIDPipe) foodId: string
@@ -110,6 +116,7 @@ export class FoodController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreateFoodResponse, "Create food successfully")
   @HttpRequestTransaction()
+  @RequirePermissions("create_food")
   async createPost(
     @Body() req: CreateFoodRequest,
     @HttpUserReq() user: User,
@@ -124,6 +131,7 @@ export class FoodController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Vote food successfully")
   @HttpRequestTransaction()
+  @RequirePermissions("read_food")
   async voteFood(
     @Body() req: VoteFoodRequest,
     @HttpUserReq() user: User,
@@ -140,6 +148,7 @@ export class FoodController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Edit vote successfully")
   @HttpRequestTransaction()
+  @RequirePermissions("read_food")
   async editVote(
     @Body() req: EditVoteRequest,
     @HttpUserReq() user: User,

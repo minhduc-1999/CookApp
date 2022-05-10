@@ -15,6 +15,7 @@ import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { EmailVerificationGuard } from "guards/emailVerification.guard";
 import { JwtAuthGuard } from "guards/jwtAuth.guard";
+import { PermissionGuard } from "guards/roles.guard";
 import { ConfigurationModule } from "modules/configuration/configuration.module";
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule, ConfigService } from "nestjs-config";
@@ -52,6 +53,10 @@ const globalGuards = [
   {
     provide: APP_GUARD,
     useClass: EmailVerificationGuard,
+  },
+  {
+    provide: APP_GUARD,
+    useClass: PermissionGuard,
   },
 ];
 

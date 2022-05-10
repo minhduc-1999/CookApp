@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  NotFoundException,
+} from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import {
   FoodShare,
@@ -105,6 +110,13 @@ export class CreatePostCommandHandler
         break;
       }
       case PostType.RECOMMENDATION:
+        const userPermissions =
+          user?.account?.role?.permissions.map((p) => p.sign) ?? [];
+        if (
+          userPermissions.length === 0 ||
+          !userPermissions.includes("create_recommendation_post")
+        )
+          throw new ForbiddenException();
         const shouldFoods = await this._foodRepo.getByIds(req.should.foodIds);
         if (!shouldFoods || shouldFoods.length === 0)
           throw new NotFoundException(

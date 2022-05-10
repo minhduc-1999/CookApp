@@ -108,7 +108,7 @@ export class AccountEntity extends AbstractEntity {
       ...data,
       externalProvider: this.externalProvider?.toDomain(),
       user: data.user?.toDomain(),
-      role: this.role.toDomain(),
+      role: data.role?.toDomain(),
     });
   }
 

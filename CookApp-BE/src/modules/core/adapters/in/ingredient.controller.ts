@@ -7,6 +7,7 @@ import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
@@ -17,12 +18,14 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("ingredients")
 @ApiTags("Ingredients")
 @ApiBearerAuth()
+@RequirePermissions('manage_ingredient')
 export class IngredientController {
   constructor(private _queryBus: QueryBus) {}
 
   @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetIngredientsResponse, "Get ingredients successfully")
+  @RequirePermissions("read_ingredient")
   async getIngredients(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,

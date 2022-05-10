@@ -15,6 +15,7 @@ import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
@@ -40,6 +41,7 @@ export class WallController {
   @Get("posts")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetWallPostsResponse, "Get wall's posts successfully")
+  @RequirePermissions("read_post")
   async getWallPosts(
     @Query(new ParseHttpRequestPipe<typeof GetWallPostsRequest>()) query: GetWallPostsRequest,
     @HttpUserReq() user: User,
@@ -58,6 +60,7 @@ export class WallController {
     GetAlbumsResponse,
     "Get albums successfully"
   )
+  @RequirePermissions("read_album")
   async getAlbums(
     @Query(new ParseHttpRequestPipe<typeof GetAlbumsRequest>()) query: GetAlbumsRequest,
     @Param("id", ParseUUIDPipe) targetId: string,
