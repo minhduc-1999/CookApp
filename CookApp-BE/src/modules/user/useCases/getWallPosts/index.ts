@@ -5,9 +5,9 @@ import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { User } from "domains/social/user.domain";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
 import { IPostService } from "modules/user/services/post.service";
-import { inspectObj } from "utils";
 import { GetWallPostsRequest } from "./getWallPostsRequest";
 import { GetWallPostsResponse } from "./getWallPostsResponse";
+
 export class GetWallPostsQuery extends BaseQuery {
   queryReq: GetWallPostsRequest;
   targetId: string;
@@ -31,7 +31,6 @@ export class GetWallPostsQueryHandler
   async execute(query: GetWallPostsQuery): Promise<GetWallPostsResponse> {
     const { queryReq, targetId } = query;
     let [posts, total] = await this._wallRepo.getPosts(targetId, queryReq);
-    inspectObj(posts)
     posts = await this._postService.fulfillData(posts)
     let meta: PageMetadata;
     if (posts.length > 0) {

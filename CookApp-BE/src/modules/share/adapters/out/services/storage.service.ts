@@ -71,8 +71,10 @@ export class FireBaseService implements IStorageService {
         file
           .delete({ ignoreNotFound: true })
           .then((res) => {
-            if (res[0].statusCode === 204) return media;
-            else return null;
+            if (res[0].statusCode === 204) 
+              return media;
+            else 
+              return null;
           })
           .catch((err) => {
             this.logger.error(err);

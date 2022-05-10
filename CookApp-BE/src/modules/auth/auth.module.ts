@@ -8,7 +8,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import {
     AccountEntity,
-    AccountRoleEntity
+    RoleEntity
 } from "entities/social/account.entity";
 import { ProviderEntity } from "entities/social/provider.entity";
 import { UserEntity } from "entities/social/user.entity";
@@ -77,7 +77,7 @@ const globalGuards = [
       UserEntity,
       AccountEntity,
       ProviderEntity,
-      AccountRoleEntity,
+      RoleEntity,
     ]),
     MongooseModule.forFeature([UserModel]),
   ],

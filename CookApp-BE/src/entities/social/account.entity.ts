@@ -7,30 +7,57 @@ import {
   OneToOne,
 } from "typeorm";
 import { UserEntity } from "./user.entity";
-import { Account, AccountRole } from "../../domains/social/account.domain";
+import { Account, Role, Permission } from "../../domains/social/account.domain";
 import { ProviderEntity } from "./provider.entity";
 import { AbstractEntity } from "../../base/entities/base.entity";
 import { User } from "../../domains/social/user.domain";
-import { RoleType } from "enums/system.enum";
+import { PermisstionType, RoleType } from "../../enums/system.enum";
 
-@Entity({ name: "roles" })
-export class AccountRoleEntity extends AbstractEntity {
+@Entity({ name: "permissions" })
+export class PermissionEntity extends AbstractEntity {
   @Column({ name: "title", unique: true, nullable: false })
   title: string;
 
-  @Column({ name: "slug", unique: true, nullable: false })
-  slug: RoleType;
+  @Column({ name: "sign", unique: true, nullable: false })
+  sign: PermisstionType;
 
-  @OneToMany(() => AccountEntity, (account) => account.role)
-  users: AccountEntity[];
-
-  constructor(role: AccountRole) {
-    super(role);
-    this.title = role?.title;
+  constructor(pms: Permission) {
+    super(pms);
+    this.title = pms?.title;
+    this.sign = pms?.sign;
   }
 
-  toDomain(): AccountRole {
-    return new AccountRole(this);
+  toDomain(): Permission {
+    return new Permission(this);
+  }
+}
+
+@Entity({ name: "roles" })
+export class RoleEntity extends AbstractEntity {
+  @Column({ name: "title", unique: true, nullable: false })
+  title: string;
+
+  @Column({ name: "sign", unique: true, nullable: false })
+  sign: RoleType;
+
+  @OneToMany(() => RolePermisstionEntity, (rolePms) => rolePms.role)
+  permissions: RolePermisstionEntity[];
+
+  constructor(role: Role) {
+    super(role);
+    this.title = role?.title;
+    this.sign = role?.sign;
+    this.permissions = role?.permissions?.map(
+      (pms) => new RolePermisstionEntity(role, pms)
+    );
+  }
+
+  toDomain(): Role {
+    const audit = this;
+    return new Role({
+      ...audit,
+      permissions: this.permissions?.map((pms) => pms.toDomain()),
+    });
   }
 }
 
@@ -58,9 +85,9 @@ export class AccountEntity extends AbstractEntity {
   @OneToOne(() => ProviderEntity, (provider) => provider.account)
   externalProvider: ProviderEntity;
 
-  @ManyToOne(() => AccountRoleEntity, (role) => role.users, { nullable: false })
+  @ManyToOne(() => RoleEntity, { nullable: false })
   @JoinColumn({ name: "role_id" })
-  role: AccountRoleEntity;
+  role: RoleEntity;
 
   constructor(account: Account, user?: User) {
     super(account);
@@ -72,7 +99,7 @@ export class AccountEntity extends AbstractEntity {
     this.externalProvider =
       account?.externalProvider && new ProviderEntity(account.externalProvider);
     this.user = user && new UserEntity(user);
-    this.role = account?.role && new AccountRoleEntity(account.role);
+    this.role = account?.role && new RoleEntity(account.role);
   }
 
   toDomain(): Account {
@@ -81,7 +108,7 @@ export class AccountEntity extends AbstractEntity {
       ...data,
       externalProvider: this.externalProvider?.toDomain(),
       user: data.user?.toDomain(),
-      role: data.role?.toDomain(),
+      role: this.role.toDomain(),
     });
   }
 
@@ -90,5 +117,28 @@ export class AccountEntity extends AbstractEntity {
       emailVerified: data.emailVerified ?? this.emailVerified,
       password: data.password ?? this.password,
     };
+  }
+}
+
+@Entity({ name: "role_permissions" })
+export class RolePermisstionEntity extends AbstractEntity {
+  @ManyToOne(() => RoleEntity, (role) => role.permissions, {
+    nullable: false,
+  })
+  @JoinColumn({ name: "role_id" })
+  role: RoleEntity;
+
+  @ManyToOne(() => PermissionEntity, { nullable: false })
+  @JoinColumn({ name: "permission_id" })
+  permission: PermissionEntity;
+
+  constructor(role: Role, pms: Permission) {
+    super(null);
+    this.role = role && new RoleEntity(role);
+    this.permission = pms && new PermissionEntity(pms);
+  }
+
+  toDomain(): Permission {
+    return this.permission?.toDomain();
   }
 }
