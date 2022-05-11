@@ -37,7 +37,7 @@ import {
 } from "components/Icons/Icons.js";
 import DashboardTableRow from "components/Tables/DashboardTableRow";
 import TimelineRow from "components/Tables/TimelineRow";
-import React  from "react";
+import React from "react";
 // react icons
 import { IoCheckmarkDoneCircleSharp } from "react-icons/io5";
 import { dashboardTableData, timelineData } from "variables/general";
@@ -162,7 +162,7 @@ export default function Dashboard() {
         templateColumns={{ sm: "1fr", lg: "1.3fr 1.7fr" }}
         templateRows={{ sm: "repeat(2, 1fr)", lg: "1fr" }}
         gap="24px"
-        my='26px'
+        my="26px"
       >
         <Card p="16px">
           <CardBody>
@@ -382,9 +382,10 @@ export default function Dashboard() {
               </Tr>
             </Thead>
             <Tbody>
-              {dashboardTableData.map((row) => {
+              {dashboardTableData.map((row, index) => {
                 return (
                   <DashboardTableRow
+                    key={index}
                     name={row.name}
                     logo={row.logo}
                     members={row.members}
@@ -420,6 +421,7 @@ export default function Dashboard() {
               {timelineData.map((row, index, arr) => {
                 return (
                   <TimelineRow
+                    key={index}
                     logo={row.logo}
                     title={row.title}
                     date={row.date}

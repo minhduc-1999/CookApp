@@ -85,7 +85,7 @@ function Sidebar(props) {
         );
       }
       return (
-        <NavLink to={prop.layout + prop.path}>
+        <NavLink key={key} to={prop.layout + prop.path}>
           {activeRoute(prop.layout + prop.path) === "active" ? (
             <Button
               boxSize="initial"
@@ -313,7 +313,7 @@ export function SidebarResponsive(props) {
         );
       }
       return (
-        <NavLink to={prop.layout + prop.path}>
+        <NavLink key={key} to={prop.layout + prop.path}>
           {activeRoute(prop.layout + prop.path) === "active" ? (
             <Button
               boxSize="initial"
@@ -466,7 +466,6 @@ export function SidebarResponsive(props) {
         w="18px"
         h="18px"
         ref={btnRef}
-        colorScheme="teal"
         onClick={onOpen}
       />
       <Drawer

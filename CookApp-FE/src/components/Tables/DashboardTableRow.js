@@ -32,9 +32,10 @@ function DashboardTableRow(props) {
 
       <Td>
         <AvatarGroup size="sm">
-          {members.map((member) => {
+          {members.map((member, index) => {
             return (
               <Avatar
+                key={index}
                 name="Ryan Florence"
                 src={member}
                 _hover={{ zIndex: "3", cursor: "pointer" }}

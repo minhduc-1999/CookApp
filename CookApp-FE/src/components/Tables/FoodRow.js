@@ -12,15 +12,15 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { OptionIcon } from "components/Icons/Icons";
-import React from "react";
+import React  from "react";
 import { calendarTime } from "utils/time";
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons"
+import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 import { durationFormat } from "utils/time";
 import PropTypes from "prop-types";
 
 function FoodRow(props) {
-  const {name, createdAt, totalTime, servings, photos} = props.data;
-  const index = props.index + 1
+  const { name, createdAt, totalTime, servings, photos } = props.data;
+  const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
 
   return (
@@ -64,21 +64,17 @@ function FoodRow(props) {
         </Text>
       </Td>
 
-      <Td>
+      <Td isNumeric>
         <Menu>
           <MenuButton
             as={IconButton}
-            aria-label='Options'
+            aria-label="Options"
             icon={<OptionIcon />}
-            variant='outline'
+            variant="outline"
           />
           <MenuList>
-            <MenuItem icon={<EditIcon />}>
-              Edit
-            </MenuItem>
-            <MenuItem icon={<DeleteIcon />}>
-              Delete
-            </MenuItem>
+            <MenuItem icon={<EditIcon />}>Edit</MenuItem>
+            <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>
           </MenuList>
         </Menu>
       </Td>
@@ -88,7 +84,7 @@ function FoodRow(props) {
 
 FoodRow.propTypes = {
   index: PropTypes.number,
-  data: PropTypes.object
+  data: PropTypes.object,
 };
 
 export default FoodRow;

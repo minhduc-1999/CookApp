@@ -1,26 +1,64 @@
-import React from "react";
-// Chakra imports
-import {
-  Flex,
-  Table,
-  Tbody,
-  Text,
-  Th,
-  Thead,
-  Tr,
-  Box,
-  useColorModeValue,
-} from "@chakra-ui/react";
-// Custom components
+import React, { useState, useEffect } from "react";
+import Spinner from "components/Spinner";
+import { Flex, Text, Box, useColorModeValue } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
-import FoodRow from "components/Tables/FoodRow.js";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
-import { foodData } from "variables/general";
+import { usePaginator } from "chakra-paginator";
+import FoodTable from "components/Tables/FoodTable";
+import Paginator from "components/Tables/Paginator";
+import { getFoods } from "apis/foods";
+
+const PAGE_SIZE = 10;
+const INIT_CUR_PAGE = 1;
 
 function Foods() {
   const textColor = useColorModeValue("gray.700", "white");
+  const [foods, setFoods] = useState({});
+  const [loading, setLoading] = useState(true);
+  const [totalPage, setTotalPage] = useState(0);
+  const [totalFood, setTotalFood] = useState(0);
+
+  const { currentPage, setCurrentPage, pageSize } = usePaginator({
+    initialState: { currentPage: INIT_CUR_PAGE, pageSize: PAGE_SIZE },
+  });
+
+  useEffect(() => {
+    fetchData(INIT_CUR_PAGE);
+  }, []);
+
+  const fetchData = (page) => {
+    getFoods(page, pageSize)
+      .then((data) => {
+        if (data.metadata.totalPage !== totalPage)
+          setTotalPage(data.metadata.totalPage);
+        if (data.metadata.totalCount !== totalFood)
+          setTotalFood(data.metadata.totalCount);
+        const temp = { ...foods };
+        temp[page] = data.foods;
+        setFoods(temp);
+        setLoading(false);
+      })
+      .catch((err) => {
+        setLoading(true);
+        console.error(err);
+      });
+  };
+
+  const handlePageChange = (nextPage) => {
+    if (!foods[nextPage] || foods[nextPage].length !== pageSize) {
+      if (nextPage === totalPage) {
+        if (foods[nextPage]?.length === totalFood % pageSize) {
+          setCurrentPage(nextPage);
+          return;
+        }
+      }
+      setLoading(true);
+      fetchData(nextPage);
+    }
+    setCurrentPage(nextPage);
+  };
 
   return (
     <Tabs isFitted variant="enclosed" pt={{ base: "120px", md: "75px" }}>
@@ -31,35 +69,32 @@ function Foods() {
       </TabList>
       <TabPanels>
         <TabPanel>
-          <Flex direction="column">
-            <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-              <CardHeader p="6px 0px 22px 0px">
-                <Text fontSize="xl" color={textColor} fontWeight="bold">
-                  Foods Table
-                </Text>
-              </CardHeader>
-              <CardBody>
-                <Table variant="simple" color={textColor}>
-                  <Thead>
-                    <Tr my=".8rem" pl="0px" color="gray.400">
-                      <Th pl="0px" color="gray.400">
-                        Index
-                      </Th>
-                      <Th color="gray.400">Name</Th>
-                      <Th color="gray.400">Servings</Th>
-                      <Th color="gray.400">Total Time</Th>
-                      <Th color="gray.400">Created At</Th>
-                      <Th></Th>
-                    </Tr>
-                  </Thead>
-                  <Tbody>
-                    {foodData.map((row, index) => {
-                      return <FoodRow index={index} data={row} />;
-                    })}
-                  </Tbody>
-                </Table>
-              </CardBody>
-            </Card>
+          <Flex direction="column" justifyContent="center" alignItems="center">
+            {loading ? (
+              <Spinner />
+            ) : (
+              <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
+                <CardHeader p="6px 0px 22px 0px">
+                  <Text fontSize="xl" color={textColor} fontWeight="bold">
+                    Foods Table
+                  </Text>
+                </CardHeader>
+                <CardBody>
+                  <FoodTable
+                    foods={foods}
+                    limit={pageSize}
+                    curPage={currentPage}
+                  />
+                </CardBody>
+                <Flex mt="20px" justifyContent="end">
+                  <Paginator
+                    pagesQuantity={totalPage}
+                    currentPage={currentPage}
+                    onPageChange={handlePageChange}
+                  />
+                </Flex>
+              </Card>
+            )}
           </Flex>
         </TabPanel>
         <TabPanel>
