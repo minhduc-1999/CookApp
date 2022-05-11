@@ -36,14 +36,16 @@ export class CreateAlbumCommandHandler
     if (req.images?.length > 0) {
       req.images = await this._storageService.makePublic(
         req.images,
-        MediaType.IMAGE
+        MediaType.IMAGE,
+        "album"
       );
     }
 
     if (req.videos?.length > 0) {
       req.videos = await this._storageService.makePublic(
         req.videos,
-        MediaType.VIDEO
+        MediaType.VIDEO,
+        "album"
       );
     }
 

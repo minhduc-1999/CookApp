@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'PostDetailRespondModel.dart';
 NewFeedRespondModel newFeedRespondModel(String str) =>
     NewFeedRespondModel.fromJson(json.decode(str));
 class NewFeedRespondModel {
@@ -87,7 +89,7 @@ class Posts {
   String kind;
   String location;
   bool saved;
-
+  Ref ref;
   Posts(
       {this.id,
         this.createdAt,
@@ -123,6 +125,7 @@ class Posts {
     kind = json['kind'];
     location = json['location'];
     saved = json['saved'];
+    ref = json['ref'] != null ? new Ref.fromJson(json['ref']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -144,38 +147,17 @@ class Posts {
     data['kind'] = this.kind;
     data['location'] = this.location;
     data['saved'] = this.saved;
+    if (this.ref != null) {
+      data['ref'] = this.ref.toJson();
+    }
     return data;
   }
 }
 
-class Medias {
-  String id;
-  String url;
-  String type;
-  String reaction;
-
-  Medias({this.id, this.url, this.type, this.reaction});
-
-  Medias.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    url = json['url'];
-    type = json['type'];
-    reaction = json['reaction'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['url'] = this.url;
-    data['type'] = this.type;
-    data['reaction'] = this.reaction;
-    return data;
-  }
-}
 
 class Author {
   String id;
-  Medias avatar;
+  Avatar avatar;
   String displayName;
 
   Author({this.id, this.avatar, this.displayName});
@@ -183,7 +165,7 @@ class Author {
   Author.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     avatar =
-    json['avatar'] != null ? new Medias.fromJson(json['avatar']) : null;
+    json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
     displayName = json['displayName'];
   }
 
@@ -219,6 +201,86 @@ class Metadata {
     data['pageSize'] = this.pageSize;
     data['totalPage'] = this.totalPage;
     data['totalCount'] = this.totalCount;
+    return data;
+  }
+}
+class Ref {
+  int createdAt;
+  String id;
+  int updatedAt;
+  int servings;
+  String name;
+  String description;
+  List<Photos> photos;
+  int totalTime;
+
+  String videoUrl;
+
+  Ref(
+      {this.createdAt,
+        this.id,
+        this.updatedAt,
+        this.servings,
+        this.name,
+        this.description,
+        this.photos,
+        this.totalTime,
+
+        this.videoUrl});
+
+  Ref.fromJson(Map<String, dynamic> json) {
+    createdAt = json['createdAt'];
+    id = json['id'];
+    updatedAt = json['updatedAt'];
+    servings = json['servings'];
+    name = json['name'];
+    description = json['description'];
+    if (json['photos'] != null) {
+      photos = <Photos>[];
+      json['photos'].forEach((v) {
+        photos.add(new Photos.fromJson(v));
+      });
+    }
+    totalTime = json['totalTime'];
+
+    videoUrl = json['videoUrl'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['createdAt'] = this.createdAt;
+    data['id'] = this.id;
+    data['updatedAt'] = this.updatedAt;
+    data['servings'] = this.servings;
+    data['name'] = this.name;
+    data['description'] = this.description;
+    if (this.photos != null) {
+      data['photos'] = this.photos.map((v) => v.toJson()).toList();
+    }
+    data['totalTime'] = this.totalTime;
+
+    data['videoUrl'] = this.videoUrl;
+    return data;
+  }
+}
+class Photos {
+  String url;
+  String type;
+  String id;
+
+  Photos({this.url, this.type, this.id});
+
+  Photos.fromJson(Map<String, dynamic> json) {
+    url = json['url'];
+    type = json['type'];
+    id = json['id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['url'] = this.url;
+    data['type'] = this.type;
+    data['id'] = this.id;
     return data;
   }
 }

@@ -26,29 +26,41 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
     @Inject("IStorageService")
     private _storageService: IStorageService,
     @Inject("IFoodSeService")
-    private _foodSeService: IFoodSeService,
-  ) { }
+    private _foodSeService: IFoodSeService
+  ) {}
   async execute(query: GetFoodsQuery): Promise<GetFoodsResponse> {
     const { queryOptions } = query;
-    let foods: Food[]
-    let totalCount = 0
+    let foods: Food[];
+    let totalCount = 0;
 
     if (queryOptions.q) {
-      const [ids, total] = await this._foodSeService.findManyByNameAndCount(queryOptions.q, queryOptions)
-      totalCount = total
-      foods = await this._foodRepo.getByIds(ids)
+      const [ids, total] = await this._foodSeService.findManyByNameAndCount(
+        queryOptions.q,
+        queryOptions
+      );
+      totalCount = total;
+      const queryResult = await this._foodRepo.getByIds(ids);
+      foods = ids.map((id) => queryResult.find((item) => item.id === id));
     } else {
       [foods, totalCount] = await this._foodRepo.getFoods(queryOptions);
     }
 
     for (let food of foods) {
-      food.photos = (await this._storageService.getDownloadUrls(food.photos)) as Image[];
+      food.photos = (await this._storageService.getDownloadUrls(
+        food.photos
+      )) as Image[];
+      if (food.author?.avatar?.key)
+        [food.author.avatar] = await this._storageService.getDownloadUrls([
+          food.author.avatar,
+        ]);
       if (food.steps.length > 0) {
         food.steps = await Promise.all(
           food.steps.map(async (step) => {
             return {
               ...step,
-              photos: (await this._storageService.getDownloadUrls(step.photos)) as Image[],
+              photos: (await this._storageService.getDownloadUrls(
+                step.photos
+              )) as Image[],
             };
           })
         );

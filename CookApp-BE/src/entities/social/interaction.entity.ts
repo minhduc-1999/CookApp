@@ -1,29 +1,38 @@
-import { AbstractEntity } from '../../base/entities/base.entity';
-import { Column, Entity, OneToOne } from 'typeorm';
-import { IInteractable } from '../../domains/interfaces/IInteractable.interface';
-import { PostEntity } from './post.entity';
+import { AbstractEntity } from "../../base/entities/base.entity";
+import { Column, Entity, OneToOne } from "typeorm";
+import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
+import { PostEntity } from "./post.entity";
+import { RecipeStepEntity } from "../../entities/core/recipeStep.entity";
+import { AlbumEntity } from "./album.entity";
 
-@Entity({ name: 'interactions' })
+@Entity({ name: "interactions" })
 export class InteractionEntity extends AbstractEntity {
-
   @Column({
     name: "n_comments",
-    default: 0
+    default: 0,
   })
-  nComments: number
+  nComments: number;
 
   @Column({
     name: "n_reactions",
-    default: 0
+    default: 0,
   })
-  nReactions: number
+  nReactions: number;
 
-  @OneToOne(() => PostEntity, post => post.interaction)
-  post: PostEntity
+  @OneToOne(() => PostEntity, (post) => post.interaction)
+  post?: PostEntity;
+
+  @OneToOne(() => AlbumEntity, (album) => album.interaction)
+  album?: AlbumEntity;
+
+  @OneToOne(() => RecipeStepEntity, (recipe) => recipe.interaction, {
+    cascade: ["insert"],
+  })
+  recipeStep?: RecipeStepEntity;
 
   constructor(data: IInteractable) {
-    super(data)
-    this.nReactions = data?.nReactions
-    this.nComments = data?.nComments
+    super(data);
+    this.nReactions = data?.nReactions;
+    this.nComments = data?.nComments;
   }
 }

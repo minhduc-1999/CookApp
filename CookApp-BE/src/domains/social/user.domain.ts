@@ -1,6 +1,6 @@
 import { Audit } from "../../domains/audit.domain";
 import { MessageContentType, ReactionType, Sex } from "../../enums/social.enum";
-import { CommentMedia } from "./media.domain";
+import { AvatarMedia, CommentMedia } from "./media.domain";
 import { Account } from "./account.domain";
 import { generateDisplayName } from "../../utils";
 import { Follow } from "./follow.domain";
@@ -10,11 +10,19 @@ import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Comment } from "./comment.domain";
 import { Conversation, Message, MessageContent } from "./conversation.domain";
 
+export class Topic extends Audit {
+  title: string;
+
+  constructor(topic: Partial<Topic>) {
+    super(topic);
+    this.title = topic?.title;
+  }
+}
 
 export class User extends Audit {
-  id: string
+  id: string;
 
-  avatar?: CommentMedia;
+  avatar?: AvatarMedia;
 
   displayName?: string;
 
@@ -30,67 +38,82 @@ export class User extends Audit {
 
   sex?: Sex;
 
-  nFollowers?: number
+  nFollowers?: number;
 
-  nFollowees?: number
+  nFollowees?: number;
 
-  nPosts?: number
+  nPosts?: number;
 
-  account?: Account
+  account?: Account;
+
+  bio?: string;
+
+  interestedTopics: Topic[];
 
   constructor(user: Partial<User>) {
-    super(user)
-    this.account = user?.account
-    this.displayName = user?.displayName ?? generateDisplayName()
-    this.birthDate = user?.birthDate
-    this.avatar = user?.avatar
-    this.height = user?.height
-    this.weight = user?.weight
-    this.firstName = user?.firstName
-    this.lastName = user?.lastName
-    this.sex = user?.sex
-    this.nPosts = user?.nPosts
-    this.nFollowees = user?.nFollowees
-    this.nFollowers = user?.nFollowers
+    super(user);
+    this.account = user?.account;
+    this.displayName = user?.displayName ?? generateDisplayName();
+    this.birthDate = user?.birthDate;
+    this.avatar = user?.avatar;
+    this.height = user?.height;
+    this.weight = user?.weight;
+    this.firstName = user?.firstName;
+    this.lastName = user?.lastName;
+    this.sex = user?.sex;
+    this.nPosts = user?.nPosts;
+    this.nFollowees = user?.nFollowees;
+    this.nFollowers = user?.nFollowers;
+    this.bio = user?.bio;
+    this.interestedTopics = user?.interestedTopics;
   }
 
   follow(followee: User): Follow {
     return new Follow({
       follower: this,
-      followee
-    })
+      followee,
+    });
   }
 
   react(target: IInteractable, type: ReactionType): Reaction {
     return new Reaction({
       reactor: this,
       target: target,
-      type
-    })
+      type,
+    });
   }
 
   savePost(target: Post): SavedPost {
     return new SavedPost({
       saver: this,
-      post: target
-    })
+      post: target,
+    });
   }
 
-  comment(target: IInteractable, content: string, medias?: CommentMedia[], replyFor?: Comment): Comment {
+  comment(
+    target: IInteractable,
+    content: string,
+    medias?: CommentMedia[],
+    replyFor?: Comment
+  ): Comment {
     return new Comment({
       target: target,
       parent: replyFor,
       content,
       medias,
-      user: this
-    })
+      user: this,
+    });
   }
 
-  inbox(conv: Conversation, content: string, contentType: MessageContentType): Message {
+  inbox(
+    conv: Conversation,
+    content: string,
+    contentType: MessageContentType
+  ): Message {
     return new Message({
       to: conv,
       sender: this,
-      message: new MessageContent(content, contentType)
-    })
+      message: new MessageContent(content, contentType),
+    });
   }
 }

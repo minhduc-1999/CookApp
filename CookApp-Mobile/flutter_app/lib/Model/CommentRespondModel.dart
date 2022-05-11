@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'NewFeedRespondModel.dart';
+import 'PostDetailRespondModel.dart';
 CommentRespondModel commentRespondModel(String str) =>
     CommentRespondModel.fromJson(json.decode(str));
 class CommentRespondModel {

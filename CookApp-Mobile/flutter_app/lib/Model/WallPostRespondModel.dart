@@ -25,20 +25,20 @@ class WallPostRespondModel {
 }
 
 class Meta {
-  bool ok;
   List<String> messages;
+  bool ok;
 
-  Meta({this.ok, this.messages});
+  Meta({this.messages, this.ok});
 
   Meta.fromJson(Map<String, dynamic> json) {
-    ok = json['ok'];
     messages = json['messages'].cast<String>();
+    ok = json['ok'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['ok'] = this.ok;
     data['messages'] = this.messages;
+    data['ok'] = this.ok;
     return data;
   }
 }
@@ -51,7 +51,7 @@ class Data {
 
   Data.fromJson(Map<String, dynamic> json) {
     if (json['posts'] != null) {
-      posts = new List<Posts>();
+      posts = <Posts>[];
       json['posts'].forEach((v) {
         posts.add(new Posts.fromJson(v));
       });
@@ -74,63 +74,87 @@ class Data {
 }
 
 class Posts {
-  int updatedAt;
-  int createdAt;
   String id;
+  int createdAt;
   String content;
-  List<String> images;
-  List<String> videos;
+  List<Medias> medias;
+  String kind;
 
-  Posts(
-      {this.updatedAt,
-        this.createdAt,
-        this.id,
-        this.content,
-        this.images,
-        this.videos});
+  Posts({this.id, this.createdAt, this.content, this.medias, this.kind});
 
   Posts.fromJson(Map<String, dynamic> json) {
-    updatedAt = json['updatedAt'];
-    createdAt = json['createdAt'];
     id = json['id'];
+    createdAt = json['createdAt'];
     content = json['content'];
-    images = json['images'].cast<String>();
-    videos = json['videos'].cast<String>();
+    if (json['medias'] != null) {
+      medias = <Medias>[];
+      json['medias'].forEach((v) {
+        medias.add(new Medias.fromJson(v));
+      });
+    }
+    kind = json['kind'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['updatedAt'] = this.updatedAt;
-    data['createdAt'] = this.createdAt;
     data['id'] = this.id;
+    data['createdAt'] = this.createdAt;
     data['content'] = this.content;
-    data['images'] = this.images;
-    data['videos'] = this.videos;
+    if (this.medias != null) {
+      data['medias'] = this.medias.map((v) => v.toJson()).toList();
+    }
+    data['kind'] = this.kind;
+    return data;
+  }
+}
+
+class Medias {
+  String id;
+  String url;
+  String type;
+  String reaction;
+
+  Medias({this.id, this.url, this.type, this.reaction});
+
+  Medias.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    url = json['url'];
+    type = json['type'];
+    reaction = json['reaction'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['url'] = this.url;
+    data['type'] = this.type;
+    data['reaction'] = this.reaction;
     return data;
   }
 }
 
 class Metadata {
+  int totalPage;
   int page;
   int pageSize;
-  int totalPage;
   int totalCount;
 
-  Metadata({this.page, this.pageSize, this.totalPage, this.totalCount});
+  Metadata({this.totalPage, this.page, this.pageSize, this.totalCount});
 
   Metadata.fromJson(Map<String, dynamic> json) {
+    totalPage = json['totalPage'];
     page = json['page'];
     pageSize = json['pageSize'];
-    totalPage = json['totalPage'];
     totalCount = json['totalCount'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['totalPage'] = this.totalPage;
     data['page'] = this.page;
     data['pageSize'] = this.pageSize;
-    data['totalPage'] = this.totalPage;
     data['totalCount'] = this.totalCount;
     return data;
   }
 }
+

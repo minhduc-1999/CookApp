@@ -5,7 +5,9 @@ import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
 import 'package:tastify/CommentScreen/CommentActivity.dart';
 import 'package:tastify/EditPostScreen/EditPostActivity.dart';
+import 'package:tastify/FoodScreen/FoodInstructionWidget.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
+import 'package:tastify/Model/PostDetailRespondModel.dart';
 import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import '../MultiImagesDetailScreen/MultiImagesDetailActivity.dart';
@@ -31,7 +33,13 @@ class Post extends StatefulWidget {
       this.dateTime,
       this.isLike,
       this.saved,
-      this.reloadFunction});
+        this.foodRefId,
+        this.totalTime,
+        this.foodImage,
+        this.servings,
+        this.foodName,
+        this.foodDescription
+      });
 
   factory Post.fromJSON(Map data) {
     return Post(
@@ -73,7 +81,12 @@ class Post extends StatefulWidget {
   final DateTime dateTime;
   final bool isLike;
   final bool saved;
-  final Function reloadFunction;
+  final String foodRefId;
+  final String foodImage;
+  final int totalTime;
+  final int servings;
+  final String foodName;
+  final String foodDescription;
   _Post createState() => _Post(
       id: this.id,
       userId: this.userId,
@@ -92,9 +105,9 @@ class Post extends StatefulWidget {
 class _Post extends State<Post> {
   final String id;
   final String userId;
-  final String content;
+  String content;
   final String location;
-  final List<Medias> medias;
+  List<Medias> medias;
   final String displayName;
   final String avatar;
   final DateTime dateTime;
@@ -117,8 +130,13 @@ class _Post extends State<Post> {
         numOfReaction = data.data.numOfReaction;
         liked = data.data.reaction != null;
       });
-
-
+  }
+  FutureOr _updatePost(dynamic value) async {
+    var data = await APIService.getPostDetail(id);
+    setState(() {
+      medias = data.data.medias;
+      content = data.data.content;
+    });
   }
   _Post(
       {this.id,
@@ -133,7 +151,60 @@ class _Post extends State<Post> {
       this.dateTime,
       this.liked,
       this.saved});
+  Widget _buildFoodRef() {
+    final Size size = MediaQuery.of(context).size;
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => FoodInstructionWidget(id: widget.foodRefId,name: widget.foodName,)),
+        );
+      },
+      child: Container(
+        margin: EdgeInsets.all(8),
+        decoration: BoxDecoration(border: Border.all(color: appPrimaryColor)),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: EdgeInsets.all(8),
+              decoration: BoxDecoration(shape: BoxShape.circle),
+              child: Image.network(
+                widget.foodImage,
+                fit: BoxFit.cover,
+                width: size.width * 0.2,
+                height: size.height * 0.1,
+              ),
+            ),
+            Flexible(
+              child: Container(
+                margin: EdgeInsets.only(top: 8, right: 8),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.foodName,
+                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      widget.foodDescription,
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                      softWrap: false,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
 
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
   GestureDetector buildLikeIcon() {
     Color color;
     IconData icon;
@@ -353,7 +424,7 @@ class _Post extends State<Post> {
                                       CurveTween(curve: curve));
 
                                   return FadeTransition(opacity: animation,child: child,);
-                                })).then(widget.reloadFunction);
+                                })).then(_updatePost);
                       },
                       icon: Icon(Icons.edit_outlined),
                       color: Colors.black.withOpacity(0.7),
@@ -379,6 +450,7 @@ class _Post extends State<Post> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         buildPostHeader(),
+        widget.foodRefId != "" ? _buildFoodRef() : Container(),
         buildLikeableImage(),
         Row(
           mainAxisAlignment: MainAxisAlignment.start,
@@ -409,9 +481,14 @@ class _Post extends State<Post> {
                 child: Container(
               margin: EdgeInsets.only(right: 15),
               alignment: Alignment.centerRight,
-              child: Icon(
-                FontAwesomeIcons.solidSave,
-                color: Colors.black,
+              child: GestureDetector(
+                onTap: (){
+                  savePost();
+                },
+                child: Icon(
+                  FontAwesomeIcons.solidSave,
+                  color: saved ? Colors.black : Colors.grey,
+                ),
               ),
             ))
           ],
@@ -506,6 +583,18 @@ class _Post extends State<Post> {
             builder: (context) => ProfileActivity(
                   userId: userId,
                 )));
+  }
+
+  void savePost() async {
+      if(saved){
+        await APIService.deleteSavedPost(this.id);
+
+      }else{
+        await APIService.savePost(this.id);
+      }
+      setState(() {
+        saved = !saved;
+      });
   }
 }
 

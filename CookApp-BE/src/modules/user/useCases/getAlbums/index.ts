@@ -7,7 +7,7 @@ import { IUserService } from "modules/auth/services/user.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IAlbumRepository } from "modules/user/interfaces/repositories/album.interface";
 import { GetAlbumsResponse } from "./getAlbumResponse";
-import { GetAlbumsRequest } from "./getWallPostsRequest";
+import { GetAlbumsRequest } from "./getAlbumsRequest";
 
 export class GetAlbumsQuery extends BaseQuery {
   req: GetAlbumsRequest

@@ -1,6 +1,21 @@
-import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Patch,
+  Post as PostHttp,
+  Query,
+} from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
-import { ApiBearerAuth, ApiConflictResponse, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
+import {
+  ApiBearerAuth,
+  ApiConflictResponse,
+  ApiNotFoundResponse,
+  ApiTags,
+} from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
@@ -10,7 +25,11 @@ import {
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
-import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
+import {
+  HttpParamTransaction,
+  HttpRequestTransaction,
+} from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
@@ -28,20 +47,23 @@ import { GetSavedPostsQuery } from "modules/user/useCases/getSavedPosts";
 import { GetSavedPostsResponse } from "modules/user/useCases/getSavedPosts/getSavedPostsResponse";
 import { SavePostCommand } from "modules/user/useCases/savePost";
 import { SavePostRequest } from "modules/user/useCases/savePost/savePostRequest";
+import { ParseCreatePostRequestPipe } from "pipes/parsePostRequest.pipe";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("users/posts")
 @ApiTags("User/Post")
 @ApiBearerAuth()
+@RequirePermissions("manage_post")
 export class PostController {
-  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
+  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
   @PostHttp()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreatePostResponse, "Create post successfully")
   @HttpRequestTransaction()
+  @RequirePermissions("create_moment_post", "create_recommendation_post", "create_share_food_post")
   async createPost(
-    @Body() post: CreatePostRequest,
+    @Body(ParseCreatePostRequestPipe) post: CreatePostRequest,
     @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<Post>> {
@@ -54,6 +76,7 @@ export class PostController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(GetPostResponse, "Get post successfully")
   @ApiNotFoundResponse({ description: "Post not found" })
+  @RequirePermissions('read_post')
   async getPostById(
     @Param("postId", ParseUUIDPipe) postId: string,
     @HttpUserReq() user: User
@@ -68,6 +91,7 @@ export class PostController {
   @ApiCreatedResponseCustom(EditPostResponse, "Edit post successfully")
   @HttpRequestTransaction()
   @ApiNotFoundResponse({ description: "Post not found" })
+  @RequirePermissions("edit_post")
   async editPost(
     @Body() post: EditPostRequest,
     @HttpUserReq() user: User,
@@ -86,12 +110,13 @@ export class PostController {
   @ApiOKResponseCustomWithoutData("Save post successfully")
   @ApiConflictResponse({ description: "Post have been saved already" })
   @ApiNotFoundResponse({ description: "Post not found" })
+  @RequirePermissions("read_post")
   async savePost(
     @HttpUserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {
-    const savePostReq = new SavePostRequest(postID)
+    const savePostReq = new SavePostRequest(postID);
     const savePostCommand = new SavePostCommand(savePostReq, user, tx);
     await this._commandBus.execute(savePostCommand);
     return Result.ok(null, {
@@ -99,19 +124,19 @@ export class PostController {
     });
   }
 
-
   @Delete(":postId/save")
   @HttpRequestTransaction()
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Delete saved post successfully")
   @ApiConflictResponse({ description: "Post have not been saved yet" })
   @ApiNotFoundResponse({ description: "Post not found" })
+  @RequirePermissions("delete_post")
   async deleteSavedPost(
     @HttpUserReq() user: User,
     @Param("postId", ParseUUIDPipe) postID: string,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {
-    const dto = new DeleteSavedPostRequest(postID)
+    const dto = new DeleteSavedPostRequest(postID);
     const deleteSavedPostCommand = new DeleteSavedPostCommand(dto, user, tx);
     await this._commandBus.execute(deleteSavedPostCommand);
     return Result.ok(null, {
@@ -119,14 +144,13 @@ export class PostController {
     });
   }
 
-  @Get('save')
+  @Get("save")
   @ApiFailResponseCustom()
-  @ApiOKResponseCustom(
-    GetSavedPostsResponse,
-    "Get saved posts successfully"
-  )
+  @ApiOKResponseCustom(GetSavedPostsResponse, "Get saved posts successfully")
+  @RequirePermissions("read_post")
   async getSavedPosts(
-    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
+    query: PageOptionsDto,
     @HttpUserReq() user: User
   ): Promise<Result<GetSavedPostsResponse>> {
     const savedPostsQuery = new GetSavedPostsQuery(user, query);

@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable, InternalServerErrorException, Logger } from "@nestjs/common";
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  InternalServerErrorException,
+  Logger,
+} from "@nestjs/common";
 import * as bcrypt from "bcrypt";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { isEmail } from "class-validator";
@@ -8,8 +14,13 @@ import { LoginResponse } from "../useCases/login/loginResponse";
 import { User } from "domains/social/user.domain";
 import { JwtAuthTokenPayload } from "base/jwtPayload";
 import { ConfigService } from "nestjs-config";
-import { applicationDefault, cert, getApps, initializeApp } from "firebase-admin/app";
-import { Auth, getAuth } from 'firebase-admin/auth'
+import {
+  applicationDefault,
+  cert,
+  getApps,
+  initializeApp,
+} from "firebase-admin/app";
+import { Auth, getAuth } from "firebase-admin/auth";
 import { IUserRepository } from "../interfaces/repositories/user.interface";
 
 export interface IAuthentication {
@@ -18,8 +29,8 @@ export interface IAuthentication {
 }
 @Injectable()
 class AuthenticationService implements IAuthentication {
-  private _auth: Auth
-  private _logger: Logger = new Logger(AuthenticationService.name)
+  private _auth: Auth;
+  private _logger: Logger = new Logger(AuthenticationService.name);
   constructor(
     @Inject("IUserRepository") private _userRepo: IUserRepository,
     private jwtService: JwtService,
@@ -36,12 +47,12 @@ class AuthenticationService implements IAuthentication {
           : applicationDefault(),
       });
     }
-    this._auth = getAuth()
-
+    this._auth = getAuth();
   }
   async login(user: User): Promise<LoginResponse> {
     const payload: JwtAuthTokenPayload = { sub: user.id };
-    return this._auth.createCustomToken(user.id)
+    return this._auth
+      .createCustomToken(user.id)
       .then((token) => {
         return {
           loginToken: token,
@@ -49,11 +60,15 @@ class AuthenticationService implements IAuthentication {
           userId: user.id,
           emailVerified: user.account.emailVerified,
           email: user.account.email,
+          role: user.account.role.sign,
         };
-      }).catch(error => {
-        this._logger.error(error);
-        throw new InternalServerErrorException(ResponseDTO.fail("Error when creating login token"))
       })
+      .catch((error) => {
+        this._logger.error(error);
+        throw new InternalServerErrorException(
+          ResponseDTO.fail("Error when creating login token")
+        );
+      });
   }
 
   private async verifyPassword(
@@ -75,10 +90,7 @@ class AuthenticationService implements IAuthentication {
     return true;
   }
 
-  async getAuthUser(
-    usernameOrEmail: string,
-    password: string
-  ): Promise<User> {
+  async getAuthUser(usernameOrEmail: string, password: string): Promise<User> {
     let user: User;
     if (isEmail(usernameOrEmail))
       user = await this._userRepo.getUserByEmail(usernameOrEmail);

@@ -11,6 +11,7 @@ import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetFeedPostsQuery } from "modules/user/useCases/getFeedPosts";
@@ -20,6 +21,7 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("users/feeds")
 @ApiTags("User/Feed")
 @ApiBearerAuth()
+@RequirePermissions("manage_post")
 export class FeedController {
   constructor(private _queryBus: QueryBus) {}
 
@@ -29,6 +31,7 @@ export class FeedController {
     GetFeedPostsResponse,
     "Get feed's posts successfully"
   )
+  @RequirePermissions("read_post")
   async getFeedPosts(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
     @HttpUserReq() user: User

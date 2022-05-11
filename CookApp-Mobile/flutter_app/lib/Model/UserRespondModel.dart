@@ -45,41 +45,29 @@ class Meta {
 }
 
 class Data {
-  String id;
-  int createdAt;
-  int updatedAt;
-  String avatar;
   Profile profile;
   String displayName;
+  Avatar avatar;
 
-  Data(
-      {this.id,
-        this.createdAt,
-        this.updatedAt,
-        this.avatar,
-        this.profile,
-        this.displayName});
+  Data({this.profile, this.displayName, this.avatar});
 
   Data.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    createdAt = json['createdAt'];
-    updatedAt = json['updatedAt'];
-    avatar = json['avatar'] != null ? json['avatar'] : null;
     profile =
     json['profile'] != null ? new Profile.fromJson(json['profile']) : null;
-    displayName = json['displayName'] != null ? json['displayName'] : null;
+    displayName = json['displayName'];
+    avatar =
+    json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    data['createdAt'] = this.createdAt;
-    data['updatedAt'] = this.updatedAt;
-    data['avatar'] = this.avatar;
     if (this.profile != null) {
       data['profile'] = this.profile.toJson();
     }
     data['displayName'] = this.displayName;
+    if (this.avatar != null) {
+      data['avatar'] = this.avatar.toJson();
+    }
     return data;
   }
 }
@@ -120,3 +108,29 @@ class Profile {
     return data;
   }
 }
+
+class Avatar {
+  String id;
+  String url;
+  String type;
+  String reaction;
+
+  Avatar({this.id, this.url, this.type, this.reaction});
+
+  Avatar.fromJson(Map<String, dynamic> json) {
+    id = json['id'] != null ? json['id'] : null;
+    url = json['url'];
+    type = json['type'];
+    reaction = json['reaction'] != null ? json['url'] : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['url'] = this.url;
+    data['type'] = this.type;
+    data['reaction'] = this.reaction;
+    return data;
+  }
+}
+

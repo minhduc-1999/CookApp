@@ -26,7 +26,7 @@ export class GetAlbumDetailQueryHandler
     @Inject("IStorageService")
     private _storageService: IStorageService,
     @Inject("IReactionRepository")
-    private _reacRepo: IReactionRepository,
+    private _reactionRepo: IReactionRepository,
   ) { }
   async execute(query: GetAlbumDetailQuery): Promise<GetAlbumDetailResponse> {
     const { albumId, user } = query
@@ -39,10 +39,12 @@ export class GetAlbumDetailQueryHandler
       [album.owner.avatar] = await this._storageService.getDownloadUrls([album.owner.avatar])
     }
 
-    const result = new GetAlbumDetailResponse(album)
+    const albumReaction = await this._reactionRepo.findById(user.id, albumId)
+
+    const result = new GetAlbumDetailResponse(album, albumReaction)
 
     const task = album.medias?.map(async media => {
-      const mediaReaction = await this._reacRepo.findById(user.id, media.id)
+      const mediaReaction = await this._reactionRepo.findById(user.id, media.id)
       return new MediaResponse(media, mediaReaction)
     })
 

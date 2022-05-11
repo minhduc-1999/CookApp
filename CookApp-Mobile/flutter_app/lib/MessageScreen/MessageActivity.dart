@@ -1,5 +1,10 @@
+import 'dart:async';
+
 import 'package:bubble/bubble.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_client_sse/flutter_client_sse.dart';
+import 'package:flutter_observer/Observable.dart';
+import 'package:flutter_observer/Observer.dart';
 import 'package:speech_to_text/speech_recognition_result.dart';
 import 'package:speech_to_text/speech_to_text.dart';
 import 'package:tastify/Model/Message.dart';
@@ -12,91 +17,110 @@ import 'package:tastify/main.dart';
 import '../config.dart';
 import '../constants.dart';
 class MessageActivity extends StatefulWidget {
+  final String conversationId;
+  final String cover;
+  final String displayName;
+  const MessageActivity({Key key, this.conversationId,this.cover,this.displayName}) : super(key: key);
   @override
   _MessageActivityState createState() => _MessageActivityState();
 }
 
-class _MessageActivityState extends State<MessageActivity> {
+class _MessageActivityState extends State<MessageActivity> with Observer {
   UserWallRespondModel user;
-  SpeechToText _speechToText = SpeechToText();
   List<Message> messages = [];
-  List<String> suggestions = [];
-  bool _speechEnabled = false;
-  MessageRespondModel preRespond = MessageRespondModel(response: "temp", context: null);
+  bool circular = true;
   final messageInsert = TextEditingController();
   @override
   void initState() {
     // TODO: implement initState
+    Observable.instance.addObserver(this);
     super.initState();
-    _initSpeechToText();
     fetchData();
   }
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    Observable.instance.removeObserver(this);
+    super.dispose();
+  }
+  @override
+  update(Observable observable, String notifyName, Map map) async{
+    // TODO: implement update
+    if(notifyName == "new_message"){
+      if(map["to"] == widget.conversationId){
+        Message mess = Message(
+            content: map["content"],
+            avatar: map["sender"]["avatar"]["url"],
+            createdAt: DateTime.now(),
+            isUser: false);
+        //await APIService.seen(map["to"],map["id"]);
+        setState(() {
+            messages.insert(0, mess);
+        });
+
+      }
+    }
+
+  }
   void fetchData() async {
-    var response = await APIService.getUserWall(currentUserId);
+    var dataUser = await APIService.getUserWall(currentUserId);
+    var dataMessages = await APIService.getMessages(widget.conversationId);
+    List<Message> tempMessages = [];
+    for(var i in dataMessages.data.messages){
+      if(i.sender.id != currentUserId){
+        tempMessages.add(Message(content: i.content,avatar: i.sender.avatar.url,createdAt: DateTime.fromMillisecondsSinceEpoch(i.createdAt),isUser: false));
+      } else {
+        tempMessages.add(Message(content: i.content,avatar: i.sender.avatar.url,createdAt: DateTime.fromMillisecondsSinceEpoch(i.createdAt),isUser: true));
+      }
+    }
     setState(() {
-      user = response;
-    });
-  }
-  void _initSpeechToText() async {
-    _speechEnabled = await _speechToText.initialize();
-
-    setState(() {});
-  }
-  void _startListening() async {
-    var locales = await _speechToText.locales();
-
-    // get locale of vietnam
-    var selectedLocale = locales[121];
-
-    await _speechToText.listen(
-        onResult: _onSpeechResult, localeId: selectedLocale.localeId);
-    setState(() {});
-  }
-
-  /// Manually stop the active speech recognition session
-  /// Note that there are also timeouts that each platform enforces
-  /// and the SpeechToText plugin supports setting timeouts on the
-  /// listen method.
-  void _stopListening() async {
-    await _speechToText.stop();
-    setState(() {});
-  }
-
-  /// This is the callback that the SpeechToText plugin calls when
-  /// the platform returns recognized words.
-  void _onSpeechResult(SpeechRecognitionResult result) {
-    setState(() {
-      messageInsert.text = result.recognizedWords;
+      user = dataUser;
+      messages = tempMessages;
+      circular = false;
     });
   }
   @override
   Widget build(BuildContext context) {
-
+    final Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        brightness: Brightness.dark,
+
         automaticallyImplyLeading: false,
         flexibleSpace: Container(
           decoration: BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.centerLeft,
               end: Alignment.centerRight,
-              colors: <Color>[appPrimaryColor, appPrimaryColor],
+              colors: <Color>[Theme.of(context).scaffoldBackgroundColor, Theme.of(context).scaffoldBackgroundColor],
             ),
           ),
         ),
-        title: Text(Config.chatbot,
-            style: TextStyle(
-            fontFamily: 'Billabong',
-            fontSize: 32,
-            fontStyle: FontStyle.italic)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back,color: Colors.black,),
+          onPressed: () {
+            Navigator.of(context).pop();
+          },
+        ),
+        title:  Row(
+          children: [
+            CircleAvatar(
+              radius: 15,
+              backgroundColor: Colors.grey,
+              backgroundImage: NetworkImage(widget.cover),
+            ),
+            SizedBox(
+              width: size.width * 0.04,
+            ),
+            Text(widget.displayName, style: TextStyle(fontSize: 16, color: Colors.black),)
+          ],
+        ),
       ),
 
       body: Container(
         child: Column(
           children: <Widget>[
             Flexible(
-                child: ListView.builder(
+                child: circular ? Center(child: CircularProgressIndicator()) :  ListView.builder(
                     reverse: true,
                     itemCount: messages.length,
                     itemBuilder: (context, index) => chat(messages[index]))),
@@ -104,29 +128,10 @@ class _MessageActivityState extends State<MessageActivity> {
               height: 5.0,
               color: appPrimaryColor,
             ),
-            suggestions.length > 0 ? ConstrainedBox (
-                constraints: BoxConstraints(maxHeight: 50),
-                child: ListView.builder(
-                    shrinkWrap: true,
-                    scrollDirection: Axis.horizontal,
-                    itemCount: suggestions.length,
-                    itemBuilder: (context, index) => Center(child: suggestion(suggestions[index])))
-            )
-                : Container(),
 
             Container(
               child: ListTile(
-                leading: IconButton(
-                    icon: Icon(
-                      _speechToText.isNotListening ? Icons.mic_off : Icons.mic,
-                      color: appPrimaryColor,
-                      size: 35,
-                    ),
-                    onPressed: () {
-                      _speechToText.isNotListening
-                          ? _startListening()
-                          : _stopListening();
-                    }),
+
                 title: Container(
                   height: 40,
                   decoration: BoxDecoration(
@@ -160,33 +165,21 @@ class _MessageActivityState extends State<MessageActivity> {
                         print("empty message");
                       } else {
                         Message mess = Message(
-                            response: messageInsert.text,
-                            context: null,
-                            isBot: false);
+                            content: messageInsert.text,
+                            avatar: "",
+                            createdAt: DateTime.now(),
+                            isUser: true);
+                        messageInsert.clear();
+                        await APIService.sendMessage(MessageRequestModel(
+                            to: widget.conversationId,
+                            message: mess.content,
+                            type: "TEXT"));
                         setState(() {
                           messages.insert(0, mess);
                         });
-                        String saveMess = messageInsert.text;
-                        messageInsert.clear();
-                        MessageRespondModel respond =
-                        await APIService.sendMessage(MessageRequestModel(
-                            post: saveMess,
-                            context: preRespond.context,
-                            isLocal: true));
-                        Message res = Message(
-                            response: respond.response,
-                            context: respond.context,
-                            isBot: true);
-                        setState(() {
-                          messages.insert(0, res);
-                          preRespond = respond;
-                          suggestions = respond.context.suggestionList;
-                        });
+
                       }
-                      FocusScopeNode currentFocus = FocusScope.of(context);
-                      if (!currentFocus.hasPrimaryFocus) {
-                        currentFocus.unfocus();
-                      }
+
                     }),
               ),
             ),
@@ -247,27 +240,28 @@ class _MessageActivityState extends State<MessageActivity> {
     return Container(
       padding: EdgeInsets.only(left: 20, right: 20),
       child: Row(
-        mainAxisAlignment: message.isBot == false
+        mainAxisAlignment: message.isUser == true
             ? MainAxisAlignment.end
             : MainAxisAlignment.start,
         children: [
-          message.isBot == true
+          message.isUser == false
               ? Container(
             height: 35,
             width: 35,
-            child: CircleAvatar(
-              radius: 50.0,
-              backgroundImage: AssetImage("assets/images/robot.png"),
+            child:   CircleAvatar(
+              radius: 15,
+              backgroundColor: Colors.grey,
+              backgroundImage: NetworkImage(message.avatar),
             ),
           )
               : Container(),
           Padding(
-            padding: EdgeInsets.all(10.0),
+            padding: EdgeInsets.only(left: 10.0, right: 10, top: 6,bottom: 6),
             child: Bubble(
                 radius: Radius.circular(15.0),
-                color: message.isBot == false
+                color: message.isUser == true
                     ? appPrimaryColor
-                    :Color.fromRGBO(252, 186, 3, 1),
+                    : backGroundFoodScreenColor,
                 elevation: 0.0,
                 child: Padding(
                   padding: EdgeInsets.all(2.0),
@@ -281,41 +275,43 @@ class _MessageActivityState extends State<MessageActivity> {
                           child: Container(
                             constraints: BoxConstraints(maxWidth: 200),
                             child: Text(
-                              message.response,
+                              message.content,
                               style: TextStyle(
-                                  color: Colors.white),
+                                  color: message.isUser ? Colors.white : Colors.black),
                             ),
                           ))
                     ],
                   ),
                 )),
           ),
-          message.isBot == false
+          /*message.isUser == true
               ? Container(
             height: 35,
             width: 35,
-            child: (user.data.user.avatar != null)
+            child: (user.data.avatar.url != null)
                 ? CircleAvatar(
               radius: size.width * 0.11,
               backgroundColor: Colors.grey,
               backgroundImage:
-              NetworkImage(user.data.user.avatar),
+              NetworkImage(user.data.avatar.url),
             )
                 : CircleAvatar(
-              /*child: Image.asset("assets/images/default_avatar.png",
+              *//*child: Image.asset("assets/images/default_avatar.png",
                                     width: size.width * 0.20,
                                     height: size.width * 0.20,
-                                    fit: BoxFit.fill),*/
+                                    fit: BoxFit.fill),*//*
                 radius: size.width * 0.11,
                 backgroundColor: Colors.grey,
                 backgroundImage: AssetImage(
                     'assets/images/default_avatar.png')),
           )
-              : Container(),
+              : Container(),*/
         ],
       ),
     );
   }
+
+
 
 
 }

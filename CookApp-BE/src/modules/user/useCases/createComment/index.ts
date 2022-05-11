@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, InternalServerErrorException, NotFoundException } from "@nestjs/common";
+import {
+  BadRequestException,
+  Inject,
+  InternalServerErrorException,
+  NotFoundException,
+} from "@nestjs/common";
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
@@ -17,14 +22,11 @@ import { CommentMedia, Image } from "domains/social/media.domain";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IFoodRecipeService } from "modules/core/services/recipeStep.service";
 import { IAlbumMediaRepository } from "modules/user/interfaces/repositories/albumMedia.interface";
+import { IAlbumService } from "modules/user/services/album.service";
 
 export class CreateCommentCommand extends BaseCommand {
   commentReq: CreateCommentRequest;
-  constructor(
-    user: User,
-    request: CreateCommentRequest,
-    tx: ITransaction
-  ) {
+  constructor(user: User, request: CreateCommentRequest, tx: ITransaction) {
     super(tx, user);
     this.commentReq = request;
   }
@@ -43,23 +45,26 @@ export class CreateCommentCommandHandler
     @Inject("IStorageService")
     private _storageService: IStorageService,
     @Inject("IFoodRecipeService")
-    private _recipeService : IFoodRecipeService,
+    private _recipeService: IFoodRecipeService,
     @Inject("IAlbumMediaRepository")
     private _albumMediaRepo: IAlbumMediaRepository,
     @Inject("IPostService")
-    private _postService: IPostService
-  ) { }
+    private _postService: IPostService,
+    @Inject("IAlbumService")
+    private _albumService: IAlbumService
+  ) {}
   async execute(command: CreateCommentCommand): Promise<CreateCommentResponse> {
     const { commentReq, user, tx } = command;
 
     if (commentReq.images?.length > 0) {
       commentReq.images = await this._storageService.makePublic(
         commentReq.images,
-        MediaType.IMAGE
+        MediaType.IMAGE,
+        "comment"
       );
     }
 
-    let target: IInteractable
+    let target: IInteractable;
 
     switch (commentReq.targetType) {
       case InteractiveTargetType.POST:
@@ -67,38 +72,46 @@ export class CreateCommentCommandHandler
         this._eventBus.publish(new CommentPostEvent(target as Post, user));
         break;
       case InteractiveTargetType.POST_MEDIA:
-        target = await this._postMediaRepo.getMedia(commentReq.targetId)
+        target = await this._postMediaRepo.getMedia(commentReq.targetId);
         if (!target) {
-          throw new NotFoundException(
-            ResponseDTO.fail("Media not found")
-          );
+          throw new NotFoundException(ResponseDTO.fail("Media not found"));
         }
         break;
       case InteractiveTargetType.RECIPE_STEP:
-        target = await this._recipeService.getStepById(commentReq.targetId)
+        target = await this._recipeService.getStepById(commentReq.targetId);
         break;
       case InteractiveTargetType.ALBUM_MEDIA:
-        target = await this._albumMediaRepo.getMedia(commentReq.targetId)
+        target = await this._albumMediaRepo.getMedia(commentReq.targetId);
         if (!target) {
-          throw new NotFoundException(
-            ResponseDTO.fail("Media not found")
-          );
+          throw new NotFoundException(ResponseDTO.fail("Media not found"));
         }
         break;
+      case InteractiveTargetType.ALBUM:
+        target = await this._albumService.getAlbumDetail(commentReq.targetId);
+        break;
       default:
-        throw new BadRequestException(ResponseDTO.fail("Target type not valid"))
+        throw new BadRequestException(
+          ResponseDTO.fail("Target type not valid")
+        );
     }
 
-    let medias: CommentMedia[]
+    let medias: CommentMedia[];
     if (commentReq.images?.length > 0) {
-      medias = commentReq.images?.map(image => new Image({ key: image }))
+      medias = commentReq.images?.map((image) => new Image({ key: image }));
     }
 
-    const parentComment = await this._commentService.getCommentBy(commentReq.replyFor)
-    let comment = user.comment(target, commentReq.content, medias, parentComment)
-    let createdComment = await this._commentService.createComment(comment, tx)
+    const parentComment = await this._commentService.getCommentBy(
+      commentReq.replyFor
+    );
+    let comment = user.comment(
+      target,
+      commentReq.content,
+      medias,
+      parentComment
+    );
+    let createdComment = await this._commentService.createComment(comment, tx);
     if (!createdComment) {
-      throw new InternalServerErrorException()
+      throw new InternalServerErrorException();
     }
 
     return new CreateCommentResponse(createdComment);

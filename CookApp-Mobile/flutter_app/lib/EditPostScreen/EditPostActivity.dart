@@ -7,6 +7,7 @@ import 'package:image_picker/image_picker.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/Model/EditPostRequestModel.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
+import 'package:tastify/Model/PostDetailRespondModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Services/APIService.dart';
 
@@ -302,7 +303,7 @@ class _EditPostActivityState extends State<EditPostActivity> {
                 onTap: () {
                   setState(() {
                     medias.remove(image);
-                    deleteImages.add(image.url);
+                    deleteImages.add(image.id);
                   });
                 },
                 child: Container(

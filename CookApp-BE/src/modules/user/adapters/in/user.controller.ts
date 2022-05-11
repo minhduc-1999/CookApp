@@ -9,6 +9,7 @@ import {
   ApiOKResponseCustom,
   ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
@@ -23,6 +24,7 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("users")
 @ApiTags("Users")
 @ApiBearerAuth()
+@RequirePermissions("manage_user")
 export class UserController {
   constructor(
     private _queryBus: QueryBus,
@@ -31,6 +33,7 @@ export class UserController {
   @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetUsersResponse, "Get users successfully")
+  @RequirePermissions("read_user")
   async findUsers(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>()) query: PageOptionsDto,
     @HttpUserReq() user: User
@@ -45,6 +48,7 @@ export class UserController {
   @Get("profile")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetProfileResponse, "Getting profile successfully")
+  @RequirePermissions("read_user")
   async getProfile(@HttpUserReq() user: User): Promise<Result<GetProfileResponse>> {
     const query = new GetProfileQuery(user);
     const result = await this._queryBus.execute(query);
@@ -56,6 +60,7 @@ export class UserController {
   @ApiConflictResponse()
   @ApiOKResponseCustomWithoutData("Updating profile successfully")
   @HttpRequestTransaction()
+  @RequirePermissions("read_user")
   async updateProfile(
     @HttpUserReq() user: User,
     @Body() body: UpdateProfileRequest,

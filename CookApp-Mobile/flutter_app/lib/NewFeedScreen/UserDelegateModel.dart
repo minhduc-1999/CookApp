@@ -75,26 +75,51 @@ class Data {
 
 class Users {
   String id;
-  String avatar;
+  Avatar avatar;
   String displayName;
 
   Users({this.id, this.avatar, this.displayName});
 
   Users.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    avatar = json['avatar'];
+    json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
     displayName = json['displayName'];
   }
 
   Map<String, dynamic> toJson() {
     final Map<String, dynamic> data = new Map<String, dynamic>();
     data['id'] = this.id;
-    data['avatar'] = this.avatar;
+    if (this.avatar != null) {
+      data['avatar'] = this.avatar.toJson();
+    }
     data['displayName'] = this.displayName;
     return data;
   }
 }
+class Avatar {
+  String id;
+  String url;
+  String type;
+  String reaction;
 
+  Avatar({this.id, this.url, this.type, this.reaction});
+
+  Avatar.fromJson(Map<String, dynamic> json) {
+    id = json['id'] != null ? json['id'] : null;
+    url = json['url'];
+    type = json['type'];
+    reaction = json['reaction'] != null ? json['reaction'] : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    data['url'] = this.url;
+    data['type'] = this.type;
+    data['reaction'] = this.reaction;
+    return data;
+  }
+}
 class Metadata {
   int page;
   int pageSize;

@@ -82,7 +82,7 @@ class SearchUserDelegate extends SearchDelegate<UserDelegateModel>{
                 ? CircleAvatar(
               radius: size.width * 0.06,
               backgroundImage:
-              NetworkImage(user.avatar),
+              NetworkImage(user.avatar.url),
             )
                 : Image.asset(
                 "assets/images/default_avatar.png",

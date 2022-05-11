@@ -8,13 +8,16 @@ import { IUserRepository } from '../interfaces/repositories/user.interface';
 import { Connection } from "typeorm"
 import { TypeOrmTransactionAdapter } from 'adapters/typeormTransaction.adapter';
 import { Account, ExternalProvider } from 'domains/social/account.domain';
+import { IRoleRepository } from '../adapters/out/repositories/role.repository';
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(
     @Inject("IUserRepository")
     private _userRepo: IUserRepository,
-    private _connection: Connection
+    private _connection: Connection,
+    @Inject("IRoleRepository")
+    private _roleRepo: IRoleRepository
   ) {
     super({
       clientID: AuthConfig.googleClientID,
@@ -31,13 +34,15 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ) {
     const { name, emails, photos, id, displayName } = profile
+    const userRole = await this._roleRepo.getRole("user")
     const account = new Account({
       email: emails[0].value,
       externalProvider: new ExternalProvider({
         externalID: id,
         type: ExternalProviderType.GOOGLE,
       }),
-      emailVerified: true
+      emailVerified: true,
+      role: userRole
     })
     const user: User = new User({
       avatar: photos[0].value,

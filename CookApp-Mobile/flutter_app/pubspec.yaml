@@ -58,6 +58,9 @@ dependencies:
   socket_io_client: ^2.0.0-beta.4-nullsafety.0
   web_socket_channel: ^2.1.0
   flutter_client_sse: ^1.0.0
+  flutter_observer: ^2.0.0
+  accordion: ^2.1.2
+  rating_bar_flutter: ^1.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

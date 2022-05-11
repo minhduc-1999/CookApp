@@ -6,6 +6,7 @@ import {
   ApiFailResponseCustom,
   ApiOKListResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetUploadPresignedLinkQuery } from "modules/share/useCases/getUploadPresignedLink";
@@ -25,6 +26,7 @@ export class StorageController {
     "items",
     "Get presigned links successfully"
   )
+  @RequirePermissions("get_signed_url")
   async getPresignedLinks(
     @Body() body: PreSignedLinkRequest,
     @HttpUserReq() user: User

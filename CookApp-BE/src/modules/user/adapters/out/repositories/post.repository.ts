@@ -11,19 +11,23 @@ import { Post } from "domains/social/post.domain";
 export class PostRepository extends BaseRepository implements IPostRepository {
   constructor(
     @InjectRepository(PostEntity)
-    private _postRepo: Repository<PostEntity>,
+    private _postRepo: Repository<PostEntity>
   ) {
-    super()
+    super();
   }
   async createPost(post: Post): Promise<Post> {
-    if (!post) return null
-    const queryRunner = this.tx.getRef() as QueryRunner
+    if (!post) return null;
+    const queryRunner = this.tx.getRef() as QueryRunner;
     if (queryRunner && !queryRunner.isReleased) {
-      const postInteraction = await queryRunner.manager.save<InteractionEntity>(new InteractionEntity(post))
-      const postEntity = await queryRunner.manager.save<PostEntity>(new PostEntity(post, postInteraction))
-      return postEntity?.toDomain()
+      const postInteraction = await queryRunner.manager.save<InteractionEntity>(
+        new InteractionEntity(post)
+      );
+      const postEntity = await queryRunner.manager.save<PostEntity>(
+        new PostEntity(post, postInteraction)
+      );
+      return postEntity?.toDomain();
     }
-    return null
+    return null;
   }
   async getPostById(postId: string): Promise<Post> {
     const postEntity = await this._postRepo
@@ -32,28 +36,44 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       .leftJoinAndSelect("post.author", "author")
       .leftJoinAndSelect("post.medias", "media")
       .leftJoinAndSelect("media.interaction", "mediaInter")
+      .leftJoinAndSelect("post.foodRef", "foodRef")
+      .leftJoinAndSelect("foodRef.medias", "foodRefPhoto")
       .where("post.id = :id", { id: postId })
-      .select(["post", "interaction", "author", "media", "mediaInter"])
-      .getOne()
-    return postEntity?.toDomain()
+      .select([
+        "post",
+        "interaction",
+        "author",
+        "media",
+        "mediaInter",
+        "foodRef",
+        "foodRefPhoto",
+      ])
+      .getOne();
+    return postEntity?.toDomain();
   }
   async getPostByIds(postIds: string[]): Promise<Post[]> {
     const postEntities = await this._postRepo.findByIds(postIds, {
-      relations: ["interaction", "author"]
-    })
-    return postEntities?.map(entity => entity.toDomain())
+      relations: ["interaction", "author"],
+    });
+    return postEntities?.map((entity) => entity.toDomain());
   }
   async updatePost(post: Post, data: Partial<Post>): Promise<void> {
-    const queryRunner = this.tx.getRef() as QueryRunner
+    const queryRunner = this.tx.getRef() as QueryRunner;
     if (queryRunner && !queryRunner.isReleased) {
-      const entity = new PostEntity(post)
-      const updateData = entity.update(data)
-      await queryRunner.manager.createQueryBuilder()
+      const entity = new PostEntity(post);
+      const updateData = entity.update(data);
+      await queryRunner.manager
+        .createQueryBuilder()
         .update(InteractionEntity)
         .set({ updatedAt: new Date() })
         .where("id = :id", { id: post.id })
-        .execute()
-      await queryRunner.manager.update<PostEntity>(PostEntity, entity, updateData)
+        .execute();
+
+      await queryRunner.manager.createQueryBuilder()
+      .update(PostEntity)
+      .set(updateData)
+      .where("id = :postId", { postId: post.id})
+      .execute()
     }
   }
 }

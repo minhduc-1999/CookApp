@@ -3,13 +3,9 @@ import _ = require("lodash");
 import { PreSignedLinkResponse } from "modules/share/useCases/getUploadPresignedLink/presignedLinkResponse";
 import { ConfigService } from "nestjs-config";
 import { Bucket } from "@google-cloud/storage";
-import {
-  addFilePrefix,
-  getMimeType,
-  getNameFromPath,
-} from "utils";
+import { addFilePrefix, getMimeType, getNameFromPath } from "utils";
 import { IStorageProvider } from "./provider.service";
-import { CommentMedia, Media } from "domains/social/media.domain";
+import { Media } from "domains/social/media.domain";
 import { MediaType } from "enums/social.enum";
 import { isNil } from "lodash";
 
@@ -20,13 +16,18 @@ export interface IStorageService {
     fileNames: string[],
     userId: string
   ): Promise<PreSignedLinkResponse[]>;
-  makePublic(objectNames: string[], mediaType: MediaType): Promise<string[]>;
-  getDownloadUrls(mediaArr: CommentMedia[]): Promise<CommentMedia[]>;
-  replaceFiles(
-    oldMediaArr: CommentMedia[],
-    newKeys: string[],
-    mediaType: MediaType
+  makePublic(
+    objectNames: string[],
+    mediaType: MediaType,
+    subPath:
+      | "post"
+      | "food"
+      | "recipe-step"
+      | "comment"
+      | "album"
+      | "avatar"
   ): Promise<string[]>;
+  getDownloadUrls(mediaArr: Media[]): Promise<Media[]>;
   deleteFiles(medias: Media[]): Promise<Media[]>;
 }
 
@@ -39,19 +40,28 @@ export type ObjectMetadata = {
 export class FireBaseService implements IStorageService {
   private logger: Logger = new Logger(FireBaseService.name);
 
-  private readonly storageTree = {
+  private readonly _storageTreeRoot = {
     image: "images/",
     video: "videos/",
     audio: "audios/",
     temp: "temp/",
   };
-  private bucket: Bucket
+
+  private readonly _subPath = {
+    post: "posts/",
+    food: "foods/covers/",
+    "recipe-step": "foods/step_photos/",
+    album: "albums/",
+    comment: "comments/",
+    avatar: "avatars/"
+  }
+  private bucket: Bucket;
 
   constructor(
     @Inject("IStorageProvider") private _provider: IStorageProvider,
     private _configService: ConfigService
   ) {
-    this.bucket = this._provider.getBucket()
+    this.bucket = this._provider.getBucket();
   }
   async deleteFiles(medias: Media[]): Promise<Media[]> {
     const deleteTasks: Promise<Media>[] = [];
@@ -61,12 +71,14 @@ export class FireBaseService implements IStorageService {
         file
           .delete({ ignoreNotFound: true })
           .then((res) => {
-            if (res[0].statusCode === 204) return media;
-            else return null
+            if (res[0].statusCode === 204) 
+              return media;
+            else 
+              return null;
           })
           .catch((err) => {
             this.logger.error(err);
-            return null
+            return null;
           })
       );
     }
@@ -77,99 +89,56 @@ export class FireBaseService implements IStorageService {
     });
   }
 
-  async replaceFiles(
-    oldMediaArr: CommentMedia[],
-    newObjects: string[],
-    mediaType: MediaType
-  ): Promise<string[]> {
-    let basePath: string;
-    switch (mediaType) {
-      case MediaType.IMAGE:
-        basePath = this.storageTree.image;
-        break;
-      case MediaType.VIDEO:
-        basePath = this.storageTree.video;
-        break;
-      case MediaType.AUDIO:
-        basePath = this.storageTree.audio;
-        break;
-      default:
-        break;
-    }
-    const moveTasks: Promise<string>[] = [];
-    // oldMediaArr.forEach(async (oldMedia) => {
-    //   if (!oldMedia) return;
-    //   const oldFile = this.bucket.file(oldMedia.key);
-    //   oldFile
-    //     .delete({ ignoreNotFound: true })
-    //     .catch((err) => this.logger.error(err));
-    // });
-    for (let newObj of newObjects) {
-      const newFile = this.bucket.file(newObj);
-      if ((await newFile.exists())[0]) {
-        moveTasks.push(
-          newFile
-            .move(basePath + getNameFromPath(newObj))
-            .then((movedFile) => {
-              movedFile[0].makePublic().catch((err: Error) => this.logger.error(err));
-              return movedFile[0].name;
-            })
-            .catch((err) => {
-              this.logger.error(err);
-              return "";
-            })
-        );
-      }
-    }
-    return Promise.all(moveTasks).then((objectNames) => {
-      return objectNames.filter((objName) => {
-        return objName !== "";
-      });
+  async getDownloadUrls(mediaArr: Media[]): Promise<Media[]> {
+    if (!mediaArr) return [];
+    return mediaArr.map((media) => {
+      if (!media.key) return null;
+      media.url = this._configService.get("storage.publicUrl") + media.key;
+      return media;
     });
-  }
-
-  async getDownloadUrls(mediaArr: CommentMedia[]): Promise<CommentMedia[]> {
-    if (!mediaArr) return []
-    return mediaArr.map(
-      (media) => {
-        if (!media.key) return null
-        media.url = this._configService.get("storage.publicUrl") + media.key
-        return media
-      }
-    );
   }
 
   async makePublic(
     objectKeys: string[],
-    mediaType: MediaType
+    mediaType: MediaType,
+    subPath:
+      | "post"
+      | "food"
+      | "recipe-step"
+      | "comment"
+      | "album"
+      | "avatar"
   ): Promise<string[]> {
-    if (!objectKeys || objectKeys.length === 0) return []
+    if (!objectKeys || objectKeys.length === 0) return [];
     const tasks = [];
-    const result: string[] = []
+    const result: string[] = [];
     for (const name of objectKeys) {
       const file = this.bucket.file(name);
-      const fileExited = (await file.exists())[0];
+      const [fileExited] = await file.exists();
       if (fileExited) {
         let basePath = "";
         switch (mediaType) {
           case MediaType.IMAGE:
-            basePath = this.storageTree.image;
+            basePath = this._storageTreeRoot.image;
             break;
           case MediaType.VIDEO:
-            basePath = this.storageTree.video;
+            basePath = this._storageTreeRoot.video;
             break;
           case MediaType.AUDIO:
-            basePath = this.storageTree.audio;
+            basePath = this._storageTreeRoot.audio;
             break;
           default:
             break;
         }
+        if (subPath) basePath += this._subPath[subPath]
         tasks.push(
           file
             .move(basePath + getNameFromPath(name))
             .then((movedFile) => {
-              movedFile[0].makePublic().catch((err: unknown) => this.logger.error(err));
-              result.push(movedFile[0].name)
+              movedFile[0]
+                .makePublic()
+                .catch((err: unknown) => this.logger.error(err));
+              result.push(movedFile[0].name);
             })
             .catch((err) => {
               this.logger.error(err);
@@ -178,9 +147,8 @@ export class FireBaseService implements IStorageService {
       }
     }
     return Promise.all(tasks).then(() => {
-      return result
-    }
-    );
+      return result;
+    });
   }
 
   async setMetadata(objectName: string, meta: ObjectMetadata): Promise<any> {
@@ -213,7 +181,7 @@ export class FireBaseService implements IStorageService {
   ): Promise<PreSignedLinkResponse[]> {
     const tasks: Promise<PreSignedLinkResponse>[] = [];
     fileNames.forEach((file) => {
-      const objectName = this.storageTree.temp + addFilePrefix(file, userId);
+      const objectName = this._storageTreeRoot.temp + addFilePrefix(file, userId);
       tasks.push(this.getUploadSignedLink(objectName));
     });
 

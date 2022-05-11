@@ -46,7 +46,6 @@ export class MessageRepository extends BaseRepository implements IMessageReposit
     const entity = await this._messageRepo.findOne(msgId, {
       relations: ["sender", "sender.user"],
     })
-    console.log(entity)
     return entity?.toDomain()
   }
 
