@@ -17,8 +17,9 @@ import React from "react";
 import { calendarTime } from "utils/time";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons"
 
-function AccountRow(props) {
-  const { id, username, email, phone, emailVerification, createdAt, displayName, avatar } = props.data;
+function UserRow(props) {
+  const { username, email, phone, emailVerification, createdAt, displayName, avatar } = props.data;
+  const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
   const bgStatus = useColorModeValue("gray.400", "#1a202c");
   const colorStatus = useColorModeValue("white", "gray.400");
@@ -27,7 +28,7 @@ function AccountRow(props) {
     <Tr>
       <Td pl="0px">
         <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
-          {id}
+          {index}
         </Text>
       </Td>
       <Td minWidth={{ sm: "250px" }}>
@@ -114,4 +115,4 @@ function AccountRow(props) {
   );
 }
 
-export default AccountRow;
+export default UserRow;

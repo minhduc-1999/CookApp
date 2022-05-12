@@ -4,7 +4,7 @@ import Tables from "views/Dashboard/Tables.js";
 import Billing from "views/Dashboard/Billing.js";
 import Profile from "views/Dashboard/Profile.js";
 import SignUp from "views/Pages/SignUp.js";
-import Accounts from "views/Dashboard/Accounts.js";
+import Users from "views/Dashboard/Users.js";
 import Foods from "views/Dashboard/Foods.js";
 import {
   HomeIcon,
@@ -58,10 +58,10 @@ var dashRoutes = [
         layout: "/admin",
       },
       {
-        path: "/accounts",
-        name: "Accounts",
+        path: "/users",
+        name: "Users",
         icon: <DocumentIcon color="inherit" />,
-        component: Accounts,
+        component: Users,
         layout: "/admin",
       },
       {

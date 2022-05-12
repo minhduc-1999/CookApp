@@ -3,8 +3,8 @@ import { token } from "./token"
 
 const baseUrl = "http://localhost:3002/api";
 
-export const getFoods = async (page, limit, q = "") => {
-  return axios.get(baseUrl + "/foods", {
+export const getUsers = async (page, limit, q = "") => {
+  return axios.get(baseUrl + "/users", {
     headers: {
       "Authorization": `Bearer ${token}`,
     },
