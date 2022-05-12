@@ -6,6 +6,7 @@ import { UserErrorCode } from "enums/errorCode.enum";
 import { PostType } from "enums/social.enum";
 import { IFoodService } from "modules/core/services/food.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
+import { inspectObj } from "utils";
 import {
   FoodShare,
   Moment,
@@ -110,6 +111,7 @@ export class PostService implements IPostService {
 
   async createPost(post: Post, tx: ITransaction): Promise<Post> {
     const postResult = await this._postRepo.setTransaction(tx).createPost(post);
+
     switch (post.type) {
       case PostType.MOMENT:
       case PostType.FOOD_SHARE:
