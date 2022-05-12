@@ -5,7 +5,7 @@ import Billing from "views/Dashboard/Billing.js";
 import Profile from "views/Dashboard/Profile.js";
 import SignUp from "views/Pages/SignUp.js";
 import Users from "views/Dashboard/Users.js";
-import Foods from "views/Dashboard/Foods.js";
+import Foods from "views/Dashboard/Foods";
 import {
   HomeIcon,
   StatsIcon,

@@ -40,7 +40,7 @@
     "stylis-plugin-rtl": "^2.1.0"
   },
   "scripts": {
-    "start": "export PORT=8080 && react-scripts start",
+    "start": "export BROWSER=none; export FAST_REFRESH=false; export PORT=8080; react-scripts start",
     "build": "react-scripts build && gulp licenses",
     "test": "react-scripts test --env=jsdom",
     "eject": "react-scripts eject",
@@ -51,10 +51,13 @@
   },
   "optionalDependencies": {
     "@babel/core": "7.14.0",
-    "typescript": "4.2.4"
+    "typescript": "^4.6.4"
   },
   "devDependencies": {
     "@babel/plugin-transform-react-jsx-source": "^7.14.5",
+    "@types/node": "^17.0.32",
+    "@types/react": "^18.0.9",
+    "@types/react-dom": "^18.0.3",
     "eslint-config-prettier": "8.3.0",
     "eslint-plugin-prettier": "3.4.0",
     "gulp": "4.0.2",
