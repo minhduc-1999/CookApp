@@ -12,7 +12,7 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { OptionIcon } from "components/Icons/Icons";
-import React  from "react";
+import React from "react";
 import { calendarTime } from "utils/time";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 import { durationFormat } from "utils/time";

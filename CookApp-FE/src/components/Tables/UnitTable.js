@@ -38,7 +38,7 @@ function UnitTable({ units, curPage, limit }) {
         <Tbody>
           {unitList?.map((row, index) => (
             <UnitRow
-              key={row.id}
+              key={row.name}
               index={(curPage - 1) * limit + index}
               data={row}
             />

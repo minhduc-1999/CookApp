@@ -38,7 +38,7 @@ function IngredientTable({ ingredients, curPage, limit }) {
         <Tbody>
           {ingredientList?.map((row, index) => (
             <IngredientRow
-              key={row.id}
+              key={row.name}
               index={(curPage - 1) * limit + index}
               data={row}
             />
