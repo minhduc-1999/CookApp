@@ -5,6 +5,7 @@ import {
   Tbody,
   Table,
   useColorModeValue,
+  TableContainer,
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
@@ -23,29 +24,31 @@ function FoodTable({ foods, curPage, limit }) {
   }, [curPage]);
 
   return (
-    <Table variant="simple" color={textColor}>
-      <Thead>
-        <Tr my=".8rem" pl="0px" color="gray.400">
-          <Th pl="0px" color="gray.400">
-            Index
-          </Th>
-          <Th color="gray.400">Name</Th>
-          <Th color="gray.400">Servings</Th>
-          <Th color="gray.400">Total Time</Th>
-          <Th color="gray.400">Created At</Th>
-          <Th></Th>
-        </Tr>
-      </Thead>
-      <Tbody>
-        {foodList?.map((row, index) => (
-          <FoodRow
-            key={row.id}
-            index={(curPage - 1) * limit + index}
-            data={row}
-          />
-        ))}
-      </Tbody>
-    </Table>
+    <TableContainer w="100%">
+      <Table variant="simple" color={textColor}>
+        <Thead>
+          <Tr my=".8rem" pl="0px" color="gray.400">
+            <Th pl="0px" color="gray.400">
+              Index
+            </Th>
+            <Th color="gray.400">Name</Th>
+            <Th color="gray.400">Servings</Th>
+            <Th color="gray.400">Total Time</Th>
+            <Th color="gray.400">Created At</Th>
+            <Th></Th>
+          </Tr>
+        </Thead>
+        <Tbody>
+          {foodList?.map((row, index) => (
+            <FoodRow
+              key={row.id}
+              index={(curPage - 1) * limit + index}
+              data={row}
+            />
+          ))}
+        </Tbody>
+      </Table>
+    </TableContainer>
   );
 }
 

@@ -9,14 +9,14 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import UnitRow from "./UnitRow";
+import IngredientRow from "./IngredientRow";
 
-function UnitTable({ units, curPage, limit }) {
+function IngredientTable({ ingredients, curPage, limit }) {
   const textColor = useColorModeValue("gray.700", "white");
-  const [unitList, setUnitList] = useState([]);
+  const [ingredientList, setIngredientList] = useState([]);
 
   const getList = (curPage) => {
-    setUnitList(units[curPage]);
+    setIngredientList(ingredients[curPage]);
   };
 
   useEffect(() => {
@@ -36,8 +36,8 @@ function UnitTable({ units, curPage, limit }) {
           </Tr>
         </Thead>
         <Tbody>
-          {unitList?.map((row, index) => (
-            <UnitRow
+          {ingredientList?.map((row, index) => (
+            <IngredientRow
               key={row.id}
               index={(curPage - 1) * limit + index}
               data={row}
@@ -49,10 +49,10 @@ function UnitTable({ units, curPage, limit }) {
   );
 }
 
-UnitTable.propTypes = {
-  units: PropTypes.object,
+IngredientTable.propTypes = {
+  ingredients: PropTypes.object,
   curPage: PropTypes.number,
   limit: PropTypes.number,
 };
 
-export default UnitTable;
+export default IngredientTable;

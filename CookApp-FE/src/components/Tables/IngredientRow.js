@@ -14,7 +14,7 @@ import React from "react";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 import PropTypes from "prop-types";
 
-function UnitRow(props) {
+function IngredientRow(props) {
   const { name } = props.data;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
@@ -54,9 +54,9 @@ function UnitRow(props) {
   );
 }
 
-UnitRow.propTypes = {
+IngredientRow.propTypes = {
   index: PropTypes.number,
   data: PropTypes.object,
 };
 
-export default UnitRow;
+export default IngredientRow;
