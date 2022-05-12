@@ -8,14 +8,15 @@ import {
 } from "@chakra-ui/react";
 import React, { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import FoodRow from "./FoodRow";
+import UnitRow from "./UnitRow";
 
-function FoodTable({ foods, curPage, limit }) {
+function UnitTable({ units, curPage, limit }) {
   const textColor = useColorModeValue("gray.700", "white");
-  const [foodList, setFoodList] = useState([]);
+  const [unitList, setUnitList] = useState([]);
 
   const getList = (curPage) => {
-    setFoodList(foods[curPage]);
+    console.log(units)
+    setUnitList(units[curPage]);
   };
 
   useEffect(() => {
@@ -30,15 +31,12 @@ function FoodTable({ foods, curPage, limit }) {
             Index
           </Th>
           <Th color="gray.400">Name</Th>
-          <Th color="gray.400">Servings</Th>
-          <Th color="gray.400">Total Time</Th>
-          <Th color="gray.400">Created At</Th>
           <Th></Th>
         </Tr>
       </Thead>
       <Tbody>
-        {foodList?.map((row, index) => (
-          <FoodRow
+        {unitList?.map((row, index) => (
+          <UnitRow
             key={row.id}
             index={(curPage - 1) * limit + index}
             data={row}
@@ -49,10 +47,10 @@ function FoodTable({ foods, curPage, limit }) {
   );
 }
 
-FoodTable.propTypes = {
-  foods: PropTypes.object,
+UnitTable.propTypes = {
+  units: PropTypes.object,
   curPage: PropTypes.number,
   limit: PropTypes.number,
 };
 
-export default FoodTable;
+export default UnitTable;

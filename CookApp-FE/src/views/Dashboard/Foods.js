@@ -9,55 +9,107 @@ import { usePaginator } from "chakra-paginator";
 import FoodTable from "components/Tables/FoodTable";
 import Paginator from "components/Tables/Paginator";
 import { getFoods } from "apis/foods";
+import { getUnits } from "apis/units";
+import UnitTable from "components/Tables/UnitTable";
 
-const PAGE_SIZE = 10;
+const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
 
 function Foods() {
   const textColor = useColorModeValue("gray.700", "white");
   const [foods, setFoods] = useState({});
-  const [loading, setLoading] = useState(true);
-  const [totalPage, setTotalPage] = useState(0);
+  const [foodloading, setFoodLoading] = useState(true);
+  const [totalFoodPage, setTotalFoodPage] = useState(0);
   const [totalFood, setTotalFood] = useState(0);
 
-  const { currentPage, setCurrentPage, pageSize } = usePaginator({
-    initialState: { currentPage: INIT_CUR_PAGE, pageSize: PAGE_SIZE },
+  const [units, setUnits] = useState({});
+  const [unitLoading, setUnitLoading] = useState(true);
+  const [totalUnitPage, setTotalUnitPage] = useState(0);
+  const [totalUnit, setTotalUnit] = useState(0);
+
+  const {
+    currentPage: currentFoodPage,
+    setCurrentPage: setCurrentFoodPage,
+    pageSize: foodPageSize,
+  } = usePaginator({
+    initialState: { currentPage: INIT_CUR_PAGE, pageSize: INIT_PAGE_SIZE },
+  });
+
+  const {
+    currentPage: currentUnitPage,
+    setCurrentPage: setCurrentUnitPage,
+    pageSize: unitPageSize,
+  } = usePaginator({
+    initialState: { currentPage: INIT_CUR_PAGE, pageSize: INIT_PAGE_SIZE },
   });
 
   useEffect(() => {
-    fetchData(INIT_CUR_PAGE);
+    fetchFoodData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
+    fetchUnitData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
   }, []);
 
-  const fetchData = (page) => {
-    getFoods(page, pageSize)
+  const fetchFoodData = (page, size) => {
+    getFoods(page, size)
       .then((data) => {
-        if (data.metadata.totalPage !== totalPage)
-          setTotalPage(data.metadata.totalPage);
+        if (data.metadata.totalPage !== totalFoodPage)
+          setTotalFoodPage(data.metadata.totalPage);
         if (data.metadata.totalCount !== totalFood)
           setTotalFood(data.metadata.totalCount);
         const temp = { ...foods };
         temp[page] = data.foods;
         setFoods(temp);
-        setLoading(false);
+        setFoodLoading(false);
       })
       .catch((err) => {
-        setLoading(true);
+        setFoodLoading(true);
         console.error(err);
       });
   };
 
-  const handlePageChange = (nextPage) => {
-    if (!foods[nextPage] || foods[nextPage].length !== pageSize) {
-      if (nextPage === totalPage) {
-        if (foods[nextPage]?.length === totalFood % pageSize) {
-          setCurrentPage(nextPage);
+  const fetchUnitData = (page, size) => {
+    getUnits(page, size)
+      .then((data) => {
+        if (data.metadata.totalPage !== totalUnitPage)
+          setTotalUnitPage(data.metadata.totalPage);
+        if (data.metadata.totalCount !== totalUnit)
+          setTotalUnit(data.metadata.totalCount);
+        const temp = { ...units };
+        temp[page] = data.units;
+        setUnits(temp);
+        setUnitLoading(false);
+      })
+      .catch((err) => {
+        setUnitLoading(true);
+        console.error(err);
+      });
+  };
+
+  const handleFoodPageChange = (nextPage) => {
+    if (!foods[nextPage] || foods[nextPage].length !== foodPageSize) {
+      if (nextPage === totalFoodPage) {
+        if (foods[nextPage]?.length === totalFood % foodPageSize) {
+          setCurrentFoodPage(nextPage);
           return;
         }
       }
-      setLoading(true);
-      fetchData(nextPage);
+      setFoodLoading(true);
+      fetchFoodData(nextPage, foodPageSize);
     }
-    setCurrentPage(nextPage);
+    setCurrentFoodPage(nextPage);
+  };
+
+  const handleUnitPageChange = (nextPage) => {
+    if (!units[nextPage] || units[nextPage].length !== unitPageSize) {
+      if (nextPage === totalUnitPage) {
+        if (units[nextPage]?.length === totalUnit % unitPageSize) {
+          setCurrentUnitPage(nextPage);
+          return;
+        }
+      }
+      setUnitLoading(true);
+      fetchUnitData(nextPage, unitPageSize);
+    }
+    setCurrentUnitPage(nextPage);
   };
 
   return (
@@ -70,7 +122,7 @@ function Foods() {
       <TabPanels>
         <TabPanel>
           <Flex direction="column" justifyContent="center" alignItems="center">
-            {loading ? (
+            {foodloading ? (
               <Spinner />
             ) : (
               <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
@@ -82,15 +134,15 @@ function Foods() {
                 <CardBody>
                   <FoodTable
                     foods={foods}
-                    limit={pageSize}
-                    curPage={currentPage}
+                    limit={foodPageSize}
+                    curPage={currentFoodPage}
                   />
                 </CardBody>
                 <Flex mt="20px" justifyContent="end">
                   <Paginator
-                    pagesQuantity={totalPage}
-                    currentPage={currentPage}
-                    onPageChange={handlePageChange}
+                    pagesQuantity={totalFoodPage}
+                    currentPage={currentFoodPage}
+                    onPageChange={handleFoodPageChange}
                   />
                 </Flex>
               </Card>
@@ -101,7 +153,33 @@ function Foods() {
           <Box>ingredients</Box>
         </TabPanel>
         <TabPanel>
-          <Box>Unit</Box>
+          <Flex direction="column" justifyContent="center" alignItems="center">
+            {unitLoading ? (
+              <Spinner />
+            ) : (
+              <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
+                <CardHeader p="6px 0px 22px 0px">
+                  <Text fontSize="xl" color={textColor} fontWeight="bold">
+                    Units Table
+                  </Text>
+                </CardHeader>
+                <CardBody>
+                  <UnitTable
+                    units={units}
+                    limit={unitPageSize}
+                    curPage={currentUnitPage}
+                  />
+                </CardBody>
+                <Flex mt="20px" justifyContent="end">
+                  <Paginator
+                    pagesQuantity={totalUnitPage}
+                    currentPage={currentUnitPage}
+                    onPageChange={handleUnitPageChange}
+                  />
+                </Flex>
+              </Card>
+            )}
+          </Flex>
         </TabPanel>
       </TabPanels>
     </Tabs>
