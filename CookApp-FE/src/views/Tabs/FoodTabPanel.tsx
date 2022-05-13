@@ -28,7 +28,7 @@ const FoodTabPanel = () => {
   const [foods, setFoods] = useState<{
     [key: number]: FoodResponse[];
   }>({});
-  const [foodloading, setFoodLoading] = useState(true);
+  const [foodloading, setFoodLoading] = useState(false);
   const [totalFoodPage, setTotalFoodPage] = useState(0);
   const [totalFood, setTotalFood] = useState(0);
 
@@ -41,8 +41,8 @@ const FoodTabPanel = () => {
   });
 
   useEffect(() => {
-    // fetchFoodData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
-    setFoodLoading(false);
+    fetchFoodData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
+    setFoodLoading(true);
   }, []);
 
   const fetchFoodData = (page: number, size: number) => {

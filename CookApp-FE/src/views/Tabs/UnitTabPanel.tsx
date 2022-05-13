@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Spinner from "components/Spinner";
 import { Flex, Text, useColorModeValue } from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
@@ -8,6 +8,7 @@ import { usePaginator } from "chakra-paginator";
 import Paginator from "components/Tables/Paginator";
 import UnitTable from "components/Tables/UnitTable";
 import { getUnits } from "apis/units";
+import { UnitResponse } from "apis/base.type";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
@@ -15,7 +16,9 @@ const INIT_CUR_PAGE = 1;
 const UnitTabPanel = () => {
   const textColor = useColorModeValue("gray.700", "white");
 
-  const [units, setUnits] = useState({});
+  const [units, setUnits] = useState<{
+    [key: number]: UnitResponse[];
+  }>({});
   const [unitLoading, setUnitLoading] = useState(true);
   const [totalUnitPage, setTotalUnitPage] = useState(0);
   const [totalUnit, setTotalUnit] = useState(0);
@@ -32,15 +35,16 @@ const UnitTabPanel = () => {
     fetchUnitData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
   }, []);
 
-  const fetchUnitData = (page, size) => {
+  const fetchUnitData = (page: number, size: number) => {
     getUnits(page, size)
       .then((data) => {
-        if (data.metadata.totalPage !== totalUnitPage)
-          setTotalUnitPage(data.metadata.totalPage);
-        if (data.metadata.totalCount !== totalUnit)
-          setTotalUnit(data.metadata.totalCount);
+        const [unitResult, metadata] = data;
+        if (metadata.totalPage !== totalUnitPage)
+          setTotalUnitPage(metadata.totalPage);
+        if (metadata.totalCount !== totalUnit)
+          setTotalUnit(metadata.totalCount);
         const temp = { ...units };
-        temp[page] = data.units;
+        temp[page] = unitResult;
         setUnits(temp);
         setUnitLoading(false);
       })
@@ -50,10 +54,11 @@ const UnitTabPanel = () => {
       });
   };
 
-  const handleUnitPageChange = (nextPage) => {
-    if (!units[nextPage] || units[nextPage].length !== unitPageSize) {
+  const handleUnitPageChange = (nextPage: number) => {
+    const unitList = units[nextPage];
+    if (!unitList || unitList.length !== unitPageSize) {
       if (nextPage === totalUnitPage) {
-        if (units[nextPage]?.length === totalUnit % unitPageSize) {
+        if (unitList?.length === totalUnit % unitPageSize) {
           setCurrentUnitPage(nextPage);
           return;
         }

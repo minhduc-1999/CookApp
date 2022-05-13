@@ -1,21 +1,23 @@
-import React, { useState, useEffect } from "react";
-import Spinner from "components/Spinner";
+import { useState, useEffect } from "react";
 import { Flex, Text, useColorModeValue } from "@chakra-ui/react";
-import Card from "components/Card/Card.js";
-import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import { usePaginator } from "chakra-paginator";
-import Paginator from "components/Tables/Paginator";
-import IngredientTable from "components/Tables/IngredientTable";
 import { getIngredients } from "apis/ingredients";
+import { IngredientResponse } from "apis/base.type";
+import Card from "components/Card/Card";
+import IngredientTable from "components/Tables/IngredientTable";
+import CardHeader from "components/Card/CardHeader";
+import Paginator from "components/Tables/Paginator";
+import Spinner from "components/Spinner";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
 
 const IngredientTabPanel = () => {
   const textColor = useColorModeValue("gray.700", "white");
-
-  const [ingredients, setIngredients] = useState({});
+  const [ingredients, setIngredients] = useState<{
+    [key: number]: IngredientResponse[];
+  }>({});
   const [ingredientLoading, setIngredientLoading] = useState(true);
   const [totalIngredientPage, setTotalIngredientPage] = useState(0);
   const [totalIngredient, setTotalIngredient] = useState(0);
@@ -32,15 +34,16 @@ const IngredientTabPanel = () => {
     fetchIngredientData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
   }, []);
 
-  const fetchIngredientData = (page, size) => {
+  const fetchIngredientData = (page: number, size: number) => {
     getIngredients(page, size)
       .then((data) => {
-        if (data.metadata.totalPage !== totalIngredientPage)
-          setTotalIngredientPage(data.metadata.totalPage);
-        if (data.metadata.totalCount !== totalIngredient)
-          setTotalIngredient(data.metadata.totalCount);
+        const [listResult, meta] = data;
+        if (meta.totalPage !== totalIngredientPage)
+          setTotalIngredientPage(meta.totalPage);
+        if (meta.totalCount !== totalIngredient)
+          setTotalIngredient(meta.totalCount);
         const temp = { ...ingredients };
-        temp[page] = data.ingredients;
+        temp[page] = listResult;
         setIngredients(temp);
         setIngredientLoading(false);
       })
@@ -50,16 +53,17 @@ const IngredientTabPanel = () => {
       });
   };
 
-  const handleIngredientPageChange = (nextPage) => {
-    if (!ingredientss[nextPage] || foods[nextPage].length !== foodPageSize) {
+  const handleIngredientPageChange = (nextPage: number) => {
+    const ingredientList = ingredients[nextPage];
+    if (!ingredientList || ingredientList.length !== ingredientPageSize) {
       if (nextPage === totalIngredientPage) {
-        if (ingredientss[nextPage]?.length === totalIngredient % foodPageSize) {
+        if (ingredientList?.length === totalIngredient % ingredientPageSize) {
           setCurrentIngredientPage(nextPage);
           return;
         }
       }
       setIngredientLoading(true);
-      fetchIngredientData(nextPage, ingredientsPageSize);
+      fetchIngredientData(nextPage, ingredientPageSize);
     }
     setCurrentIngredientPage(nextPage);
   };

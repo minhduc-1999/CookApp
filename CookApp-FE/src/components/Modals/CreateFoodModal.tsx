@@ -31,7 +31,9 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { canSaveFood, createFood } from "apis/foods";
+import { getIngredients } from "apis/ingredients";
 import { uploadImageToStorage } from "apis/storage";
+import { getUnits } from "apis/units";
 import UploadedImage from "components/UploadedImage";
 import { useEffect, useRef, useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
@@ -69,6 +71,7 @@ const IngredientAddingRow = ({
       name: ingredient,
     });
   };
+
   return (
     <Flex
       gap={2}
@@ -224,6 +227,9 @@ type CreateFoodModalProps = {
   onClose: () => void;
 };
 
+const INIT_UNIT_SIZE = 50;
+const INIT_INGREDIENT_SIZE = 50;
+
 const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [stepList, setStepList] = useState<string[]>([]);
@@ -237,6 +243,9 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
   const [saving, setSaving] = useState(false);
   const [foodPhotos, setFoodPhotos] = useState<ImageListType>([]);
   const toast = useToast();
+
+  const [units, setUnits] = useState<string[]>([]);
+  const [ingredients, setIngredients] = useState<string[]>([]);
 
   useEffect(() => {
     let checkSavingInterval: NodeJS.Timer;
@@ -258,6 +267,21 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
     foodPhotos,
     description,
   ]);
+
+  useEffect(() => {
+    if (isOpen) {
+      getUnits(1, INIT_UNIT_SIZE).then((res) => {
+        const [unitItems, _] = res;
+        const temp = unitItems.map((item) => item.name);
+        setUnits(temp);
+      });
+      getIngredients(1, INIT_INGREDIENT_SIZE).then((res) => {
+        const [ingreItems, _] = res;
+        const temp = ingreItems.map((item) => item.name)
+        setIngredients(temp);
+      });
+    }
+  }, [isOpen]);
 
   const onStepRowChange = (index: number) => {
     return (value: string) => {
@@ -449,8 +473,8 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                         ingredient={ingredient}
                         onChange={onIngredientRowChange(index)}
                         onDelete={onIngredientRowDelete(index)}
-                        unitList={["Lit", "Cai", "Kg"]}
-                        ingredientList={["Cu hanh", "Cu toi", "Duong"]}
+                        unitList={units}
+                        ingredientList={ingredients}
                       />
                     ))}
                     <IconButton
