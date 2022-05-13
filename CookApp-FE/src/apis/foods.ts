@@ -1,8 +1,6 @@
 import axios from "axios";
 import { FoodResponse, PageMetadata } from "./base.type";
-import { token } from "./token";
-
-const baseUrl = "http://localhost:3002/api";
+import { baseUrl, token } from "./token";
 
 export const getFoods = async (
   page: number,
@@ -39,15 +37,14 @@ export type CreateFoodBody = {
     unit: string;
     quantity: number;
   }[];
-  videoUrl?: string;
+  videoUrl?: string | undefined;
   name: string;
-  description?: string;
+  description: string | undefined;
   photos: string[];
-  url?: string;
 };
 
 export const canSaveFood = (food: CreateFoodBody) => {
-  if (!food.name || !food.totalTime) return false;
+  if (!food.name || !food.totalTime || !food.description) return false;
   if (!food.steps || !food.steps.length) return false;
   for (const step of food.steps) {
     if (!step || !step.content) return false;
@@ -61,13 +58,13 @@ export const canSaveFood = (food: CreateFoodBody) => {
 };
 
 export const createFood = async (data: CreateFoodBody): Promise<void> => {
+  if (!data.videoUrl) delete data.videoUrl;
   return axios
-    .post(baseUrl + "/foods", {
+    .post(baseUrl + "/foods", data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-      data: data,
     })
     .then((res) => {
       if (res.status === 201) return;

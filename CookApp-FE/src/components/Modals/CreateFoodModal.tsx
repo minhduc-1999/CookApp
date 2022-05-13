@@ -27,9 +27,11 @@ import {
   NumberInputStepper,
   Select,
   Textarea,
+  useToast,
   VStack,
 } from "@chakra-ui/react";
-import { canSaveFood } from "apis/foods";
+import { canSaveFood, createFood } from "apis/foods";
+import { uploadImageToStorage } from "apis/storage";
 import UploadedImage from "components/UploadedImage";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
@@ -194,6 +196,31 @@ const StepAddingRow = ({ step, onChange, onDelete }: StepAddingRowProps) => {
   );
 };
 
+const saveFood = async (foodReq: {
+  steps: string[];
+  name: string;
+  description?: string;
+  servings: number;
+  totalTime: number;
+  videoUrl?: string;
+  photos: ImageListType;
+  ingredients: Ingredient[];
+}) => {
+  const photoObjectName = await uploadImageToStorage(foodReq.photos[0]);
+  await createFood({
+    steps: foodReq.steps.map((step) => {
+      return { content: step };
+    }),
+    name: foodReq.name,
+    description: foodReq.description,
+    servings: foodReq.servings,
+    totalTime: foodReq.totalTime,
+    videoUrl: foodReq.videoUrl,
+    ingredients: foodReq.ingredients,
+    photos: [photoObjectName],
+  });
+};
+
 type CreateFoodModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -211,6 +238,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
   const [canSave, setCanSave] = useState(true);
   const [saving, setSaving] = useState(false);
   const [foodPhotos, setFoodPhotos] = useState<ImageListType>([]);
+  const toast = useToast();
 
   useEffect(() => {
     let checkSavingInterval: NodeJS.Timer;
@@ -222,7 +250,16 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
     return () => {
       if (checkSavingInterval) clearInterval(checkSavingInterval);
     };
-  }, [isOpen, stepList, name, ingredientList, servings, totalTime, foodPhotos]);
+  }, [
+    isOpen,
+    stepList,
+    name,
+    ingredientList,
+    servings,
+    totalTime,
+    foodPhotos,
+    description,
+  ]);
 
   const onStepRowChange = (index: number) => {
     return (e: ChangeEvent<HTMLInputElement>) => {
@@ -308,7 +345,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
         <ModalCloseButton />
         <ModalBody pb={6}>
           <VStack spacing={4}>
-            <FormControl isRequired>
+            <FormControl isRequired isInvalid={name ? false : true}>
               <FormLabel htmlFor="food-name">Food name</FormLabel>
               <Input
                 id="food-name"
@@ -321,7 +358,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
               />
             </FormControl>
 
-            <FormControl>
+            <FormControl isRequired isInvalid={description ? false : true}>
               <FormLabel htmlFor="description">Description</FormLabel>
               <Textarea
                 id="description"
@@ -340,8 +377,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
               justifyContent={"space-between"}
               alignItems="center"
             >
-              <FormControl isRequired>
-                <FormLabel htmlFor="servings">Servings</FormLabel>
+              <FormControl isRequired isInvalid={servings >= 1 ? false : true}>
                 <HStack>
                   <NumberInput
                     id="servings"
@@ -365,7 +401,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                 </HStack>
               </FormControl>
 
-              <FormControl isRequired>
+              <FormControl isRequired isInvalid={totalTime >= 1 ? false : true}>
                 <FormLabel htmlFor="total-time">Total time</FormLabel>
                 <HStack>
                   <NumberInput
@@ -393,7 +429,10 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
             <Accordion allowToggle w="100%">
               <AccordionItem borderTop={"none"}>
                 <AccordionButton px={0}>
-                  <FormControl isRequired>
+                  <FormControl
+                    isRequired
+                    isInvalid={ingredientList.length > 0 ? false : true}
+                  >
                     <Flex
                       direction={"row"}
                       alignItems="center"
@@ -428,7 +467,10 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
 
               <AccordionItem borderBottom="none">
                 <AccordionButton px={0}>
-                  <FormControl isRequired>
+                  <FormControl
+                    isRequired
+                    isInvalid={stepList.length > 0 ? false : true}
+                  >
                     <Flex
                       direction={"row"}
                       alignItems="center"
@@ -474,7 +516,10 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                 dragProps,
               }) => (
                 // write your building UI
-                <FormControl isRequired>
+                <FormControl
+                  isRequired
+                  isInvalid={foodPhotos.length > 0 ? false : true}
+                >
                   <FormLabel htmlFor="photo">Photo</FormLabel>
                   <VStack>
                     {imageList.length > 0 ? null : (
@@ -530,6 +575,38 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
               colorScheme="teal"
               onClick={() => {
                 setSaving(true);
+                saveFood({
+                  steps: stepList,
+                  name,
+                  servings,
+                  totalTime,
+                  ingredients: ingredientList,
+                  photos: foodPhotos,
+                  videoUrl,
+                  description,
+                })
+                  .then(() => {
+                    toast({
+                      title: "Food created",
+                      status: "success",
+                      duration: 3000,
+                      isClosable: true,
+                      position: "top-right",
+                    });
+                    onClose();
+                  })
+                  .catch(() => {
+                    toast({
+                      title: "Fail to create food",
+                      status: "error",
+                      duration: 3000,
+                      isClosable: true,
+                      position: "top-right",
+                    });
+                  })
+                  .finally(() => {
+                    setSaving(false);
+                  });
               }}
               disabled={!canSave}
             >

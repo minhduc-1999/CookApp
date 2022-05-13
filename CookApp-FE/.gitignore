@@ -3,3 +3,4 @@ package-lock.json
 build
 src/apis/token.js
 src/dummy/
+src/apis/firebase.ts
