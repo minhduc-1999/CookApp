@@ -14,6 +14,7 @@ import {
   DocumentIcon,
   RocketIcon,
 } from "components/Icons/Icons";
+import OtherSetting from "views/Dashboard/OtherSetting";
 
 var dashRoutes = [
   {
@@ -62,6 +63,13 @@ var dashRoutes = [
         name: "Users",
         icon: <DocumentIcon color="inherit" />,
         component: Users,
+        layout: "/admin",
+      },
+      {
+        path: "/others",
+        name: "Other settings",
+        icon: <DocumentIcon color="inherit" />,
+        component: OtherSetting,
         layout: "/admin",
       },
       {

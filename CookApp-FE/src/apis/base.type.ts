@@ -251,7 +251,7 @@ export type ProfileResponse = {
   bio?: string;
 };
 
-export type TopicResponse = {
+export type TopicResponse = AuditResponse & {
   title: string;
 };
 
