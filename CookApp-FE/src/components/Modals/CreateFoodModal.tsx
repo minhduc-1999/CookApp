@@ -33,7 +33,7 @@ import {
 import { canSaveFood, createFood } from "apis/foods";
 import { uploadImageToStorage } from "apis/storage";
 import UploadedImage from "components/UploadedImage";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 
 type Ingredient = {
@@ -61,9 +61,6 @@ const IngredientAddingRow = ({
   const [selectedIngredient, setSelectedIngredient] = useState(ingredient.name);
   const [selectedUnit, setSelectedUnit] = useState(ingredient.unit);
   const [selectedQuantity, setSelectedQuantity] = useState(ingredient.quantity);
-  const [isIngredientError, setIsIngredientError] = useState(false);
-  const [isQuantityError, setIsQuantityError] = useState(false);
-  const [isUnitError, setIsUnitError] = useState(false);
 
   const onAnyChange = (ingredient: string, unit: string, quantity: number) => {
     onChange({
@@ -86,16 +83,13 @@ const IngredientAddingRow = ({
       alignItems={"center"}
       w="100%"
     >
-      <FormControl isInvalid={isIngredientError}>
+      <FormControl isInvalid={selectedIngredient ? false : true}>
         <Select
           placeholder="Ingredient..."
           value={selectedIngredient ? selectedIngredient : undefined}
           onChange={(e) => {
             const { value } = e.target;
             setSelectedIngredient(value);
-            if (!value) {
-              setIsIngredientError(true);
-            } else setIsIngredientError(false);
             onAnyChange(value, selectedUnit, selectedQuantity);
           }}
         >
@@ -106,7 +100,7 @@ const IngredientAddingRow = ({
           ))}
         </Select>
       </FormControl>
-      <FormControl isInvalid={isQuantityError}>
+      <FormControl isInvalid={selectedQuantity ? false : true}>
         <NumberInput
           id="quantity"
           step={0.5}
@@ -118,9 +112,6 @@ const IngredientAddingRow = ({
           value={selectedQuantity}
           onChange={(_, value) => {
             setSelectedQuantity(value);
-            if (value <= 0) {
-              setIsQuantityError(true);
-            } else setIsQuantityError(false);
             onAnyChange(selectedIngredient, selectedUnit, value);
           }}
         >
@@ -131,16 +122,13 @@ const IngredientAddingRow = ({
           </NumberInputStepper>
         </NumberInput>
       </FormControl>
-      <FormControl isInvalid={isUnitError}>
+      <FormControl isInvalid={selectedUnit ? false : true}>
         <Select
           placeholder="Unit..."
           value={selectedUnit ? selectedUnit : undefined}
           onChange={(e) => {
             const { value } = e.target;
             setSelectedUnit(value);
-            if (!value) {
-              setIsUnitError(true);
-            } else setIsUnitError(false);
             onAnyChange(selectedIngredient, value, selectedQuantity);
           }}
         >
@@ -164,12 +152,13 @@ const IngredientAddingRow = ({
 
 type StepAddingRowProps = {
   step: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (value: string) => void;
   onDelete: () => void;
 };
 
 const StepAddingRow = ({ step, onChange, onDelete }: StepAddingRowProps) => {
   const [deleteBtnOpacity, setDeleteBtnOpacity] = useState(0);
+  const [recipe, setRecipe] = useState(step);
   return (
     <Flex
       gap={2}
@@ -184,7 +173,16 @@ const StepAddingRow = ({ step, onChange, onDelete }: StepAddingRowProps) => {
       alignItems={"center"}
       w="100%"
     >
-      <Input onChange={onChange} value={step} />
+      <FormControl isInvalid={recipe ? false : true}>
+        <Input
+          onChange={(e) => {
+            const { value } = e.target;
+            setRecipe(value);
+            onChange(value);
+          }}
+          value={recipe}
+        />
+      </FormControl>
       <IconButton
         bgColor={"inherit"}
         opacity={deleteBtnOpacity}
@@ -262,8 +260,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
   ]);
 
   const onStepRowChange = (index: number) => {
-    return (e: ChangeEvent<HTMLInputElement>) => {
-      const { value } = e.target;
+    return (value: string) => {
       const steps = [...stepList];
       steps[index] = value;
       setStepList(steps);
@@ -378,6 +375,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
               alignItems="center"
             >
               <FormControl isRequired isInvalid={servings >= 1 ? false : true}>
+                <FormLabel htmlFor="servings">Servings</FormLabel>
                 <HStack>
                   <NumberInput
                     id="servings"

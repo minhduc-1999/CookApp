@@ -47,9 +47,6 @@ export class RoleEntity extends AbstractEntity {
     super(role);
     this.title = role?.title;
     this.sign = role?.sign;
-    this.permissions = role?.permissions?.map(
-      (pms) => new RolePermisstionEntity(role, pms)
-    );
   }
 
   toDomain(): Role {
