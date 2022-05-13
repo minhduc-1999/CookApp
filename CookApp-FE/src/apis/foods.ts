@@ -49,7 +49,13 @@ export type CreateFoodBody = {
 export const canSaveFood = (food: CreateFoodBody) => {
   if (!food.name || !food.totalTime) return false;
   if (!food.steps || !food.steps.length) return false;
+  for (const step of food.steps) {
+    if (!step || !step.content) return false;
+  }
   if (!food.ingredients || !food.ingredients.length) return false;
+  for (const ingre of food.ingredients) {
+    if (!ingre.name || !ingre.unit || !ingre.quantity) return false;
+  }
   if (!food.photos || !food.photos.length) return false;
   return true;
 };

@@ -30,7 +30,9 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { canSaveFood } from "apis/foods";
-import { ChangeEvent, useRef, useState } from "react";
+import UploadedImage from "components/UploadedImage";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
+import ImageUploading, { ImageListType } from "react-images-uploading";
 
 type Ingredient = {
   name: string;
@@ -60,8 +62,8 @@ const IngredientAddingRow = ({
   const [isIngredientError, setIsIngredientError] = useState(false);
   const [isQuantityError, setIsQuantityError] = useState(false);
   const [isUnitError, setIsUnitError] = useState(false);
+
   const onAnyChange = (ingredient: string, unit: string, quantity: number) => {
-    if (!ingredient || !unit || quantity <= 0) return;
     onChange({
       quantity,
       unit,
@@ -91,9 +93,7 @@ const IngredientAddingRow = ({
             setSelectedIngredient(value);
             if (!value) {
               setIsIngredientError(true);
-              return;
-            }
-            setIsIngredientError(false);
+            } else setIsIngredientError(false);
             onAnyChange(value, selectedUnit, selectedQuantity);
           }}
         >
@@ -118,9 +118,7 @@ const IngredientAddingRow = ({
             setSelectedQuantity(value);
             if (value <= 0) {
               setIsQuantityError(true);
-              return;
-            }
-            setIsQuantityError(false);
+            } else setIsQuantityError(false);
             onAnyChange(selectedIngredient, selectedUnit, value);
           }}
         >
@@ -140,9 +138,7 @@ const IngredientAddingRow = ({
             setSelectedUnit(value);
             if (!value) {
               setIsUnitError(true);
-              return;
-            }
-            setIsUnitError(false);
+            } else setIsUnitError(false);
             onAnyChange(selectedIngredient, value, selectedQuantity);
           }}
         >
@@ -212,9 +208,21 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
   const [servings, setServings] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
   const [videoUrl, setVideoUrl] = useState("");
-  // const [photos, setPhotos] = useState<string[]>([]);
-  const [canSave, setCanSave] = useState(false);
+  const [canSave, setCanSave] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [foodPhotos, setFoodPhotos] = useState<ImageListType>([]);
+
+  useEffect(() => {
+    let checkSavingInterval: NodeJS.Timer;
+    if (isOpen)
+      checkSavingInterval = setInterval(() => {
+        checkSaving();
+      }, 500);
+
+    return () => {
+      if (checkSavingInterval) clearInterval(checkSavingInterval);
+    };
+  }, [isOpen, stepList, name, ingredientList, servings, totalTime, foodPhotos]);
 
   const onStepRowChange = (index: number) => {
     return (e: ChangeEvent<HTMLInputElement>) => {
@@ -222,7 +230,6 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
       const steps = [...stepList];
       steps[index] = value;
       setStepList(steps);
-      checkSaving();
     };
   };
 
@@ -236,7 +243,6 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
     const steps = [...stepList];
     steps.splice(index, 1);
     setStepList(steps);
-    checkSaving();
   };
 
   const onAddIngredientRowClick = () => {
@@ -253,14 +259,12 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
     const temp = [...ingredientList];
     temp.splice(index, 1);
     setIngredientList(temp);
-    checkSaving();
   };
 
   const onIngredientRowChange = (index: number) => (ingredient: Ingredient) => {
     const temp = [...ingredientList];
     temp[index] = ingredient;
     setIngredientList(temp);
-    checkSaving();
   };
 
   const checkSaving = () => {
@@ -275,13 +279,20 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
         }),
         videoUrl,
         description,
-        photos: ["test"],
+        photos: foodPhotos.map((photo) => photo.file?.name || ""),
       })
     ) {
       setCanSave(false);
       return;
     }
     setCanSave(true);
+  };
+
+  const onUploadImagesChange = (
+    imgList: ImageListType,
+    addUpdateIndex: number[] | undefined
+  ) => {
+    setFoodPhotos(imgList);
   };
 
   return (
@@ -306,7 +317,6 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
-                  checkSaving();
                 }}
               />
             </FormControl>
@@ -319,7 +329,6 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                 value={description}
                 onChange={(e) => {
                   setDescription(e.target.value);
-                  checkSaving();
                 }}
               />
             </FormControl>
@@ -344,7 +353,6 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                     value={servings}
                     onChange={(_, value) => {
                       setServings(value);
-                      checkSaving();
                     }}
                   >
                     <NumberInputField />
@@ -364,7 +372,6 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                     value={totalTime}
                     onChange={(_, value) => {
                       setTotalTime(value);
-                      checkSaving();
                     }}
                     id="total-time"
                     step={1}
@@ -452,6 +459,50 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                 </AccordionPanel>
               </AccordionItem>
             </Accordion>
+            <ImageUploading
+              multiple={false}
+              value={foodPhotos}
+              onChange={onUploadImagesChange}
+            >
+              {({
+                imageList,
+                onImageUpload,
+                onImageRemoveAll,
+                onImageUpdate,
+                onImageRemove,
+                isDragging,
+                dragProps,
+              }) => (
+                // write your building UI
+                <FormControl isRequired>
+                  <FormLabel htmlFor="photo">Photo</FormLabel>
+                  <VStack>
+                    {imageList.length > 0 ? null : (
+                      <Button
+                        color={isDragging ? "red" : "inherit"}
+                        onClick={onImageUpload}
+                        w="100%"
+                        {...dragProps}
+                      >
+                        Click or Drop here
+                      </Button>
+                    )}
+                    {imageList.map((image, index) => (
+                      <UploadedImage
+                        image={image}
+                        key={index}
+                        onImageRemove={() => {
+                          onImageRemove(index);
+                        }}
+                        onImageUpdate={() => {
+                          onImageUpdate(index);
+                        }}
+                      />
+                    ))}
+                  </VStack>
+                </FormControl>
+              )}
+            </ImageUploading>
             <FormControl>
               <FormLabel htmlFor="video-url">Video URL</FormLabel>
               <Input
@@ -460,7 +511,6 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                 value={videoUrl}
                 onChange={(e) => {
                   setVideoUrl(e.target.value);
-                  checkSaving();
                 }}
               />
             </FormControl>
