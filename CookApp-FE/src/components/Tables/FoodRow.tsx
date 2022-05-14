@@ -12,13 +12,17 @@ import {
   useColorModeValue,
 } from "@chakra-ui/react";
 import { OptionIcon } from "components/Icons/Icons";
-import React from "react";
 import { calendarTime } from "utils/time";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 import { durationFormat } from "utils/time";
-import PropTypes from "prop-types";
+import { FoodResponse } from "apis/base.type";
 
-function FoodRow(props) {
+type Props = {
+  data: FoodResponse;
+  index: number;
+};
+
+function FoodRow(props: Props) {
   const { name, createdAt, totalTime, servings, photos } = props.data;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
@@ -32,7 +36,12 @@ function FoodRow(props) {
       </Td>
       <Td minWidth={{ sm: "250px" }}>
         <Flex align="center" py=".8rem" minWidth="100%" flexWrap="nowrap">
-          <Avatar src={photos[0].url} w="50px" borderRadius="12px" me="18px" />
+          <Avatar
+            src={photos[0] ? photos[0].url : ""}
+            w="50px"
+            borderRadius="12px"
+            me="18px"
+          />
           <Flex direction="column">
             <Text
               fontSize="md"
@@ -81,10 +90,5 @@ function FoodRow(props) {
     </Tr>
   );
 }
-
-FoodRow.propTypes = {
-  index: PropTypes.number,
-  data: PropTypes.object,
-};
 
 export default FoodRow;

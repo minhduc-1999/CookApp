@@ -1,6 +1,5 @@
 import {
   Avatar,
-  Badge,
   Flex,
   Td,
   Text,
@@ -12,17 +11,31 @@ import {
   IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { OptionIcon } from "components/Icons/Icons";
-import React from "react";
 import { calendarTime } from "utils/time";
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons"
+import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
+import { FaCheckSquare, FaEllipsisV } from "react-icons/fa";
+import RoleTag from "components/Tags/RoleTag";
+import { IoWarning } from "react-icons/io5";
+import { UserResponse } from "apis/base.type";
 
-function UserRow(props) {
-  const { username, email, phone, emailVerification, createdAt, displayName, avatar } = props.data;
+type UserRowProps = {
+  data: UserResponse;
+  index: number;
+};
+
+function UserRow(props: UserRowProps) {
+  const {
+    username,
+    email,
+    phoneNumber,
+    emailVerification,
+    createdAt,
+    displayName,
+    avatar,
+    role,
+  } = props.data;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
-  const bgStatus = useColorModeValue("gray.400", "#1a202c");
-  const colorStatus = useColorModeValue("white", "gray.400");
 
   return (
     <Tr>
@@ -58,7 +71,7 @@ function UserRow(props) {
 
       <Td>
         <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
-          {phone}
+          {phoneNumber}
         </Text>
       </Td>
 
@@ -69,45 +82,31 @@ function UserRow(props) {
       </Td>
 
       <Td>
-        <Badge
-          bg={emailVerification ? "green.400" : bgStatus}
-          color={emailVerification ? "white" : colorStatus}
-          fontSize="16px"
-          p="3px 10px"
-          borderRadius="8px"
-        >
-          {emailVerification ? "Đã xác thực" : "Chưa xác thực"}
-        </Badge>
+        <Flex justifyContent="center">
+          {emailVerification ? (
+            <FaCheckSquare color="green" size="24px" />
+          ) : (
+            <IoWarning color={"red"} size="24px" />
+          )}
+        </Flex>
       </Td>
 
       <Td>
-        {
-          /* 
-          <Button p="0px" bg="transparent" variant="no-hover">
-              <Text
-                fontSize="md"
-                color="gray.400"
-                fontWeight="bold"
-                cursor="pointer">
-                Edit
-              </Text>
-            </Button>
-          */
-        }
+        <RoleTag data={{ roleName: role?.name, roleSign: role?.sign }} />
+      </Td>
+
+      <Td>
         <Menu>
           <MenuButton
             as={IconButton}
-            aria-label='Options'
-            icon={<OptionIcon />}
-            variant='outline'
+            aria-label="Options"
+            icon={<FaEllipsisV />}
+            variant="solid"
+            bgColor={"inherit"}
           />
           <MenuList>
-            <MenuItem icon={<EditIcon />}>
-              Edit
-            </MenuItem>
-            <MenuItem icon={<DeleteIcon />}>
-              Delete
-            </MenuItem>
+            <MenuItem icon={<EditIcon />}>Edit</MenuItem>
+            <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>
           </MenuList>
         </Menu>
       </Td>

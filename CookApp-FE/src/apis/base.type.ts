@@ -29,11 +29,7 @@ export enum ReactionType {
   LOVE = "LOVE",
 }
 
-export enum MediaType {
-  IMAGE = "IMAGE",
-  VIDEO = "VIDEO",
-  AUDIO = "AUDIO",
-}
+export type MediaType = "IMAGE" | "VIDEO" | "AUDIO";
 
 export enum PostType {
   MOMENT = "MOMENT",
@@ -46,6 +42,8 @@ export enum Sex {
   FEMALE = "FEMALE",
   OTHER = "OTHER",
 }
+
+export type RoleType = "sys-admin" | "user" | "nutritionist" | "manager";
 
 export const SexEnum = ["male", "female", "other"];
 
@@ -98,7 +96,7 @@ export type AuditResponse = {
 };
 
 export type MediaResponse = {
-  id: string;
+  id?: string;
 
   url: string;
 
@@ -117,6 +115,19 @@ export type AuthorResponse = {
   avatar: MediaResponse;
 
   displayName: string;
+};
+
+export type UserResponse = AuditResponse & {
+  avatar: MediaResponse;
+  displayName: string;
+  role: {
+    name: string;
+    sign: RoleType;
+  };
+  username: string;
+  email: string;
+  phoneNumber: string;
+  emailVerification: boolean;
 };
 
 export type UnitResponse = {

@@ -1,4 +1,3 @@
-import React from "react";
 import { Tabs, TabList, TabPanels, Tab, TabPanel } from "@chakra-ui/react";
 import FoodTab from "../Tabs/FoodTabPanel";
 import UnitTab from "../Tabs/UnitTabPanel";

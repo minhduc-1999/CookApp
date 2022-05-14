@@ -6,16 +6,24 @@ import {
   Table,
   useColorModeValue,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
-import PropTypes from "prop-types";
+import { useEffect, useState } from "react";
 import UserRow from "./UserRow";
+import { UserResponse } from "apis/base.type";
 
-function UserTable({ users, curPage, limit }) {
+type UserTableProps = {
+  users: {
+    [key: number]: UserResponse[];
+  };
+  curPage: number;
+  limit: number;
+};
+function UserTable({ users, curPage, limit }: UserTableProps) {
   const textColor = useColorModeValue("gray.700", "white");
-  const [userList, setUserList] = useState([]);
+  const [userList, setUserList] = useState<UserResponse[]>([]);
 
-  const getList = (curPage) => {
-    setUserList(users[curPage]);
+  const getList = (curPage: number) => {
+    const temp = users[curPage];
+    if (temp) setUserList(temp);
   };
 
   useEffect(() => {
@@ -33,7 +41,10 @@ function UserTable({ users, curPage, limit }) {
           <Th color="gray.400">Username</Th>
           <Th color="gray.400">Phone</Th>
           <Th color="gray.400">Created At</Th>
-          <Th color="gray.400">Email Verification</Th>
+          <Th color="gray.400" textAlign={"center"}>
+            Email Verification
+          </Th>
+          <Th color="gray.400">Role</Th>
           <Th></Th>
         </Tr>
       </Thead>
@@ -41,7 +52,7 @@ function UserTable({ users, curPage, limit }) {
         {userList.map((row, index) => {
           return (
             <UserRow
-              key={row.id}
+              key={index}
               index={(curPage - 1) * limit + index}
               data={row}
             />
@@ -51,11 +62,5 @@ function UserTable({ users, curPage, limit }) {
     </Table>
   );
 }
-
-UserTable.propTypes = {
-  users: PropTypes.array,
-  curPage: PropTypes.number,
-  limit: PropTypes.number,
-};
 
 export default UserTable;

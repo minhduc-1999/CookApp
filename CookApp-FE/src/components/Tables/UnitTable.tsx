@@ -7,16 +7,26 @@ import {
   useColorModeValue,
   TableContainer,
 } from "@chakra-ui/react";
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import PropTypes from "prop-types";
-import IngredientRow from "./IngredientRow";
+import UnitRow from "./UnitRow";
+import { UnitResponse } from "apis/base.type";
 
-function IngredientTable({ ingredients, curPage, limit }) {
+type Props = {
+  units: {
+    [key: number]: UnitResponse[];
+  };
+  curPage: number;
+  limit: number;
+};
+
+function UnitTable({ units, curPage, limit }: Props) {
   const textColor = useColorModeValue("gray.700", "white");
-  const [ingredientList, setIngredientList] = useState([]);
+  const [unitList, setUnitList] = useState<UnitResponse[]>([]);
 
-  const getList = (curPage) => {
-    setIngredientList(ingredients[curPage]);
+  const getList = (curPage: number) => {
+    const temp = units[curPage];
+    if (temp) setUnitList(temp);
   };
 
   useEffect(() => {
@@ -36,8 +46,8 @@ function IngredientTable({ ingredients, curPage, limit }) {
           </Tr>
         </Thead>
         <Tbody>
-          {ingredientList?.map((row, index) => (
-            <IngredientRow
+          {unitList?.map((row, index) => (
+            <UnitRow
               key={row.name}
               index={(curPage - 1) * limit + index}
               data={row}
@@ -49,10 +59,10 @@ function IngredientTable({ ingredients, curPage, limit }) {
   );
 }
 
-IngredientTable.propTypes = {
-  ingredients: PropTypes.object,
+UnitTable.propTypes = {
+  units: PropTypes.object,
   curPage: PropTypes.number,
   limit: PropTypes.number,
 };
 
-export default IngredientTable;
+export default UnitTable;

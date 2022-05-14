@@ -1,10 +1,10 @@
 // import
-import Dashboard from "views/Dashboard/Dashboard.js";
-import Tables from "views/Dashboard/Tables.js";
-import Billing from "views/Dashboard/Billing.js";
-import Profile from "views/Dashboard/Profile.js";
-import SignUp from "views/Pages/SignUp.js";
-import Users from "views/Dashboard/Users.js";
+import Dashboard from "views/Dashboard/Dashboard";
+import Tables from "views/Dashboard/Tables";
+import Billing from "views/Dashboard/Billing";
+import Profile from "views/Dashboard/Profile";
+import SignUp from "views/Pages/SignUp";
+import Users from "views/Dashboard/Users";
 import Foods from "views/Dashboard/Foods";
 import {
   HomeIcon,

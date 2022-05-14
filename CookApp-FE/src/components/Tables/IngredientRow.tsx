@@ -9,12 +9,16 @@ import {
   IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { OptionIcon } from "components/Icons/Icons";
-import React from "react";
 import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
-import PropTypes from "prop-types";
+import { FaEllipsisV } from "react-icons/fa";
+import { IngredientResponse } from "apis/base.type";
 
-function UnitRow(props) {
+type Props = {
+  data: IngredientResponse;
+  index: number;
+};
+
+function IngredientRow(props: Props) {
   const { name } = props.data;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
@@ -33,16 +37,14 @@ function UnitRow(props) {
         </Text>
       </Td>
 
-      <Td
-        isNumeric
-        w="8px"
-      >
+      <Td isNumeric w="8px">
         <Menu>
           <MenuButton
             as={IconButton}
             aria-label="Options"
-            icon={<OptionIcon />}
-            variant="outline"
+            icon={<FaEllipsisV />}
+            variant="solid"
+            bgColor={"inherit"}
           />
           <MenuList>
             <MenuItem icon={<EditIcon />}>Edit</MenuItem>
@@ -54,9 +56,4 @@ function UnitRow(props) {
   );
 }
 
-UnitRow.propTypes = {
-  index: PropTypes.number,
-  data: PropTypes.object,
-};
-
-export default UnitRow;
+export default IngredientRow;
