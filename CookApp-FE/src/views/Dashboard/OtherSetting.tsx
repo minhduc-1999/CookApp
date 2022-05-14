@@ -6,6 +6,7 @@ import {
   Icon,
   Text,
   useColorModeValue,
+  useDisclosure,
   VStack,
 } from "@chakra-ui/react";
 import Card from "components/Card/Card";
@@ -17,6 +18,7 @@ import { TopicResponse } from "apis/base.type";
 import { useEffect, useState } from "react";
 import { getTopics } from "apis/topics";
 import Spinner from "components/Spinner";
+import CreateTopicModal from "components/Modals/CreateTopicModal";
 
 const INIT_TOPIC_PAGE_SIZE = 1;
 const INIT_TOPIC_PAGE = 1;
@@ -27,6 +29,7 @@ function OtherSetting() {
   const [nextTopicPage, setNextTopicPage] = useState(INIT_TOPIC_PAGE + 1);
   const [topicLoading, setTopicLoading] = useState(true);
   const [totalTopic, setTotalTopic] = useState(0);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
     fetchTopics(INIT_TOPIC_PAGE, INIT_TOPIC_PAGE_SIZE);
@@ -81,6 +84,7 @@ function OtherSetting() {
                 border="1px solid lightgray"
                 borderRadius="15px"
                 minHeight={{ sm: "200px", md: "100%" }}
+                onClick={onOpen}
               >
                 <Flex direction="column" justifyContent="center" align="center">
                   <Icon as={FaPlus} fontSize="lg" mb="12px" />
@@ -112,7 +116,7 @@ function OtherSetting() {
                   >
                     <Text
                       color="blackAlpha.700"
-                      fontSize="4xl"
+                      fontSize="3xl"
                       fontWeight="extrabold"
                     >
                       {topic.title}
@@ -141,6 +145,7 @@ function OtherSetting() {
           </VStack>
         </CardBody>
       </Card>
+      <CreateTopicModal isOpen={isOpen} onClose={onClose} />
     </Flex>
   );
 }

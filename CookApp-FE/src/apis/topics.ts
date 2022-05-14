@@ -2,6 +2,15 @@ import axios from "axios";
 import { PageMetadata, TopicResponse } from "./base.type";
 import { baseUrl, token } from "./token";
 
+type CreateTopicBody = {
+  title: string;
+};
+
+export const canSaveTopic = (body: CreateTopicBody) => {
+  if (!body || !body.title) return false;
+  return true;
+};
+
 export const getTopics = async (
   page: number,
   limit: number,

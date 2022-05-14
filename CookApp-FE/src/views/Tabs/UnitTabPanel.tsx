@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import Spinner from "components/Spinner";
-import { Flex, Text, useColorModeValue } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  HStack,
+  Text,
+  useColorModeValue,
+  useDisclosure,
+} from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
@@ -9,6 +16,8 @@ import Paginator from "components/Tables/Paginator";
 import UnitTable from "components/Tables/UnitTable";
 import { getUnits } from "apis/units";
 import { UnitResponse } from "apis/base.type";
+import { FaPlus } from "react-icons/fa";
+import CreateUnitModal from "components/Modals/CreateUnitModal";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
@@ -22,6 +31,7 @@ const UnitTabPanel = () => {
   const [unitLoading, setUnitLoading] = useState(true);
   const [totalUnitPage, setTotalUnitPage] = useState(0);
   const [totalUnit, setTotalUnit] = useState(0);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const {
     currentPage: currentUnitPage,
@@ -75,10 +85,20 @@ const UnitTabPanel = () => {
         <Spinner />
       ) : (
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-          <CardHeader p="6px 0px 22px 0px">
+          <CardHeader p="6px 0px 22px 0px" justifyContent="space-between">
             <Text fontSize="xl" color={textColor} fontWeight="bold">
               Units Table
             </Text>
+            <HStack spacing="10px">
+              <Button
+                leftIcon={<FaPlus />}
+                variant="ghost"
+                colorScheme="teal"
+                onClick={onOpen}
+              >
+                Add unit
+              </Button>
+            </HStack>
           </CardHeader>
           <CardBody>
             <UnitTable
@@ -96,6 +116,7 @@ const UnitTabPanel = () => {
           </Flex>
         </Card>
       )}
+      <CreateUnitModal isOpen={isOpen} onClose={onClose} />
     </Flex>
   );
 };

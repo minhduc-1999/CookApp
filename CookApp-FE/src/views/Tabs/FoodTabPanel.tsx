@@ -1,4 +1,3 @@
-import { AddIcon } from "@chakra-ui/icons";
 import {
   Button,
   Flex,
@@ -18,6 +17,7 @@ import Spinner from "components/Spinner";
 import FoodTable from "components/Tables/FoodTable";
 import Paginator from "components/Tables/Paginator";
 import { useEffect, useState } from "react";
+import { FaPlus } from "react-icons/fa";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
@@ -91,7 +91,7 @@ const FoodTabPanel = () => {
             </Text>
             <HStack spacing="10px">
               <Button
-                leftIcon={<AddIcon />}
+                leftIcon={<FaPlus />}
                 variant="ghost"
                 colorScheme="teal"
                 onClick={onOpen}

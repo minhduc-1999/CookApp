@@ -1,5 +1,12 @@
 import { useState, useEffect } from "react";
-import { Flex, Text, useColorModeValue } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  HStack,
+  Text,
+  useColorModeValue,
+  useDisclosure,
+} from "@chakra-ui/react";
 import CardBody from "components/Card/CardBody.js";
 import { usePaginator } from "chakra-paginator";
 import { getIngredients } from "apis/ingredients";
@@ -9,6 +16,8 @@ import IngredientTable from "components/Tables/IngredientTable";
 import CardHeader from "components/Card/CardHeader";
 import Paginator from "components/Tables/Paginator";
 import Spinner from "components/Spinner";
+import { FaPlus } from "react-icons/fa";
+import CreateIngredientModal from "components/Modals/CreateIngredientModal";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
@@ -21,6 +30,7 @@ const IngredientTabPanel = () => {
   const [ingredientLoading, setIngredientLoading] = useState(true);
   const [totalIngredientPage, setTotalIngredientPage] = useState(0);
   const [totalIngredient, setTotalIngredient] = useState(0);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const {
     currentPage: currentIngredientPage,
@@ -74,10 +84,20 @@ const IngredientTabPanel = () => {
         <Spinner />
       ) : (
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-          <CardHeader p="6px 0px 22px 0px">
+          <CardHeader p="6px 0px 22px 0px" justifyContent="space-between">
             <Text fontSize="xl" color={textColor} fontWeight="bold">
               Ingredients Table
             </Text>
+            <HStack spacing="10px">
+              <Button
+                leftIcon={<FaPlus />}
+                variant="ghost"
+                colorScheme="teal"
+                onClick={onOpen}
+              >
+                Add ingredient
+              </Button>
+            </HStack>
           </CardHeader>
           <CardBody>
             <IngredientTable
@@ -95,6 +115,7 @@ const IngredientTabPanel = () => {
           </Flex>
         </Card>
       )}
+      <CreateIngredientModal isOpen={isOpen} onClose={onClose} />
     </Flex>
   );
 };
