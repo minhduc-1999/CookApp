@@ -2,7 +2,6 @@ import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { User } from "domains/social/user.domain";
 import _ = require("lodash");
-import { inspectObj } from "utils";
 
 @Injectable()
 export class RolesGuard implements CanActivate {

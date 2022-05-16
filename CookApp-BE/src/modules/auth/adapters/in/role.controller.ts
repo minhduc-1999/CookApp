@@ -15,12 +15,12 @@ import { GetRolesResponse } from "modules/auth/useCases/getRoles/getRolesRespons
 import { PageOptionsDto } from "base/pageOptions.base";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 import { GetRolesQuery } from "modules/auth/useCases/getRoles";
-
-//TODO: add permissions
+import { RequirePermissions } from "decorators/roles.decorator";
 
 @Controller("roles")
 @ApiTags("Roles")
 @ApiBearerAuth()
+@RequirePermissions("manage_role")
 export class RoleController {
   constructor(private _queryBus: QueryBus) { }
 

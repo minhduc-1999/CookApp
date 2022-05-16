@@ -53,6 +53,8 @@ export type UnitPermissionType =
   | "read_unit"
   | "manage_unit";
 
+export type RolePermissionType = "manage_role"
+
 export type PermisstionType =
   | PostPermissionType
   | AlbumPermissionType
@@ -61,4 +63,5 @@ export type PermisstionType =
   | TopicPermisstionType
   | FoodPermisstionType
   | IngredientPermissionType
-  | UnitPermissionType;
+  | UnitPermissionType
+  | RolePermissionType
