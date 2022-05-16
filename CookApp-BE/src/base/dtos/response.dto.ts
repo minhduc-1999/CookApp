@@ -38,6 +38,8 @@ import { RecipeStep } from "domains/core/recipeStep.domain";
 import { Album } from "domains/social/album.domain";
 import { Conversation, Message } from "domains/social/conversation.domain";
 import { FoodVote } from "domains/core/foodVote.domain";
+import { RoleType } from "enums/system.enum";
+import { Role } from "domains/social/account.domain";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -285,7 +287,8 @@ export class RecommendationResponse {
 
   constructor(rec: Recommendation) {
     this.should = rec.should && new RecommendationItemResponse(rec.should);
-    this.shouldNot = rec.shouldNot && new RecommendationItemResponse(rec.shouldNot);
+    this.shouldNot =
+      rec.shouldNot && new RecommendationItemResponse(rec.shouldNot);
   }
 }
 
@@ -354,9 +357,9 @@ export class PostResponse extends AuditResponse {
         break;
       case PostType.RECOMMENDATION:
         const recommendPost = post as RecommendationPost;
-        this.recomendation = recommendPost.recommendation && new RecommendationResponse(
-          recommendPost.recommendation
-        );
+        this.recomendation =
+          recommendPost.recommendation &&
+          new RecommendationResponse(recommendPost.recommendation);
         break;
     }
   }
@@ -577,5 +580,18 @@ export class ConversationResponse extends AuditResponse {
     this.members = conv?.members?.map((user) => new AuthorResponse(user));
     this.cover = conv?.cover;
     this.name = conv?.name;
+  }
+}
+
+export class RoleResponse {
+  @ApiResponseProperty({ type: String })
+  title: string;
+
+  @ApiResponseProperty({ type: String })
+  sign: RoleType;
+
+  constructor(role: Role) {
+    this.title = role?.title;
+    this.sign = role?.sign;
   }
 }

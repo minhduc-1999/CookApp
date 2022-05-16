@@ -6,10 +6,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { MongooseModule } from "@nestjs/mongoose";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
-import {
-    AccountEntity,
-    RoleEntity
-} from "entities/social/account.entity";
+import { AccountEntity, RoleEntity } from "entities/social/account.entity";
 import { ProviderEntity } from "entities/social/provider.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
@@ -20,6 +17,7 @@ import { ConfigurationModule } from "modules/configuration/configuration.module"
 import { ShareModule } from "modules/share/share.module";
 import { ConfigModule, ConfigService } from "nestjs-config";
 import { AuthController } from "./adapters/in/auth.controller";
+import { RoleController } from "./adapters/in/role.controller";
 import { AccountRepository } from "./adapters/out/repositories/account.repository";
 import { RoleRepository } from "./adapters/out/repositories/role.repository";
 import { UserRepository } from "./adapters/out/repositories/user.repository";
@@ -31,6 +29,7 @@ import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
 import { GoogleStrategy } from "./strategies/google.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { GetRolesQueryHandler } from "./useCases/getRoles";
 import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
 import { ResendEmailVerificationCommandHandler } from "./useCases/resendEmailVerification";
@@ -42,6 +41,8 @@ const commandHandlers = [
   VerifyEmailCommandHandler,
   ResendEmailVerificationCommandHandler,
 ];
+
+const queryHandlers = [GetRolesQueryHandler];
 
 const eventHandlers = [UserCreatedEventHandler];
 
@@ -86,7 +87,7 @@ const globalGuards = [
     ]),
     MongooseModule.forFeature([UserModel]),
   ],
-  controllers: [AuthController],
+  controllers: [AuthController, RoleController],
   providers: [
     {
       provide: "IUserService",
@@ -118,6 +119,7 @@ const globalGuards = [
     ...commandHandlers,
     ...globalGuards,
     ...eventHandlers,
+    ...queryHandlers,
   ],
   exports: ["IUserService", JwtModule, "IUserRepository", "IUserSeService"],
 })
