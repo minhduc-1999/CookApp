@@ -1,6 +1,13 @@
 import { useState, useEffect } from "react";
 import Spinner from "components/Spinner";
-import { Flex, Text, useColorModeValue } from "@chakra-ui/react";
+import {
+  Button,
+  Flex,
+  HStack,
+  Text,
+  useColorModeValue,
+  useDisclosure,
+} from "@chakra-ui/react";
 import Card from "components/Card/Card.js";
 import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
@@ -9,11 +16,13 @@ import Paginator from "components/Tables/Paginator";
 import { getUsers } from "dummy/users";
 import { UserResponse } from "apis/base.type";
 import UserTable from "components/Tables/UserTable";
+import { FaPlus } from "react-icons/fa";
+import CreateSystemUserModal from "components/Modals/CreateSystemUserModal";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
 
-const SocialUserTabPanel = () => {
+const SystemlUserTabPanel = () => {
   const textColor = useColorModeValue("gray.700", "white");
   const [users, setUsers] = useState<{
     [key: number]: UserResponse[];
@@ -21,6 +30,8 @@ const SocialUserTabPanel = () => {
   const [loading, setLoading] = useState(true);
   const [totalUserPage, setTotalUserPage] = useState(0);
   const [totalUser, setTotalUser] = useState(0);
+
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   const { currentPage, setCurrentPage, pageSize } = usePaginator({
     initialState: { currentPage: INIT_CUR_PAGE, pageSize: INIT_PAGE_SIZE },
@@ -66,10 +77,20 @@ const SocialUserTabPanel = () => {
   return (
     <Flex direction="column">
       <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-        <CardHeader p="6px 0px 22px 0px">
+        <CardHeader p="6px 0px 22px 0px" justifyContent="space-between">
           <Text fontSize="xl" color={textColor} fontWeight="bold">
-            Social Users
+            System Users
           </Text>
+          <HStack spacing="10px">
+            <Button
+              leftIcon={<FaPlus />}
+              variant="ghost"
+              colorScheme="teal"
+              onClick={onOpen}
+            >
+              Add unit
+            </Button>
+          </HStack>
         </CardHeader>
         <CardBody justifyContent="center" alignItems="center">
           {loading ? (
@@ -86,8 +107,9 @@ const SocialUserTabPanel = () => {
           />
         </Flex>
       </Card>
+      <CreateSystemUserModal onClose={onClose} isOpen={isOpen} />
     </Flex>
   );
 };
 
-export default SocialUserTabPanel;
+export default SystemlUserTabPanel;

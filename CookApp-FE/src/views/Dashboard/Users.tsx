@@ -1,5 +1,6 @@
 import { Tab, TabList, TabPanel, TabPanels, Tabs } from "@chakra-ui/react";
 import SocialUserTab from "views/Tabs/SocialUserTabPanel";
+import SystemlUserTab from "views/Tabs/SystemUserTabPanel";
 
 function Users() {
   return (
@@ -12,7 +13,9 @@ function Users() {
         <TabPanel>
           <SocialUserTab />
         </TabPanel>
-        <TabPanel>System user</TabPanel>
+        <TabPanel>
+          <SystemlUserTab />
+        </TabPanel>
       </TabPanels>
     </Tabs>
   );

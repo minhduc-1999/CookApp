@@ -117,6 +117,11 @@ export type AuthorResponse = {
   displayName: string;
 };
 
+export type RoleResponse = {
+  title: string
+  sign: RoleType
+}
+
 export type UserResponse = AuditResponse & {
   avatar: MediaResponse;
   displayName: string;
