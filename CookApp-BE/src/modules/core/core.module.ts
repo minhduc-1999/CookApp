@@ -30,6 +30,8 @@ import { SyncFoodCreatedEventHandler } from "./events/syncSeData";
 import { FoodService } from "./services/food.service";
 import { FoodRecipeService } from "./services/recipeStep.service";
 import { CreateFoodCommandHandler } from "./useCases/createFood";
+import { CreateIngredientCommandHandler } from "./useCases/createIngredient";
+import { CreateUnitCommandHandler } from "./useCases/createUnit";
 import { EditVoteCommandHandler } from "./useCases/editVote";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
 import { GetFoodsQueryHandler } from "./useCases/getFoods";
@@ -43,6 +45,8 @@ const commandHandlers = [
   CreateFoodCommandHandler,
   VoteFoodCommandHandler,
   EditVoteCommandHandler,
+  CreateUnitCommandHandler,
+  CreateIngredientCommandHandler
 ];
 const queryHandlers = [
   GetFoodsQueryHandler,

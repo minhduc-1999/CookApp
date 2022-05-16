@@ -5,10 +5,11 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { Ingredient } from "domains/core/ingredient.domain";
 import { IngredientEntity } from "entities/core/ingredient.entity";
-import { Repository } from "typeorm";
+import { QueryRunner, Repository } from "typeorm";
 
 export interface IIngredientRepository {
   getIngredients(query: PageOptionsDto): Promise<[Ingredient[], number]>;
+  insertIngredient(ingredient: Ingredient): Promise<Ingredient>;
   setTransaction(tx: ITransaction): IIngredientRepository;
 }
 
@@ -22,6 +23,18 @@ export class IngredientRepository
     private _ingredientRepo: Repository<IngredientEntity>
   ) {
     super();
+  }
+  async insertIngredient(ingredient: Ingredient): Promise<Ingredient> {
+    if (!ingredient) return null;
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      const ingreEntity = new IngredientEntity(ingredient);
+      const savedIngredient = await queryRunner.manager.save<IngredientEntity>(
+        ingreEntity
+      );
+      return savedIngredient?.toDomain();
+    }
+    return null;
   }
 
   async getIngredients(query: PageOptionsDto): Promise<[Ingredient[], number]> {

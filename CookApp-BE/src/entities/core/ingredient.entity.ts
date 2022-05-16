@@ -8,7 +8,12 @@ export class IngredientEntity extends AbstractEntity {
   name: string;
 
   toDomain(): Ingredient {
-    return new Ingredient(this)
+    return new Ingredient(this);
+  }
+
+  constructor(ing: Ingredient) {
+    super(ing);
+    this.name = ing?.name;
   }
 }
 
@@ -18,6 +23,11 @@ export class UnitEntity extends AbstractEntity {
   name: string;
 
   toDomain(): Unit {
-    return new Unit(this)
+    return new Unit(this);
+  }
+
+  constructor(unit: Unit) {
+    super(unit);
+    this.name = unit?.name;
   }
 }

@@ -78,9 +78,25 @@ export const ApiOKResponseCustom = <TModel extends Type<any>>(
   );
 };
 
-export const ApiOKResponseCustomWithoutData = (description?: string) => {
+export const ApiOKResponseCustomWithoutData = (description?: string ) => {
   return applyDecorators(
     ApiOkResponse({
+      description: description,
+      schema: {
+        properties: {
+          meta: {
+            type: "object",
+            $ref: getSchemaPath(MetaDTO),
+          },
+        },
+      },
+    })
+  );
+};
+
+export const ApiCreatedResponseCustomWithoutData = (description?: string ) => {
+  return applyDecorators(
+    ApiCreatedResponse({
       description: description,
       schema: {
         properties: {
