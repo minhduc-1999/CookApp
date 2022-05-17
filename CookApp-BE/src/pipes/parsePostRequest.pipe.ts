@@ -24,17 +24,15 @@ export class ParseCreatePostRequestPipe
       case PostType.MOMENT:
         break;
       case PostType.RECOMMENDATION:
-        if (!req.title)
-          throw new BadRequestException(
-            ResponseDTO.fail("Field title is required in RECOMMENDATION type")
-          );
         if (!req.should)
           throw new BadRequestException(
             ResponseDTO.fail("Field should is required in RECOMMENDATION type")
           );
         if (!req.shouldNot)
           throw new BadRequestException(
-            ResponseDTO.fail("Field shouldNot is required in RECOMMENDATION type")
+            ResponseDTO.fail(
+              "Field shouldNot is required in RECOMMENDATION type"
+            )
           );
         break;
       default:

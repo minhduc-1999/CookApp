@@ -107,7 +107,7 @@ export class Recommendation {
 
 export class RecommendationPost extends PostBase {
   canCreate(): boolean {
-    if (this.title && this.recommendation) return true;
+    if (this.recommendation) return true;
     return false;
   }
 
@@ -115,29 +115,33 @@ export class RecommendationPost extends PostBase {
     const newRecommendation = data?.recommendation;
     return {
       content: data.content ?? this.content,
-      title: data?.title ?? this.title,
       recommendation: {
         should: {
-          advice: newRecommendation?.should?.advice ?? this.recommendation.should.advice,
-          foods: newRecommendation?.should?.foods ?? this.recommendation.should.foods
+          advice:
+            newRecommendation?.should?.advice ??
+            this.recommendation.should.advice,
+          foods:
+            newRecommendation?.should?.foods ??
+            this.recommendation.should.foods,
         },
         shouldNot: {
-          advice: newRecommendation?.shouldNot?.advice ?? this.recommendation.shouldNot.advice,
-          foods: newRecommendation?.shouldNot?.foods ?? this.recommendation.shouldNot.foods
-        }
-      }
+          advice:
+            newRecommendation?.shouldNot?.advice ??
+            this.recommendation.shouldNot.advice,
+          foods:
+            newRecommendation?.shouldNot?.foods ??
+            this.recommendation.shouldNot.foods,
+        },
+      },
     };
   }
-
-  title: string;
 
   recommendation: Recommendation;
 
   constructor(post: Partial<RecommendationPost>) {
     super(post);
-    this.title = post?.title;
     this.recommendation = post?.recommendation;
-    this.type = PostType.RECOMMENDATION
+    this.type = PostType.RECOMMENDATION;
   }
 }
 

@@ -83,9 +83,6 @@ export class PostEntity {
   @Column({ type: "jsonb", nullable: true })
   recommendation?: RecommendationEntity;
 
-  @Column({ nullable: true })
-  title?: string;
-
   constructor(post: Post, interaction?: InteractionEntity) {
     this.interaction = interaction ? interaction : new InteractionEntity(post);
     this.author = new UserEntity(post?.author);
@@ -105,7 +102,6 @@ export class PostEntity {
         this.recommendation = new RecommendationEntity(
           (post as RecommendationPost).recommendation
         );
-        this.title = (post as RecommendationPost).title;
         break;
       default:
         break;
@@ -148,7 +144,6 @@ export class PostEntity {
       case PostType.RECOMMENDATION:
         return new RecommendationPost({
           ...common,
-          title: this.title,
           recommendation: new Recommendation(
             {
               advice: this.recommendation.should.advice,
@@ -185,7 +180,6 @@ export class PostEntity {
       case PostType.RECOMMENDATION:
         const temp2 = data as Partial<RecommendationPost>;
         return {
-          title: temp2?.title ?? this.title,
           recommendation: temp2?.recommendation && new RecommendationEntity(temp2.recommendation)
         };
     }

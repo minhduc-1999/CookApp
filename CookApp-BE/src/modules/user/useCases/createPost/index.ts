@@ -138,7 +138,6 @@ export class CreatePostCommandHandler
           foods: shouldNotFoods,
         };
         creatingPost = new RecommendationPost({
-          title: req.title,
           recommendation: new Recommendation(
             shouldRecommendItem,
             shouldNotRecommendItem

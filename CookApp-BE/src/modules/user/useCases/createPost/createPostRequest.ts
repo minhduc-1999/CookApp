@@ -73,13 +73,6 @@ export class CreatePostRequest {
   @ArrayNotEmpty()
   tags: string[];
 
-  @IsNotEmpty()
-  @ApiPropertyOptional({ type: String, description: "Recommendation's title" })
-  @IsString()
-  @WordLength(1)
-  @IsOptional()
-  title?: string;
-
   @ApiPropertyOptional({ type: RecommendationRequest})
   @ValidateNested()
   @Type(() => RecommendationRequest)

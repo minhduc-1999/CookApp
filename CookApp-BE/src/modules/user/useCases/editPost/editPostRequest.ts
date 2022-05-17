@@ -75,13 +75,6 @@ export class EditPostRequest {
   @ApiPropertyOptional({ type: [String] })
   shouldNotFoodIds?: string[];
 
-  @IsNotEmpty()
-  @ApiPropertyOptional({ type: String })
-  @IsString()
-  @WordLength(1)
-  @IsOptional()
-  title?: string;
-
   @IsUUID(4)
   @IsOptional()
   @ApiPropertyOptional({ type: String })
