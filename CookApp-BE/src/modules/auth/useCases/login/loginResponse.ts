@@ -1,4 +1,5 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
+import { RoleType } from "enums/system.enum";
 
 export class LoginResponse {
   @ApiResponseProperty({type: String})
@@ -15,4 +16,7 @@ export class LoginResponse {
 
   @ApiResponseProperty({ type: Boolean })
   emailVerified: boolean;
+
+  @ApiResponseProperty({ type: String })
+  role: RoleType;
 }

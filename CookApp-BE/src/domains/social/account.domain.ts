@@ -1,4 +1,4 @@
-import { RoleType } from "enums/system.enum";
+import { PermisstionType, RoleType } from "../../enums/system.enum";
 import { Audit } from "../../domains/audit.domain";
 import { ExternalProviderType } from "../../enums/externalProvider.enum";
 
@@ -15,15 +15,30 @@ export class ExternalProvider extends Audit{
   }
 }
 
-export class AccountRole extends Audit {
+export class Permission extends Audit {
   title: string
 
-  slug: RoleType
+  sign: PermisstionType
 
-  constructor(role: Partial<AccountRole>) {
+  constructor(pms: Partial<Permission>) {
+    super(pms)
+    this.title = pms?.title
+    this.sign = pms?.sign
+  }
+}
+
+export class Role extends Audit {
+  title: string
+
+  sign: RoleType
+
+  permissions: Permission[]
+
+  constructor(role: Partial<Role>) {
     super(role)
     this.title = role?.title
-    this.slug = role?.slug
+    this.sign = role?.sign
+    this.permissions = role?.permissions
   }
 }
 
@@ -41,7 +56,7 @@ export class Account extends Audit{
 
   emailVerified: boolean;
 
-  role: AccountRole
+  role: Role
 
   verify() {
     this.emailVerified = true

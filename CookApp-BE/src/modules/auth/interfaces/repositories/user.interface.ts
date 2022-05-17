@@ -13,4 +13,5 @@ export interface IUserRepository {
   updateStatus(user: User, statusID?: string): Promise<void>
   getProfile(userId: string): Promise<User>
   existAll(userIds: string[]): Promise<boolean>
+  getUsersByIds(ids: string[]): Promise<User[]>
 }

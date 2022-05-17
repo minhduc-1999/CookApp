@@ -3,10 +3,11 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { User } from "domains/social/user.domain";
-import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IWallRepository } from "modules/user/interfaces/repositories/wall.interface";
+import { IPostService } from "modules/user/services/post.service";
 import { GetWallPostsRequest } from "./getWallPostsRequest";
 import { GetWallPostsResponse } from "./getWallPostsResponse";
+
 export class GetWallPostsQuery extends BaseQuery {
   queryReq: GetWallPostsRequest;
   targetId: string;
@@ -24,14 +25,13 @@ export class GetWallPostsQueryHandler
   constructor(
     @Inject("IWallRepository")
     private _wallRepo: IWallRepository,
-    @Inject("IStorageService") private _storageService: IStorageService
+    @Inject("IPostService")
+    private _postService: IPostService
   ) { }
   async execute(query: GetWallPostsQuery): Promise<GetWallPostsResponse> {
     const { queryReq, targetId } = query;
-    const [posts, total] = await this._wallRepo.getPosts(targetId, queryReq);
-    for (let post of posts) {
-      post.medias = await this._storageService.getDownloadUrls(post.medias);
-    }
+    let [posts, total] = await this._wallRepo.getPosts(targetId, queryReq);
+    posts = await this._postService.fulfillData(posts)
     let meta: PageMetadata;
     if (posts.length > 0) {
       meta = new PageMetadata(

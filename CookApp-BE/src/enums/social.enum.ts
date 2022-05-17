@@ -1,28 +1,34 @@
 export enum InteractiveTargetType {
-  POST = "POST", POST_MEDIA = "POST_MEDIA", RECIPE_STEP = "RECIPE_STEP", ALBUM_MEDIA = "ALBUM_MEDIA"
+  POST = "POST",
+  POST_MEDIA = "POST_MEDIA",
+  RECIPE_STEP = "RECIPE_STEP",
+  ALBUM_MEDIA = "ALBUM_MEDIA",
+  ALBUM = "ALBUM",
 }
 
 export enum ReactionType {
-  LOVE = 'LOVE'
+  LOVE = "LOVE",
 }
 
 export enum MediaType {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",
-  AUDIO = "AUDIO"
+  AUDIO = "AUDIO",
 }
 
 export enum PostType {
-  MOMENT = "MOMENT"
+  MOMENT = "MOMENT",
+  FOOD_SHARE = "FOOD_SHARE",
+  RECOMMENDATION = "RECOMMENDATION"
 }
 
 export enum Sex {
   MALE = "MALE",
   FEMALE = "FEMALE",
-  OTHER = "OTHER"
+  OTHER = "OTHER",
 }
 
-export const SexEnum = ['male', 'female', 'other']
+export const SexEnum = ["male", "female", "other"];
 
 export enum ConversationType {
   DIRECT = "DIRECT",
@@ -35,10 +41,10 @@ export enum MessageContentType {
   VIDEO = "VIDEO",
   AUDIO = "AUDIO",
   RECIPE = "RECIPE",
-  INGREDIENT = "INGREDIENT"
+  INGREDIENT = "INGREDIENT",
 }
 
 export const BotActionType = {
-  "SHOW_INGREDIENT": "food.show-ingredient",
-  "SHOW_RECIPE": "food.show-recipe"
-}
+  SHOW_INGREDIENT: "food.show-ingredient",
+  SHOW_RECIPE: "food.show-recipe",
+};

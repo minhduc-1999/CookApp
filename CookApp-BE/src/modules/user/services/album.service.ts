@@ -26,7 +26,6 @@ export class AlbumService implements IAlbumService {
       throw new NotFoundException(
         ResponseDTO.fail("Album not found", UserErrorCode.ALBUM_NOT_FOUND)
       );
-
     return album
   }
 

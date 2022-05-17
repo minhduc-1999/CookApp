@@ -18,7 +18,7 @@ export class AlbumRepository extends BaseRepository implements IAlbumRepository 
 
   async getAlbums(userId: string, queryOpt: PageOptionsDto): Promise<[Album[], number]> {
     const [entities, total] = await this._albumRepo.findAndCount({
-      relations: ["medias"],
+      relations: ["medias", "interaction", "medias.interaction"],
       where: {
         owner: {
           id: userId
@@ -43,7 +43,7 @@ export class AlbumRepository extends BaseRepository implements IAlbumRepository 
 
   async getAlbumById(albumId: string): Promise<Album> {
     const albumEntity = await this._albumRepo.findOne(albumId, {
-      relations: ["medias", "owner", "medias.interaction"]
+      relations: ["medias", "owner", "medias.interaction", "interaction"]
     })
     return albumEntity?.toDomain()
   }

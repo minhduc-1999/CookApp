@@ -37,6 +37,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       .leftJoinAndSelect("media.interaction", "mediaInter")
       .leftJoinAndSelect("post.foodRef", "foodRef")
       .leftJoinAndSelect("foodRef.medias", "foodRefPhoto")
+      .leftJoinAndSelect("foodRef.author", "foodAuthor")
       .where("feed.user_id = :userId", { userId: user.id })
       .orderBy("feed.updatedAt", "DESC")
       .select([
@@ -49,7 +50,8 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
         "media",
         "mediaInter",
         "foodRef",
-        "foodRefPhoto"
+        "foodRefPhoto",
+        "foodAuthor"
       ])
       .skip(query.limit * query.offset)
       .take(query.limit)

@@ -1,22 +1,27 @@
+import { ApiPropertyOptional } from "@nestjs/swagger";
 import {
-  ApiPropertyOptional,
-} from "@nestjs/swagger";
-import { IsArray, IsNotEmpty, IsOptional, IsString, IsUUID } from "class-validator";
+  ArrayNotEmpty,
+  IsArray,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  IsUUID,
+} from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
+import { WordLength } from "decorators/wordLength.decorator";
 
 export class EditPostRequest {
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordLength(1)
   @IsOptional()
   content: string;
 
   @IsNotEmpty()
-  @ApiPropertyOptional({ type: String  })
+  @ApiPropertyOptional({ type: String })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordLength(1)
   @IsOptional()
   location?: string;
 
@@ -35,5 +40,52 @@ export class EditPostRequest {
   @IsOptional()
   deleteImages?: string[];
 
-  id: string
+  @IsArray()
+  @ApiPropertyOptional({ type: [String] })
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @IsOptional()
+  tags: string[];
+
+  @IsNotEmpty()
+  @ApiPropertyOptional({ type: String })
+  @IsString()
+  @WordLength(1)
+  @IsOptional()
+  shouldAdvice?: string;
+
+  @IsNotEmpty()
+  @ApiPropertyOptional({ type: String })
+  @IsString()
+  @WordLength(1)
+  @IsOptional()
+  shouldNotAdvice?: string;
+
+  @IsUUID(4, { each: true })
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsOptional()
+  @ApiPropertyOptional({ type: [String] })
+  shouldFoodIds?: string[];
+
+  @IsUUID(4, { each: true })
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsOptional()
+  @ApiPropertyOptional({ type: [String] })
+  shouldNotFoodIds?: string[];
+
+  @IsNotEmpty()
+  @ApiPropertyOptional({ type: String })
+  @IsString()
+  @WordLength(1)
+  @IsOptional()
+  title?: string;
+
+  @IsUUID(4)
+  @IsOptional()
+  @ApiPropertyOptional({ type: String })
+  foodRefId?: string
+
+  id: string;
 }

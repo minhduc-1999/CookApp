@@ -1,28 +1,44 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Type } from "class-transformer";
 import {
+  ArrayNotEmpty,
   IsArray,
   IsEnum,
   IsNotEmpty,
   IsOptional,
   IsString,
   IsUUID,
+  ValidateNested,
 } from "class-validator";
 import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
-import { IsMeaningfulString } from "decorators/isMeaningfulString.decorator";
+import { WordLength } from "decorators/wordLength.decorator";
 import { PostType } from "enums/social.enum";
+
+class RecommendationRequest {
+  @IsNotEmpty()
+  @ApiProperty({ type: String, description: "Recommendation's content" })
+  @IsString()
+  @WordLength(1)
+  advice: string;
+
+  @ApiProperty({ type: [String] })
+  @IsArray()
+  @IsUUID(4, { each: true })
+  @ArrayNotEmpty()
+  foodIds: string[];
+}
 
 export class CreatePostRequest {
   @IsNotEmpty()
-  @ApiPropertyOptional({ type: String, description: "Moment's content" })
+  @ApiProperty({ type: String, description: "Moment's content" })
   @IsString()
-  @IsMeaningfulString(1)
-  @IsOptional()
-  content?: string;
+  @WordLength(1)
+  content: string;
 
   @IsNotEmpty()
   @ApiPropertyOptional({ type: String })
   @IsString()
-  @IsMeaningfulString(1)
+  @WordLength(1)
   @IsOptional()
   location?: string;
 
@@ -45,8 +61,34 @@ export class CreatePostRequest {
   @ApiProperty({ enum: PostType })
   kind: PostType;
 
-  @IsUUID()
+  @IsUUID(4)
   @IsOptional()
   @ApiPropertyOptional({ type: String })
   foodRefId?: string;
+
+  @IsArray()
+  @ApiProperty({ type: [String] })
+  @IsString({ each: true })
+  @IsNotEmpty({ each: true })
+  @ArrayNotEmpty()
+  tags: string[];
+
+  @IsNotEmpty()
+  @ApiPropertyOptional({ type: String, description: "Recommendation's title" })
+  @IsString()
+  @WordLength(1)
+  @IsOptional()
+  title?: string;
+
+  @ApiPropertyOptional({ type: RecommendationRequest})
+  @ValidateNested()
+  @Type(() => RecommendationRequest)
+  @IsOptional()
+  should?: RecommendationRequest
+
+  @ApiPropertyOptional({ type: RecommendationRequest})
+  @ValidateNested()
+  @IsOptional()
+  @Type(() => RecommendationRequest)
+  shouldNot?: RecommendationRequest
 }

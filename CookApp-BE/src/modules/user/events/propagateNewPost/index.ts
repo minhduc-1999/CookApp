@@ -1,21 +1,36 @@
 import { Inject } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { NewPostEvent } from "modules/notification/events/NewPostNotification";
+import { PostCreatedEvent } from "domains/social/events/post.event";
+import { IUserSeService } from "modules/auth/adapters/out/services/userSe.service";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
 import { IFollowRepository } from "modules/user/interfaces/repositories/follow.interface";
+import * as lodash from "lodash";
+import { User } from "domains/social/user.domain";
 
-@EventsHandler(NewPostEvent)
-export class NewPostEventHandler implements IEventHandler<NewPostEvent> {
+@EventsHandler(PostCreatedEvent)
+export class PropagatePostCreatedEventHandler
+  implements IEventHandler<PostCreatedEvent>
+{
   constructor(
     @Inject("IFeedRepository")
     private _feedRepository: IFeedRepository,
     @Inject("IFollowRepository")
     private _followRepo: IFollowRepository,
-  ) { }
+    @Inject("IUserSeService")
+    private _userSeService: IUserSeService
+  ) {}
 
-  async handle(event: NewPostEvent): Promise<void> {
+  async handle(event: PostCreatedEvent): Promise<void> {
+    const { post, author } = event;
     const [followers, _] = await this._followRepo.getFollowers(event.author.id);
-    followers.push(event.author)
-    await this._feedRepository.pushNewPost(event.post, followers)
+    const relatedUser = (
+      await this._userSeService.findManyByInterestsTopic(post.tags)
+    ).map((id) => new User({ id }));
+    const receiver = lodash.uniqBy(
+      [...followers, ...relatedUser, author],
+      "id"
+    );
+
+    this._feedRepository.pushNewPost(post, receiver);
   }
 }

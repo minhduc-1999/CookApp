@@ -7,6 +7,7 @@ import { FoodIngredientEntity } from "./foodIngredient.entity";
 import { RecipeStepEntity } from "./recipeStep.entity";
 import { UserEntity } from "../../entities/social/user.entity";
 import { PostEntity } from "../../entities/social/post.entity";
+import { FoodVoteEntity } from "./foodVote.entity";
 
 @Entity({ name: "foods" })
 export class FoodEntity extends AbstractEntity {
@@ -28,6 +29,9 @@ export class FoodEntity extends AbstractEntity {
   @Column({ name: "video_url", nullable: true })
   videoUrl: string;
 
+  @Column({name: "rating", nullable: true, type: "float4"})
+  rating: number
+  
   @OneToMany(() => FoodIngredientEntity, (foodIng) => foodIng.food, {
     cascade: ["insert"],
   })
@@ -47,6 +51,9 @@ export class FoodEntity extends AbstractEntity {
 
   @OneToMany(() => PostEntity, post => post.foodRef)
   referredPosts: PostEntity[]
+
+  @OneToMany(() => FoodVoteEntity, vote => vote.food)
+  votes: FoodVoteEntity[]
 
   constructor(food: Food) {
     super(food);
@@ -71,7 +78,7 @@ export class FoodEntity extends AbstractEntity {
       photos: this.medias?.map((media) => media.toDomain()),
       steps: this.steps?.map((step) => step.toDomain()),
       ingredients: this.ingredients?.map((ing) => ing.toDomain()),
-      author: this.author?.toDomain(),
+      author: this.author?.toDomain()
     });
   }
 

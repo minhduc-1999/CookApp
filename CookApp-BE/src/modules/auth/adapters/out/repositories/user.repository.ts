@@ -21,6 +21,11 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     super();
   }
 
+  async getUsersByIds(ids: string[]): Promise<User[]> {
+    const entities = await this._repo.findByIds(ids);
+    return entities?.map((e) => e.toDomain());
+  }
+
   async existAll(userIds: string[]): Promise<boolean> {
     if (userIds.length === 0) return false;
     const count = await this._repo.count({
@@ -58,8 +63,19 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     const user = await this._repo
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.account", "account")
+      .leftJoinAndSelect("account.role", "role")
+      .leftJoinAndSelect("role.permissions", "rolePms")
+      .leftJoinAndSelect("rolePms.permission", "permission")
       .where("account.email = :email", { email })
-      .select(["account", "user.id", "user.displayName", "user.avatar"])
+      .select([
+        "account",
+        "user.id",
+        "user.displayName",
+        "user.avatar",
+        "role",
+        "rolePms",
+        "permission",
+      ])
       .getOne();
     return user?.toDomain();
   }
@@ -68,8 +84,19 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     const user = await this._repo
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.account", "account")
+      .leftJoinAndSelect("account.role", "role")
+      .leftJoinAndSelect("role.permissions", "rolePms")
+      .leftJoinAndSelect("rolePms.permission", "permission")
       .where("account.username = :username", { username })
-      .select(["user.id", "user.displayName", "user.avatar", "account"])
+      .select([
+        "user.id",
+        "user.displayName",
+        "user.avatar",
+        "account",
+        "role",
+        "rolePms",
+        "permission",
+      ])
       .getOne();
     return user?.toDomain();
   }
@@ -79,11 +106,22 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       .createQueryBuilder("user")
       .leftJoinAndSelect("user.account", "account")
       .leftJoinAndSelect("account.role", "role")
+      .leftJoinAndSelect("role.permissions", "rolePms")
+      .leftJoinAndSelect("rolePms.permission", "permission")
       .where("user.id = :id", { id })
-      .select(["user.id", "user.displayName", "role", "user.avatar", "account"])
+      .select([
+        "user.id",
+        "user.displayName",
+        "role",
+        "rolePms",
+        "user.avatar",
+        "account",
+        "permission",
+      ])
       .getOne();
     return user?.toDomain();
   }
+
   async updateUserProfile(user: User): Promise<void> {
     const queryRunner = this.tx?.getRef() as QueryRunner;
     if (queryRunner && !queryRunner.isReleased) {

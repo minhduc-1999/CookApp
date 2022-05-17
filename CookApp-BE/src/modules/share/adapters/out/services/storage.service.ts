@@ -5,7 +5,7 @@ import { ConfigService } from "nestjs-config";
 import { Bucket } from "@google-cloud/storage";
 import { addFilePrefix, getMimeType, getNameFromPath } from "utils";
 import { IStorageProvider } from "./provider.service";
-import { CommentMedia, Media } from "domains/social/media.domain";
+import { Media } from "domains/social/media.domain";
 import { MediaType } from "enums/social.enum";
 import { isNil } from "lodash";
 
@@ -27,7 +27,7 @@ export interface IStorageService {
       | "album"
       | "avatar"
   ): Promise<string[]>;
-  getDownloadUrls(mediaArr: CommentMedia[]): Promise<CommentMedia[]>;
+  getDownloadUrls(mediaArr: Media[]): Promise<Media[]>;
   deleteFiles(medias: Media[]): Promise<Media[]>;
 }
 
@@ -71,8 +71,10 @@ export class FireBaseService implements IStorageService {
         file
           .delete({ ignoreNotFound: true })
           .then((res) => {
-            if (res[0].statusCode === 204) return media;
-            else return null;
+            if (res[0].statusCode === 204) 
+              return media;
+            else 
+              return null;
           })
           .catch((err) => {
             this.logger.error(err);
@@ -87,7 +89,7 @@ export class FireBaseService implements IStorageService {
     });
   }
 
-  async getDownloadUrls(mediaArr: CommentMedia[]): Promise<CommentMedia[]> {
+  async getDownloadUrls(mediaArr: Media[]): Promise<Media[]> {
     if (!mediaArr) return [];
     return mediaArr.map((media) => {
       if (!media.key) return null;

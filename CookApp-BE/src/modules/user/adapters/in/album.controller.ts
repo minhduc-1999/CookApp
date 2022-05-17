@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp } from "@nestjs/common";
+import { Body, Controller, Get, Param, ParseUUIDPipe, Patch, Post as PostHttp, UseGuards } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiNotFoundResponse, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -7,6 +7,7 @@ import {
   ApiCreatedResponseCustom,
   ApiFailResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
@@ -22,6 +23,7 @@ import { GetAlbumDetailResponse } from "modules/user/useCases/getAlbumDetail/get
 @Controller("users/albums")
 @ApiTags("User/Album")
 @ApiBearerAuth()
+@RequirePermissions("manage_album")
 export class AlbumController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
 
@@ -29,7 +31,8 @@ export class AlbumController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreateAlbumResponse, "Create album successfully")
   @HttpRequestTransaction()
-  async createPost(
+  @RequirePermissions("create_album")
+  async createAlbum(
     @Body() body: CreateAlbumRequest,
     @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
@@ -44,7 +47,8 @@ export class AlbumController {
   @ApiCreatedResponseCustom(EditAlbumResponse, "Edit album successfully")
   @HttpRequestTransaction()
   @ApiNotFoundResponse({ description: "Album not found" })
-  async editPost(
+  @RequirePermissions("edit_album")
+  async editAlbum(
     @Body() body: EditAlbumRequest,
     @HttpUserReq() user: User,
     @Param("albumId", ParseUUIDPipe) albumId: string,
@@ -60,7 +64,8 @@ export class AlbumController {
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(GetAlbumDetailResponse, "Get album successfully")
   @ApiNotFoundResponse({ description: "Album not found" })
-  async getPostById(
+  @RequirePermissions("read_album")
+  async getAlbumDetail(
     @Param("albumId", ParseUUIDPipe) albumId: string,
     @HttpUserReq() user: User
   ): Promise<Result<GetAlbumDetailResponse>> {

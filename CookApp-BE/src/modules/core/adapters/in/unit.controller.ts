@@ -11,6 +11,7 @@ import {
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
+import { RequirePermissions } from "decorators/roles.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
@@ -21,12 +22,14 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("units")
 @ApiTags("Units")
 @ApiBearerAuth()
+@RequirePermissions("manage_unit")
 export class UnitController {
   constructor(private _queryBus: QueryBus) {}
 
   @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetUnitsResponse, "Get units successfully")
+  @RequirePermissions("read_unit")
   async getUnits(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,

@@ -1,5 +1,5 @@
 import { Inject } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
 import { Image } from "domains/social/media.domain";
@@ -12,7 +12,7 @@ import { Food } from "domains/core/food.domain";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { RecipeStep } from "domains/core/recipeStep.domain";
 import { FoodIngredient } from "domains/core/ingredient.domain";
-import { IFoodSeService } from "modules/core/adapters/out/services/foodSe.service";
+import { FoodCreatedEvent } from "domains/core/events/food.event";
 
 export class CreateFoodCommand extends BaseCommand {
   req: CreateFoodRequest;
@@ -31,8 +31,7 @@ export class CreateFoodCommandHandler
     private _storageService: IStorageService,
     @Inject("IFoodRepository")
     private _foodRepo: IFoodRepository,
-    @Inject("IFoodSeService")
-    private _foodSeService: IFoodSeService
+    private _eventBus: EventBus
   ) {}
   async execute(command: CreateFoodCommand): Promise<CreateFoodResponse> {
     const { req, user, tx } = command;
@@ -86,9 +85,7 @@ export class CreateFoodCommandHandler
 
     const savedFood = await this._foodRepo.setTransaction(tx).insertFood(food);
 
-    console.log(savedFood);
-
-    await this._foodSeService.insertNewFood(savedFood);
+    this._eventBus.publish(new FoodCreatedEvent(savedFood))
 
     return new CreateFoodResponse(savedFood.id);
   }

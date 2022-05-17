@@ -3,6 +3,7 @@ import { Column, Entity, OneToOne } from "typeorm";
 import { IInteractable } from "../../domains/interfaces/IInteractable.interface";
 import { PostEntity } from "./post.entity";
 import { RecipeStepEntity } from "../../entities/core/recipeStep.entity";
+import { AlbumEntity } from "./album.entity";
 
 @Entity({ name: "interactions" })
 export class InteractionEntity extends AbstractEntity {
@@ -20,6 +21,9 @@ export class InteractionEntity extends AbstractEntity {
 
   @OneToOne(() => PostEntity, (post) => post.interaction)
   post?: PostEntity;
+
+  @OneToOne(() => AlbumEntity, (album) => album.interaction)
+  album?: AlbumEntity;
 
   @OneToOne(() => RecipeStepEntity, (recipe) => recipe.interaction, {
     cascade: ["insert"],

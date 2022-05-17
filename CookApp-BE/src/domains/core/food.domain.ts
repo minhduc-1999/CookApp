@@ -25,6 +25,8 @@ export class Food extends Audit {
 
   author: User
 
+  rating: number
+
   isValidFood(): boolean {
     if (this.photos?.length < 1)
       return false
@@ -45,5 +47,6 @@ export class Food extends Audit {
     this.videoUrl = food?.videoUrl
     this.url = food?.url
     this.author = food?.author
+    this.rating = food?.rating
   }
 }
