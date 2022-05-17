@@ -17,10 +17,11 @@ import { User } from "domains/social/user.domain";
 import { ChooseInterestsCommand } from "modules/user/useCases/chooseInterests";
 import { ChooseInterestsRequest } from "modules/user/useCases/chooseInterests/chooseInterestsRequest";
 import { ChooseInterestsResponse } from "modules/user/useCases/chooseInterests/chooseInterestsResponse";
+import { GetInterestedTopicsQuery } from "modules/user/useCases/getInterestedTopics";
+import { GetInterestedTopicsResponse } from "modules/user/useCases/getInterestedTopics/getInterestedTopicsResponse";
 import { GetTopicsQuery } from "modules/user/useCases/getTopics";
 import { GetTopicsRequest } from "modules/user/useCases/getTopics/getTopicsRequest";
 import { GetTopicsResponse } from "modules/user/useCases/getTopics/getTopicsResponse";
-import { GetWallPostsResponse } from "modules/user/useCases/getWallPosts/getWallPostsResponse";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 
 @Controller("topics")
@@ -33,14 +34,28 @@ export class TopicController {
   @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetTopicsResponse, "Get topics successfully")
-  @RequirePermissions('read_topic')
+  @RequirePermissions("read_topic")
   async getTopics(
     @Query(new ParseHttpRequestPipe<typeof GetTopicsRequest>())
     query: GetTopicsRequest,
     @HttpUserReq() user: User
-  ): Promise<Result<GetWallPostsResponse>> {
-    const postsQuery = new GetTopicsQuery(user, query);
-    const result = await this._queryBus.execute(postsQuery);
+  ): Promise<Result<GetTopicsResponse>> {
+    const getTopicsQuery = new GetTopicsQuery(user, query);
+    const result = await this._queryBus.execute(getTopicsQuery);
+    return Result.ok(result, {
+      messages: ["Get topics successfully"],
+    });
+  }
+
+  @Get("interested")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(GetInterestedTopicsResponse, "Get topics successfully")
+  @RequirePermissions("read_topic")
+  async getInterestedTopics(
+    @HttpUserReq() user: User
+  ): Promise<Result<GetInterestedTopicsResponse>> {
+    const query = new GetInterestedTopicsQuery(user);
+    const result = await this._queryBus.execute(query);
     return Result.ok(result, {
       messages: ["Get topics successfully"],
     });
@@ -50,7 +65,7 @@ export class TopicController {
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(ChooseInterestsResponse, "Successfully")
   @HttpRequestTransaction()
-  @RequirePermissions('read_topic')
+  @RequirePermissions("read_topic")
   async chooseInterests(
     @Body() body: ChooseInterestsRequest,
     @HttpUserReq() user: User,

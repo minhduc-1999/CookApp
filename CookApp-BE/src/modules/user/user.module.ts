@@ -58,6 +58,7 @@ import { GetAlbumDetailQueryHandler } from "./useCases/getAlbumDetail";
 import { GetAlbumsQueryHandler } from "./useCases/getAlbums";
 import { GetCommentsQueryHandler } from "./useCases/getComments";
 import { GetFeedPostsQueryHandler } from "./useCases/getFeedPosts";
+import { GetInterestedTopicsQueryHandler } from "./useCases/getInterestedTopics";
 import { GetPostDetailQueryHandler } from "./useCases/getPostDetail";
 import { GetProfileQueryHandler } from "./useCases/getProfile";
 import { GetSavedPostsQueryHandler } from "./useCases/getSavedPosts";
@@ -100,7 +101,8 @@ const queryHandlers = [
   GetSavedPostsQueryHandler,
   GetAlbumsQueryHandler,
   GetAlbumDetailQueryHandler,
-  GetTopicsQueryHandler
+  GetTopicsQueryHandler,
+  GetInterestedTopicsQueryHandler
 ];
 const services = [
   {

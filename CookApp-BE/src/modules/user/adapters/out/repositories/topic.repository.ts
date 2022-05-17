@@ -34,11 +34,12 @@ export class TopicRepository
     const queryRunner = this.tx.getRef() as QueryRunner;
     if (queryRunner && !queryRunner.isReleased) {
       const topicIds = topics.map((topic) => topic.id);
-      await this._useTopicRepo.createQueryBuilder("userTopic", queryRunner)
+      await this._useTopicRepo
+        .createQueryBuilder("userTopic", queryRunner)
         .where("user_id = :userId", { userId: user.id })
         .andWhere("topic_id IN (:...topicIds)", { topicIds })
         .softDelete()
-        .execute()
+        .execute();
     }
   }
 
