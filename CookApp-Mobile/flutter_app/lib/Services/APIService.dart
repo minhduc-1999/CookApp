@@ -42,6 +42,7 @@ import 'package:tastify/Model/RegisterRequestModel.dart';
 import 'package:tastify/Model/RegisterRespondModel.dart';
 import 'package:tastify/Model/ResendEmailRequestModel.dart';
 import 'package:tastify/Model/SavedPostRespondModel.dart';
+import 'package:tastify/Model/TagsRespondModel.dart';
 import 'package:tastify/Model/TotalNewMessageRespondModel.dart';
 import 'package:tastify/Model/UnitsRespondModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
@@ -729,5 +730,18 @@ class APIService {
     print('ln');
     return chatBotRespondModel(respone.body);
 
+  }
+  static Future<TagsRespondModel> getTags() async {
+    var url = Uri.parse(Config.apiURL +
+        Config.topicsAPI)
+        .replace(
+        queryParameters: <String, String>{'offset': '0', 'limit': '10'});
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return tagsRespondModel(respone.body);
   }
 }

@@ -10,3 +10,4 @@ const backGroundUnreadNotiColor = Color.fromARGB(255, 231, 243, 255);
 const customYellowColor = Color.fromRGBO(252, 186, 3, 1);
 const totalNewBackgroundColor = Color.fromRGBO(121, 153, 57, 1);
 const starColor = Color.fromARGB(255, 254, 186, 27);
+const int defaultTagsColor = 4285309999;

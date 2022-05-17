@@ -29,7 +29,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.2
   cached_network_image: ^3.1.0
-  font_awesome_flutter: ^9.1.0
+  font_awesome_flutter: ^10.1.0
   flare_flutter: ^3.0.1
   api_cache_manager: ^1.0.2
   image_picker: ^0.8.4+4
@@ -61,6 +61,7 @@ dependencies:
   flutter_observer: ^2.0.0
   accordion: ^2.1.2
   rating_bar_flutter: ^1.0.0
+  string_to_hex: ^0.2.2
 dev_dependencies:
   flutter_test:
     sdk: flutter

@@ -155,7 +155,7 @@ class _FoodWidgetState extends State<FoodWidget> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceAround,
                   children: [
-                    GestureDetector(
+                    rating > 0 ? GestureDetector(
                       onTap: (){
                         Navigator.push(
                             context,
@@ -183,7 +183,7 @@ class _FoodWidgetState extends State<FoodWidget> {
                                   );
                                 })).then(updateRating);
                       },
-                      child: Row(
+                      child:  Row(
                         children: [
                           RatingBarFlutter.readOnly(
                             initialRating: rating - rating.floor() > 0 ? rating.floor() + 0.5 : rating ,
@@ -200,7 +200,7 @@ class _FoodWidgetState extends State<FoodWidget> {
                           GestureDetector(child: Text(rating.toStringAsPrecision(2))),
                         ],
                       ),
-                    ),
+                    ) : Text("No ratings"),
 
                     SizedBox(width: 15,),
                     GestureDetector(
@@ -256,6 +256,6 @@ class _FoodWidgetState extends State<FoodWidget> {
                 secondaryAnimation,
                 child) {
               return FadeTransition(opacity: animation, child: child,);
-            }));
+            })).then(updateRating);
   }
 }

@@ -21,8 +21,9 @@ class RatingActivity extends StatefulWidget {
 }
 
 class _RatingActivityState extends State<RatingActivity> {
-  UserVoteRespondModel userVote;
+
   List<Votes> votes;
+  UserVoteRespondModel userVote;
   bool voted = false;
   double userRating = 0;
   bool isAPIcallProcess = false;
@@ -104,88 +105,8 @@ class _RatingActivityState extends State<RatingActivity> {
         : Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              RatingBarFlutter(
-                initialRating: userRating,
-                onRatingChanged: (rating) =>
-                    setState(() => userRating = rating),
-                filledIcon: Icons.star,
-                emptyIcon: Icons.star_border,
-                isHalfAllowed: false,
-                aligns: Alignment.center,
-                filledColor: starColor,
-                emptyColor: starColor,
-                halfFilledColor: starColor,
-                size: 36,
-              ),
-              Padding(
-                padding: const EdgeInsets.only(
-                    left: 15, right: 15, top: 8, bottom: 8),
-                child: TextField(
-                  controller: ratingController,
-                  minLines: 1,
-                  maxLines: 4,
-                  cursorColor: Colors.black,
-                  decoration: InputDecoration(
-                    labelText: "Comment",
-                    labelStyle: TextStyle(
-                        color: Colors.black.withOpacity(0.7), fontSize: 14),
-                    floatingLabelBehavior: FloatingLabelBehavior.auto,
-                    hintStyle: TextStyle(fontSize: 14),
-                    fillColor: backGroundFoodScreenColor,
-                    filled: true,
-                    focusedBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.black, width: 0.5),
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    border: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.black, width: 0.5),
-                      borderRadius: BorderRadius.circular(25.0),
-                    ),
-                    contentPadding:
-                        EdgeInsets.only(left: 15, bottom: 5, top: 5, right: 15),
-                  ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () async{
-                  setState(() {
-                    isAPIcallProcess = true;
-                  });
-                  if (!voted) {
-                    await APIService.ratingFood(widget.foodId, RatingFoodRequestModel(star: userRating,comment: ratingController.text));
-                  } else {
-                    await APIService.editRatingFood(widget.foodId, RatingFoodRequestModel(star: userRating,comment: ratingController.text));
-                  }
-                  var votesData = await APIService.getVotes(widget.foodId);
-                  setState(() {
-                    isAPIcallProcess = false;
-                    voted = true;
-                    votes = votesData.data.votes;
-                  });
-                },
-                child: Container(
-                  decoration: BoxDecoration(
-                      color: appPrimaryColor,
-                      borderRadius: BorderRadius.all(Radius.circular(20))),
-                  child: Padding(
-                    padding: const EdgeInsets.only(
-                        top: 10, bottom: 10, left: 25, right: 25),
-                    child: Text(
-                      "Rate Food",
-                      style: TextStyle(color: Colors.white, fontSize: 16),
-                    ),
-                  ),
-                ),
-              ),
-              SizedBox(
-                height: 10,
-              ),
-              Divider(
-                height: 2,
-                thickness: 0.7,
-              ),
+
+
               votes.length > 0
                   ? Expanded(
                       child: ListView.builder(

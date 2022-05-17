@@ -8,6 +8,8 @@ import 'package:onesignal_flutter/onesignal_flutter.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
+
+import 'package:tastify/UploadScreen/RecommendedPostActivity.dart';
 import 'dart:convert';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tastify/UploadScreen/UploadActivity.dart';
@@ -73,6 +75,8 @@ Future<void> main() async {
     _defaultHome = HomeActivity(
       auth: Auth(),
     );
+    //_defaultHome = RecommendedPostActivity();
+    //_defaultHome = UploadActivity();
   }
   runApp(MyApp());
 }

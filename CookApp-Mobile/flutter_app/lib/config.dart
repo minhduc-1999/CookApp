@@ -29,7 +29,7 @@ class Config {
   static const String userFeedAPI = "/api/users/feeds/posts";
   static const String foodAPI = "/api/foods";
   static const String resendEmailAPI = "/api/resend-email-verification";
-
+  static const String topicsAPI = "/api/topics";
   static const String ingredientsAPI = "/api/ingredients";
   static const String unitsAPI = "/api/units";
   static const String statusMessagesAPI = "/api/messages/status";
@@ -47,5 +47,7 @@ class Config {
   static const String postReactType = "POST";
   static const String imageReactType = "POST_MEDIA";
   static const String albumReactType = "ALBUM";
+  static const String postRecommendType = "RECOMMENDATION";
+  static const String postMomentType = "MOMENT";
   static const String textType = "TEXT";
 }

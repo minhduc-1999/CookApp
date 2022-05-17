@@ -11,7 +11,8 @@ import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart' as loca;
-
+import 'package:tastify/UploadScreen/TagsActivity.dart';
+import 'package:string_to_hex/string_to_hex.dart';
 import '../constants.dart';
 
 class UploadActivity extends StatefulWidget {
@@ -34,7 +35,11 @@ class _UploadActivityState extends State<UploadActivity> {
   int currentPage = 0;
   int lastPage;
   int maxSelection = 1;
+
+  List<String> tagsInit = [];
+  List<String> userTags = [];
   Placemark userLocation;
+
   _handleScrollEvent(ScrollNotification scroll) {
     if (scroll.metrics.pixels / scroll.metrics.maxScrollExtent > 0.33) {
       if (currentPage != lastPage) {
@@ -78,15 +83,30 @@ class _UploadActivityState extends State<UploadActivity> {
     super.initState();
     _initLocation();
     _fetchPhotos();
+    _fetchTags();
   }
+
   _initLocation() async {
     Position position = await _determinePosition();
-    List<Placemark> placemarks = await placemarkFromCoordinates(position.latitude, position.longitude);
+    List<Placemark> placemarks =
+        await placemarkFromCoordinates(position.latitude, position.longitude);
 
     setState(() {
       userLocation = placemarks[0];
     });
   }
+
+  _fetchTags() async {
+    var dataTags = await APIService.getTags();
+    List<String> temp = [];
+    for (var i in dataTags.data.topics) {
+      temp.add(i.title);
+    }
+    setState(() {
+      tagsInit = temp;
+    });
+  }
+
   Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
@@ -127,6 +147,7 @@ class _UploadActivityState extends State<UploadActivity> {
     // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
   }
+
   @override
   Widget build(BuildContext context) {
     return files.length == 0
@@ -204,100 +225,231 @@ class _UploadActivityState extends State<UploadActivity> {
                   }),
             ))
         : Scaffold(
-              resizeToAvoidBottomInset: false,
-              appBar: AppBar(
-                  backgroundColor: appPrimaryColor,
-                  leading: IconButton(
-                    icon: Icon(Icons.arrow_back, color: Colors.white),
-                    onPressed: () {
-                      setState(() {
-                        files.clear();
-                      });
-                    },
-                  ),
-                  title: const Text(
-                    "New Post",
-                    style: const TextStyle(color: Colors.white),
-                  ),
-                  actions: <Widget>[
-                    FlatButton(
-                        onPressed: () async {
-                          if (files != null) {
-                            setState(() {
-                              isAPIcallProcess = true;
-                            });
-                            List<String> names = [];
-                            for (var i in files) {
-                              //names.add(i.path.substring(i.path.lastIndexOf("/")+1));
-                              names.add(
-                                  i.path.substring(i.path.lastIndexOf("/") + 1));
-                            }
-                            List<String> objectName = [];
-                            List<String> video = [];
-                            var response = await APIService.getPresignedLink(
-                                PresignedLinkedRequestModel(fileNames: names));
-                            //uploadImage(response, objectName);
-                            for (int i = 0; i < response.data.items.length; i++) {
-                              await APIService.uploadImage(
-                                  files[i], response.data.items[i].signedLink);
-                              objectName.add(response.data.items[i].objectName);
-                            }
-                            print("object name " + objectName.length.toString());
-                            await APIService.uploadPost(PostRequestModel(
-                                content: descriptionController.text,
-                                images: objectName,
-                                videos: video,
-                                location: locationController.text,
-                                kind: "MOMENT",
-                                name: "string"));
-                            setState(() {
-                              isAPIcallProcess = false;
-                            });
-                            Navigator.of(context).pop();
-                          }
-                        },
-                        child: IconButton(
-                            icon: Icon(Icons.send,
-                                color: Colors.white))
-                        )
-                  ]),
-              body: ProgressHUD(
-                child: Form(
-                  key: globalFormKey,
-                  child: _uploadUI(context),
+            resizeToAvoidBottomInset: false,
+            appBar: AppBar(
+                backgroundColor: appPrimaryColor,
+                leading: IconButton(
+                  icon: Icon(Icons.arrow_back, color: Colors.white),
+                  onPressed: () {
+                    setState(() {
+                      files.clear();
+                      userTags.clear();
+                    });
+                  },
                 ),
-                inAsyncCall: isAPIcallProcess,
-                key: UniqueKey(),
-                opacity: 0.3,
-              )
-            );
-
+                title: const Text(
+                  "New Post",
+                  style: const TextStyle(color: Colors.white),
+                ),
+                actions: <Widget>[
+                  FlatButton(
+                      onPressed: () async {
+                        if (files != null) {
+                          setState(() {
+                            isAPIcallProcess = true;
+                          });
+                          List<String> names = [];
+                          for (var i in files) {
+                            //names.add(i.path.substring(i.path.lastIndexOf("/")+1));
+                            names.add(
+                                i.path.substring(i.path.lastIndexOf("/") + 1));
+                          }
+                          List<String> objectName = [];
+                          List<String> video = [];
+                          var response = await APIService.getPresignedLink(
+                              PresignedLinkedRequestModel(fileNames: names));
+                          //uploadImage(response, objectName);
+                          for (int i = 0; i < response.data.items.length; i++) {
+                            await APIService.uploadImage(
+                                files[i], response.data.items[i].signedLink);
+                            objectName.add(response.data.items[i].objectName);
+                          }
+                          print("object name " + objectName.length.toString());
+                          await APIService.uploadPost(PostRequestModel(
+                              content: descriptionController.text,
+                              images: objectName,
+                              videos: video,
+                              location: locationController.text,
+                              tags: userTags,
+                              kind: "MOMENT",
+                              name: "string"));
+                          setState(() {
+                            isAPIcallProcess = false;
+                          });
+                          Navigator.of(context).pop();
+                        }
+                      },
+                      child: IconButton(
+                          icon: Icon(Icons.send, color: Colors.white)))
+                ]),
+            body: ProgressHUD(
+              child: Form(
+                key: globalFormKey,
+                child: _uploadUI(context),
+              ),
+              inAsyncCall: isAPIcallProcess,
+              key: UniqueKey(),
+              opacity: 0.3,
+            ));
   }
-  Widget _uploadUI(BuildContext context){
+
+  Widget _uploadUI(BuildContext context) {
     return ListView(
       children: <Widget>[
-        PostForm(
-          imageFile: files,
-          descriptionController: descriptionController,
-          locationController: locationController,
-          loading: uploading,
+        Column(
+
+          children: <Widget>[
+            uploading
+                ? LinearProgressIndicator()
+                : Padding(padding: EdgeInsets.only(top: 0.0)),
+            Divider(),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
+              children: <Widget>[
+                Container(
+                  height: 45.0,
+                  width: 45.0,
+                  child: AspectRatio(
+                    aspectRatio: 487 / 451,
+                    child: Container(
+                      decoration: BoxDecoration(
+                          image: DecorationImage(
+                        fit: BoxFit.fill,
+                        alignment: FractionalOffset.topCenter,
+                        image: FileImage(files[0]),
+                      )),
+                    ),
+                  ),
+                ),
+                Container(
+                  width: 250.0,
+                  child: TextField(
+                    controller: descriptionController,
+                    decoration: InputDecoration(
+                        hintText: "Write a caption...",
+                        border: InputBorder.none),
+                  ),
+                ),
+              ],
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.tag),
+              title: Container(
+                child: TextField(
+                  enableInteractiveSelection: false, //
+                  focusNode: new AlwaysDisabledFocusNode(),
+                  decoration: InputDecoration(
+                      hintText: "Tags", border: InputBorder.none),
+                )),
+
+              trailing: IconButton(
+                icon: Icon(Icons.attachment),
+                onPressed: () {
+                  return showModalBottomSheet(
+                    context: context,
+                    builder: (BuildContext context) {
+                      return TagsActivity(
+                        tags: this.tagsInit,
+                      );
+                    },
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                  ).then((value){
+
+                    setState(() {
+                      userTags.add(value);
+
+                    });
+
+                  });
+                },
+              ),
+            ),
+
+            userTags.length <= 0 ?Container(
+                ) : SizedBox(
+              height: 35,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                shrinkWrap: true,
+                itemCount: userTags.length,
+                separatorBuilder: (context, index) {
+                  return SizedBox(width: 5,);
+                },
+                itemBuilder: (context, index) {
+
+                  return Stack(
+                    children: [
+                      Container(
+                        child: Padding(
+                          padding: const EdgeInsets.only(left: 15, top: 8, bottom: 8, right: 15),
+                          child: Text(userTags[index], style: TextStyle(color: Colors.white),),
+                        ),
+                        decoration: BoxDecoration(
+                            color: userTags[index] != "Gymer" ? Color(StringToHex.toColor(userTags[index])): Color(defaultTagsColor) ,
+                            borderRadius: BorderRadius.circular(10)
+                        ),
+                      ),
+                      Positioned(
+                          top: 0,
+                          right: 3,
+                          child: GestureDetector(
+                            onTap: () {
+                              setState(() {
+                                userTags.remove(userTags[index]);
+                              });
+                            },
+                            child: Container(
+                              height: 15,
+                              width: 15,
+                              child: Icon(
+                                Icons.clear,
+                                color: Colors.white
+                                    .withOpacity(0.8),
+                                size: 15,
+                              ),
+                            ),
+                          )),
+                    ],
+                  );
+
+                },
+              ),
+            ),
+            Divider(),
+            ListTile(
+              leading: Icon(Icons.pin_drop),
+              title: Container(
+                width: 250.0,
+                child: TextField(
+                  controller: locationController,
+                  decoration: InputDecoration(
+                      hintText: "Where was this photo taken?",
+                      border: InputBorder.none),
+                ),
+              ),
+            )
+          ],
         ),
         Divider(),
-        (userLocation == null) ? Container()
-            :  SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: EdgeInsets.only(right: 5.0, left: 5.0),
-            child: Row(
-              children: <Widget>[
-                //buildLocationButton(location.street),
-                buildLocationButton(userLocation.locality),
-                buildLocationButton(userLocation.administrativeArea),
-                buildLocationButton(userLocation.country),
-              ],
-            ))
+        (userLocation == null)
+            ? Container()
+            : SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                padding: EdgeInsets.only(right: 5.0, left: 5.0),
+                child: Row(
+                  children: <Widget>[
+                    //buildLocationButton(location.street),
+                    buildLocationButton(userLocation.locality),
+                    buildLocationButton(userLocation.administrativeArea),
+                    buildLocationButton(userLocation.country),
+                  ],
+                ))
       ],
     );
   }
+
   _getFile(AssetEntity asset) async {
     File temp = await asset.file;
     setState(() {
@@ -334,7 +486,6 @@ class _UploadActivityState extends State<UploadActivity> {
       return Container();
     }
   }
-
 }
 
 class PhotoPickerItem extends StatefulWidget {
@@ -385,12 +536,14 @@ class PostForm extends StatelessWidget {
   final TextEditingController descriptionController;
   final TextEditingController locationController;
   final bool loading;
+  final List<String> tagsInit;
 
   PostForm(
       {this.imageFile,
       this.descriptionController,
       this.loading,
-      this.locationController});
+      this.locationController,
+      this.tagsInit});
 
   Widget build(BuildContext context) {
     return Column(
@@ -429,6 +582,33 @@ class PostForm extends StatelessWidget {
         ),
         Divider(),
         ListTile(
+          leading: Icon(Icons.tag),
+          title: Container(
+            child: TextField(
+              enableInteractiveSelection: false, //
+              focusNode: new AlwaysDisabledFocusNode(),
+              decoration:
+                  InputDecoration(hintText: "Tags", border: InputBorder.none),
+            ),
+          ),
+          trailing: IconButton(
+            icon: Icon(Icons.attachment),
+            onPressed: () {
+              return showModalBottomSheet(
+                context: context,
+                builder: (BuildContext context) {
+                  return TagsActivity(
+                    tags: this.tagsInit,
+                  );
+                },
+                isScrollControlled: true,
+                backgroundColor: Colors.transparent,
+              );
+            },
+          ),
+        ),
+        Divider(),
+        ListTile(
           leading: Icon(Icons.pin_drop),
           title: Container(
             width: 250.0,
@@ -440,8 +620,12 @@ class PostForm extends StatelessWidget {
             ),
           ),
         )
-
       ],
     );
   }
+}
+
+class AlwaysDisabledFocusNode extends FocusNode {
+  @override
+  bool get hasFocus => false;
 }
