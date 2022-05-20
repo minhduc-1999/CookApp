@@ -166,13 +166,13 @@ class APIService {
     return userRespondModel(respone.body);
   }
 
-  static Future<WallPostRespondModel> getUserWallPosts(String userId, int offset) async {
+  static Future<WallPostRespondModel> getUserWallPosts(String userId, int offset, String kind) async {
     var url = Uri.parse(Config.apiURL +
             Config.preUserWallAPI +
             userId +
             Config.endUserWallPostAPI)
         .replace(
-            queryParameters: <String, String>{'offset': offset.toString(), 'limit': '48', 'kind' : 'MOMENT'});
+            queryParameters: <String, String>{'offset': offset.toString(), 'limit': '12', 'kind' : kind});
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{

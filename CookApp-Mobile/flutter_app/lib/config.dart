@@ -49,5 +49,6 @@ class Config {
   static const String albumReactType = "ALBUM";
   static const String postRecommendType = "RECOMMENDATION";
   static const String postMomentType = "MOMENT";
+  static const String postFoodShareType = "FOOD_SHARE";
   static const String textType = "TEXT";
 }

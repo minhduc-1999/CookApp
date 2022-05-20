@@ -8,12 +8,15 @@ import 'package:geocoding/geocoding.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
+import 'package:string_to_hex/string_to_hex.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:location/location.dart' as loca;
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Services/APIService.dart';
+import 'package:tastify/UploadScreen/TagsActivity.dart';
+import 'package:tastify/config.dart';
 import '../constants.dart';
 
 class ShareFoodActivity extends StatefulWidget {
@@ -44,14 +47,28 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
 
+  List<String> tagsInit = [];
+  List<String> userTags = [];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _initLocation();
+    fetchTags();
     fetchData();
+
     fToast = FToast();
     fToast.init(context);
+  }
+  fetchTags() async {
+    var dataTags = await APIService.getTags();
+    List<String> temp = [];
+    for (var i in dataTags.data.topics) {
+      temp.add(i.title);
+    }
+    setState(() {
+      tagsInit = temp;
+    });
   }
 
   @override
@@ -73,7 +90,8 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
         actions: <Widget>[
           FlatButton(
               onPressed: () async {
-                if (files.length > 0) {
+                if (files.length > 0 && userTags.length > 0) {
+                  FocusScope.of(context).unfocus();
                   setState(() {
                     isAPIcallProcess = true;
                   });
@@ -99,7 +117,8 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         images: objectName,
                         videos: video,
                         location: locationController.text,
-                        kind: "MOMENT",
+                        tags: userTags,
+                        kind: Config.postFoodShareType,
                         name: "string",
                         foodRefId: widget.food.id),
                   );
@@ -107,8 +126,10 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                     isAPIcallProcess = false;
                   });
                   Navigator.of(context).pop();
-                } else {
+                } else if (files.length == 0) {
                   _showToast("You have to add photos first!", size);
+                } else if (userTags.length == 0){
+                  _showToast("You have to add tags first!", size);
                 }
               },
               child: IconButton(icon: Icon(Icons.send, color: Colors.white)))
@@ -276,6 +297,92 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         .toList(),
                   ))
                 : Container(),
+              ListTile(
+                leading: Icon(Icons.tag),
+                title: Container(
+                    child: TextField(
+                      enableInteractiveSelection: false, //
+                      focusNode: new AlwaysDisabledFocusNode(),
+                      decoration: InputDecoration(
+                          hintText: "Tags", border: InputBorder.none),
+                    )),
+
+                trailing: IconButton(
+                  icon: Icon(Icons.attachment),
+                  onPressed: () {
+                    FocusScope.of(context).unfocus();
+                    return showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return TagsActivity(
+                          tags: this.tagsInit,
+                        );
+                      },
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                    ).then((value){
+
+                      setState(() {
+                        userTags.add(value);
+
+                      });
+                      return FocusScope.of(context).unfocus();
+
+                    });
+                  },
+                ),
+              ),
+
+              userTags.length <= 0 ?Container(
+              ) : SizedBox(
+                height: 35,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemCount: userTags.length,
+                  separatorBuilder: (context, index) {
+                    return SizedBox(width: 5,);
+                  },
+                  itemBuilder: (context, index) {
+
+                    return Stack(
+                      children: [
+                        Container(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 15, top: 8, bottom: 8, right: 15),
+                            child: Text(userTags[index], style: TextStyle(color: Colors.white),),
+                          ),
+                          decoration: BoxDecoration(
+                              color: userTags[index] != "Gymer" ? Color(StringToHex.toColor(userTags[index])): Color(defaultTagsColor) ,
+                              borderRadius: BorderRadius.circular(10)
+                          ),
+                        ),
+                        Positioned(
+                            top: 0,
+                            right: 3,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  userTags.remove(userTags[index]);
+                                });
+                              },
+                              child: Container(
+                                height: 15,
+                                width: 15,
+                                child: Icon(
+                                  Icons.clear,
+                                  color: Colors.white
+                                      .withOpacity(0.8),
+                                  size: 15,
+                                ),
+                              ),
+                            )),
+                      ],
+                    );
+
+                  },
+                ),
+              ),
             ListTile(
               leading: Icon(Icons.comment),
               title: Container(
@@ -465,4 +572,9 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
       ingredients = temp;
     });
   }
+}
+
+class AlwaysDisabledFocusNode extends FocusNode {
+  @override
+  bool get hasFocus => false;
 }

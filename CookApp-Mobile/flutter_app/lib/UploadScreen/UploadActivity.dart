@@ -245,6 +245,7 @@ class _UploadActivityState extends State<UploadActivity> {
                   FlatButton(
                       onPressed: () async {
                         if (files != null) {
+                          FocusScope.of(context).unfocus();
                           setState(() {
                             isAPIcallProcess = true;
                           });
@@ -346,6 +347,7 @@ class _UploadActivityState extends State<UploadActivity> {
               trailing: IconButton(
                 icon: Icon(Icons.attachment),
                 onPressed: () {
+                  FocusScope.of(context).unfocus();
                   return showModalBottomSheet(
                     context: context,
                     builder: (BuildContext context) {
@@ -361,6 +363,7 @@ class _UploadActivityState extends State<UploadActivity> {
                       userTags.add(value);
 
                     });
+                    return FocusScope.of(context).unfocus();
 
                   });
                 },

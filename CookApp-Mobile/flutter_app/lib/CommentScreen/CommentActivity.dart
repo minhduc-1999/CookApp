@@ -1,9 +1,14 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:tastify/Model/CommentRequestModel.dart';
 import 'package:tastify/Model/CommentRespondModel.dart';
+import 'package:tastify/Model/PostDetailRespondModel.dart';
+import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/config.dart';
 import 'package:timeago/timeago.dart' as timeago;
@@ -33,6 +38,8 @@ class _CommentActivityState extends State<CommentActivity> {
   String replyFor = "";
   ScrollController _scrollController = ScrollController();
   bool showSpaceWhenScroll = false;
+  ImagePicker imagePicker = ImagePicker();
+  File file;
 
   _CommentActivityState(this.targetId, this.targetType, this.stepName);
 
@@ -64,6 +71,7 @@ class _CommentActivityState extends State<CommentActivity> {
   }
 
   Widget buildPage() {
+    final Size size = MediaQuery.of(context).size;
     return DraggableScrollableSheet(
         minChildSize: 0.5,
         maxChildSize: 0.9,
@@ -96,101 +104,149 @@ class _CommentActivityState extends State<CommentActivity> {
                   ),
                   Padding(
                     padding: MediaQuery.of(context).viewInsets,
-                    child: Container(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        children: [
-                          this.labelText != ""
-                              ? Padding(
-                                  padding: const EdgeInsets.only(top: 8.0),
-                                  child: Wrap(
-                                    spacing: 10,
-                                    children: [
-                                      Text(
-                                        labelText,
-                                        style: TextStyle(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12),
-                                      ),
-                                      GestureDetector(
-                                          onTap: () {
-                                            setState(() {
-                                              labelText = "";
-                                              replyFor = "";
-                                            });
-                                          },
-                                          child: Text(
-                                            "Cancel",
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Container(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              this.labelText != ""
+                                  ? Padding(
+                                      padding: const EdgeInsets.only(top: 8.0),
+                                      child: Wrap(
+                                        spacing: 10,
+                                        children: [
+                                          Text(
+                                            labelText,
                                             style: TextStyle(
                                                 fontWeight: FontWeight.bold,
-                                                fontSize: 12,
-                                                color: Colors.black
-                                                    .withOpacity(0.6)),
-                                          ))
-                                    ],
+                                                fontSize: 12),
+                                          ),
+                                          GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  labelText = "";
+                                                  replyFor = "";
+                                                });
+                                              },
+                                              child: Text(
+                                                "Cancel",
+                                                style: TextStyle(
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 12,
+                                                    color: Colors.black
+                                                        .withOpacity(0.6)),
+                                              ))
+                                        ],
+                                      ),
+                                    )
+                                  : Container(),
+                              Row(
+                                children: <Widget>[
+                                  // Button send image
+                                  Material(
+                                    child: Container(
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 1.0),
+                                      child: IconButton(
+                                        icon: Icon(Icons.image),
+                                        onPressed: () async {
+                                          XFile temp =
+                                              await imagePicker.pickImage(
+                                                  source: ImageSource.gallery);
+                                          setState(() {
+                                            file = File(temp.path);
+                                          });
+                                        },
+                                        color: appPrimaryColor,
+                                      ),
+                                    ),
+                                    color: Colors.white,
                                   ),
-                                )
-                              : Container(),
-                          Row(
-                            children: <Widget>[
-                              // Button send image
-                              Material(
-                                child: Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 1.0),
-                                  child: IconButton(
-                                    icon: Icon(Icons.image),
-                                    onPressed: () {},
-                                    color: appPrimaryColor,
-                                  ),
-                                ),
-                                color: Colors.white,
-                              ),
 
-                              // Edit text
-                              Flexible(
-                                child: Container(
-                                  child: TextFormField(
-                                    focusNode: focusNode,
-                                    style: TextStyle(fontSize: 15.0),
-                                    controller: _commentController,
-                                    decoration: InputDecoration.collapsed(
-                                      hintText: 'Type your message...',
+                                  // Edit text
+                                  Flexible(
+                                    child: Container(
+                                      child: TextFormField(
+                                        focusNode: focusNode,
+                                        style: TextStyle(fontSize: 15.0),
+                                        controller: _commentController,
+                                        decoration: InputDecoration.collapsed(
+                                          hintText: 'Type your message...',
+                                        ),
+                                      ),
                                     ),
                                   ),
-                                ),
-                              ),
 
-                              // Button send message
-                              Material(
-                                child: Container(
-                                  margin: EdgeInsets.symmetric(horizontal: 8.0),
-                                  child: IconButton(
-                                    icon: Icon(Icons.send),
-                                    onPressed: () {
-                                      setState(() {
-                                        showSpaceWhenScroll = true;
-                                      });
+                                  // Button send message
+                                  Material(
+                                    child: Container(
+                                      margin:
+                                          EdgeInsets.symmetric(horizontal: 8.0),
+                                      child: IconButton(
+                                        icon: Icon(Icons.send),
+                                        onPressed: () {
+                                          setState(() {
+                                            showSpaceWhenScroll = true;
+                                          });
 
-
-                                      addComment(
-                                          _commentController.text, replyFor);
-                                    },
-                                    color: appPrimaryColor,
+                                          addComment(_commentController.text,
+                                              replyFor,context);
+                                        },
+                                        color: appPrimaryColor,
+                                      ),
+                                    ),
+                                    color: Colors.white,
                                   ),
-                                ),
-                                color: Colors.white,
+                                ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
-                      width: double.infinity,
-                      height: labelText != "" ? 71.0 : 50.0,
-                      decoration: BoxDecoration(
-                          border: Border(
-                              top: BorderSide(
-                                  color: appPrimaryColor, width: 0.5)),
-                          color: Colors.white),
+                          width: double.infinity,
+                          height: labelText != "" ? 71.0 : 50.0,
+                          decoration: BoxDecoration(
+                              border: Border(
+                                  top: BorderSide(
+                                      color: appPrimaryColor, width: 0.5)),
+                              color: Colors.white),
+                        ),
+                        file != null
+                            ? Container(
+                                margin: EdgeInsets.all(5.0),
+                                width: size.width * 0.3,
+                                height: size.width * 0.3,
+                                child: ClipRRect(
+                                    borderRadius:
+                                        BorderRadius.all(Radius.circular(5.0)),
+                                    child: Stack(
+                                      children: <Widget>[
+                                        Image.file(file,
+                                            fit: BoxFit.cover, width: 1000.0),
+                                        Positioned(
+                                            top: 0,
+                                            right: 0,
+                                            child: GestureDetector(
+                                              onTap: () {
+                                                setState(() {
+                                                  file = null;
+                                                });
+                                              },
+                                              child: Container(
+                                                height: 35,
+                                                width: 35,
+                                                child: Icon(
+                                                  Icons.clear,
+                                                  color: Colors.white
+                                                      .withOpacity(0.8),
+                                                ),
+                                              ),
+                                            )),
+                                      ],
+                                    )),
+                              )
+                            : Container()
+                      ],
                     ),
                   ),
                 ],
@@ -258,6 +314,7 @@ class _CommentActivityState extends State<CommentActivity> {
         updateLabelText: this.updateLabelText,
         targetType: this.targetType,
         targetId: this.targetId,
+        medias: i.medias,
       ));
     }
     setState(() {
@@ -267,21 +324,31 @@ class _CommentActivityState extends State<CommentActivity> {
     });
   }
 
-  void addComment(String comment, String replyFor) async {
+  void addComment(String comment, String replyFor, BuildContext context) async {
     _commentController.clear();
+    File savedFile = file;
+    file = null;
+    List<String> objectName = [];
+    FocusScope.of(context).unfocus();
+    if (savedFile != null) {
+      List<String> names = [];
+      names.add(savedFile.path.substring(savedFile.path.lastIndexOf("/") + 1));
+      var response = await APIService.getPresignedLink(
+          PresignedLinkedRequestModel(fileNames: names));
+      await APIService.uploadImage(savedFile, response.data.items[0].signedLink);
+      objectName.add(response.data.items[0].objectName);
+    }
 
     await APIService.comment(CommentRequestModel(
-        targetId: targetId,
-        content: comment,
-        replyFor: replyFor,
-        targetType: targetType));
+      targetId: targetId,
+      content: comment,
+      replyFor: replyFor,
+      targetType: targetType,
+      images: objectName,
+    ));
     if (comments.length > 0) {
-      _scrollController.animateTo(
-          _scrollController
-              .position.maxScrollExtent,
-          duration:
-          Duration(milliseconds: 300),
-          curve: Curves.easeOut);
+      _scrollController.animateTo(_scrollController.position.maxScrollExtent,
+          duration: Duration(milliseconds: 300), curve: Curves.easeOut);
     }
     await fetchData();
   }
@@ -299,7 +366,7 @@ class Comment extends StatefulWidget {
   final Function updateLabelText;
   final String targetType;
   final String targetId;
-
+  final List<Medias> medias;
   Comment({
     this.displayName,
     this.userId,
@@ -312,6 +379,7 @@ class Comment extends StatefulWidget {
     this.updateLabelText,
     this.targetType,
     this.targetId,
+    this.medias
   });
 
   @override
@@ -384,6 +452,23 @@ class _CommentState extends State<Comment> {
                       ),
                     ),
                   ),
+                  widget.medias.length > 0 ? Container(
+                    margin: EdgeInsets.only(top: 5),
+                    width: size.width*0.6,
+                    height: size.width*0.4,
+                    decoration: BoxDecoration(
+                        borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                        image: DecorationImage(
+                          image: NetworkImage(
+                              widget.medias[0].url
+
+                          ),
+                          fit: BoxFit.cover,
+                        )
+                    ),
+                  )
+
+                      : Container(),
                   Container(
                     margin: EdgeInsets.only(left: 10, right: 10, top: 4),
                     child: Wrap(
@@ -447,6 +532,7 @@ class _CommentState extends State<Comment> {
                                       updateLabelText: widget.updateLabelText,
                                       targetType: widget.targetType,
                                       targetId: widget.targetId,
+                                      medias: i.medias,
                                     ));
                                   }
                                   setState(() {
@@ -519,7 +605,7 @@ class ChildComment extends StatelessWidget {
   final Function updateLabelText;
   final String targetType;
   final String targetId;
-
+  final List<Medias> medias;
   const ChildComment(
       {this.targetId,
       this.targetType,
@@ -531,7 +617,8 @@ class ChildComment extends StatelessWidget {
       this.id,
       this.focusNode,
       this.updateLabelText,
-      this.parentId});
+      this.parentId,
+      this.medias});
 
   @override
   Widget build(BuildContext context) {
@@ -592,6 +679,23 @@ class ChildComment extends StatelessWidget {
                     ),
                   ),
                 ),
+                medias.length > 0 ? Container(
+                  margin: EdgeInsets.only(top: 5),
+                  width: size.width*0.5,
+                  height: size.width/3,
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.all(Radius.circular(20.0)),
+                      image: DecorationImage(
+                        image: NetworkImage(
+                            medias[0].url
+
+                        ),
+                        fit: BoxFit.cover,
+                      )
+                  ),
+                )
+
+                    : Container(),
                 Container(
                   margin: EdgeInsets.only(left: 10, right: 10, top: 4),
                   child: Wrap(

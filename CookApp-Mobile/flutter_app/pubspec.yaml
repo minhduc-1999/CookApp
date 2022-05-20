@@ -33,7 +33,7 @@ dependencies:
   flare_flutter: ^3.0.1
   api_cache_manager: ^1.0.2
   image_picker: ^0.8.4+4
-  snippet_coder_utils: ^1.0.12
+  snippet_coder_utils: ^1.0.9
   photo_manager: ^0.6.0
   uuid: ^3.0.5
   timeago: ^3.1.0

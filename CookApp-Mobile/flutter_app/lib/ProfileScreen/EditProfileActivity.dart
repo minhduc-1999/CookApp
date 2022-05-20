@@ -37,6 +37,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   TextEditingController heightController = TextEditingController();
   TextEditingController weightController = TextEditingController();
   TextEditingController displayNameController = TextEditingController();
+  TextEditingController bioController = TextEditingController();
   FToast fToast;
   @override
   void initState() {
@@ -90,7 +91,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                   EditUserRequestModel profile = EditUserRequestModel(
                       displayName: displayNameController.text,
                       avatar: file != null ? objectName : user.data.avatar,
-
+                        bio: bioController.text,
                         height: int.parse(heightController.text != "" ? heightController.text : "0"),
                         weight: int.parse(weightController.text != "" ? weightController.text : "0"),
                         birthDate: DateTime.now().microsecondsSinceEpoch,
@@ -193,14 +194,16 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                 ],
               ),
             ),
-            buildName("First Name", "Enter your first name",
+            buildName("First Name",
                 firstNameController),
-            buildName("Last Name", "Enter your last name",
+            buildName("Last Name",
                 lastNameController),
-            buildName("Display Name", "Enter your display name",
+            buildName("Display Name",
                 displayNameController),
-            buildWeightAndHeight("Height (cm)", "cm", heightController),
-            buildWeightAndHeight("Weight (kg)", "kg", weightController),
+            buildName("Bio",
+                bioController),
+            buildWeightAndHeight("Height (cm)",  heightController),
+            buildWeightAndHeight("Weight (kg)", weightController),
             buildSexual()
           ],
         ),
@@ -208,12 +211,12 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
     );
   }
   Widget buildName(
-      String label, String hintText, TextEditingController controller) {
+      String label,  TextEditingController controller) {
     return TextField(
       controller: controller,
       decoration: InputDecoration(
           labelText: label,
-          hintText: hintText,
+
           hintStyle: TextStyle(
             fontSize: 16,
             color: Colors.grey.withOpacity(0.3),
@@ -222,13 +225,13 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   }
 
   Widget buildWeightAndHeight(
-      String label, String hintText, TextEditingController controller) {
+      String label, TextEditingController controller) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
           labelText: label,
-          hintText: hintText,
+
           hintStyle: TextStyle(
             fontSize: 16,
             color: Colors.grey.withOpacity(0.3),

@@ -117,6 +117,7 @@ class _LoginActivityState extends State<LoginActivity> {
         }, (onSavedVal) {
           username = onSavedVal;
         },
+            showPrefixIcon: true,
             prefixIcon: const Icon(Icons.person),
             prefixIconColor: appPrimaryColor,
             borderRadius: 10,
@@ -139,6 +140,7 @@ class _LoginActivityState extends State<LoginActivity> {
         }, (onSavedVal) {
           password = onSavedVal;
         },
+            showPrefixIcon: true,
             prefixIcon: const Icon(Icons.vpn_key_rounded),
             prefixIconColor: appPrimaryColor,
             borderRadius: 10,

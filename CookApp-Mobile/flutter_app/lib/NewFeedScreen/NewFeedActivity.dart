@@ -181,29 +181,32 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
     var listPosts = await APIService.getNewFeed(offset);
     List<Post> tempData = [];
     for (var i in listPosts.data.posts) {
-      tempData.add(Post(
-        id: i.id,
-        userId: i.author.id,
-        location: i.location,
-        content: i.content,
-        kind: i.kind,
-        medias: i.medias,
-        avatar: i.author.avatar.url,
-        displayName: i.author.displayName,
-        numOfReaction: i.numOfReaction,
-        numOfComment: i.numOfComment,
-        dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
-        isLike: i.reaction != null,
-        saved: i.saved,
-        foodRefId: i.ref != null ? i.ref.id : "",
-        totalTime: i.ref != null ? i.ref.totalTime : 0,
-        servings: i.ref != null ? i.ref.servings : 0,
-        foodName: i.ref != null ? i.ref.name : "",
-        foodDescription: i.ref != null ? i.ref.description : "",
-        foodImage: i.ref != null ? i.ref.photos[0].url : "",
-        should: i.recomendation != null ? i.recomendation.should : null,
-        shouldNot: i.recomendation != null ? i.recomendation.shouldNot : null,
-      ));
+      tempData.add(
+        Post(
+          id: i.id,
+          userId: i.author.id,
+          location: i.location,
+          content: i.content,
+          kind: i.kind,
+          medias: i.medias != null ? i.medias : [],
+          avatar: i.author.avatar.url,
+          displayName: i.author.displayName,
+          numOfReaction: i.numOfReaction,
+          numOfComment: i.numOfComment,
+          dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
+          isLike: i.reaction != null,
+          saved: i.saved,
+          foodRefId: i.ref != null ? i.ref.id : "",
+          totalTime: i.ref != null ? i.ref.totalTime : 0,
+          servings: i.ref != null ? i.ref.servings : 0,
+          foodName: i.ref != null ? i.ref.name : "",
+          foodDescription: i.ref != null ? i.ref.description : "",
+          foodImage: i.ref != null ? i.ref.photos[0].url : "",
+          tags: i.tags,
+          should: i.recomendation != null ? i.recomendation.should : null,
+          shouldNot: i.recomendation != null ? i.recomendation.shouldNot : null,
+        ),
+      );
     }
     setState(() {
       feedData.addAll(tempData);

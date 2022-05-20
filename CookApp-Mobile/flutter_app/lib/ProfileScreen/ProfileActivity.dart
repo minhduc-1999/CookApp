@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/MessageScreen/ConversationsActivity.dart';
 import 'package:tastify/MessageScreen/MessageActivity.dart';
@@ -14,6 +15,7 @@ import 'package:tastify/SavedPostScreen/SavedPostActivity.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
 import 'package:tastify/SettingsScreen/SettingsActivity.dart';
+import 'package:tastify/config.dart';
 import '../NewFeedScreen/PostDetail.dart';
 import '../NewFeedScreen/Post.dart';
 
@@ -37,15 +39,22 @@ class ProfileActivity extends StatefulWidget {
   _ProfileActivityState createState() => _ProfileActivityState(this.userId);
 }
 
-class _ProfileActivityState extends State<ProfileActivity> {
+class _ProfileActivityState extends State<ProfileActivity>
+    with TickerProviderStateMixin {
   final String profileId;
   ScrollController _scrollController = ScrollController();
   UserWallRespondModel user;
-  List<Posts> posts;
-  int offsetPost = 0;
-  int offsetAlbum = 0;
-  int totalPagePost = 1000;
-  int totalPageAlbum = 1000;
+  List<Posts> postsMoment;
+  List<Posts> postsFoodShare;
+  List<Posts> postsRecommendation;
+  int offsetPostsMoment = 0;
+  int offsetPostsFoodShare = 0;
+  int offserPostsRecommendation = 0;
+  int offsetAlbums = 0;
+  int totalPagePostsMoment = 1000;
+  int totalPagePostsFoodShare = 1000;
+  int totalPagePostsRecommendation = 1000;
+  int totalPageAlbums = 1000;
   List<Album> albums;
   bool isFollowing = false;
   String view = "grid";
@@ -56,6 +65,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
   bool isAPIcallProcess = false;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   EditProfileActivity editProfile = new EditProfileActivity();
+  TabController _tabController;
+  int indexTab = 0;
 
   _ProfileActivityState(this.profileId);
 
@@ -82,6 +93,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
     super.initState();
 
     fetchData();
+    _tabController = TabController(initialIndex: 0, length: 4, vsync: this);
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
@@ -90,11 +102,19 @@ class _ProfileActivityState extends State<ProfileActivity> {
     });
   }
 
-  void fetchData() async {
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _tabController.dispose();
+    super.dispose();
+  }
 
+  void fetchData() async {
     var response = await APIService.getUserWall(profileId);
-    var listPosts = await APIService.getUserWallPosts(profileId,offsetPost);
-    var listAlbum = await APIService.getAlbum(profileId,offsetAlbum);
+    var listPostsMoment = await APIService.getUserWallPosts(profileId, offsetPostsMoment,Config.postMomentType);
+    var listPostsFoodShare = await APIService.getUserWallPosts(profileId, offsetPostsFoodShare, Config.postFoodShareType);
+    var listPostsRecommendation = await APIService.getUserWallPosts(profileId, offserPostsRecommendation, Config.postRecommendType);
+    var listAlbum = await APIService.getAlbum(profileId, offsetAlbums);
     List<Album> temp = [];
     if (response.data.id == currentUserId) {
       temp.add(Album(isCreateItem: true, id: "", name: "", url: ""));
@@ -106,26 +126,37 @@ class _ProfileActivityState extends State<ProfileActivity> {
     }
     print('ln');
     setState(() {
-      if (listPosts.data.posts.length > 0) {
-        totalPagePost = listPosts.data.metadata.totalPage;
+      if (listPostsMoment.data.posts.length > 0) {
+        totalPagePostsMoment = listPostsMoment.data.metadata.totalPage;
+      }
+      if (listPostsFoodShare.data.posts.length > 0) {
+        totalPagePostsFoodShare = listPostsFoodShare.data.metadata.totalPage;
+      }
+      if (listPostsRecommendation.data.posts.length > 0) {
+        totalPagePostsRecommendation = listPostsRecommendation.data.metadata.totalPage;
       }
       if (listAlbum.data.albums.length > 0) {
-        totalPageAlbum = listAlbum.data.metadata.totalPage;
+        totalPageAlbums = listAlbum.data.metadata.totalPage;
       }
       isFollowing = response.data.isFollowed;
       user = response;
-      posts = listPosts.data.posts;
+      postsMoment = listPostsMoment.data.posts;
+      postsFoodShare = listPostsFoodShare.data.posts;
+      postsRecommendation = listPostsRecommendation.data.posts;
       albums = temp;
       postCount = response.data.numberOfPost;
       followerCount = user.data.numberOfFollower;
       followingCount = user.data.numberOfFollowing;
       circular = false;
-      offsetAlbum++;
-      offsetPost++;
+      offsetPostsMoment++;
+      offsetAlbums++;
+      offsetPostsFoodShare++;
+      offserPostsRecommendation++;
     });
   }
-  FutureOr reloadAlbum (dynamic value) async{
-    var listAlbum = await APIService.getAlbum(profileId,0);
+
+  FutureOr reloadAlbum(dynamic value) async {
+    var listAlbum = await APIService.getAlbum(profileId, 0);
     List<Album> temp = [];
     temp.add(Album(isCreateItem: true, id: "", name: "", url: ""));
     for (var i in listAlbum.data.albums) {
@@ -134,12 +165,13 @@ class _ProfileActivityState extends State<ProfileActivity> {
     }
     setState(() {
       albums = temp;
-      offsetAlbum = 1;
+      offsetAlbums = 1;
       if (listAlbum.data.albums.length > 0) {
-        totalPageAlbum = listAlbum.data.metadata.totalPage;
+        totalPageAlbums = listAlbum.data.metadata.totalPage;
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -151,14 +183,14 @@ class _ProfileActivityState extends State<ProfileActivity> {
           Text(
             number.toString(),
             style: TextStyle(
-                fontSize: size.width * 0.05, fontWeight: FontWeight.bold),
+                fontSize: size.width * 0.055, fontWeight: FontWeight.bold),
           ),
           Container(
               margin: const EdgeInsets.only(top: 4.0),
               child: Text(
                 label,
                 style: TextStyle(
-                    color: Colors.grey,
+                    color: Colors.black,
                     fontSize: size.width * 0.035,
                     fontWeight: FontWeight.w400),
               ))
@@ -174,8 +206,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
         Function function,
         bool isUser}) {
       return Container(
-        padding: EdgeInsets.only(top: 2.0),
-        child: FlatButton(
+
+        child: TextButton(
             onPressed: function,
             child: Container(
               decoration: BoxDecoration(
@@ -186,8 +218,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
               child: Text(text,
                   style:
                       TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              width: isUser ? size.width * 0.6 : size.width * 0.25,
-              height: 27.0,
+              width: isUser ? size.width * 0.8 : size.width / 3,
+              height: size.height*0.05,
             )),
       );
     }
@@ -295,9 +327,52 @@ class _ProfileActivityState extends State<ProfileActivity> {
       //currentUser = null;
     }
 
+    Widget buildTabBar() {
+      return Container(
+          child: TabBar(
+              onTap: (index) {
+                setState(() {
+                  indexTab = index;
+                });
+              },
+              controller: _tabController,
+              indicatorColor: Colors.grey,
+              indicatorWeight: 1,
+              labelColor: Colors.black,
+              unselectedLabelColor: Colors.black26,
+              tabs: [
+            Tab(
+              icon: Icon(
+                Icons.grid_on,
+                color: indexTab == 0 ? appPrimaryColor : Colors.black26,
+              ),
+            ),
+                Tab(
+                  icon: Icon(
+                    Icons.share_outlined,
+                    color: indexTab == 1 ? appPrimaryColor : Colors.black26,
+                  ),
+                ),
+            Tab(
+              icon: Icon(
+                Icons.photo_album,
+                color: indexTab == 2 ? appPrimaryColor : Colors.black26,
+              ),
+            ),
+                Tab(
+                  icon: Icon(
+                    Icons.recommend,
+                    color: indexTab == 3 ? appPrimaryColor : Colors.black26,
+                  ),
+                )
+          ]));
+    }
+
+
+
     Widget buildUserPosts() {
-      return view == "grid"
-          ? posts.length == 0
+      return indexTab == 0
+          ? postsMoment.length == 0
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 20),
@@ -307,27 +382,48 @@ class _ProfileActivityState extends State<ProfileActivity> {
                     ),
                   ),
                 )
-              : GridView.count(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.0,
-                  padding: const EdgeInsets.all(0.5),
-                  mainAxisSpacing: 1.5,
-                  crossAxisSpacing: 1.5,
-                  controller: _scrollController,
+              : GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3, childAspectRatio: 1),
+                  physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: List.generate(posts.length, (index) {
-                    if(index == posts.length){
-                      return offsetPost < totalPagePost
-                          ? CupertinoActivityIndicator()
-                          : SizedBox(
-                        height: 8,
-                      );
+                  itemCount: offsetPostsMoment < totalPagePostsMoment ? postsMoment.length + 2 : postsMoment.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == postsMoment.length){
+                      return Container();
                     }
-                    return ImageTile(posts[index]);
-                  }))
+                    if (index == postsMoment.length + 1) {
+                      return  CupertinoActivityIndicator();
+                    }
 
-          : albums.length == 0
+                    return ImageTile(postsMoment[index]);
+                  })
+          : indexTab == 1 ? postsFoodShare.length == 0
+          ? Center(
+        child: Padding(
+          padding: const EdgeInsets.only(top: 20),
+          child: Text(
+            "Nothing to show!",
+            style: TextStyle(fontSize: 16),
+          ),
+        ),
+      )
+          : GridView.builder(
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 3, childAspectRatio: 1),
+          physics: NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          itemCount: offsetPostsFoodShare < totalPagePostsFoodShare ? postsFoodShare.length + 2 : postsFoodShare.length,
+          itemBuilder: (BuildContext context, int index) {
+            if (index == postsFoodShare.length){
+              return Container();
+            }
+            if (index == postsFoodShare.length + 1) {
+              return  CupertinoActivityIndicator();
+            }
+
+            return ImageTile(postsFoodShare[index]);
+          }): albums.length == 0
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 20),
@@ -347,12 +443,12 @@ class _ProfileActivityState extends State<ProfileActivity> {
                   shrinkWrap: true,
                   physics: const NeverScrollableScrollPhysics(),
                   children: List.generate(albums.length, (index) {
-                    if(index == albums.length){
-                      return offsetAlbum < totalPageAlbum
+                    if (index == albums.length) {
+                      return offsetAlbums < totalPageAlbums
                           ? CupertinoActivityIndicator()
                           : SizedBox(
-                        height: 8,
-                      );
+                              height: 8,
+                            );
                     }
                     return AlbumTile(
                       album: albums[index],
@@ -481,10 +577,12 @@ class _ProfileActivityState extends State<ProfileActivity> {
               child: Form(
                 key: globalFormKey,
                 child: ListView(
+                  controller: _scrollController,
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Row(
                             children: <Widget>[
@@ -496,10 +594,6 @@ class _ProfileActivityState extends State<ProfileActivity> {
                                           NetworkImage(user.data.avatar.url),
                                     )
                                   : CircleAvatar(
-                                      /*child: Image.asset("assets/images/default_avatar.png",
-                                        width: size.width * 0.20,
-                                        height: size.width * 0.20,
-                                        fit: BoxFit.fill),*/
                                       radius: size.width * 0.11,
                                       backgroundColor: Colors.grey,
                                       backgroundImage: AssetImage(
@@ -513,19 +607,14 @@ class _ProfileActivityState extends State<ProfileActivity> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: <Widget>[
-                                        buildStatColumn("posts", postCount),
+                                        buildStatColumn(postCount > 1 ? "Posts" : "Post", postCount),
                                         buildStatColumn(
-                                            "followers", followerCount),
+                                            followerCount > 1 ? "Followers" : "Follower", followerCount),
                                         buildStatColumn(
-                                            "following", followingCount),
+                                            followingCount > 1 ? "Followings" : "Following", followingCount),
                                       ],
                                     ),
-                                    Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: <Widget>[
-                                          buildProfileFollowButton(context)
-                                        ]),
+
                                   ],
                                 ),
                               )
@@ -538,13 +627,20 @@ class _ProfileActivityState extends State<ProfileActivity> {
                                 user.data.displayName,
                                 style: TextStyle(fontWeight: FontWeight.bold),
                               )),
+                          buildProfileFollowButton(context),
+                          /*Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                        children: <Widget>[
+                                          buildProfileFollowButton(context)
+                                        ]),*/
                         ],
                       ),
                     ),
                     Divider(),
-                    buildImageViewButtonBar(),
-                    Divider(height: 0.0),
+                    buildTabBar(),
                     buildUserPosts(),
+
                   ],
                 ),
               ),
@@ -595,13 +691,13 @@ class _ProfileActivityState extends State<ProfileActivity> {
 
   void _getMoreData() async {
     print("get more");
-    var listPosts = await APIService.getUserWallPosts(profileId,offsetPost);
+    var listPosts = await APIService.getUserWallPosts(profileId, offsetPostsMoment,Config.postMomentType);
     setState(() {
       if (listPosts.data.posts.length > 0) {
-        totalPagePost = listPosts.data.metadata.totalPage;
+        totalPagePostsMoment = listPosts.data.metadata.totalPage;
       }
-      posts.addAll(listPosts.data.posts);
-      offsetPost++;
+      postsMoment.addAll(listPosts.data.posts);
+      offsetPostsMoment++;
     });
   }
 }
@@ -617,22 +713,24 @@ class ImageTile extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () => clickedImage(context),
-        child: CachedNetworkImage(
-
-          imageUrl: posts.medias[0].url,
-          imageBuilder: (context, imageProvider) => Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: imageProvider,
-                fit: BoxFit.cover,
-              ),
+      onTap: () => clickedImage(context),
+      child: CachedNetworkImage(
+        imageUrl: posts.medias[0].url,
+        imageBuilder: (context, imageProvider) => Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: imageProvider,
+              fit: BoxFit.cover,
             ),
           ),
-          placeholder: (context, url) => Center(child: CircularProgressIndicator(color: Colors.white30,)),
-          errorWidget: (context, url, error) => Icon(Icons.error),
-        ),);
-
+        ),
+        placeholder: (context, url) => Center(
+            child: CircularProgressIndicator(
+          color: Colors.white30,
+        )),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+      ),
+    );
   }
 }
 
@@ -640,7 +738,9 @@ class AlbumTile extends StatefulWidget {
   final Album album;
   final Function reloadFunction;
   final String userId;
-  const AlbumTile({Key key, this.album, this.reloadFunction, this.userId}) : super(key: key);
+
+  const AlbumTile({Key key, this.album, this.reloadFunction, this.userId})
+      : super(key: key);
 
   @override
   State<AlbumTile> createState() =>
@@ -692,13 +792,22 @@ class _AlbumTileState extends State<AlbumTile> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AlbumDetailsActivity(userId: widget.userId, albumId: widget.album.id, name: widget.album.name,)),
+                MaterialPageRoute(
+                    builder: (context) => AlbumDetailsActivity(
+                          userId: widget.userId,
+                          albumId: widget.album.id,
+                          name: widget.album.name,
+                        )),
               );
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: Container( width: 1000, height: 1000,child: Image.network(url, fit: BoxFit.cover))),
+                Expanded(
+                    child: Container(
+                        width: 1000,
+                        height: 1000,
+                        child: Image.network(url, fit: BoxFit.cover))),
                 SizedBox(
                   height: 5,
                 ),
