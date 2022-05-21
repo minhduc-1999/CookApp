@@ -11,6 +11,7 @@ type SignedLinkResponseItem = {
 
 export const uploadImageToStorage = async (data: ImageType | undefined) => {
   if (!data || !data.file) throw new Error("No image found");
+  try {
   const signedLinkItem: SignedLinkResponseItem = await axios
     .post(
       baseUrl + "/storage/uploadSignedUrl",
@@ -31,4 +32,8 @@ export const uploadImageToStorage = async (data: ImageType | undefined) => {
   const newImageRef = ref(storage, signedLinkItem.objectName);
   await uploadBytes(newImageRef, data.file).catch(err => console.log(err))
   return signedLinkItem.objectName;
+  }
+  catch {
+    throw new Error("Failed to upload image")
+  }
 };

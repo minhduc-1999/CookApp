@@ -15,6 +15,9 @@ export enum UserErrorCode {
   CONVERSATION_NOT_FOUND = "conversation_not_found",
   MESSAGE_NOT_FOUND = "message_not_found",
   VOTE_NOT_FOUND = "vote_not_found",
+  UNIT_ALREADY_EXISTED = "unit_already_existed",
+  INGREDIENT_ALREADY_EXISTED = "ingredient_already_existed",
+  TOPIC_ALREADY_EXISTED = "topic_already_existed",
 }
 
 export enum InteractiveTargetType {
@@ -51,6 +54,15 @@ export enum ConversationType {
   DIRECT = "DIRECT",
   GROUP = "GROUP",
 }
+
+export type BaseResponse<T = any> = {
+  meta: {
+    messages: [string];
+    ok: boolean;
+    errorCode?: UserErrorCode;
+  };
+  data: T;
+};
 
 export enum MessageContentType {
   TEXT = "TEXT",
@@ -118,9 +130,9 @@ export type AuthorResponse = {
 };
 
 export type RoleResponse = {
-  title: string
-  sign: RoleType
-}
+  title: string;
+  sign: RoleType;
+};
 
 export type UserResponse = AuditResponse & {
   avatar: MediaResponse;
@@ -269,7 +281,7 @@ export type ProfileResponse = {
 
 export type TopicResponse = AuditResponse & {
   title: string;
-  cover: MediaResponse
+  cover: MediaResponse;
 };
 
 export type AlbumResponse = {

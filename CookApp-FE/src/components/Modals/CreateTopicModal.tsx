@@ -32,7 +32,7 @@ const CreateTopicModal = ({
 }: CreateTopicModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
-  const [canSave, setCanSave] = useState(true);
+  const [canSave, setCanSave] = useState(false);
   const [saving, setSaving] = useState(false);
   const [topicCover, setTopicCover] = useState<ImageListType>([]);
   const toast = useToast();
@@ -75,6 +75,13 @@ const CreateTopicModal = ({
       title,
       cover: photoObjectName,
     });
+  };
+
+  const resetModal = () => {
+    setTitle("");
+    setSaving(false);
+    setCanSave(false);
+    setTopicCover([]);
   };
 
   return (
@@ -175,11 +182,12 @@ const CreateTopicModal = ({
                       position: "top-right",
                     });
                     onClose();
-                    saveCallback()
+                    saveCallback();
+                    resetModal();
                   })
-                  .catch(() => {
+                  .catch((err: Error) => {
                     toast({
-                      title: "Fail to create topic",
+                      title: err.message,
                       status: "error",
                       duration: 3000,
                       isClosable: true,

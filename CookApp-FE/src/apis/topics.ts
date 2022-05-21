@@ -1,5 +1,10 @@
-import axios from "axios";
-import { PageMetadata, TopicResponse } from "./base.type";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import {
+  BaseResponse,
+  PageMetadata,
+  TopicResponse,
+  UserErrorCode,
+} from "./base.type";
 import { baseUrl, token } from "./token";
 
 type CreateTopicBody = {
@@ -36,15 +41,23 @@ export const getTopics = async (
 };
 
 export const createTopic = async (data: CreateTopicBody): Promise<void> => {
-  return axios
-    .post(baseUrl + "/topics", data, {
+  try {
+    const res = await axios.post(baseUrl + "/topics", data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
-    })
-    .then((res) => {
-      if (res.status === 201) return;
-      throw new Error("Fail");
     });
+    if (res.status === 201) return;
+  } catch (err) {
+    if (err instanceof AxiosError) {
+      const res: AxiosResponse<BaseResponse> | undefined = err.response;
+      if (
+        res?.status === 409 &&
+        res?.data?.meta.errorCode === UserErrorCode.TOPIC_ALREADY_EXISTED
+      )
+        throw new Error("Topic is already existed");
+    }
+    throw new Error("Failed to create topic");
+  }
 };
