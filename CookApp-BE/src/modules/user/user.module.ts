@@ -5,7 +5,10 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AccountEntity } from "entities/social/account.entity";
 import { AlbumEntity, AlbumMediaEntity } from "entities/social/album.entity";
-import { CommentEntity, CommentMediaEntity } from "entities/social/comment.entity";
+import {
+  CommentEntity,
+  CommentMediaEntity,
+} from "entities/social/comment.entity";
 import { FeedEntity } from "entities/social/feed.entity";
 import { FollowEntity } from "entities/social/follow.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
@@ -42,7 +45,10 @@ import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repos
 import { TopicRepository } from "./adapters/out/repositories/topic.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { PropagatePostCreatedEventHandler } from "./events/propagateNewPost";
-import { InterestsChosenEventHandler, UserProfileUpdatedEventHandler } from "./events/syncSeData";
+import {
+  InterestsChosenEventHandler,
+  UserProfileUpdatedEventHandler,
+} from "./events/syncSeData";
 import { AlbumService } from "./services/album.service";
 import { CommentService } from "./services/comment.service";
 import { PostService } from "./services/post.service";
@@ -50,6 +56,7 @@ import { ChooseInterestsCommandHandler } from "./useCases/chooseInterests";
 import { CreateAlbumCommandHandler } from "./useCases/createAlbum";
 import { CreateCommentCommandHandler } from "./useCases/createComment";
 import { CreatePostCommandHandler } from "./useCases/createPost";
+import { CreateTopicCommandHandler } from "./useCases/createTopic";
 import { DeleteSavedPostCommandHandler } from "./useCases/deleteSavedPost";
 import { EditAlbumCommandHandler } from "./useCases/editAlbum";
 import { EditPostCommandHandler } from "./useCases/editPost";
@@ -74,8 +81,8 @@ import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
   InterestsChosenEventHandler,
-  UserProfileUpdatedEventHandler
-]
+  UserProfileUpdatedEventHandler,
+];
 const commandHandlers = [
   CreatePostCommandHandler,
   EditPostCommandHandler,
@@ -88,7 +95,8 @@ const commandHandlers = [
   DeleteSavedPostCommandHandler,
   CreateAlbumCommandHandler,
   EditAlbumCommandHandler,
-  ChooseInterestsCommandHandler
+  ChooseInterestsCommandHandler,
+  CreateTopicCommandHandler,
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
@@ -102,7 +110,7 @@ const queryHandlers = [
   GetAlbumsQueryHandler,
   GetAlbumDetailQueryHandler,
   GetTopicsQueryHandler,
-  GetInterestedTopicsQueryHandler
+  GetInterestedTopicsQueryHandler,
 ];
 const services = [
   {
@@ -173,7 +181,7 @@ const repositories = [
   },
   {
     provide: "ITopicRepository",
-    useClass: TopicRepository ,
+    useClass: TopicRepository,
   },
 ];
 
@@ -201,10 +209,10 @@ const repositories = [
       AlbumEntity,
       AlbumMediaEntity,
       TopicEntity,
-      UserTopicEntity
+      UserTopicEntity,
     ]),
     forwardRef(() => CommunicationModule),
-    forwardRef(() => CoreModule)
+    forwardRef(() => CoreModule),
   ],
   controllers: [
     PostController,
@@ -214,19 +222,15 @@ const repositories = [
     CommentController,
     UserController,
     ReactionController,
-    TopicController
+    TopicController,
   ],
   providers: [
     ...commandHandlers,
     ...services,
     ...repositories,
     ...queryHandlers,
-    ...eventHandlers
+    ...eventHandlers,
   ],
-  exports: [
-    "IFollowRepository",
-    "IReactionRepository",
-    "ICommentRepository"
-  ],
+  exports: ["IFollowRepository", "IReactionRepository", "ICommentRepository"],
 })
-export class UserModule { }
+export class UserModule {}

@@ -14,6 +14,7 @@ export interface ITopicRepository {
   getInterestTopics(user: User): Promise<Topic[]>;
   insertUserTopic(user: User, topics: Topic[]): Promise<void>;
   deleteUserTopic(user: User, topics: Topic[]): Promise<void>;
+  insertNewTopic(topic: Topic): Promise<void>;
 }
 
 @Injectable()
@@ -28,6 +29,13 @@ export class TopicRepository
     private _useTopicRepo: Repository<UserTopicEntity>
   ) {
     super();
+  }
+  async insertNewTopic(topic: Topic): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      const entitie = new TopicEntity(topic);
+      await queryRunner.manager.save<TopicEntity>(entitie);
+    }
   }
 
   async deleteUserTopic(user: User, topics: Topic[]): Promise<void> {

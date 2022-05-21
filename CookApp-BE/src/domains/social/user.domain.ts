@@ -1,6 +1,6 @@
 import { Audit } from "../../domains/audit.domain";
 import { MessageContentType, ReactionType, Sex } from "../../enums/social.enum";
-import { AvatarMedia, CommentMedia } from "./media.domain";
+import { AvatarMedia, CommentMedia, Image } from "./media.domain";
 import { Account } from "./account.domain";
 import { generateDisplayName } from "../../utils";
 import { Follow } from "./follow.domain";
@@ -13,9 +13,12 @@ import { Conversation, Message, MessageContent } from "./conversation.domain";
 export class Topic extends Audit {
   title: string;
 
+  cover: Image
+
   constructor(topic: Partial<Topic>) {
     super(topic);
     this.title = topic?.title;
+    this.cover = topic?.cover
   }
 }
 

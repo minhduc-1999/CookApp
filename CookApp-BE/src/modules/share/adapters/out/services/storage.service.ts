@@ -26,6 +26,7 @@ export interface IStorageService {
       | "comment"
       | "album"
       | "avatar"
+      | "topic"
   ): Promise<string[]>;
   getDownloadUrls(mediaArr: Media[]): Promise<Media[]>;
   deleteFiles(medias: Media[]): Promise<Media[]>;
@@ -53,7 +54,8 @@ export class FireBaseService implements IStorageService {
     "recipe-step": "foods/step_photos/",
     album: "albums/",
     comment: "comments/",
-    avatar: "avatars/"
+    avatar: "avatars/",
+    topic: "topics/"
   }
   private bucket: Bucket;
 

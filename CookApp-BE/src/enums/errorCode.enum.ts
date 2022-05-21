@@ -16,5 +16,6 @@ export enum UserErrorCode {
   MESSAGE_NOT_FOUND = "message_not_found",
   VOTE_NOT_FOUND = "vote_not_found",
   UNIT_ALREADY_EXISTED= "unit_already_existed",
-  INGREDIENT_ALREADY_EXISTED= "ingredient_already_existed"
+  INGREDIENT_ALREADY_EXISTED= "ingredient_already_existed",
+  TOPIC_ALREADY_EXISTED= "topic_already_existed",
 }

@@ -50,6 +50,7 @@ export class IngredientController {
   @HttpRequestTransaction()
   @ApiCreatedResponseCustomWithoutData("Create ingredient successfully")
   @Post()
+  @RequirePermissions("create_ingredient")
   async createIngredient(
     @Body() req: CreateIngredientRequest,
     @HttpUserReq() user: User,

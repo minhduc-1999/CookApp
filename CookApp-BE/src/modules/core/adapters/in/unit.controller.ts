@@ -50,6 +50,7 @@ export class UnitController {
   @HttpRequestTransaction()
   @ApiCreatedResponseCustomWithoutData("Create unit successfully")
   @Post()
+  @RequirePermissions("create_unit")
   async createUnit(
     @Body() req: CreateUnitRequest,
     @HttpUserReq() user: User,

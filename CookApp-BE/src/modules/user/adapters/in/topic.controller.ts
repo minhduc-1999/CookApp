@@ -1,9 +1,10 @@
-import { Body, Controller, Get, Put, Query } from "@nestjs/common";
+import { Body, Controller, Get, Post, Put, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { Result } from "base/result.base";
 import {
+    ApiCreatedResponseCustomWithoutData,
   ApiFailResponseCustom,
   ApiOKResponseCustom,
 } from "decorators/apiSuccessResponse.decorator";
@@ -17,6 +18,9 @@ import { User } from "domains/social/user.domain";
 import { ChooseInterestsCommand } from "modules/user/useCases/chooseInterests";
 import { ChooseInterestsRequest } from "modules/user/useCases/chooseInterests/chooseInterestsRequest";
 import { ChooseInterestsResponse } from "modules/user/useCases/chooseInterests/chooseInterestsResponse";
+import { CreateTopicCommand } from "modules/user/useCases/createTopic";
+import { CreateTopicRequest } from "modules/user/useCases/createTopic/createTopicRequest";
+import { CreateTopicResponse } from "modules/user/useCases/createTopic/createTopicResponse";
 import { GetInterestedTopicsQuery } from "modules/user/useCases/getInterestedTopics";
 import { GetInterestedTopicsResponse } from "modules/user/useCases/getInterestedTopics/getInterestedTopicsResponse";
 import { GetTopicsQuery } from "modules/user/useCases/getTopics";
@@ -74,5 +78,20 @@ export class TopicController {
     const editAlbumCommand = new ChooseInterestsCommand(tx, user, body);
     const res = await this._commandBus.execute(editAlbumCommand);
     return Result.ok(res, { messages: ["Successfully"] });
+  }
+
+  @Post()
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustomWithoutData("Create topic successfully")
+  @HttpRequestTransaction()
+  @RequirePermissions("create_topic")
+  async createTopic(
+    @Body() topicBody: CreateTopicRequest,
+    @HttpUserReq() user: User,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<CreateTopicResponse>> {
+    const createTopicCommand = new CreateTopicCommand(user, topicBody, tx);
+    const createdTopic = await this._commandBus.execute(createTopicCommand);
+    return Result.ok(createdTopic, { messages: ["Create topic successfully"] });
   }
 }
