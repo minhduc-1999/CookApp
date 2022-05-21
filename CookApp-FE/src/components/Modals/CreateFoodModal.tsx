@@ -337,7 +337,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
         }),
         videoUrl,
         description,
-        photos: foodPhotos.map((photo) => photo.file?.name || ""),
+        photos: foodPhotos.map((photo) => photo.file?.name ?? ""),
       })
     ) {
       setCanSave(false);
