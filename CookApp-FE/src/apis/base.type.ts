@@ -269,6 +269,7 @@ export type ProfileResponse = {
 
 export type TopicResponse = AuditResponse & {
   title: string;
+  cover: MediaResponse
 };
 
 export type AlbumResponse = {

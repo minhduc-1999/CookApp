@@ -425,9 +425,13 @@ export class TopicResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   title: string;
 
+  @ApiResponseProperty({ type: MediaResponse })
+  cover: MediaResponse
+
   constructor(topic: Topic) {
     super(topic);
     this.title = topic?.title;
+    this.cover = topic?.cover && new MediaResponse(topic.cover)
   }
 }
 

@@ -22,9 +22,14 @@ import ImageUploading, { ImageListType } from "react-images-uploading";
 type CreateTopicModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  saveCallback: () => void;
 };
 
-const CreateTopicModal = ({ isOpen, onClose }: CreateTopicModalProps) => {
+const CreateTopicModal = ({
+  isOpen,
+  onClose,
+  saveCallback,
+}: CreateTopicModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [title, setTitle] = useState("");
   const [canSave, setCanSave] = useState(true);
@@ -42,7 +47,7 @@ const CreateTopicModal = ({ isOpen, onClose }: CreateTopicModalProps) => {
     return () => {
       if (checkSavingInterval) clearInterval(checkSavingInterval);
     };
-  }, [isOpen, title]);
+  }, [isOpen, title, topicCover]);
 
   const checkSaving = () => {
     if (
@@ -170,6 +175,7 @@ const CreateTopicModal = ({ isOpen, onClose }: CreateTopicModalProps) => {
                       position: "top-right",
                     });
                     onClose();
+                    saveCallback()
                   })
                   .catch(() => {
                     toast({

@@ -20,7 +20,7 @@ import { getTopics } from "apis/topics";
 import Spinner from "components/Spinner";
 import CreateTopicModal from "components/Modals/CreateTopicModal";
 
-const INIT_TOPIC_PAGE_SIZE = 1;
+const INIT_TOPIC_PAGE_SIZE = 5;
 const INIT_TOPIC_PAGE = 1;
 
 function OtherSetting() {
@@ -30,16 +30,18 @@ function OtherSetting() {
   const [topicLoading, setTopicLoading] = useState(true);
   const [totalTopic, setTotalTopic] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [refresh, setRefresh] = useState(false);
 
   useEffect(() => {
     fetchTopics(INIT_TOPIC_PAGE, INIT_TOPIC_PAGE_SIZE);
     setTopicLoading(true);
-  }, []);
+  }, [refresh]);
 
-  const fetchTopics = async (page: number, size: number) => {
+  const fetchTopics = async (page: number, size: number, isLoadMore = false) => {
     try {
       const [topicItems, meta] = await getTopics(page, size);
-      setTopics([...topics, ...topicItems]);
+      if (isLoadMore) setTopics([...topics, ...topicItems]);
+      else setTopics(topicItems);
       setNextTopicPage(page + 1);
       setTotalTopic(meta.totalCount);
     } catch (err) {
@@ -50,7 +52,7 @@ function OtherSetting() {
   };
 
   const onSeeMoreTopic = () => {
-    fetchTopics(nextTopicPage, INIT_TOPIC_PAGE_SIZE);
+    fetchTopics(nextTopicPage, INIT_TOPIC_PAGE_SIZE, true);
     setTopicLoading(true);
   };
   return (
@@ -102,6 +104,8 @@ function OtherSetting() {
                     luminosity: "light",
                   })}
                   position="relative"
+                  backgroundImage={topic?.cover?.url}
+                  backgroundSize="cover"
                   key={index}
                 >
                   <Flex
@@ -115,7 +119,7 @@ function OtherSetting() {
                     left={0}
                   >
                     <Text
-                      color="blackAlpha.700"
+                      color="blackAlpha.800"
                       fontSize="3xl"
                       fontWeight="extrabold"
                     >
@@ -145,7 +149,13 @@ function OtherSetting() {
           </VStack>
         </CardBody>
       </Card>
-      <CreateTopicModal isOpen={isOpen} onClose={onClose} />
+      <CreateTopicModal
+        isOpen={isOpen}
+        onClose={onClose}
+        saveCallback={() => {
+          setRefresh(!refresh);
+        }}
+      />
     </Flex>
   );
 }

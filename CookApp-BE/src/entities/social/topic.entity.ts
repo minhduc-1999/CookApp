@@ -26,7 +26,7 @@ export class TopicEntity extends AbstractEntity {
     const data = this;
     return new Topic({
       ...data,
-      cover: new Image({
+      cover: this.cover && new Image({
         key: this.cover,
       }),
     });
