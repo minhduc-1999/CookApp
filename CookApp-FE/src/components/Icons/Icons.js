@@ -1,8 +1,23 @@
 import { createIcon, Icon } from "@chakra-ui/icons";
-import { MdChevronLeft, MdChevronRight, MdFastfood } from "react-icons/md";
+import {
+  MdChevronLeft,
+  MdChevronRight,
+  MdFastfood,
+} from "react-icons/md";
 import { HiOutlineNewspaper } from "react-icons/hi";
-import { BsThreeDots } from "react-icons/bs";
+import { BsReceipt, BsThreeDots } from "react-icons/bs";
 import { useColorModeValue } from "@chakra-ui/color-mode";
+import { GrUpgrade } from "react-icons/gr";
+
+export const DetailIcon = () => {
+  let color = useColorModeValue("black", "white");
+  return <Icon as={BsReceipt} alignItems="center" justifyContent="center" color={color} />;
+};
+
+export const UpgradeIcon = () => {
+  let color = useColorModeValue("black", "white");
+  return <Icon as={GrUpgrade} color={color} />;
+};
 
 export const FoodIcon = () => <Icon as={MdFastfood} color="white" />;
 

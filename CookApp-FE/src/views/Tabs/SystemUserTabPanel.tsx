@@ -88,7 +88,7 @@ const SystemlUserTabPanel = () => {
               colorScheme="teal"
               onClick={onOpen}
             >
-              Add unit
+              Add account
             </Button>
           </HStack>
         </CardHeader>

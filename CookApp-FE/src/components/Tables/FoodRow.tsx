@@ -4,18 +4,12 @@ import {
   Td,
   Text,
   Tr,
-  Menu,
-  MenuList,
-  MenuItem,
-  MenuButton,
-  IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { OptionIcon } from "components/Icons/Icons";
 import { calendarTime } from "utils/time";
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
 import { durationFormat } from "utils/time";
 import { FoodResponse } from "apis/base.type";
+import RowMenuOption from "components/Menu/RowMenuOption";
 
 type Props = {
   data: FoodResponse;
@@ -74,18 +68,7 @@ function FoodRow(props: Props) {
       </Td>
 
       <Td isNumeric>
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label="Options"
-            icon={<OptionIcon />}
-            variant="outline"
-          />
-          <MenuList>
-            <MenuItem icon={<EditIcon />}>Edit</MenuItem>
-            <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>
-          </MenuList>
-        </Menu>
+        <RowMenuOption remove detail />
       </Td>
     </Tr>
   );

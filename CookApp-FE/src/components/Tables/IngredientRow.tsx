@@ -2,16 +2,10 @@ import {
   Td,
   Text,
   Tr,
-  Menu,
-  MenuList,
-  MenuItem,
-  MenuButton,
-  IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
-import { FaEllipsisV } from "react-icons/fa";
 import { IngredientResponse } from "apis/base.type";
+import RowMenuOption from "components/Menu/RowMenuOption";
 
 type Props = {
   data: IngredientResponse;
@@ -38,19 +32,7 @@ function IngredientRow(props: Props) {
       </Td>
 
       <Td isNumeric w="8px">
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label="Options"
-            icon={<FaEllipsisV />}
-            variant="solid"
-            bgColor={"inherit"}
-          />
-          <MenuList>
-            <MenuItem icon={<EditIcon />}>Edit</MenuItem>
-            <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>
-          </MenuList>
-        </Menu>
+        <RowMenuOption remove />
       </Td>
     </Tr>
   );

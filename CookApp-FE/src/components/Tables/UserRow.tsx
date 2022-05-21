@@ -4,19 +4,14 @@ import {
   Td,
   Text,
   Tr,
-  Menu,
-  MenuList,
-  MenuItem,
-  MenuButton,
-  IconButton,
   useColorModeValue,
 } from "@chakra-ui/react";
 import { calendarTime } from "utils/time";
-import { EditIcon, DeleteIcon } from "@chakra-ui/icons";
-import { FaCheckSquare, FaEllipsisV } from "react-icons/fa";
+import { FaCheckSquare } from "react-icons/fa";
 import RoleTag from "components/Tags/RoleTag";
 import { IoWarning } from "react-icons/io5";
 import { UserResponse } from "apis/base.type";
+import RowMenuOption from "components/Menu/RowMenuOption";
 
 type UserRowProps = {
   data: UserResponse;
@@ -96,19 +91,7 @@ function UserRow(props: UserRowProps) {
       </Td>
 
       <Td>
-        <Menu>
-          <MenuButton
-            as={IconButton}
-            aria-label="Options"
-            icon={<FaEllipsisV />}
-            variant="solid"
-            bgColor={"inherit"}
-          />
-          <MenuList>
-            <MenuItem icon={<EditIcon />}>Edit</MenuItem>
-            <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>
-          </MenuList>
-        </Menu>
+        <RowMenuOption upgrade detail remove/>
       </Td>
     </Tr>
   );
