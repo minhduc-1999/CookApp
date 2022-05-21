@@ -4,7 +4,6 @@ import { Conversation } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
 
 export class GetWallResponse extends AuthorResponse {
-
   @ApiResponseProperty({ type: Number })
   numberOfPost: number;
 
@@ -18,14 +17,18 @@ export class GetWallResponse extends AuthorResponse {
   isFollowed?: boolean;
 
   @ApiResponseProperty({ type: ConversationResponse })
-  conversation?: ConversationResponse
+  conversation?: ConversationResponse;
+
+  @ApiResponseProperty({ type: String })
+  bio: string;
 
   constructor(user: User, isFollowed: boolean, conv: Conversation) {
-    super(user)
+    super(user);
     this.numberOfFollower = user.nFollowers;
     this.numberOfFollowing = user.nFollowees;
     this.numberOfPost = user.nPosts;
     this.isFollowed = isFollowed;
-    this.conversation = conv && new ConversationResponse(conv)
+    this.conversation = conv && new ConversationResponse(conv);
+    this.bio = user.bio;
   }
 }
