@@ -3,15 +3,60 @@ import {
   MdChevronLeft,
   MdChevronRight,
   MdFastfood,
+  MdPeopleOutline,
 } from "react-icons/md";
 import { HiOutlineNewspaper } from "react-icons/hi";
 import { BsReceipt, BsThreeDots } from "react-icons/bs";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import { GrUpgrade } from "react-icons/gr";
+import { AiOutlineFieldTime, AiOutlineStar } from "react-icons/ai";
+
+export const RatingIcon = () => {
+  let color = useColorModeValue("black", "white");
+  return (
+    <Icon
+      as={AiOutlineStar}
+      alignItems="center"
+      justifyContent="center"
+      color={color}
+    />
+  );
+};
+
+export const ServingIcon = () => {
+  let color = useColorModeValue("black", "white");
+  return (
+    <Icon
+      as={MdPeopleOutline}
+      alignItems="center"
+      justifyContent="center"
+      color={color}
+    />
+  );
+};
+
+export const TotalTimeIcon = () => {
+  let color = useColorModeValue("black", "white");
+  return (
+    <Icon
+      as={AiOutlineFieldTime}
+      alignItems="center"
+      justifyContent="center"
+      color={color}
+    />
+  );
+};
 
 export const DetailIcon = () => {
   let color = useColorModeValue("black", "white");
-  return <Icon as={BsReceipt} alignItems="center" justifyContent="center" color={color} />;
+  return (
+    <Icon
+      as={BsReceipt}
+      alignItems="center"
+      justifyContent="center"
+      color={color}
+    />
+  );
 };
 
 export const UpgradeIcon = () => {

@@ -1,5 +1,15 @@
-import { Table, TableContainer, Tbody, Th, Thead, Tr, useColorModeValue } from "@chakra-ui/react";
+import {
+  Table,
+  TableContainer,
+  Tbody,
+  Th,
+  Thead,
+  Tr,
+  useColorModeValue,
+  useDisclosure,
+} from "@chakra-ui/react";
 import { FoodResponse } from "apis/base.type";
+import FoodDetailModal from "components/Modals/FoodDetailModal";
 import { useEffect, useState } from "react";
 import FoodRow from "./FoodRow";
 
@@ -14,15 +24,22 @@ type Props = {
 function FoodTable({ foods, curPage, limit }: Props) {
   const textColor = useColorModeValue("gray.700", "white");
   const [foodList, setFoodList] = useState<FoodResponse[]>([]);
+  const [selectedFoodId, setSelectedFoodId] = useState("");
+
+  const {
+    isOpen: isFoodDetailOpen,
+    onOpen: onFoodDetailOpen,
+    onClose: onFoodDetailClose,
+  } = useDisclosure();
+
+  useEffect(() => {
+    getList(curPage);
+  }, [curPage]);
 
   const getList = (curPage: number) => {
     const curPageList = foods[curPage];
     curPageList && setFoodList(curPageList);
   };
-
-  useEffect(() => {
-    getList(curPage);
-  }, [curPage]);
 
   return (
     <>
@@ -46,11 +63,20 @@ function FoodTable({ foods, curPage, limit }: Props) {
                 key={row.id}
                 index={(curPage - 1) * limit + index}
                 data={row}
+                onSelect={() => {
+                  onFoodDetailOpen();
+                  setSelectedFoodId(row.id);
+                }}
               />
             ))}
           </Tbody>
         </Table>
       </TableContainer>
+      <FoodDetailModal
+        foodId={selectedFoodId}
+        isOpen={isFoodDetailOpen}
+        onClose={onFoodDetailClose}
+      />
     </>
   );
 }

@@ -15,6 +15,7 @@ type Props = {
   remove?: boolean;
   detail?: boolean;
   upgrade?: boolean;
+  detailCallback?: () => void;
 };
 
 function RowMenuOption(props: Props) {
@@ -29,9 +30,9 @@ function RowMenuOption(props: Props) {
       />
       <MenuList>
         {props.edit && <MenuItem icon={<EditIcon />}>Edit</MenuItem>}
-        {props.detail && <MenuItem icon={<DetailIcon />}>Detail</MenuItem>}
+        {props.detail && <MenuItem onClick={props.detailCallback} icon={<DetailIcon />}>Detail</MenuItem>}
         {props.upgrade && <MenuItem icon={<UpgradeIcon />}>Upgrade</MenuItem>}
-        {props.remove && <MenuItem icon={<DeleteIcon />}>Delete</MenuItem>}
+        {props.remove && <MenuItem  icon={<DeleteIcon />}>Delete</MenuItem>}
       </MenuList>
     </Menu>
   );

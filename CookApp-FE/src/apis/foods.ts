@@ -25,6 +25,21 @@ export const getFoods = async (
     });
 };
 
+export const getFoodDetail = async (foodId: string): Promise<FoodResponse> => {
+  return axios
+    .get(baseUrl + `/foods/${foodId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+    .then((res) => {
+      return res.data.data;
+    })
+    .catch(() => {
+      throw new Error("Failed");
+    });
+};
+
 export type CreateFoodBody = {
   servings: number;
   totalTime: number;
