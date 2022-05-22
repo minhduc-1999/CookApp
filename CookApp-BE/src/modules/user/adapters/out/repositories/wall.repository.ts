@@ -34,7 +34,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
         .where("author.id = :authorId", { authorId })
         .andWhere("kind = :kind", { kind: query.kind })
         .orderBy("interaction.createdAt", "DESC")
-        .select(["post", "interaction", "media", "mediaInter", "foodRef"])
+        .select(["post", "interaction", "media", "mediaInter", "foodRef", "author"])
         .skip(query.limit * query.offset)
         .take(query.limit)
         .getManyAndCount();

@@ -35,6 +35,7 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("users/:id/walls")
 @ApiTags("User/Wall")
 @ApiBearerAuth()
+@RequirePermissions("manage_post")
 export class WallController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
 

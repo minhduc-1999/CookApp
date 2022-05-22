@@ -48,12 +48,14 @@ export class PostService implements IPostService {
     private _foodService: IFoodService
   ) {}
 
+  async fulfillOneMedia(post: Moment | FoodShare) {
+    post.medias = await this._storageService.getDownloadUrls(post.medias);
+    return post;
+  }
+
   async fulfillData(posts: Post[]): Promise<Post[]> {
     if (!posts || posts.length === 0) return [];
-    const fulfillOneMedia = async (post: Moment | FoodShare) => {
-      post.medias = await this._storageService.getDownloadUrls(post.medias);
-      return post;
-    };
+
     for (let post of posts) {
       if (post.author) {
         [post.author.avatar] = await this._storageService.getDownloadUrls([
@@ -62,10 +64,10 @@ export class PostService implements IPostService {
       }
       switch (post.type) {
         case PostType.MOMENT:
-          post = await fulfillOneMedia(post);
+          post = await this.fulfillOneMedia(post);
           break;
         case PostType.FOOD_SHARE:
-          post = await fulfillOneMedia(post);
+          post = await this.fulfillOneMedia(post);
           if ((<FoodShare>post).ref) {
             (<FoodShare>post).ref.photos =
               await this._storageService.getDownloadUrls(
