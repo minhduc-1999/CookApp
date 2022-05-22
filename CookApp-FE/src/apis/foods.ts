@@ -2,6 +2,30 @@ import axios from "axios";
 import { FoodResponse, PageMetadata } from "./base.type";
 import { baseUrl, token } from "./token";
 
+export const getUncensoredFood = async (
+  page: number,
+  limit: number,
+  q = ""
+): Promise<[FoodResponse[], PageMetadata]> => {
+  return axios
+    .get(baseUrl + "/foods", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+      params: {
+        offset: page - 1,
+        limit,
+        q,
+      },
+    })
+    .then((res) => {
+      if (res.status === 200)
+        return [res.data.data.foods, res.data.data.metadata];
+      throw new Error("Fail");
+    });
+};
+
+
 export const getFoods = async (
   page: number,
   limit: number,

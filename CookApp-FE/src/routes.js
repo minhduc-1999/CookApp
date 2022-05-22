@@ -15,6 +15,7 @@ import {
   RocketIcon,
 } from "components/Icons/Icons";
 import OtherSetting from "views/Dashboard/OtherSetting";
+import Censorship from "views/Dashboard/Censorship";
 
 var dashRoutes = [
   {
@@ -22,6 +23,13 @@ var dashRoutes = [
     name: "Dashboard",
     icon: <HomeIcon color="inherit" />,
     component: Dashboard,
+    layout: "/admin",
+  },
+  {
+    path: "/censorship",
+    name: "Censorship",
+    icon: <StatsIcon color="inherit" />,
+    component: Censorship,
     layout: "/admin",
   },
   {
