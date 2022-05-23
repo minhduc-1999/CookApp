@@ -53,6 +53,8 @@ export type UnitPermissionType =
   | "read_unit"
   | "manage_unit";
 
+export type WallPermissionType = "read_wall_info"
+
 export type RolePermissionType = "manage_role"
 
 export type PermisstionType =
@@ -65,3 +67,4 @@ export type PermisstionType =
   | IngredientPermissionType
   | UnitPermissionType
   | RolePermissionType
+  | WallPermissionType

@@ -35,7 +35,6 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 @Controller("users/:id/walls")
 @ApiTags("User/Wall")
 @ApiBearerAuth()
-@RequirePermissions("manage_post")
 export class WallController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) { }
 
@@ -110,6 +109,7 @@ export class WallController {
   @Get()
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetWallResponse, "Get wall information successfully")
+  @RequirePermissions("read_wall_info")
   async getWall(
     @Param("id", ParseUUIDPipe) targetId: string,
     @HttpUserReq() user: User

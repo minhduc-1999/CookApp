@@ -1,0 +1,123 @@
+###################################################
+#              Neo4 Configuration                 #
+#              config/database.ts                 #
+###################################################
+# NEO4J_SCHEME=neo4j+s
+# NEO4J_HOST=64e768d6.databases.neo4j.io
+# NEO4J_PORT=7687
+# NEO4J_USERNAME=neo4j
+# NEO4J_PASSWORD=tGxgn8_nZ3czVXeG7dl3Aq99QZ4pbWJ-x99XEh3gwDY
+# NEO4J_DATABASE=neo4j
+# NEO4J_SCHEME=neo4j
+# NEO4J_HOST=localhost
+# NEO4J_PORT=7687
+# NEO4J_USERNAME=neo4j
+# NEO4J_PASSWORD=tastify
+# NEO4J_DATABASE=neo4j
+###################################################
+#              DB Configuration                   #
+#              config/database.ts                 #
+###################################################
+MONGO_CONNECTION_STRING="mongodb+srv://tastify-be:mtlIpGrorgMtBTbL@cluster0.auwps.mongodb.net/tastify-db?retryWrites=true&w=majority"
+# MONGO_CONNECTION_STRING=mongodb://root:example@localhost:27017
+MONGO_DB_NAME=tastify-se
+# DB_HOST=localhost
+# DB_PORT=5432
+# DB_APP_USER=admin
+# DB_APP_PASS=tastify
+# DB_NAME=tastify-db-2
+# APP_ENV=development
+
+DB_HOST="ec2-18-215-96-22.compute-1.amazonaws.com"
+DB_PORT=5432
+DB_APP_USER=wfaqzekitmufvd
+DB_APP_PASS=9c036d1a54ebf9dac96e11596ca359765e38d05e20908601f0f13c809bbcdac1
+DB_NAME=d1i8b4r97vfcro
+APP_ENV=staging
+###################################################
+#              API Authentication                 #
+#              config/auth.ts                     #
+###################################################
+JWT_PRIVATE_KEY=t41s_1s_pr1vat3_k
+JWT_EXPIRES_IN=30d
+
+###################################################
+#              Google Authentication              #
+#              config/auth.ts                     #
+###################################################
+GOOGLE_USER_INFO_URL=https://www.googleapis.com/oauth2/v2/userinfo?alt=json
+GOOGLE_CLIENT_ID=290846649369-f3hhd4vgdrt6iv17r1sj6h59f9mivbtq.apps.googleusercontent.com
+GOOGLE_CLIENT_SECRET=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
+GOOGLE_CALLBACK_URL=http://localhost:3002/api/google/redirect
+
+###################################################
+#              App Configuration                  #
+#              config/app.ts                      #
+###################################################
+PORT=3002
+SENTRY_URL=
+TZ=UTC
+STAGING_URL=https://tastify-be.herokuapp.com
+EMAIL_VERIFICATION_REQUIRE=true
+
+###################################################
+#              API Configuration                  #
+#                                                 #
+###################################################
+LIMIT=10
+OFFSET=0
+
+###################################################
+#              SMTP Configuration                 #
+#                                                 #
+###################################################
+# TRANSPORT_HOST=smtp.gmail.com
+# TRANSPORT_PORT=587
+# DEFAULT_FROM="Tastify <tastify.noreply@gmail.com>"
+# EMAIL_CLIENT_ID=290846649369-f3hhd4vgdrt6iv17r1sj6h59f9mivbtq.apps.googleusercontent.com
+# EMAIL_CLIENT_SECRET=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
+# EMAIL_REFRESH_TOKEN=1//04V3zD-6QEM8dCgYIARAAGAQSNwF-L9IrGIYnole0GqtB5G9oRa2eHMMrCfe-dcVknyA8kdTJ-WGluaUpliyp4Jij7qv9zxi-m3k
+# EMAIL_ACCESS_TOKEN=ya29.A0ARrdaM8ue5dk4JYC1mqLCWR9Zp1dcCWgiRe7nTap9h87Ad6oMy1bl7NAuK94Y7aDVQQ7BYidHp5U3_Wm44QOmp4g7U4sZcRKnnabHlflJCuacOSu5k680k5suUcFuUYIEx8zADu8uv1-hW2e-Ztt_8OplSme
+# EMAIL_DOMAIN=gmail.com
+# EMAIL_USER=tastify.noreply@gmail.com
+# EMAIL_VERIFICATION_SECRET=t41s_1s_pr1vat3_k3yt41s_1s_pr1vat3_k3y
+# EMAIL_VERIFICATION_CALLBACK=http://localhost:3002/api/email-verification/callback
+# EMAIL_VERIFICATION_CALLBACK_EXPIRATION=5m
+
+TRANSPORT_HOST=localhost
+TRANSPORT_PORT=1025
+DEFAULT_FROM="Tastify <tastify.noreply@gmail.com>"
+EMAIL_DOMAIN=gmail.com
+EMAIL_CLIENT_ID=sample-client-id
+EMAIL_CLIENT_SECRET=sample-client-secret
+EMAIL_REFRESH_TOKEN=sample-refesh-token
+EMAIL_ACCESS_TOKEN=sample-access-token
+EMAIL_USER=tastify.noreply@gmail.com
+EMAIL_PASSWORD=tastify0326
+EMAIL_VERIFICATION_SECRET=t41s_1s_pr1vat3_k3yt41s_1s_pr1vat3_k3y
+EMAIL_VERIFICATION_CALLBACK=http://localhost:3002/api/email-verification/callback
+EMAIL_VERIFICATION_CALLBACK_EXPIRATION=5m
+
+###################################################
+#              Storage Configuration              #
+#                                                 #
+###################################################
+PROJECT_ID=cookapp-3ae24
+CREDENTIAL_JSON='{ "type": "service_account", "project_id": "cookapp-3ae24", "private_key_id": "1c2140bbad4bf87a8457047526cf340ce4ab4d9a", "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQCRytBVxU9T2aXO\nK5kx4q+v8sixqlGX1uDkBgR+PP63rFaB/nF8a0KtU+P051o+KyS7qfAlrAht9y6O\nY+Vn2VR+DTrBmQNZIsSdfeykPP62MIJG6LjfhHibhxRfKWGBJ2SoCZVq59IHfJCn\najqXsSzUOYyE/8zVEchqhxfI4iy9THRZW6RYylW60poZdDQhArSxDEMMNgh7JLnY\n9GWJnXOlnDFJR+YMYz3sBRxImzmsEqRyiwQwY1XgCInnsVzjscIekTnshbMN7YOn\nVF1w1F3oGEqOo1+hhQegvCaUCJhV/cq3nRWAMzRINL7t1zDYdDG4Lx/zvhhsAMkq\nuXAJ+uy5AgMBAAECggEAPgKYuFKTGiQRzO5oW3qCpYDLch3yVHX186bHlHYXFUJ9\nDQ+Pb48jrhtncwxQKu8o0ZVHao6Qi00+hRviQFiFApRX8G5HqUsLe71KwNScthtN\n3iEwOQncTrKWrJ8qNMfvnTVuUylFASAvWrXpNAoM+jt8FDnFAr9skjrhl/TzeJP+\nyyVYiEGix+tqXRjfl5qD1z+eiugHqEFqeebdoh4E2OzJLz4HRTYEQV0HwCmHj8dg\nZN4x7DVM+F0pqvahjd6IPBsYNOJxxB8l2KRyDUoQdMsV4ZBwsZA/fw73QpZcuODB\nwo7fJ+9LY6BS+Izt6agBQnzpeX5HctRDhEJNSXCM3QKBgQDKAAYD6ivkDySGcVT3\nust5QtdfnEwgQzmnQav9iIj5/4JCwDDGu4iprCGjyCt3JCw2W5lHBQKNMxTYdWyn\nKYtDguTOH7zw4VRuN3/we+6YhVDrXJUVHDiXBVtp+sKc5Xh/WO+SKJwpq7TujXiJ\ngTn8Rvz7neHVeXoRHrAiF6hKXwKBgQC4xC2dlrko1mkhh2Efr6h3C4pKgLSpwaOB\nWsIRr3BODbeI8YSbiNOozK8C7/jQKCiy/BN7e5jU0dn4CEZXABD3djf+lfEBX0/h\nJ7J1E91L8vOA1ta8TwNrIWvT8GK+QSVc+O7nnP9ZRZOi7TuO0toebEM3DrvTHVNe\nar3vziPP5wKBgEpwXccdiZUee3BL3Wr5XDhQiHvEZk1RWLKpQc9JfGjcXs1oc9EY\nlNEqDK+FeXcLTnutn7uLPhh4pYrrIuIrLhXv64+GJKOD9hAzxaMCmLd+EYbadFn2\nL2h/4eMZNJSK/6+2P3rWGk5E54Utfyj1BUBRjLLQyMNZY8FhVLkLjMnzAoGAHGsQ\nGQz1rbJMuTt5VMZPwv+jZZImN3XxEBRFhTLWsyqo8Ac1vjZtV6kjwe/m9R04JU9g\nL73y48jjHaMoLnl0IpusQRwO1YczYg4ZBKjpgKT9jvN8U7pTbEbXruFqTpj2hjZD\niJw9Kh3pd0XFw1Hq+oLsU6uQeAgqqnsAe8HZAEECgYEAu1tPXboyGenAP+INHpiu\n2fQGn9JQHVU1FDtDK5F7Y7tobe8wgTnywfeGI0VK8orsus+mh7HKVleAauVwSjPK\niHmO6wkuJmu5q628NyGPIE2k8wdpeIiE2ATJ0gzvV41vBwyWqNK9xiGlPn2VbZYr\nZZEd0JulSxJztlGBdjFtnCk=\n-----END PRIVATE KEY-----\n", "client_email": "firebase-adminsdk-qch8q@cookapp-3ae24.iam.gserviceaccount.com", "client_id": "108397904151261395472", "auth_uri": "https://accounts.google.com/o/oauth2/auth", "token_uri": "https://oauth2.googleapis.com/token", "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs", "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-qch8q%40cookapp-3ae24.iam.gserviceaccount.com" }'
+# CREDENTIAL_PATH=./service-account/credential.json
+STORAGE_BUCKET=cookapp-3ae24.appspot.com
+PRESIGNED_LINK_EXPIRATION=5
+MAX_IMAGES_PER_REQ=5
+PUBLIC_URL=https://storage.googleapis.com/cookapp-3ae24.appspot.com/
+###################################################
+#              Storage Configuration              #
+#                                                 #
+###################################################
+NLP_LANGUAGE_CODE=vi
+###################################################
+#              Notification Configuration         #
+#                                                 #
+###################################################
+ONESIGNAL_APP_ID=98ac72eb-bcdd-4614-a672-5e198c73363e
+ONESIGNAL_REST_API_KEY=NGI1ZDM3MWYtMzUyNi00NjFmLThiMDAtNzQzZjVlYWFjNWFm
+ONESIGNAL_API_BASE_URL=https://onesignal.com/api/
