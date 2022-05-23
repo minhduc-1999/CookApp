@@ -134,6 +134,15 @@ export type RoleResponse = {
   sign: RoleType;
 };
 
+export type LoginResponse = {
+  loginToken: string;
+  accessToken: string;
+  userId: string;
+  email: string;
+  emailVerified: boolean;
+  role: RoleType;
+};
+
 export type UserResponse = AuditResponse & {
   avatar: MediaResponse;
   displayName: string;

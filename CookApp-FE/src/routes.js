@@ -1,9 +1,8 @@
 // import
 import Dashboard from "views/Dashboard/Dashboard";
-import Tables from "views/Dashboard/Tables";
 import Billing from "views/Dashboard/Billing";
 import Profile from "views/Dashboard/Profile";
-import SignUp from "views/Pages/SignUp";
+import SignIn from "views/Pages/SignIn";
 import Users from "views/Dashboard/Users";
 import Foods from "views/Dashboard/Foods";
 import {
@@ -17,7 +16,7 @@ import {
 import OtherSetting from "views/Dashboard/OtherSetting";
 import Censorship from "views/Dashboard/Censorship";
 
-var dashRoutes = [
+export const dashRoutes = [
   {
     path: "/dashboard",
     name: "Dashboard",
@@ -33,13 +32,6 @@ var dashRoutes = [
     layout: "/admin",
   },
   {
-    path: "/tables",
-    name: "Tables",
-    icon: <StatsIcon color="inherit" />,
-    component: Tables,
-    layout: "/admin",
-  },
-  {
     path: "/billing",
     name: "Billing",
     icon: <CreditIcon color="inherit" />,
@@ -51,14 +43,6 @@ var dashRoutes = [
     category: "account",
     state: "pageCollapse",
     views: [
-      {
-        path: "/posts",
-        name: "Post",
-        icon: <PersonIcon color="inherit" />,
-        secondaryNavbar: true,
-        component: Profile,
-        layout: "/admin",
-      },
       {
         path: "/foods",
         name: "Food",
@@ -80,15 +64,15 @@ var dashRoutes = [
         component: OtherSetting,
         layout: "/admin",
       },
-      {
-        path: "/signup",
-        name: "Sign Up",
-        icon: <RocketIcon color="inherit" />,
-        secondaryNavbar: true,
-        component: SignUp,
-        layout: "/auth",
-      },
     ],
   },
 ];
-export default dashRoutes;
+
+export const authRoutes = [
+  {
+    path: "/login",
+    name: "Sign In",
+    component: SignIn,
+    layout: "/auth",
+  },
+];
