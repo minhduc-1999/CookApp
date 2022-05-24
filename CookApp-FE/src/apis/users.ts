@@ -1,4 +1,5 @@
 import axios from "axios";
+import { networkChecking } from "utils/network";
 import { PageMetadata, UserResponse } from "./base.type";
 import { baseUrl, token } from "./token";
 
@@ -31,6 +32,7 @@ export const getUsers = async (
   limit: number,
   q = ""
 ): Promise<[UserResponse[], PageMetadata]> => {
+  await networkChecking()
   return axios
     .get(baseUrl + "/users", {
       headers: {

@@ -1,5 +1,11 @@
-import axios from "axios";
-import { PageMetadata, UnitResponse } from "./base.type";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import { networkChecking } from "utils/network";
+import {
+  BaseResponse,
+  PageMetadata,
+  UnitResponse,
+  UserErrorCode,
+} from "./base.type";
 import { baseUrl, token } from "./token";
 
 type CreateUnitBody = {
@@ -16,6 +22,7 @@ export const getUnits = async (
   limit: number,
   q = ""
 ): Promise<[UnitResponse[], PageMetadata]> => {
+  await networkChecking()
   return axios
     .get(baseUrl + "/units", {
       headers: {
@@ -27,9 +34,32 @@ export const getUnits = async (
         q,
       },
     })
-    .then((res) => {
-      if (res.status === 200)
+    .then((res: AxiosResponse<BaseResponse>) => {
+      if (res.data.meta.ok)
         return [res.data.data.units, res.data.data.metadata];
-      throw new Error("Fail");
+      throw new Error("Failed");
+    });
+};
+
+export const createUnit = async (data: CreateUnitBody): Promise<void> => {
+  await networkChecking()
+  return axios
+    .post(baseUrl + "/units", data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res: AxiosResponse<BaseResponse>) => {
+      if (res.data.meta.ok) return;
+      throw new Error("Failed to create new unit");
+    })
+    .catch((err: AxiosError<BaseResponse>) => {
+      if (
+        err?.response?.data.meta.errorCode ===
+        UserErrorCode.UNIT_ALREADY_EXISTED
+      )
+        throw new Error("Unit has already existed");
+      throw new Error("Failed to create new unit");
     });
 };

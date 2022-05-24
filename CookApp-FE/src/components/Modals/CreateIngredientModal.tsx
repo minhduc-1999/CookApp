@@ -13,7 +13,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { canSaveIngredient } from "apis/ingredients";
+import { canSaveIngredient, createIngredient } from "apis/ingredients";
 import { useEffect, useRef, useState } from "react";
 
 type CreateIngredientModalProps = {
@@ -21,12 +21,10 @@ type CreateIngredientModalProps = {
   onClose: () => void;
 };
 
-const saveIngredient = async (body: { name: string }) => {
-  // TODO
-  console.log(body);
-};
-
-const CreateIngredientModal = ({ isOpen, onClose }: CreateIngredientModalProps) => {
+const CreateIngredientModal = ({
+  isOpen,
+  onClose,
+}: CreateIngredientModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [canSave, setCanSave] = useState(true);
@@ -98,7 +96,7 @@ const CreateIngredientModal = ({ isOpen, onClose }: CreateIngredientModalProps) 
               colorScheme="teal"
               onClick={() => {
                 setSaving(true);
-                saveIngredient({
+                createIngredient({
                   name,
                 })
                   .then(() => {

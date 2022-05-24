@@ -13,17 +13,12 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { canSaveUnit } from "apis/units";
+import { canSaveUnit, createUnit } from "apis/units";
 import { useEffect, useRef, useState } from "react";
 
 type CreateUnitModalProps = {
   isOpen: boolean;
   onClose: () => void;
-};
-
-const saveUnit = async (body: { name: string }) => {
-  // TODO
-  console.log(body);
 };
 
 const CreateUnitModal = ({ isOpen, onClose }: CreateUnitModalProps) => {
@@ -98,7 +93,7 @@ const CreateUnitModal = ({ isOpen, onClose }: CreateUnitModalProps) => {
               colorScheme="teal"
               onClick={() => {
                 setSaving(true);
-                saveUnit({
+                createUnit({
                   name,
                 })
                   .then(() => {
@@ -111,9 +106,9 @@ const CreateUnitModal = ({ isOpen, onClose }: CreateUnitModalProps) => {
                     });
                     onClose();
                   })
-                  .catch(() => {
+                  .catch((err: Error) => {
                     toast({
-                      title: "Fail to create unit",
+                      title: err.message,
                       status: "error",
                       duration: 3000,
                       isClosable: true,

@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
+import { networkChecking } from "utils/network";
 import {
   BaseResponse,
   PageMetadata,
@@ -22,6 +23,7 @@ export const getTopics = async (
   limit: number,
   q = ""
 ): Promise<[TopicResponse[], PageMetadata]> => {
+  await networkChecking()
   return axios
     .get(baseUrl + "/topics", {
       headers: {
@@ -41,6 +43,7 @@ export const getTopics = async (
 };
 
 export const createTopic = async (data: CreateTopicBody): Promise<void> => {
+  await networkChecking()
   try {
     const res = await axios.post(baseUrl + "/topics", data, {
       headers: {

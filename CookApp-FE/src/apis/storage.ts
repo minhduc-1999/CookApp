@@ -3,6 +3,7 @@ import { ImageType } from "react-images-uploading";
 import { baseUrl, token } from "./token";
 import { storage } from "./firebase";
 import { ref, uploadBytes } from "firebase/storage";
+import { networkChecking } from "utils/network";
 
 type SignedLinkResponseItem = {
   signedLink: string;
@@ -10,6 +11,7 @@ type SignedLinkResponseItem = {
 };
 
 export const uploadImageToStorage = async (data: ImageType | undefined) => {
+  await networkChecking()
   if (!data || !data.file) throw new Error("No image found");
   try {
   const signedLinkItem: SignedLinkResponseItem = await axios

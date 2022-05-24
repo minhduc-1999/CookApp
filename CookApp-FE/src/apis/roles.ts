@@ -1,4 +1,5 @@
 import axios from "axios";
+import { networkChecking } from "utils/network";
 import { PageMetadata, RoleResponse } from "./base.type";
 import { baseUrl, token } from "./token";
 
@@ -7,6 +8,7 @@ export const getRoles = async (
   limit: number,
   q = ""
 ): Promise<[RoleResponse[], PageMetadata]> => {
+  await networkChecking()
   return axios
     .get(baseUrl + "/roles", {
       headers: {

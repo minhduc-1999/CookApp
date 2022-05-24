@@ -1,4 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
+import { networkChecking } from "utils/network";
 import {
   BaseResponse,
   FoodResponse,
@@ -12,6 +13,7 @@ export const getUncensoredFood = async (
   limit: number,
   q = ""
 ): Promise<[FoodResponse[], PageMetadata]> => {
+  await networkChecking();
   return axios
     .get(baseUrl + "/foods/uncensored", {
       headers: {
@@ -35,6 +37,7 @@ export const getFoods = async (
   limit: number,
   q = ""
 ): Promise<[FoodResponse[], PageMetadata]> => {
+  await networkChecking();
   return axios
     .get(baseUrl + "/foods/censored", {
       headers: {
@@ -54,6 +57,7 @@ export const getFoods = async (
 };
 
 export const getFoodDetail = async (foodId: string): Promise<FoodResponse> => {
+  await networkChecking();
   return axios
     .get(baseUrl + `/foods/${foodId}`, {
       headers: {
@@ -101,6 +105,7 @@ export const canSaveFood = (food: CreateFoodBody) => {
 };
 
 export const createFood = async (data: CreateFoodBody): Promise<void> => {
+  await networkChecking();
   if (!data.videoUrl) delete data.videoUrl;
   return axios
     .post(baseUrl + "/foods", data, {
@@ -116,6 +121,7 @@ export const createFood = async (data: CreateFoodBody): Promise<void> => {
 };
 
 export const confirmFood = async (foodId: string): Promise<void> => {
+  await networkChecking();
   return axios
     .patch(
       baseUrl + `/foods/${foodId}/censorship`,

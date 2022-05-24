@@ -1,4 +1,5 @@
 import axios, { AxiosError } from "axios";
+import { networkChecking } from "utils/network";
 import { BaseResponse, LoginResponse, UserErrorCode } from "./base.type";
 import { baseUrl, token } from "./token";
 
@@ -34,6 +35,7 @@ export const validatePassword = (password: string) => {
 };
 
 export const login = async (data: Credential): Promise<LoginResponse> => {
+  await networkChecking()
   return axios
     .post(baseUrl + "/login", data, {
       headers: {
