@@ -26,6 +26,7 @@ import {
 } from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
+import { ConfirmFoodCommand } from "modules/core/useCases/confirmFood";
 import { CreateFoodCommand } from "modules/core/useCases/createFood";
 import { CreateFoodRequest } from "modules/core/useCases/createFood/createFoodRequest";
 import { CreateFoodResponse } from "modules/core/useCases/createFood/createFoodResponse";
@@ -70,7 +71,7 @@ export class FoodController {
   @Get("uncensored")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodsResponse, "Get foods successfully")
-  @RequirePermissions("read_food")
+  @RequirePermissions("censor_food")
   async getUnCensoredFoods(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,
@@ -97,6 +98,7 @@ export class FoodController {
       messages: ["Get food vote successfully"],
     });
   }
+
   @Get(":foodId/votes")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodVotesResponse, "Get food votes successfully")
@@ -129,18 +131,33 @@ export class FoodController {
     });
   }
 
+  @Patch(":foodId/censorship")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Confirm food successfully")
+  @HttpRequestTransaction()
+  @RequirePermissions("censor_food")
+  async confirmFood(
+    @HttpUserReq() user: User,
+    @HttpParamTransaction() tx: ITransaction,
+    @Param("foodId", ParseUUIDPipe) foodId: string
+  ): Promise<Result<string>> {
+    const confirmFoodCommand = new ConfirmFoodCommand(tx, user, foodId);
+    await this._commandBus.execute(confirmFoodCommand);
+    return Result.ok(null, { messages: ["Confirm food successfully"] });
+  }
+
   @Post()
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(CreateFoodResponse, "Create food successfully")
   @HttpRequestTransaction()
   @RequirePermissions("create_food")
-  async createPost(
+  async createFood(
     @Body() req: CreateFoodRequest,
     @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<string>> {
-    const createPostCommand = new CreateFoodCommand(user, req, tx);
-    const newFoodId = await this._commandBus.execute(createPostCommand);
+    const createFoodCommand = new CreateFoodCommand(user, req, tx);
+    const newFoodId = await this._commandBus.execute(createFoodCommand);
     return Result.ok(newFoodId, { messages: ["Create food successfully"] });
   }
 

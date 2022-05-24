@@ -20,6 +20,7 @@ export interface IFoodRepository {
   getSteps(foodId: string): Promise<RecipeStep[]>;
   getIngredients(foodId: string): Promise<FoodIngredient[]>;
   insertFood(food: Food): Promise<Food>;
+  updateFood(food: Food, data: Partial<Food>): Promise<void>;
 }
 
 @Injectable()
@@ -29,6 +30,17 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     private _foodRepo: Repository<FoodEntity>
   ) {
     super();
+  }
+  async updateFood(food: Food, data: Partial<Food>): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      const updateData = new FoodEntity(food).update(data);
+      await queryRunner.manager.update<FoodEntity>(
+        FoodEntity,
+        { id: food.id },
+        updateData
+      );
+    }
   }
   async insertFood(food: Food): Promise<Food> {
     if (!food) return null;

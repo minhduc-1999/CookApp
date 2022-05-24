@@ -18,4 +18,5 @@ export enum UserErrorCode {
   UNIT_ALREADY_EXISTED= "unit_already_existed",
   INGREDIENT_ALREADY_EXISTED= "ingredient_already_existed",
   TOPIC_ALREADY_EXISTED= "topic_already_existed",
+  FOOD_ALREADY_CONFIRMED = "food_already_confirmed"
 }

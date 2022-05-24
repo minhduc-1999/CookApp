@@ -29,6 +29,7 @@ import { FoodModel } from "./entities/se/food.schema";
 import { SyncFoodCreatedEventHandler } from "./events/syncSeData";
 import { FoodService } from "./services/food.service";
 import { FoodRecipeService } from "./services/recipeStep.service";
+import { ConfirmFoodCommandHandler } from "./useCases/confirmFood";
 import { CreateFoodCommandHandler } from "./useCases/createFood";
 import { CreateIngredientCommandHandler } from "./useCases/createIngredient";
 import { CreateUnitCommandHandler } from "./useCases/createUnit";
@@ -47,7 +48,8 @@ const commandHandlers = [
   VoteFoodCommandHandler,
   EditVoteCommandHandler,
   CreateUnitCommandHandler,
-  CreateIngredientCommandHandler
+  CreateIngredientCommandHandler,
+  ConfirmFoodCommandHandler,
 ];
 const queryHandlers = [
   GetFoodsQueryHandler,
@@ -56,12 +58,10 @@ const queryHandlers = [
   GetIngredientsQueryHandler,
   GetFoodVotesQueryHandler,
   GetVoteQueryHandler,
-  GetUncensoredFoodsQueryHandler
+  GetUncensoredFoodsQueryHandler,
 ];
 
-const eventHandlers = [
-  SyncFoodCreatedEventHandler
-]
+const eventHandlers = [SyncFoodCreatedEventHandler];
 
 const services = [
   {
@@ -127,8 +127,13 @@ const controller = [FoodController, IngredientController, UnitController];
     ...services,
     ...repositories,
     ...queryHandlers,
-    ...eventHandlers
+    ...eventHandlers,
   ],
-  exports: ["IFoodRecipeService", "IFoodRepository", "IFoodSeService", "IFoodService"],
+  exports: [
+    "IFoodRecipeService",
+    "IFoodRepository",
+    "IFoodSeService",
+    "IFoodService",
+  ],
 })
 export class CoreModule {}

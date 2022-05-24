@@ -37,6 +37,7 @@ export type FoodPermisstionType =
   | "edit_food"
   | "delete_food"
   | "read_food"
+  | "censor_food"
   | "manage_food";
 
 export type IngredientPermissionType =
