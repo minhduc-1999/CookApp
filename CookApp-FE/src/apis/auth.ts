@@ -1,5 +1,5 @@
 import axios, { AxiosError } from "axios";
-import { LoginResponse, UserErrorCode } from "./base.type";
+import { BaseResponse, LoginResponse, UserErrorCode } from "./base.type";
 import { baseUrl, token } from "./token";
 
 export type Credential = {
@@ -44,7 +44,7 @@ export const login = async (data: Credential): Promise<LoginResponse> => {
     .then((res) => {
       return res.data.data;
     })
-    .catch((err: AxiosError<{ meta: { errorCode: UserErrorCode } }>) => {
+    .catch((err: AxiosError<BaseResponse>) => {
       if (
         err.response?.data.meta.errorCode === UserErrorCode.INVALID_CREDENTIAL
       )

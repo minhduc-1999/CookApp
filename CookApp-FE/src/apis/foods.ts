@@ -1,5 +1,10 @@
-import axios from "axios";
-import { FoodResponse, PageMetadata } from "./base.type";
+import axios, { AxiosError, AxiosResponse } from "axios";
+import {
+  BaseResponse,
+  FoodResponse,
+  PageMetadata,
+  UserErrorCode,
+} from "./base.type";
 import { baseUrl, token } from "./token";
 
 export const getUncensoredFood = async (
@@ -24,7 +29,6 @@ export const getUncensoredFood = async (
       throw new Error("Fail");
     });
 };
-
 
 export const getFoods = async (
   page: number,
@@ -108,5 +112,31 @@ export const createFood = async (data: CreateFoodBody): Promise<void> => {
     .then((res) => {
       if (res.status === 201) return;
       throw new Error("Fail");
+    });
+};
+
+export const confirmFood = async (foodId: string): Promise<void> => {
+  return axios
+    .patch(
+      baseUrl + `/foods/${foodId}/censorship`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      }
+    )
+    .then((res: AxiosResponse<BaseResponse>) => {
+      if (res.data.meta.ok) return;
+      throw new Error("Failed to confirm food");
+    })
+    .catch((err: AxiosError<BaseResponse>) => {
+      if (
+        err?.response?.data.meta.errorCode ===
+        UserErrorCode.FOOD_ALREADY_CONFIRMED
+      )
+        return;
+      throw new Error("Failed to confirm food");
     });
 };

@@ -40,10 +40,12 @@ const FoodDetailModal = ({ isOpen, onClose, foodId }: FoodDetailModalProps) => {
   const [food, setFood] = useState<FoodResponse>();
   const [loading, setLoading] = useState(true);
   useEffect(() => {
-    getFoodDetail(foodId).then((res) => {
-      setFood(res);
-      setLoading(false);
-    });
+    if (foodId) {
+      getFoodDetail(foodId).then((res) => {
+        setFood(res);
+        setLoading(false);
+      });
+    }
   }, [foodId]);
   return (
     <Modal isOpen={isOpen} onClose={onClose} size="5xl">
@@ -154,7 +156,7 @@ const FoodDetailModal = ({ isOpen, onClose, foodId }: FoodDetailModalProps) => {
                         variant="striped"
                         colorScheme="teal"
                         w="100%"
-                        __css={{whiteSpace: "normal"}}
+                        __css={{ whiteSpace: "normal" }}
                       >
                         <Thead>
                           <Tr>
@@ -168,7 +170,7 @@ const FoodDetailModal = ({ isOpen, onClose, foodId }: FoodDetailModalProps) => {
                               <Tr>
                                 <Td>{index + 1}</Td>
                                 <Td>
-                                  <Text __css={{wordWrap: "break-word"}}>
+                                  <Text __css={{ wordWrap: "break-word" }}>
                                     {step.content}
                                   </Text>
                                 </Td>
