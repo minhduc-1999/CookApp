@@ -31,6 +31,9 @@ export class FoodEntity extends AbstractEntity {
 
   @Column({name: "rating", nullable: true, type: "float4"})
   rating: number
+
+  @Column({name: "confirmed", default: false})
+  confirmed: boolean
   
   @OneToMany(() => FoodIngredientEntity, (foodIng) => foodIng.food, {
     cascade: ["insert"],
@@ -64,6 +67,7 @@ export class FoodEntity extends AbstractEntity {
     this.servings = food?.servings;
     this.description = food?.description;
     this.url = food?.url;
+    this.confirmed = food?.confirmed
     this.ingredients =
       food?.ingredients &&
       food.ingredients.map((ing) => new FoodIngredientEntity(ing));
@@ -90,6 +94,7 @@ export class FoodEntity extends AbstractEntity {
       description: data?.description ?? this.description,
       name: data?.name ?? this.name,
       videoUrl: data?.videoUrl ?? this.videoUrl,
+      confirmed: data?.confirmed ?? this.confirmed
     };
   }
 }

@@ -3,21 +3,21 @@ import {
   IsString,
   IsNotEmpty,
   IsEmail,
-  MinLength,
+  Length,
 } from "class-validator";
 
 export class RegisterRequest {
-
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ type: String, example: "user" })
   @IsNotEmpty()
+  @Length(3,20)
   username: string;
 
   @IsString()
   @IsNotEmpty()
   @ApiProperty({ type: String , example: "abc12345"})
-  @MinLength(8)
+  @Length(8, 20)
   @IsNotEmpty()
   password: string;
 

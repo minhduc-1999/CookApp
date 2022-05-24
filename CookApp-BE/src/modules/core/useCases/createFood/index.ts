@@ -77,15 +77,18 @@ export class CreateFoodCommandHandler
       totalTime: req.totalTime,
       steps,
       ingredients:
-        req?.ingredients && req.ingredients.map((ing) => new FoodIngredient(ing)),
+        req?.ingredients &&
+        req.ingredients.map((ing) => new FoodIngredient(ing)),
       videoUrl: req?.videoUrl,
       url: req?.url,
       author: user,
     });
 
+    food.setCensoredStatus(user.account.role.sign);
+
     const savedFood = await this._foodRepo.setTransaction(tx).insertFood(food);
 
-    this._eventBus.publish(new FoodCreatedEvent(savedFood))
+    this._eventBus.publish(new FoodCreatedEvent(savedFood));
 
     return new CreateFoodResponse(savedFood.id);
   }

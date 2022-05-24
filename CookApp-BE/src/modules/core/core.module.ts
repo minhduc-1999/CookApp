@@ -37,6 +37,7 @@ import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
 import { GetFoodsQueryHandler } from "./useCases/getFoods";
 import { GetFoodVotesQueryHandler } from "./useCases/getFoodVotes";
 import { GetIngredientsQueryHandler } from "./useCases/getIngredients";
+import { GetUncensoredFoodsQueryHandler } from "./useCases/getUncensoredFoods";
 import { GetUnitsQueryHandler } from "./useCases/getUnits";
 import { GetVoteQueryHandler } from "./useCases/getVote";
 import { VoteFoodCommandHandler } from "./useCases/voteFood";
@@ -54,7 +55,8 @@ const queryHandlers = [
   GetUnitsQueryHandler,
   GetIngredientsQueryHandler,
   GetFoodVotesQueryHandler,
-  GetVoteQueryHandler
+  GetVoteQueryHandler,
+  GetUncensoredFoodsQueryHandler
 ];
 
 const eventHandlers = [

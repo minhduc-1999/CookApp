@@ -13,6 +13,7 @@ import { In, QueryRunner, Repository } from "typeorm";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<[Food[], number]>;
+  getUncensoredFoods(query: PageOptionsDto): Promise<[Food[], number]>;
   setTransaction(tx: ITransaction): IFoodRepository;
   getById(id: string): Promise<Food>;
   getByIds(ids: string[]): Promise<Food[]>;
@@ -87,17 +88,54 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
       .leftJoinAndSelect("step.interaction", "stepInter")
       .leftJoinAndSelect("step.medias", "stepMedia")
       .where("food.id = :id", { id })
-      .select(["food", "ingredient", "step","author", "media", "stepInter", "stepMedia"])
+      .select([
+        "food",
+        "ingredient",
+        "step",
+        "author",
+        "media",
+        "stepInter",
+        "stepMedia",
+      ])
       .getOne();
 
     return entity?.toDomain();
   }
+
   async getFoods(query: PageOptionsDto): Promise<[Food[], number]> {
     const [foodEntities, total] = await this._foodRepo.findAndCount({
       relations: ["medias", "author"],
+      where: {
+        confirmed: true,
+      },
       skip: query.limit * query.offset,
       take: query.limit,
     });
+    return [foodEntities?.map((entity) => entity.toDomain()), total];
+  }
+
+  async getUncensoredFoods(query: PageOptionsDto): Promise<[Food[], number]> {
+    const [foodEntities, total] = await this._foodRepo
+      .createQueryBuilder("food")
+      .leftJoinAndSelect("food.ingredients", "ingredient")
+      .leftJoinAndSelect("food.author", "author")
+      .leftJoinAndSelect("food.medias", "media")
+      .leftJoinAndSelect("food.steps", "step")
+      .leftJoinAndSelect("step.interaction", "stepInter")
+      .leftJoinAndSelect("step.medias", "stepMedia")
+      .where("food.confirmed = :confirm", { confirm: false })
+      .select([
+        "food",
+        "ingredient",
+        "step",
+        "author",
+        "media",
+        "stepInter",
+        "stepMedia",
+      ])
+      .skip(query.limit * query.offset)
+      .take(query.limit)
+      .getManyAndCount();
     return [foodEntities?.map((entity) => entity.toDomain()), total];
   }
 }

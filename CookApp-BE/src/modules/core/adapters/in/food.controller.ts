@@ -37,6 +37,7 @@ import { GetFoodsQuery } from "modules/core/useCases/getFoods";
 import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
 import { GetFoodVotesQuery } from "modules/core/useCases/getFoodVotes";
 import { GetFoodVotesResponse } from "modules/core/useCases/getFoodVotes/getFoodVotesResponse";
+import { GetUncensoredFoodsQuery } from "modules/core/useCases/getUncensoredFoods";
 import { GetVoteQuery } from "modules/core/useCases/getVote";
 import { GetVoteResponse } from "modules/core/useCases/getVote/getVoteResponse";
 import { VoteFoodCommand } from "modules/core/useCases/voteFood";
@@ -50,16 +51,32 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 export class FoodController {
   constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
-  @Get()
+  @Get("censored")
   @ApiFailResponseCustom()
   @ApiOKResponseCustom(GetFoodsResponse, "Get foods successfully")
   @RequirePermissions("read_food")
-  async getFoods(
+  async getCensoredFoods(
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,
     @HttpUserReq() user: User
   ): Promise<Result<GetFoodsResponse>> {
     const foodQuery = new GetFoodsQuery(user, query);
+    const result = await this._queryBus.execute(foodQuery);
+    return Result.ok(result, {
+      messages: ["Get foods successfully"],
+    });
+  }
+
+  @Get("uncensored")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(GetFoodsResponse, "Get foods successfully")
+  @RequirePermissions("read_food")
+  async getUnCensoredFoods(
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
+    query: PageOptionsDto,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetFoodsResponse>> {
+    const foodQuery = new GetUncensoredFoodsQuery(user, query);
     const result = await this._queryBus.execute(foodQuery);
     return Result.ok(result, {
       messages: ["Get foods successfully"],
