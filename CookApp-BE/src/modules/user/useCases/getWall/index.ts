@@ -28,20 +28,31 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
     @Inject("IStorageService")
     private _storageService: IStorageService,
     @Inject("IConversationRepository")
-    private _conversationRepo: IConversationRepository,
-  ) { }
+    private _conversationRepo: IConversationRepository
+  ) {}
   async execute(query: GetWallQuery): Promise<GetWallResponse> {
-    const { user, targetId } = query
+    const { user, targetId } = query;
     const wall = await this._wallRepo.getWall(targetId);
+    console.log(wall);
     if (!wall) {
-      throw new NotFoundException(ResponseDTO.fail("User not found", UserErrorCode.USER_NOT_FOUND))
+      throw new NotFoundException(
+        ResponseDTO.fail("User not found", UserErrorCode.USER_NOT_FOUND)
+      );
     }
-    wall.avatar = (await this._storageService.getDownloadUrls([wall.avatar]))[0]
-    const follow = await this._followRepo.getFollow(
+    wall.avatar = (
+      await this._storageService.getDownloadUrls([wall.avatar])
+    )[0];
+    const follow = await this._followRepo.getFollow(user.id, targetId);
+    const hasRecommendations = wall.account.role.sign === "user" ? false : true;
+    const conv = await this._conversationRepo.findDirectConversation(
       user.id,
       targetId
     );
-    const conv = await this._conversationRepo.findDirectConversation(user.id, targetId)
-    return new GetWallResponse(wall, !(_.isNil(follow)), conv);
+    return new GetWallResponse(
+      wall,
+      !_.isNil(follow),
+      conv,
+      hasRecommendations
+    );
   }
 }

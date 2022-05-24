@@ -34,7 +34,14 @@ export class WallRepository extends BaseRepository implements IWallRepository {
         .where("author.id = :authorId", { authorId })
         .andWhere("kind = :kind", { kind: query.kind })
         .orderBy("interaction.createdAt", "DESC")
-        .select(["post", "interaction", "media", "mediaInter", "foodRef", "author"])
+        .select([
+          "post",
+          "interaction",
+          "media",
+          "mediaInter",
+          "foodRef",
+          "author",
+        ])
         .skip(query.limit * query.offset)
         .take(query.limit)
         .getManyAndCount();
@@ -58,7 +65,10 @@ export class WallRepository extends BaseRepository implements IWallRepository {
   async getWall(userId: string): Promise<User> {
     const entity = await this._userRepo
       .createQueryBuilder("user")
+      .leftJoinAndSelect("user.account", "account")
+      .leftJoinAndSelect("account.role", "role")
       .where("user.id = :userId", { userId })
+      .select(["user", "account", "role"])
       .getOne();
     return entity?.toDomain();
   }

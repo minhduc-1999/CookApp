@@ -49,7 +49,7 @@ export class UserEntity extends AbstractEntity {
   @Column({ name: "n_posts", default: 0 })
   nPosts: number;
 
-  @Column({ name: "avatar", default: "images/avatar-default.png" })
+  @Column({ name: "avatar", default: "images/avatars/avatar-default.png" })
   avatar: string;
 
   @Column({ name: "display_name" })
