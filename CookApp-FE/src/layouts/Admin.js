@@ -95,7 +95,6 @@ export default function Dashboard(props) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   document.documentElement.dir = "ltr";
   // Chakra Color Mode
-  console.log("here we gooooooooooo ======================")
   return (
     <ChakraProvider theme={theme} resetCss={false}>
       <Sidebar

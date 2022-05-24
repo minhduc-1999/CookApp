@@ -8,7 +8,7 @@ export const getUncensoredFood = async (
   q = ""
 ): Promise<[FoodResponse[], PageMetadata]> => {
   return axios
-    .get(baseUrl + "/foods", {
+    .get(baseUrl + "/foods/uncensored", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -32,7 +32,7 @@ export const getFoods = async (
   q = ""
 ): Promise<[FoodResponse[], PageMetadata]> => {
   return axios
-    .get(baseUrl + "/foods", {
+    .get(baseUrl + "/foods/censored", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

@@ -11,6 +11,9 @@ import {
   Text,
   useColorModeValue,
   FormErrorMessage,
+  Alert,
+  AlertIcon,
+  AlertDescription,
 } from "@chakra-ui/react";
 // Assets
 import signInImage from "assets/img/signInImage.png";
@@ -23,6 +26,7 @@ function SignIn() {
   const [usernameError, setUsernameError] = useState("");
   const [password, setPassword] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [loginError, setLoginError] = useState("");
   // Chakra color mode
   const titleColor = useColorModeValue("teal.300", "teal.200");
   const textColor = useColorModeValue("gray.400", "white");
@@ -43,8 +47,8 @@ function SignIn() {
       ?.signIn({ username, password }, () => {
         history.replace(from);
       })
-      .catch((err) => {
-        console.log("error message", err);
+      .catch((err: Error) => {
+        setLoginError(err.message);
       });
   };
 
@@ -52,6 +56,10 @@ function SignIn() {
     return usernameError || passwordError || username == "" || password === ""
       ? false
       : true;
+  };
+
+  const onInputFocus = () => {
+    setLoginError("");
   };
 
   return (
@@ -90,23 +98,28 @@ function SignIn() {
             >
               Enter your username/email and password to sign in
             </Text>
-            <FormControl isRequired>
-              <FormLabel ms="4px" fontSize="sm" fontWeight="normal">
+            <FormControl mb="24px" isRequired isInvalid={usernameError !== ""}>
+              <FormLabel
+                htmlFor="username"
+                ms="4px"
+                fontSize="sm"
+                fontWeight="normal"
+              >
                 Username/Email
               </FormLabel>
               <Input
+                id="username"
                 borderRadius="15px"
-                mb="24px"
                 fontSize="sm"
                 type="text"
                 placeholder="Your username/email adress"
                 size="lg"
                 value={username}
+                onFocus={onInputFocus}
                 onChange={(e) => {
                   setUsername(e.target.value);
                   const err = validateUsername(e.target.value);
                   if (err) {
-                    console.log(err.message);
                     setUsernameError(err.message);
                     return;
                   }
@@ -117,18 +130,24 @@ function SignIn() {
                 <FormErrorMessage>{usernameError}</FormErrorMessage>
               ) : null}
             </FormControl>
-            <FormControl isRequired>
-              <FormLabel ms="4px" fontSize="sm" fontWeight="normal">
+            <FormControl mb="24px" isRequired isInvalid={passwordError !== ""}>
+              <FormLabel
+                htmlFor="password"
+                ms="4px"
+                fontSize="sm"
+                fontWeight="normal"
+              >
                 Password
               </FormLabel>
               <Input
+                id="password"
                 borderRadius="15px"
-                mb="36px"
                 fontSize="sm"
                 type="password"
                 placeholder="Your password"
                 size="lg"
                 value={password}
+                onFocus={onInputFocus}
                 onChange={(e) => {
                   setPassword(e.target.value);
                   const err = validatePassword(e.target.value);
@@ -139,11 +158,16 @@ function SignIn() {
                   setPasswordError("");
                 }}
               />
-                <FormErrorMessage>password error</FormErrorMessage>
               {passwordError !== "" ? (
                 <FormErrorMessage>{passwordError}</FormErrorMessage>
               ) : null}
             </FormControl>
+            {loginError && (
+              <Alert mb="24px" status="error" borderRadius="15px">
+                <AlertIcon />
+                <AlertDescription>{loginError}</AlertDescription>
+              </Alert>
+            )}
             <Button
               fontSize="10px"
               type="submit"
@@ -163,13 +187,6 @@ function SignIn() {
             >
               SIGN IN
             </Button>
-            <Flex
-              flexDirection="column"
-              justifyContent="center"
-              alignItems="center"
-              maxW="100%"
-              mt="0px"
-            ></Flex>
           </Flex>
         </Flex>
         <Box
