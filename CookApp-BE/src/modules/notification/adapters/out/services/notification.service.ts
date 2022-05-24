@@ -75,7 +75,7 @@ export class NotificationService implements INotificationService {
       headings: { en: message.title },
       channel_for_external_user_ids: "push",
       include_external_user_ids: message.targets,
-      name: "test 1",
+      name: message.title,
       data: {
         ...message.data,
         template_id: message.templateId,
@@ -85,7 +85,7 @@ export class NotificationService implements INotificationService {
     this._httpService.post(this.apiUrl, data, { headers }).subscribe({
       next: (result) =>
         this._logger.log(
-          `Success to send push notification to ${result.data.recipients}`
+          `Success to send push notification to ${result.data.recipients} users`
         ),
       error: (err) =>
         this._logger.error(`Failed to send push notification`, err),

@@ -1,5 +1,5 @@
 import { ConflictException, Inject, NotFoundException } from "@nestjs/common";
-import { CommandHandler, ICommandHandler } from "@nestjs/cqrs";
+import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -7,6 +7,8 @@ import { IFoodRepository } from "modules/core/adapters/out/repositories/food.rep
 import { ResponseDTO } from "base/dtos/response.dto";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { Food } from "domains/core/food.domain";
+import { FoodConfirmedEvent, FoodCreatedEvent } from "domains/core/events/food.event";
+import { IFoodService } from "modules/core/services/food.service";
 
 export class ConfirmFoodCommand extends BaseCommand {
   foodId: string;
@@ -22,11 +24,16 @@ export class ConfirmFoodCommandHandler
 {
   constructor(
     @Inject("IFoodRepository")
-    private _foodRepo: IFoodRepository
+    private _foodRepo: IFoodRepository,
+    private _eventBus: EventBus,
+    @Inject("IFoodService")
+    private _foodService: IFoodService
   ) {}
   async execute(command: ConfirmFoodCommand): Promise<void> {
     const { tx, foodId } = command;
-    const food = await this._foodRepo.getById(foodId);
+
+    const food = await this._foodService.getById(foodId);
+
     if (!food)
       throw new NotFoundException(
         ResponseDTO.fail("Food not found", UserErrorCode.FOOD_NOT_FOUND)
@@ -46,6 +53,8 @@ export class ConfirmFoodCommandHandler
     };
 
     await this._foodRepo.setTransaction(tx).updateFood(food, updateData);
+    this._eventBus.publish(new FoodConfirmedEvent(food));
+    this._eventBus.publish(new FoodCreatedEvent(food));
     return;
   }
 }

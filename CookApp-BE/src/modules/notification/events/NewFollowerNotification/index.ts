@@ -26,20 +26,20 @@ export class NewFollowerEventHandler
     private _notiRepository: INotiRepository,
     @Inject("INotificationService")
     private _notiService: INotificationService
-  ) { }
+  ) {}
 
   async handle(event: NewFollowerEvent): Promise<void> {
-    const { target, follower } = event
+    const { target, follower } = event;
 
     // Cancel if target user turn off notification for new follower
-    const targetNotiConfig = await this._configurationService.getNotificationConfig(target)
-    if (!targetNotiConfig.newFollower)
-      return
+    const targetNotiConfig =
+      await this._configurationService.getNotificationConfig(target);
+    if (!targetNotiConfig.newFollower) return;
 
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.NewFollowerTemplate
     );
-    const notification: Notification = {
+    const notification: Notification<{ followerID: string }> = {
       body: template.body.replace("$user", event.follower.displayName),
       title: template.title,
       templateId: template.id,

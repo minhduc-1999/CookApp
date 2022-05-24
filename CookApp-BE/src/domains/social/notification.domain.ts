@@ -3,11 +3,11 @@ export class NotificationTemplate {
   id: string;
   body: string;
 }
-export class Notification {
+export class Notification<T = object> {
   title: string;
   body: string;
   templateId: string;
-  data?: object;
+  data?: T;
   targets: string[];
   image?: string;
 }

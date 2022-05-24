@@ -19,30 +19,34 @@ export class NewPostEventHandler implements IEventHandler<PostCreatedEvent> {
     @Inject("IConfigurationService")
     private _configurationService: IConfigurationService,
     @Inject("IFollowRepository")
-    private _followRepo: IFollowRepository,
-  ) { }
+    private _followRepo: IFollowRepository
+  ) {}
 
   async handle(event: PostCreatedEvent): Promise<void> {
     const [followers, _] = await this._followRepo.getFollowers(event.author.id);
-    if (followers.length === 0) return
+    if (followers.length === 0) return;
 
-    const followerNotiConfigs = await this._configurationService
-      .getNotificationConfigs(followers.map(follwer => follwer.id))
+    const followerNotiConfigs =
+      await this._configurationService.getNotificationConfigs(
+        followers.map((follwer) => follwer.id)
+      );
     const endFollowers = followerNotiConfigs
-      .filter(config => config.newPost)
-      .map(config => config.userID)
+      .filter((config) => config.newPost)
+      .map((config) => config.userID);
 
-    if (endFollowers.length === 0)
-      return
+    if (endFollowers.length === 0) return;
 
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.NewPostTemplate
     );
-    const notification: Notification = {
+    const notification: Notification<{ postID: string }> = {
       body: template.body.replace("$user", event.author.displayName),
       title: template.title,
       templateId: template.id,
-      image: (event.post as Moment).medias?.length > 0 ? (event.post as Moment).medias[0].url : "",
+      image:
+        (event.post as Moment).medias?.length > 0
+          ? (event.post as Moment).medias[0].url
+          : "",
       targets: endFollowers,
       data: {
         postID: event.post.id,

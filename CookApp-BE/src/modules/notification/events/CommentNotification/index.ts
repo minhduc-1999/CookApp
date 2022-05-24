@@ -35,16 +35,16 @@ export class CommentPostEventHandler
     if (actor.id === post.author.id) {
       return;
     }
-    const authorNotiConfig = await this._configurationService.getNotificationConfig(post.author)
+    const authorNotiConfig =
+      await this._configurationService.getNotificationConfig(post.author);
 
     // Cancle if post's author turn off notification for new comment
-    if (!authorNotiConfig.postComment) 
-      return
+    if (!authorNotiConfig.postComment) return;
 
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.CommentTemplate
     );
-    const notification: Notification = {
+    const notification: Notification<{ postID: string }> = {
       body: template.body.replace("$user", actor.displayName),
       title: template.title,
       templateId: template.id,

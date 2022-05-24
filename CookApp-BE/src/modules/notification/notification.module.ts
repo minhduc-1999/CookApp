@@ -10,12 +10,16 @@ import { NewFollowerEventHandler } from "./events/NewFollowerNotification";
 import { ReactPostEventHandler } from "./events/ReactNotification";
 import { CommentPostEventHandler } from "./events/CommentNotification";
 import { ConfigurationModule } from "modules/configuration/configuration.module";
+import { FoodConfirmedEventHandler } from "./events/FoodConfirmedNotification";
+import { NewFoodEventHandler } from "./events/NewFoodNotification";
 
 const eventHandlers = [
   NewPostEventHandler,
   NewFollowerEventHandler,
   ReactPostEventHandler,
   CommentPostEventHandler,
+  FoodConfirmedEventHandler,
+  NewFoodEventHandler
 ];
 
 const repositories = [

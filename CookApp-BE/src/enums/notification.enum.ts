@@ -3,4 +3,6 @@ export enum NotificationTemplateEnum {
   NewFollowerTemplate = "new_follower",
   ReactTemplate = "react",
   CommentTemplate = "comment",
+  FoodConfirmationTemplate = "food_confirmation",
+  NewFoodTemplate = "new_food"
 }

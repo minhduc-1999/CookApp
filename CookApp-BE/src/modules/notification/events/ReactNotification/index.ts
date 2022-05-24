@@ -34,14 +34,14 @@ export class ReactPostEventHandler implements IEventHandler<ReactPostEvent> {
     }
 
     // Cancel if post's author turn off notification for reaction
-    const authorNotiConfig = await this._configurationService.getNotificationConfig(post.author)
-    if (!authorNotiConfig.postReaction)
-      return
+    const authorNotiConfig =
+      await this._configurationService.getNotificationConfig(post.author);
+    if (!authorNotiConfig.postReaction) return;
 
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.ReactTemplate
     );
-    const notification: Notification = {
+    const notification: Notification<{ postID: string }> = {
       body: template.body.replace("$user", actor.displayName),
       title: template.title,
       templateId: template.id,
