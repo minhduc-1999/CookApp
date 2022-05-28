@@ -6,6 +6,7 @@ import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { FoodEntity, FoodMediaEntity } from "entities/core/food.entity";
 import { FoodIngredientEntity } from "entities/core/foodIngredient.entity";
+import { FoodSaveEntity } from "entities/core/foodSave.entity";
 import { FoodVoteEntity } from "entities/core/foodVote.entity";
 import { IngredientEntity, UnitEntity } from "entities/core/ingredient.entity";
 import {
@@ -41,6 +42,7 @@ import { GetIngredientsQueryHandler } from "./useCases/getIngredients";
 import { GetUncensoredFoodsQueryHandler } from "./useCases/getUncensoredFoods";
 import { GetUnitsQueryHandler } from "./useCases/getUnits";
 import { GetVoteQueryHandler } from "./useCases/getVote";
+import { SaveFoodCommandHandler } from "./useCases/saveFood";
 import { VoteFoodCommandHandler } from "./useCases/voteFood";
 
 const commandHandlers = [
@@ -50,6 +52,7 @@ const commandHandlers = [
   CreateUnitCommandHandler,
   CreateIngredientCommandHandler,
   ConfirmFoodCommandHandler,
+  SaveFoodCommandHandler
 ];
 const queryHandlers = [
   GetFoodsQueryHandler,
@@ -117,6 +120,7 @@ const controller = [FoodController, IngredientController, UnitController];
       UnitEntity,
       IngredientEntity,
       FoodVoteEntity,
+      FoodSaveEntity
     ]),
     forwardRef(() => UserModule),
     MongooseModule.forFeature([FoodModel]),

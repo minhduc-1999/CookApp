@@ -34,11 +34,6 @@ export class ConfirmFoodCommandHandler
 
     const food = await this._foodService.getById(foodId);
 
-    if (!food)
-      throw new NotFoundException(
-        ResponseDTO.fail("Food not found", UserErrorCode.FOOD_NOT_FOUND)
-      );
-
     if (food.confirmed) {
       throw new ConflictException(
         ResponseDTO.fail(

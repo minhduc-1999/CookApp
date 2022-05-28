@@ -6,10 +6,13 @@ import { BaseRepository } from "base/repository.base";
 import { Food } from "domains/core/food.domain";
 import { FoodIngredient } from "domains/core/ingredient.domain";
 import { RecipeStep } from "domains/core/recipeStep.domain";
+import { FoodSave } from "domains/core/foodSave.domain";
 import { FoodEntity } from "entities/core/food.entity";
 import { RecipeStepEntity } from "entities/core/recipeStep.entity";
+import { FoodSaveEntity } from "entities/core/foodSave.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { In, QueryRunner, Repository } from "typeorm";
+import { FoodSaveType } from "enums/core.enum";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<[Food[], number]>;
@@ -21,16 +24,64 @@ export interface IFoodRepository {
   getIngredients(foodId: string): Promise<FoodIngredient[]>;
   insertFood(food: Food): Promise<Food>;
   updateFood(food: Food, data: Partial<Food>): Promise<void>;
+  saveFood(save: FoodSave): Promise<void>;
+  getFoodSave(
+    userId: string,
+    foodId: string,
+    type: FoodSaveType
+  ): Promise<Food>;
+  getFoodSaves(userId: string): Promise<[Food[], number]>;
 }
 
 @Injectable()
 export class FoodRepository extends BaseRepository implements IFoodRepository {
   constructor(
     @InjectRepository(FoodEntity)
-    private _foodRepo: Repository<FoodEntity>
+    private _foodRepo: Repository<FoodEntity>,
+    @InjectRepository(FoodSaveEntity)
+    private _foodSaveRepo: Repository<FoodSaveEntity>
   ) {
     super();
   }
+  async getFoodSaves(userId: string): Promise<[Food[], number]> {
+    const [entities, total] = await this._foodSaveRepo.findAndCount({
+      relations: ["food"],
+      where: {
+        user: {
+          id: userId,
+        },
+      },
+    });
+    return [entities?.map((entity) => entity.toDomain()), total];
+  }
+  async getFoodSave(
+    userId: string,
+    foodId: string,
+    type: FoodSaveType
+  ): Promise<Food> {
+    const entity = await this._foodSaveRepo.findOne({
+      relations: ["food"],
+      where: {
+        user: {
+          id: userId,
+        },
+        food: {
+          id: foodId,
+        },
+        type,
+      },
+    });
+    return entity?.toDomain();
+  }
+
+  async saveFood(save: FoodSave): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      const foodSaveEntity = new FoodSaveEntity(save);
+      await queryRunner.manager.save<FoodSaveEntity>(foodSaveEntity);
+    }
+  }
+
   async updateFood(food: Food, data: Partial<Food>): Promise<void> {
     const queryRunner = this.tx.getRef() as QueryRunner;
     if (queryRunner && !queryRunner.isReleased) {

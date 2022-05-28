@@ -41,6 +41,8 @@ import { GetFoodVotesResponse } from "modules/core/useCases/getFoodVotes/getFood
 import { GetUncensoredFoodsQuery } from "modules/core/useCases/getUncensoredFoods";
 import { GetVoteQuery } from "modules/core/useCases/getVote";
 import { GetVoteResponse } from "modules/core/useCases/getVote/getVoteResponse";
+import { SaveFoodFoodCommand } from "modules/core/useCases/saveFood";
+import { SaveFoodRequest } from "modules/core/useCases/saveFood/saveFoodRequest";
 import { VoteFoodCommand } from "modules/core/useCases/voteFood";
 import { VoteFoodRequest } from "modules/core/useCases/voteFood/voteFoodRequest";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
@@ -193,5 +195,22 @@ export class FoodController {
     const voteFoodCommand = new EditVoteCommand(tx, user, req);
     await this._commandBus.execute(voteFoodCommand);
     return Result.ok(null, { messages: ["Edit vote successfully"] });
+  }
+
+  @Post(":foodId/save")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Save food successfully")
+  @HttpRequestTransaction()
+  @RequirePermissions("read_food")
+  async saveFood(
+    @Body() req: SaveFoodRequest,
+    @HttpUserReq() user: User,
+    @Param("foodId", ParseUUIDPipe) foodId: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    req.foodId = foodId;
+    const saveFoodCommand = new SaveFoodFoodCommand(tx, user, req);
+    await this._commandBus.execute(saveFoodCommand);
+    return Result.ok(null, { messages: ["Save food successfully"] });
   }
 }
