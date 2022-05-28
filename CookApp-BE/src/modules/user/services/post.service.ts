@@ -12,7 +12,7 @@ import {
   Moment,
   Post,
   RecommendationPost,
-  SavedPost,
+  PostSave,
 } from "../../../domains/social/post.domain";
 import { IPostRepository } from "../interfaces/repositories/post.interface";
 import { IPostMediaRepository } from "../interfaces/repositories/postMedia.interface";
@@ -23,7 +23,7 @@ export interface IPostService {
   getPostDetail(
     postId: string,
     userId?: string
-  ): Promise<[Post, Reaction, SavedPost]>;
+  ): Promise<[Post, Reaction, PostSave]>;
   createPost(post: Post, tx: ITransaction): Promise<Post>;
   updatePost(
     post: Post,
@@ -139,7 +139,7 @@ export class PostService implements IPostService {
   async getPostDetail(
     postId: string,
     userId?: string
-  ): Promise<[Post, Reaction, SavedPost]> {
+  ): Promise<[Post, Reaction, PostSave]> {
     const post = await this._postRepo.getPostById(postId);
 
     if (!post)
@@ -148,7 +148,7 @@ export class PostService implements IPostService {
       );
 
     let reaction: Reaction;
-    let saved: SavedPost;
+    let saved: PostSave;
 
     if (userId) {
       reaction = await this._reactionRepo.findById(userId, post.id);

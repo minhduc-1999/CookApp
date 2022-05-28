@@ -1,37 +1,37 @@
 import { Injectable } from "@nestjs/common";
 import { BaseRepository } from "base/repository.base";
-import { SavedPost } from "domains/social/post.domain";
+import { PostSave } from "domains/social/post.domain";
 import { User } from "@sentry/node";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { InjectRepository } from "@nestjs/typeorm";
 import { QueryRunner, Repository } from "typeorm";
 import { ISavedPostRepository } from "modules/user/interfaces/repositories/savedPost.interface";
-import { SavedPostEntity } from "entities/social/savedPost.entity";
+import { PostSaveEntity } from "entities/social/PostSave.entity";
 
 @Injectable()
 export class SavedPostRepository extends BaseRepository implements ISavedPostRepository {
   constructor(
-    @InjectRepository(SavedPostEntity)
-    private _savedPostRepo: Repository<SavedPostEntity>,
+    @InjectRepository(PostSaveEntity)
+    private _savedPostRepo: Repository<PostSaveEntity>,
   ) {
     super()
   }
 
-  async savePost(savedPost: SavedPost): Promise<void> {
+  async savePost(savedPost: PostSave): Promise<void> {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
-      await queryRunner.manager.save<SavedPostEntity>(new SavedPostEntity(savedPost))
+      await queryRunner.manager.save<PostSaveEntity>(new PostSaveEntity(savedPost))
     }
   }
 
-  async deleteSavedPost(savedPost: SavedPost): Promise<void> {
+  async deleteSavedPost(savedPost: PostSave): Promise<void> {
     const queryRunner = this.tx.getRef() as QueryRunner
     if (queryRunner && !queryRunner.isReleased) {
-      await queryRunner.manager.softDelete(SavedPostEntity, savedPost.id)
+      await queryRunner.manager.softDelete(PostSaveEntity, savedPost.id)
     }
   }
 
-  async find(postId: string, userId: string): Promise<SavedPost> {
+  async find(postId: string, userId: string): Promise<PostSave> {
     const entity = await this._savedPostRepo
       .createQueryBuilder("saved")
       .where("saved.user_id = :userId", { userId })
@@ -41,7 +41,7 @@ export class SavedPostRepository extends BaseRepository implements ISavedPostRep
     return entity?.toDomain()
   }
 
-  async getSavedPosts(user: User, queryOpt: PageOptionsDto): Promise<[SavedPost[], number]> {
+  async getSavedPosts(user: User, queryOpt: PageOptionsDto): Promise<[PostSave[], number]> {
     const [entities, total] = await this._savedPostRepo
       .createQueryBuilder("saved")
       .innerJoin("saved.user", "user")

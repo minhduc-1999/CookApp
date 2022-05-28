@@ -14,7 +14,7 @@ import { FollowEntity } from "entities/social/follow.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { PostEntity, PostMediaEntity } from "entities/social/post.entity";
 import { ReactionEntity } from "entities/social/reaction.entity";
-import { SavedPostEntity } from "entities/social/savedPost.entity";
+import { PostSaveEntity } from "entities/social/PostSave.entity";
 import { TopicEntity, UserTopicEntity } from "entities/social/topic.entity";
 import { UserEntity } from "entities/social/user.entity";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
@@ -41,7 +41,7 @@ import { FollowRepository } from "./adapters/out/repositories/follow.repository"
 import { PostRepository } from "./adapters/out/repositories/post.repository";
 import { PostMediaRepository } from "./adapters/out/repositories/postMedia.repository";
 import { ReactionRepository } from "./adapters/out/repositories/reaction.repository";
-import { SavedPostRepository } from "./adapters/out/repositories/savedPost.repository";
+import { SavedPostRepository } from "./adapters/out/repositories/postSave.repository";
 import { TopicRepository } from "./adapters/out/repositories/topic.repository";
 import { WallRepository } from "./adapters/out/repositories/wall.repository";
 import { PropagatePostCreatedEventHandler } from "./events/propagateNewPost";
@@ -202,7 +202,7 @@ const repositories = [
       PostMediaEntity,
       FollowEntity,
       ReactionEntity,
-      SavedPostEntity,
+      PostSaveEntity,
       FeedEntity,
       CommentEntity,
       CommentMediaEntity,

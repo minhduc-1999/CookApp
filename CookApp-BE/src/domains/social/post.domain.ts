@@ -147,11 +147,11 @@ export class RecommendationPost extends PostBase {
 
 export type Post = Moment | FoodShare | RecommendationPost;
 
-export class SavedPost extends Audit {
+export class PostSave extends Audit {
   saver: User;
   post: Post;
 
-  constructor(item: Partial<SavedPost>) {
+  constructor(item: Partial<PostSave>) {
     super(item);
     this.saver = item?.saver;
     this.post = item?.post;

@@ -4,7 +4,7 @@ import { AvatarMedia, CommentMedia, Image } from "./media.domain";
 import { Account } from "./account.domain";
 import { generateDisplayName } from "../../utils";
 import { Follow } from "./follow.domain";
-import { Post, SavedPost } from "./post.domain";
+import { Post, PostSave } from "./post.domain";
 import { Reaction } from "./reaction.domain";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Comment } from "./comment.domain";
@@ -86,8 +86,8 @@ export class User extends Audit {
     });
   }
 
-  savePost(target: Post): SavedPost {
-    return new SavedPost({
+  savePost(target: Post): PostSave {
+    return new PostSave({
       saver: this,
       post: target,
     });

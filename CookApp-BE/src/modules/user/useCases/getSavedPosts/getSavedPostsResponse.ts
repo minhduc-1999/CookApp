@@ -1,7 +1,7 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PostResponse } from "base/dtos/response.dto";
-import { SavedPost } from "domains/social/post.domain";
+import { PostSave } from "domains/social/post.domain";
 
 export class SavedPostDTO {
   @ApiResponseProperty({ type: Number })
@@ -10,7 +10,7 @@ export class SavedPostDTO {
   @ApiResponseProperty({ type: PostResponse })
   post: PostResponse
 
-  constructor(savedPost: SavedPost) {
+  constructor(savedPost: PostSave) {
     this.savedAt = savedPost.createdAt.getTime()
     this.post = new PostResponse(savedPost.post)
   }
