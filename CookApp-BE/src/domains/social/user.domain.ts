@@ -13,12 +13,12 @@ import { Conversation, Message, MessageContent } from "./conversation.domain";
 export class Topic extends Audit {
   title: string;
 
-  cover: Image
+  cover: Image;
 
   constructor(topic: Partial<Topic>) {
     super(topic);
     this.title = topic?.title;
-    this.cover = topic?.cover
+    this.cover = topic?.cover;
   }
 }
 
@@ -53,6 +53,8 @@ export class User extends Audit {
 
   interestedTopics: Topic[];
 
+  isNutritionist: boolean;
+
   constructor(user: Partial<User>) {
     super(user);
     this.account = user?.account;
@@ -69,6 +71,9 @@ export class User extends Audit {
     this.nFollowers = user?.nFollowers;
     this.bio = user?.bio;
     this.interestedTopics = user?.interestedTopics;
+    this.isNutritionist =
+      user?.account?.role?.sign &&
+      (user.account.role.sign === "user" ? false : true);
   }
 
   follow(followee: User): Follow {

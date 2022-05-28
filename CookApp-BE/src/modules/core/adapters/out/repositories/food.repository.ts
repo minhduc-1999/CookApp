@@ -146,6 +146,8 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
       .createQueryBuilder("food")
       .leftJoinAndSelect("food.ingredients", "ingredient")
       .leftJoinAndSelect("food.author", "author")
+      .leftJoinAndSelect("author.account", "account")
+      .leftJoinAndSelect("account.role", "role")
       .leftJoinAndSelect("food.medias", "media")
       .leftJoinAndSelect("food.steps", "step")
       .leftJoinAndSelect("step.interaction", "stepInter")
@@ -159,6 +161,8 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
         "media",
         "stepInter",
         "stepMedia",
+        "account",
+        "role"
       ])
       .getOne();
 
@@ -167,7 +171,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
 
   async getFoods(query: PageOptionsDto): Promise<[Food[], number]> {
     const [foodEntities, total] = await this._foodRepo.findAndCount({
-      relations: ["medias", "author"],
+      relations: ["medias", "author", "author.account", "author.account.role"],
       where: {
         confirmed: true,
       },

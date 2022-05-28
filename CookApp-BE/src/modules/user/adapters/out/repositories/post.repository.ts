@@ -34,6 +34,8 @@ export class PostRepository extends BaseRepository implements IPostRepository {
       .createQueryBuilder("post")
       .leftJoinAndSelect("post.interaction", "interaction")
       .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("author.account", "account")
+      .leftJoinAndSelect("account.role", "role")
       .leftJoinAndSelect("post.medias", "media")
       .leftJoinAndSelect("media.interaction", "mediaInter")
       .leftJoinAndSelect("post.foodRef", "foodRef")
@@ -47,6 +49,8 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         "mediaInter",
         "foodRef",
         "foodRefPhoto",
+        "account",
+        "role"
       ])
       .getOne();
     return postEntity?.toDomain();

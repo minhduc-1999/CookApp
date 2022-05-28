@@ -32,6 +32,8 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
       .createQueryBuilder("feed")
       .leftJoinAndSelect("feed.post", "post")
       .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("author.account", "authorAccount")
+      .leftJoinAndSelect("authorAccount.role", "authorRole")
       .leftJoinAndSelect("post.interaction", "interaction")
       .leftJoinAndSelect("post.medias", "media")
       .leftJoinAndSelect("media.interaction", "mediaInter")
@@ -51,7 +53,9 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
         "mediaInter",
         "foodRef",
         "foodRefPhoto",
-        "foodAuthor"
+        "foodAuthor",
+        "authorAccount",
+        "authorRole"
       ])
       .skip(query.limit * query.offset)
       .take(query.limit)

@@ -118,10 +118,14 @@ export class AuthorResponse {
   @ApiResponseProperty({ type: String })
   displayName: string;
 
+  @ApiResponseProperty({ type: Boolean })
+  isNutritionist: boolean;
+
   constructor(user: User) {
     this.id = user?.id;
     this.avatar = new MediaResponse(user?.avatar);
     this.displayName = user?.displayName;
+    this.isNutritionist = user.isNutritionist;
   }
 }
 
@@ -426,12 +430,12 @@ export class TopicResponse extends AuditResponse {
   title: string;
 
   @ApiResponseProperty({ type: MediaResponse })
-  cover: MediaResponse
+  cover: MediaResponse;
 
   constructor(topic: Topic) {
     super(topic);
     this.title = topic?.title;
-    this.cover = topic?.cover && new MediaResponse(topic.cover)
+    this.cover = topic?.cover && new MediaResponse(topic.cover);
   }
 }
 

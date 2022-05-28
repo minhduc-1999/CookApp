@@ -33,7 +33,6 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
   async execute(query: GetWallQuery): Promise<GetWallResponse> {
     const { user, targetId } = query;
     const wall = await this._wallRepo.getWall(targetId);
-    console.log(wall);
     if (!wall) {
       throw new NotFoundException(
         ResponseDTO.fail("User not found", UserErrorCode.USER_NOT_FOUND)
@@ -43,7 +42,6 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
       await this._storageService.getDownloadUrls([wall.avatar])
     )[0];
     const follow = await this._followRepo.getFollow(user.id, targetId);
-    const hasRecommendations = wall.account.role.sign === "user" ? false : true;
     const conv = await this._conversationRepo.findDirectConversation(
       user.id,
       targetId
@@ -52,7 +50,6 @@ export class GetWallQueryHandler implements IQueryHandler<GetWallQuery> {
       wall,
       !_.isNil(follow),
       conv,
-      hasRecommendations
     );
   }
 }

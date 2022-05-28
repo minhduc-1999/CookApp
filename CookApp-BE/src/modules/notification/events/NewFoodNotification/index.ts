@@ -6,16 +6,17 @@ import { INotiRepository } from "modules/notification/adapters/out/repositories/
 import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 import { IFollowRepository } from "modules/user/interfaces/repositories/follow.interface";
 import { Notification } from "domains/social/notification.domain";
+import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
 
 @EventsHandler(FoodCreatedEvent)
-export class NewFoodEventHandler
-  implements IEventHandler<FoodCreatedEvent>
-{
+export class NewFoodEventHandler implements IEventHandler<FoodCreatedEvent> {
   constructor(
     @Inject("IFollowRepository")
     private _followRepo: IFollowRepository,
     @Inject("INotificationService")
     private _notiService: INotificationService,
+    @Inject("IConfigurationService")
+    private _configurationService: IConfigurationService,
     @Inject("INotiRepository")
     private _notiRepository: INotiRepository
   ) {}
@@ -24,15 +25,26 @@ export class NewFoodEventHandler
     const { food } = event;
     const [followers, _] = await this._followRepo.getFollowers(food.author.id);
 
+    const followerNotiConfigs =
+      await this._configurationService.getNotificationConfigs(
+        followers.map((follwer) => follwer.id)
+      );
+    const notiReceiver = followerNotiConfigs
+      .filter((config) => config.newFood)
+      .map((config) => config.userID);
+
+    if (notiReceiver.length === 0) return;
+
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.NewFoodTemplate
     );
+
     const notification: Notification<{ foodID: string }> = {
       body: template.body.replace("$user", food.author.displayName),
       title: template.title,
       templateId: template.id,
       image: food.photos[0].url,
-      targets: followers.map((user) => user.id),
+      targets: notiReceiver,
       data: {
         foodID: food.id,
       },

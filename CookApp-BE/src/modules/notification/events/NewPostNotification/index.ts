@@ -30,11 +30,11 @@ export class NewPostEventHandler implements IEventHandler<PostCreatedEvent> {
       await this._configurationService.getNotificationConfigs(
         followers.map((follwer) => follwer.id)
       );
-    const endFollowers = followerNotiConfigs
+    const notiReceiver = followerNotiConfigs
       .filter((config) => config.newPost)
       .map((config) => config.userID);
 
-    if (endFollowers.length === 0) return;
+    if (notiReceiver.length === 0) return;
 
     const template = await this._notiRepository.getTemplate(
       NotificationTemplateEnum.NewPostTemplate
@@ -47,7 +47,7 @@ export class NewPostEventHandler implements IEventHandler<PostCreatedEvent> {
         (event.post as Moment).medias?.length > 0
           ? (event.post as Moment).medias[0].url
           : "",
-      targets: endFollowers,
+      targets: notiReceiver,
       data: {
         postID: event.post.id,
       },

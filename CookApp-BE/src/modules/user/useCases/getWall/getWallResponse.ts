@@ -22,15 +22,7 @@ export class GetWallResponse extends AuthorResponse {
   @ApiResponseProperty({ type: String })
   bio: string;
 
-  @ApiResponseProperty({ type: Boolean })
-  hasRecommendations: boolean;
-
-  constructor(
-    user: User,
-    isFollowed: boolean,
-    conv: Conversation,
-    hasRecommendations = false
-  ) {
+  constructor(user: User, isFollowed: boolean, conv: Conversation) {
     super(user);
     this.numberOfFollower = user.nFollowers;
     this.numberOfFollowing = user.nFollowees;
@@ -38,6 +30,5 @@ export class GetWallResponse extends AuthorResponse {
     this.isFollowed = isFollowed;
     this.conversation = conv && new ConversationResponse(conv);
     this.bio = user.bio;
-    this.hasRecommendations = hasRecommendations;
   }
 }
