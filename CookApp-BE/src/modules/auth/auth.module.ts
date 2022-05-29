@@ -29,6 +29,7 @@ import UserService from "./services/user.service";
 import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
 import { GoogleStrategy } from "./strategies/google.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
+import { ChangePasswordCommandHandler } from "./useCases/changePassword";
 import { GetRolesQueryHandler } from "./useCases/getRoles";
 import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
@@ -40,6 +41,7 @@ const commandHandlers = [
   LoginCommandHandler,
   VerifyEmailCommandHandler,
   ResendEmailVerificationCommandHandler,
+  ChangePasswordCommandHandler
 ];
 
 const queryHandlers = [GetRolesQueryHandler];

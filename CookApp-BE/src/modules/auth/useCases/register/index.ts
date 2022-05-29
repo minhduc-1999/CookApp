@@ -20,6 +20,7 @@ import { IUserService } from "modules/auth/services/user.service";
 import { ConfigService } from "nestjs-config";
 import { IRoleRepository } from "modules/auth/adapters/out/repositories/role.repository";
 import { UserCreatedEvent } from "domains/social/events/user.event";
+import { IAuthentication } from "modules/auth/services/authentication.service";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
@@ -41,11 +42,15 @@ export class RegisterCommandHandler
     private _configService: ConfigService,
     @Inject("IRoleRepository")
     private _roleRepo: IRoleRepository,
+    @Inject("IAuthentication")
+    private _authService: IAuthentication,
     private _eventBus: EventBus
   ) {}
   async execute(command: RegisterCommand): Promise<RegisterResponse> {
     const { registerDto, tx } = command;
-    const hashedPassword = bcrypt.hashSync(registerDto.password, 10);
+    const hashedPassword = await this._authService.getHashedPassword(
+      registerDto.password
+    );
     const userRole = await this._roleRepo.getRole("user");
     const account = new Account({
       ...registerDto,
@@ -79,7 +84,7 @@ export class RegisterCommandHandler
       createdUser.id,
       createdUser.account.email
     );
-    this._eventBus.publish(new UserCreatedEvent(createdUser))
+    this._eventBus.publish(new UserCreatedEvent(createdUser));
     return createdUser;
   }
 }

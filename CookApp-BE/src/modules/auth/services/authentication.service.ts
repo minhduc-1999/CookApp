@@ -23,9 +23,16 @@ import {
 import { Auth, getAuth } from "firebase-admin/auth";
 import { IUserRepository } from "../interfaces/repositories/user.interface";
 
+const ENCRYPTION_SALT = 10;
+
 export interface IAuthentication {
   getAuthUser(usernameOrEmail: string, password: string): Promise<User>;
   login(user: User): Promise<LoginResponse>;
+  getHashedPassword(rawPass: string): Promise<string>;
+  verifyPassword(
+    plainTextPassword: string,
+    hashedPassword: string
+  ): Promise<boolean>;
 }
 @Injectable()
 class AuthenticationService implements IAuthentication {
@@ -49,6 +56,11 @@ class AuthenticationService implements IAuthentication {
     }
     this._auth = getAuth();
   }
+
+  async getHashedPassword(rawPass: string): Promise<string> {
+    return bcrypt.hash(rawPass, ENCRYPTION_SALT);
+  }
+
   async login(user: User): Promise<LoginResponse> {
     const payload: JwtAuthTokenPayload = { sub: user.id };
     return this._auth
@@ -71,7 +83,7 @@ class AuthenticationService implements IAuthentication {
       });
   }
 
-  private async verifyPassword(
+  public async verifyPassword(
     plainTextPassword: string,
     hashedPassword: string
   ): Promise<boolean> {
@@ -79,15 +91,7 @@ class AuthenticationService implements IAuthentication {
       plainTextPassword,
       hashedPassword
     );
-    if (!isPasswordMatching) {
-      throw new BadRequestException(
-        ResponseDTO.fail(
-          "Wrong credentials provided",
-          UserErrorCode.INVALID_CREDENTIAL
-        )
-      );
-    }
-    return true;
+    return isPasswordMatching;
   }
 
   async getAuthUser(usernameOrEmail: string, password: string): Promise<User> {
@@ -102,7 +106,18 @@ class AuthenticationService implements IAuthentication {
           UserErrorCode.INVALID_CREDENTIAL
         )
       );
-    await this.verifyPassword(password, user.account.password);
+    const isPasswordMatching = await this.verifyPassword(
+      password,
+      user.account.password
+    );
+    if (!isPasswordMatching) {
+      throw new BadRequestException(
+        ResponseDTO.fail(
+          "Wrong credentials provided",
+          UserErrorCode.INVALID_CREDENTIAL
+        )
+      );
+    }
     return user;
   }
 }

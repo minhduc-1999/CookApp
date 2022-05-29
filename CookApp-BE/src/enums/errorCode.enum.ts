@@ -19,5 +19,6 @@ export enum UserErrorCode {
   INGREDIENT_ALREADY_EXISTED= "ingredient_already_existed",
   TOPIC_ALREADY_EXISTED= "topic_already_existed",
   FOOD_ALREADY_CONFIRMED = "food_already_confirmed",
-  FOOD_ALREADY_SAVED = "food_already_saved"
+  FOOD_ALREADY_SAVED = "food_already_saved",
+  OLD_PASSWORD_NOT_CORRECT = "old_password_not_correct"
 }

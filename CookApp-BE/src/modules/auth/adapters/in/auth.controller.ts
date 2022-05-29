@@ -1,4 +1,12 @@
-import { Body, Controller, Get, HttpCode, Post, UseGuards } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  Post,
+  Put,
+  UseGuards,
+} from "@nestjs/common";
 import { CommandBus } from "@nestjs/cqrs";
 import {
   ApiBearerAuth,
@@ -22,7 +30,10 @@ import { LoginResponse } from "modules/auth/useCases/login/loginResponse";
 import { RegisterResponse } from "modules/auth/useCases/register/registerResponse";
 import { RegisterRequest } from "modules/auth/useCases/register/registerRequest";
 import { User } from "domains/social/user.domain";
-import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
+import {
+  HttpParamTransaction,
+  HttpRequestTransaction,
+} from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { VerifyEmailRequest } from "modules/auth/useCases/verifyEmail/verifyEmailRequest";
 import { VerifyEmailCommand } from "modules/auth/useCases/verifyEmail";
@@ -32,11 +43,13 @@ import { NotRequireEmailVerification } from "decorators/notRequireEmailVerificat
 import { BasicAuthGuard } from "guards/basicAuth.guard";
 import { GoogleAuthGuard } from "guards/jwtAuth.guard";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { ChangePasswordRequest } from "modules/auth/useCases/changePassword/changePasswordRequest";
+import { ChangePasswordCommand } from "modules/auth/useCases/changePassword";
 
 @Controller()
 @ApiTags("Authentication")
 export class AuthController {
-  constructor(private _commandBus: CommandBus) { }
+  constructor(private _commandBus: CommandBus) {}
 
   @Post("register")
   @Public()
@@ -51,10 +64,7 @@ export class AuthController {
   ): Promise<Result<RegisterResponse>> {
     const registerCommand = new RegisterCommand(body, tx);
     const user = (await this._commandBus.execute(registerCommand)) as User;
-    return Result.ok(
-      { id: user.id },
-      { messages: ["Register successfully"] }
-    );
+    return Result.ok({ id: user.id }, { messages: ["Register successfully"] });
   }
 
   @HttpCode(200)
@@ -77,18 +87,30 @@ export class AuthController {
   @Public()
   @NotRequireEmailVerification()
   @UseGuards(GoogleAuthGuard)
-  async googleAuth() { }
+  async googleAuth() {}
 
   @Get("google/redirect")
   @UseGuards(GoogleAuthGuard)
   @Public()
   @NotRequireEmailVerification()
-  async googleAuthRedirect(
-    @HttpUserReq() user: User,
-  ) {
+  async googleAuthRedirect(@HttpUserReq() user: User) {
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);
     return Result.ok(result, { messages: ["Login successfully"] });
+  }
+
+  @Put("password/change")
+  @ApiOKResponseCustomWithoutData("Change password successfully")
+  @HttpRequestTransaction()
+  @ApiBearerAuth()
+  async changePassword(
+    @Body() body: ChangePasswordRequest,
+    @HttpParamTransaction() tx: ITransaction,
+    @HttpUserReq() user: User
+  ): Promise<Result<void>> {
+    let command = new ChangePasswordCommand(body, tx, user);
+    await this._commandBus.execute(command);
+    return Result.ok(null, { messages: ["Change password successfully"] });
   }
 
   @Post("email-verification/callback")
