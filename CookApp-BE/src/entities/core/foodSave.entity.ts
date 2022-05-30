@@ -4,7 +4,7 @@ import { UserEntity } from "../../entities/social/user.entity";
 import { FoodSaveType } from "../../enums/core.enum";
 import { FoodEntity } from "./food.entity";
 import { FoodSave } from "../../domains/core/foodSave.domain";
-import { Audit } from "domains/audit.domain";
+import { Audit } from "../../domains/audit.domain";
 
 @Entity({ name: "saved_foods" })
 export class FoodSaveEntity extends AbstractEntity {

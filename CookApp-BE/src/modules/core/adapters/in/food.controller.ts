@@ -1,6 +1,7 @@
 import {
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   ParseUUIDPipe,
@@ -30,6 +31,7 @@ import { ConfirmFoodCommand } from "modules/core/useCases/confirmFood";
 import { CreateFoodCommand } from "modules/core/useCases/createFood";
 import { CreateFoodRequest } from "modules/core/useCases/createFood/createFoodRequest";
 import { CreateFoodResponse } from "modules/core/useCases/createFood/createFoodResponse";
+import { DeleteFoodSaveCommand } from "modules/core/useCases/deleteFoodSave";
 import { EditVoteCommand } from "modules/core/useCases/editVote";
 import { EditVoteRequest } from "modules/core/useCases/editVote/editVoteRequest";
 import { GetFoodDetailQuery } from "modules/core/useCases/getFoodDetail";
@@ -44,7 +46,7 @@ import { GetFoodVotesResponse } from "modules/core/useCases/getFoodVotes/getFood
 import { GetUncensoredFoodsQuery } from "modules/core/useCases/getUncensoredFoods";
 import { GetVoteQuery } from "modules/core/useCases/getVote";
 import { GetVoteResponse } from "modules/core/useCases/getVote/getVoteResponse";
-import { SaveFoodFoodCommand } from "modules/core/useCases/saveFood";
+import { SaveFoodCommand } from "modules/core/useCases/saveFood";
 import { SaveFoodRequest } from "modules/core/useCases/saveFood/saveFoodRequest";
 import { VoteFoodCommand } from "modules/core/useCases/voteFood";
 import { VoteFoodRequest } from "modules/core/useCases/voteFood/voteFoodRequest";
@@ -228,8 +230,23 @@ export class FoodController {
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<void>> {
     req.foodId = foodId;
-    const saveFoodCommand = new SaveFoodFoodCommand(tx, user, req);
+    const saveFoodCommand = new SaveFoodCommand(tx, user, req);
     await this._commandBus.execute(saveFoodCommand);
     return Result.ok(null, { messages: ["Save food successfully"] });
+  }
+
+  @Delete(":foodId/save")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Delete food save successfully")
+  @HttpRequestTransaction()
+  @RequirePermissions("read_food")
+  async deleteFoodSave(
+    @HttpUserReq() user: User,
+    @Param("foodId", ParseUUIDPipe) foodId: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    const deleteFoodSaveCommand = new DeleteFoodSaveCommand(tx, user, foodId);
+    await this._commandBus.execute(deleteFoodSaveCommand);
+    return Result.ok(null, { messages: ["Delete food save successfully"] });
   }
 }

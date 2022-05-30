@@ -10,7 +10,7 @@ import { SaveFoodRequest } from "./saveFoodRequest";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { UserErrorCode } from "enums/errorCode.enum";
 
-export class SaveFoodFoodCommand extends BaseCommand {
+export class SaveFoodCommand extends BaseCommand {
   req: SaveFoodRequest;
   constructor(tx: ITransaction, user: User, req: SaveFoodRequest) {
     super(tx, user);
@@ -18,9 +18,9 @@ export class SaveFoodFoodCommand extends BaseCommand {
   }
 }
 
-@CommandHandler(SaveFoodFoodCommand)
+@CommandHandler(SaveFoodCommand)
 export class SaveFoodCommandHandler
-  implements ICommandHandler<SaveFoodFoodCommand>
+  implements ICommandHandler<SaveFoodCommand>
 {
   constructor(
     @Inject("IFoodRepository")
@@ -28,7 +28,7 @@ export class SaveFoodCommandHandler
     @Inject("IFoodService")
     private _foodService: IFoodService
   ) {}
-  async execute(command: SaveFoodFoodCommand): Promise<void> {
+  async execute(command: SaveFoodCommand): Promise<void> {
     const { tx, req, user } = command;
 
     const food = await this._foodService.getById(req.foodId);
