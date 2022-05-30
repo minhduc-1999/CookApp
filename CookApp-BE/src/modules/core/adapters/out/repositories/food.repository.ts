@@ -13,6 +13,8 @@ import { FoodSaveEntity } from "entities/core/foodSave.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { In, QueryRunner, Repository } from "typeorm";
 import { FoodSaveType } from "enums/core.enum";
+import { UserEntity } from "entities/social/user.entity";
+import { User } from "@sentry/node";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<[Food[], number]>;
@@ -25,12 +27,13 @@ export interface IFoodRepository {
   insertFood(food: Food): Promise<Food>;
   updateFood(food: Food, data: Partial<Food>): Promise<void>;
   saveFood(save: FoodSave): Promise<void>;
-  getFoodSave(
+  getFoodSave(userId: string, foodId: string): Promise<FoodSave>;
+  getFoodSaves(
     userId: string,
-    foodId: string,
-    type: FoodSaveType
-  ): Promise<Food>;
-  getFoodSaves(userId: string): Promise<[Food[], number]>;
+    type: FoodSaveType,
+    pageOpt?: PageOptionsDto
+  ): Promise<[Food[], number]>;
+  deleteFoodSave(foodSave: FoodSave): Promise<void>;
 }
 
 @Injectable()
@@ -43,22 +46,34 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
   ) {
     super();
   }
-  async getFoodSaves(userId: string): Promise<[Food[], number]> {
+
+  async deleteFoodSave(foodSave: FoodSave): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.softDelete(FoodSaveEntity, foodSave.id);
+    }
+  }
+
+  async getFoodSaves(
+    userId: string,
+    type: FoodSaveType,
+    pageOtp?: PageOptionsDto
+  ): Promise<[Food[], number]> {
+    const { limit, offset } = pageOtp;
     const [entities, total] = await this._foodSaveRepo.findAndCount({
       relations: ["food"],
       where: {
         user: {
           id: userId,
         },
+        type,
       },
+      skip: limit * offset,
+      take: limit,
     });
-    return [entities?.map((entity) => entity.toDomain()), total];
+    return [entities?.map((entity) => entity.toDomain().food), total];
   }
-  async getFoodSave(
-    userId: string,
-    foodId: string,
-    type: FoodSaveType
-  ): Promise<Food> {
+  async getFoodSave(userId: string, foodId: string): Promise<FoodSave> {
     const entity = await this._foodSaveRepo.findOne({
       relations: ["food"],
       where: {
@@ -68,7 +83,6 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
         food: {
           id: foodId,
         },
-        type,
       },
     });
     return entity?.toDomain();
@@ -162,7 +176,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
         "stepInter",
         "stepMedia",
         "account",
-        "role"
+        "role",
       ])
       .getOne();
 

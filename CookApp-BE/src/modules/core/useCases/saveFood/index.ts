@@ -35,14 +35,20 @@ export class SaveFoodCommandHandler
 
     const existedFoodSave = await this._foodRepo.getFoodSave(
       user.id,
-      req.foodId,
-      req.type
+      req.foodId
     );
 
     if (existedFoodSave) {
-      throw new ConflictException(
-        ResponseDTO.fail("Food already saved", UserErrorCode.FOOD_ALREADY_SAVED)
-      );
+      if (req.type !== existedFoodSave.type && req.forceUpdate) {
+        await this._foodRepo.setTransaction(tx).deleteFoodSave(existedFoodSave);
+      } else {
+        throw new ConflictException(
+          ResponseDTO.fail(
+            "Food already saved",
+            UserErrorCode.FOOD_ALREADY_SAVED
+          )
+        );
+      }
     }
 
     const foodSave = new FoodSave({

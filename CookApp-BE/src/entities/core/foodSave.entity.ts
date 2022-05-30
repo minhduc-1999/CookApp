@@ -1,10 +1,10 @@
 import { Column, Entity, JoinColumn, ManyToOne } from "typeorm";
 import { AbstractEntity } from "../../base/entities/base.entity";
-import { Food } from "../../domains/core/food.domain";
 import { UserEntity } from "../../entities/social/user.entity";
 import { FoodSaveType } from "../../enums/core.enum";
 import { FoodEntity } from "./food.entity";
 import { FoodSave } from "../../domains/core/foodSave.domain";
+import { Audit } from "domains/audit.domain";
 
 @Entity({ name: "saved_foods" })
 export class FoodSaveEntity extends AbstractEntity {
@@ -26,7 +26,14 @@ export class FoodSaveEntity extends AbstractEntity {
     this.type = save?.type;
   }
 
-  toDomain(): Food {
-    return this.food?.toDomain();
+  toDomain(): FoodSave {
+    const data = this;
+    const audit = new Audit(data);
+    return {
+      ...audit,
+      type: this.type,
+      food: this.food && this.food.toDomain(),
+      user: this.user && this.user.toDomain(),
+    };
   }
 }

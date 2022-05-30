@@ -37,6 +37,7 @@ import { CreateUnitCommandHandler } from "./useCases/createUnit";
 import { EditVoteCommandHandler } from "./useCases/editVote";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
 import { GetFoodsQueryHandler } from "./useCases/getFoods";
+import { GetFoodSavesQueryHandler } from "./useCases/getFoodSaves";
 import { GetFoodVotesQueryHandler } from "./useCases/getFoodVotes";
 import { GetIngredientsQueryHandler } from "./useCases/getIngredients";
 import { GetUncensoredFoodsQueryHandler } from "./useCases/getUncensoredFoods";
@@ -62,6 +63,7 @@ const queryHandlers = [
   GetFoodVotesQueryHandler,
   GetVoteQueryHandler,
   GetUncensoredFoodsQueryHandler,
+  GetFoodSavesQueryHandler
 ];
 
 const eventHandlers = [SyncFoodCreatedEventHandler];

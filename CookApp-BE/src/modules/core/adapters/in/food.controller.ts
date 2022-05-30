@@ -36,6 +36,9 @@ import { GetFoodDetailQuery } from "modules/core/useCases/getFoodDetail";
 import { GetFoodDetailResponse } from "modules/core/useCases/getFoodDetail/getFoodDetailResponse";
 import { GetFoodsQuery } from "modules/core/useCases/getFoods";
 import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
+import { GetFoodSavesQuery } from "modules/core/useCases/getFoodSaves";
+import { GetFoodSavesRequest } from "modules/core/useCases/getFoodSaves/getFoodSavesRequest";
+import { GetFoodSavesResponse } from "modules/core/useCases/getFoodSaves/getFoodSavesResponse";
 import { GetFoodVotesQuery } from "modules/core/useCases/getFoodVotes";
 import { GetFoodVotesResponse } from "modules/core/useCases/getFoodVotes/getFoodVotesResponse";
 import { GetUncensoredFoodsQuery } from "modules/core/useCases/getUncensoredFoods";
@@ -65,6 +68,22 @@ export class FoodController {
   ): Promise<Result<GetFoodsResponse>> {
     const foodQuery = new GetFoodsQuery(user, query);
     const result = await this._queryBus.execute(foodQuery);
+    return Result.ok(result, {
+      messages: ["Get foods successfully"],
+    });
+  }
+
+  @Get("save")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(GetFoodSavesResponse, "Get foods successfully")
+  @RequirePermissions("read_food")
+  async getFoodSaves(
+    @Query(new ParseHttpRequestPipe<typeof GetFoodSavesRequest>())
+    query: GetFoodSavesRequest,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetFoodsResponse>> {
+    const foodSavesQuery = new GetFoodSavesQuery(user, query);
+    const result = await this._queryBus.execute(foodSavesQuery);
     return Result.ok(result, {
       messages: ["Get foods successfully"],
     });
