@@ -18,7 +18,6 @@ export class RegisterRequest {
   @IsNotEmpty()
   @ApiProperty({ type: String , example: "abc12345"})
   @Length(8, 20)
-  @IsNotEmpty()
   password: string;
 
   @IsEmail()

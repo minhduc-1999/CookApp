@@ -58,6 +58,8 @@ export class Account extends Audit{
 
   role: Role
 
+  resetPasswordToken: string
+
   verify() {
     this.emailVerified = true
   }
@@ -71,5 +73,6 @@ export class Account extends Audit{
     this.externalProvider = account?.externalProvider
     this.emailVerified = account?.emailVerified
     this.role = account?.role
+    this.resetPasswordToken = account?.resetPasswordToken
   }
 }

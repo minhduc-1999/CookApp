@@ -45,6 +45,10 @@ import { GoogleAuthGuard } from "guards/jwtAuth.guard";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { ChangePasswordRequest } from "modules/auth/useCases/changePassword/changePasswordRequest";
 import { ChangePasswordCommand } from "modules/auth/useCases/changePassword";
+import { RequestResetPasswordCommand } from "modules/auth/useCases/requestResetPassword";
+import { RequestResetPasswordRequest } from "modules/auth/useCases/requestResetPassword/requestResetPasswordRequest";
+import { ResetPasswordRequest } from "modules/auth/useCases/resetPassword/resetPasswordRequest";
+import { ResetPasswordCommand } from "modules/auth/useCases/resetPassword";
 
 @Controller()
 @ApiTags("Authentication")
@@ -139,6 +143,41 @@ export class AuthController {
     await this._commandBus.execute(command);
     return Result.ok(null, {
       messages: ["Resend email verification successfully"],
+    });
+  }
+
+  @Post("password/reset")
+  @Public()
+  @NotRequireEmailVerification()
+  @ApiOKResponseCustomWithoutData(
+    "Send reset password email verification successfully"
+  )
+  @HttpRequestTransaction()
+  async resetPassword(
+    @Body()
+    body: RequestResetPasswordRequest,
+    @HttpParamTransaction()
+    tx: ITransaction
+  ): Promise<Result<void>> {
+    let resetPassCommand = new RequestResetPasswordCommand(body, tx);
+    await this._commandBus.execute(resetPassCommand);
+    return Result.ok(null, {
+      messages: ["Send reset password email verification successfully"],
+    });
+  }
+
+  @Post("password/reset/callback")
+  @Public()
+  @NotRequireEmailVerification()
+  @HttpRequestTransaction()
+  async resetPasswordCallback(
+    @Body() body: ResetPasswordRequest,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    let command = new ResetPasswordCommand(body, tx);
+    await this._commandBus.execute(command);
+    return Result.ok(null, {
+      messages: ["Reset password successfully"],
     });
   }
 }

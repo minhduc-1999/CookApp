@@ -1,10 +1,12 @@
 import { MailerService } from "@nestjs-modules/mailer";
 import { Injectable, Logger } from "@nestjs/common";
 import { JwtService } from "@nestjs/jwt";
+import { Account } from "domains/social/account.domain";
 import { ConfigService } from "nestjs-config";
 
 export interface IMailService {
   sendEmailAddressVerification(userID: string, address: string): Promise<any>;
+  sendEmailResetPassword(account: Account): Promise<void>;
 }
 
 @Injectable()
@@ -15,6 +17,20 @@ export class MailService implements IMailService {
     private _jwtService: JwtService,
     private _configService: ConfigService
   ) {}
+
+  async sendEmailResetPassword(account: Account): Promise<void> {
+    const callback = this._configService.get("mail.resetPasswordCallback");
+    this._mailerService.sendMail({
+      to: [account.email],
+      subject: `Reset password for Tastify account`,
+      template: "reset_password",
+      context: {
+        token: account.resetPasswordToken,
+        callback
+      },
+    });
+  }
+
   async sendEmailAddressVerification(
     userID: string,
     address: string

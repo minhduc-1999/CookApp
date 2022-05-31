@@ -12,6 +12,9 @@ export default {
   emailVerificationCallback: UtilsService.getConfig(
     "EMAIL_VERIFICATION_CALLBACK"
   ),
+  resetPasswordCallback: UtilsService.getConfig(
+    "RESET_PASSWORD_CALLBACK"
+  ),
   emailVerificationCallbackExpiration: UtilsService.getConfig(
     "EMAIL_VERIFICATION_CALLBACK_EXPIRATION",
     "5m"

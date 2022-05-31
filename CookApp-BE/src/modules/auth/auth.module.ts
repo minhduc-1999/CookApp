@@ -33,7 +33,9 @@ import { ChangePasswordCommandHandler } from "./useCases/changePassword";
 import { GetRolesQueryHandler } from "./useCases/getRoles";
 import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
+import { RequestResetPasswordQueryHandler } from "./useCases/requestResetPassword";
 import { ResendEmailVerificationCommandHandler } from "./useCases/resendEmailVerification";
+import { ResetPasswordCommandHandler } from "./useCases/resetPassword";
 import { VerifyEmailCommandHandler } from "./useCases/verifyEmail";
 
 const commandHandlers = [
@@ -41,10 +43,11 @@ const commandHandlers = [
   LoginCommandHandler,
   VerifyEmailCommandHandler,
   ResendEmailVerificationCommandHandler,
-  ChangePasswordCommandHandler
+  ChangePasswordCommandHandler,
+  ResetPasswordCommandHandler,
 ];
 
-const queryHandlers = [GetRolesQueryHandler];
+const queryHandlers = [GetRolesQueryHandler, RequestResetPasswordQueryHandler];
 
 const eventHandlers = [UserCreatedEventHandler];
 
