@@ -10,6 +10,7 @@ import { GetFoodsResponse } from "./getFoodsResponse";
 import { Image } from "domains/social/media.domain";
 import { Food } from "domains/core/food.domain";
 import { IFoodSeService } from "modules/core/adapters/out/services/foodSe.service";
+import { FoodResponse } from "base/dtos/response.dto";
 export class GetFoodsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
   constructor(user: User, queryOptions?: PageOptionsDto) {
@@ -29,7 +30,7 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
     private _foodSeService: IFoodSeService
   ) {}
   async execute(query: GetFoodsQuery): Promise<GetFoodsResponse> {
-    const { queryOptions } = query;
+    const { queryOptions, user } = query;
     let foods: Food[];
     let totalCount = 0;
 
@@ -44,6 +45,8 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
     } else {
       [foods, totalCount] = await this._foodRepo.getFoods(queryOptions);
     }
+
+    const foodResponses: FoodResponse[] = [];
 
     for (let food of foods) {
       food.photos = (await this._storageService.getDownloadUrls(
@@ -65,6 +68,8 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
           })
         );
       }
+      const foodSave = await this._foodRepo.getFoodSave(user.id, food.id);
+      foodResponses.push(new FoodResponse(food, null, foodSave?.type));
     }
 
     let meta: PageMetadata;
@@ -75,6 +80,6 @@ export class GetFoodsQueryHandler implements IQueryHandler<GetFoodsQuery> {
         totalCount
       );
     }
-    return new GetFoodsResponse(foods, meta);
+    return new GetFoodsResponse(foodResponses, meta);
   }
 }

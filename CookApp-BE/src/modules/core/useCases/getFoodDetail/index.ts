@@ -3,6 +3,7 @@ import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { RecipeStepResponse } from "base/dtos/response.dto";
 import { User } from "domains/social/user.domain";
+import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { IFoodService } from "modules/core/services/food.service";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
@@ -23,6 +24,8 @@ export class GetFoodDetailQueryHandler
   constructor(
     @Inject("IFoodService") 
     private _foodService: IFoodService,
+    @Inject("IFoodRepository")
+    private _foodRepo: IFoodRepository,
     @Inject("IReactionRepository")
     private _reacRepo: IReactionRepository,
     @Inject("IStorageService") private _storageService: IStorageService
@@ -45,7 +48,8 @@ export class GetFoodDetailQueryHandler
         })
       );
     }
+    const foodSave = await this._foodRepo.getFoodSave(user.id, food.id)
 
-    return new GetFoodDetailResponse(food, stepsResponse);
+    return new GetFoodDetailResponse(food, stepsResponse, foodSave?.type);
   }
 }

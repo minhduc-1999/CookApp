@@ -40,6 +40,7 @@ import { Conversation, Message } from "domains/social/conversation.domain";
 import { FoodVote } from "domains/core/foodVote.domain";
 import { RoleType } from "enums/system.enum";
 import { Role } from "domains/social/account.domain";
+import { FoodSaveType } from "enums/core.enum";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -250,8 +251,12 @@ export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: Number })
   rating: number;
 
-  constructor(food: Food, steps?: RecipeStepResponse[]) {
+  @ApiResponseProperty({ enum: FoodSaveType })
+  saveType: FoodSaveType;
+
+  constructor(food: Food, steps?: RecipeStepResponse[], saveType?: FoodSaveType) {
     super(food);
+    this.saveType = saveType
     this.servings = food?.servings;
     this.name = food?.name;
     this.description = food?.description;

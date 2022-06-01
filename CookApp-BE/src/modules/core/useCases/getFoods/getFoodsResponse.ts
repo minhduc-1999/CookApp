@@ -1,7 +1,6 @@
 import { ApiResponseProperty } from "@nestjs/swagger";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { FoodResponse } from "base/dtos/response.dto";
-import { Food } from "domains/core/food.domain";
 
 export class GetFoodsResponse {
   @ApiResponseProperty({ type: [FoodResponse] })
@@ -10,8 +9,8 @@ export class GetFoodsResponse {
   @ApiResponseProperty({ type: PageMetadata })
   metadata: PageMetadata;
 
-  constructor(foods: Food[], meta: PageMetadata) {
-    this.foods = foods.map(food => new FoodResponse(food));
+  constructor(foods: FoodResponse[], meta: PageMetadata) {
+    this.foods = foods
     this.metadata = meta;
   }
 }

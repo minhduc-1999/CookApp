@@ -13,8 +13,6 @@ import { FoodSaveEntity } from "entities/core/foodSave.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { In, QueryRunner, Repository } from "typeorm";
 import { FoodSaveType } from "enums/core.enum";
-import { UserEntity } from "entities/social/user.entity";
-import { User } from "@sentry/node";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<[Food[], number]>;
