@@ -4,4 +4,5 @@ crawl
 **/*.zip
 **/**.env
 ws-client/
+DevLocalFe/
 db/

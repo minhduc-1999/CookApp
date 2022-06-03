@@ -59,7 +59,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
   ): Promise<[Food[], number]> {
     const { limit, offset } = pageOtp;
     const [entities, total] = await this._foodSaveRepo.findAndCount({
-      relations: ["food"],
+      relations: ["food", "food.author"],
       where: {
         user: {
           id: userId,
