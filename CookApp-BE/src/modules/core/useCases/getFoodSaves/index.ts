@@ -65,6 +65,6 @@ export class GetFoodSavesQueryHandler
     if (foods.length > 0) {
       meta = new PageMetadata(req.offset, req.limit, totalCount);
     }
-    return new GetFoodSavesResponse(foods, meta);
+    return new GetFoodSavesResponse(foods, meta, req.type);
   }
 }

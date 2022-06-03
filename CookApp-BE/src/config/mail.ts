@@ -9,15 +9,4 @@ export default {
   defaultFrom: UtilsService.getConfig("DEFAULT_FROM"),
   accessToken: UtilsService.getConfig("EMAIL_ACCESS_TOKEN"),
   refreshToken: UtilsService.getConfig("EMAIL_REFRESH_TOKEN"),
-  emailVerificationCallback: UtilsService.getConfig(
-    "EMAIL_VERIFICATION_CALLBACK"
-  ),
-  resetPasswordCallback: UtilsService.getConfig(
-    "RESET_PASSWORD_CALLBACK"
-  ),
-  emailVerificationCallbackExpiration: UtilsService.getConfig(
-    "EMAIL_VERIFICATION_CALLBACK_EXPIRATION",
-    "5m"
-  ),
-  emailVerificationSecret: UtilsService.getConfig("EMAIL_VERIFICATION_SECRET"),
 };

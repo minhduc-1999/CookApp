@@ -15,6 +15,6 @@ export class ResetPasswordRequest {
 
   @ApiProperty({ type: String })
   @IsString()
-  @Length(RESET_PASSWORD_TOKEN_LENGTH)
+  @Length(RESET_PASSWORD_TOKEN_LENGTH, RESET_PASSWORD_TOKEN_LENGTH)
   token: string;
 }

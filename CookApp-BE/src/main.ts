@@ -14,6 +14,7 @@ import * as cookieParser from "cookie-parser";
 import { TransformResponse } from "./interceptors/transform.interceptor";
 import { ErrorsInterceptor } from "./interceptors/errors.interceptor";
 import { HttpExceptionFilter } from "exception_filter/httpException.filter";
+import { join } from "path";
 
 const morganFormat =
   ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
@@ -40,7 +41,10 @@ async function bootstrap() {
   app.use(helmet());
   app.use(cookieParser());
 
-  app.setGlobalPrefix("api");
+  app.setBaseViewsDir(join(__dirname,'views'))
+  app.setViewEngine("hbs")
+
+  app.setGlobalPrefix("api", { exclude: ["reset-password"]});
 
   app.useGlobalPipes(
     new ValidationPipe({

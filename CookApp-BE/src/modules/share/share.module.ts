@@ -63,9 +63,9 @@ const handler = [GetUploadPresignedLinkQueryHandler];
     }),
     JwtModule.registerAsync({
       useFactory: async (config: ConfigService) => ({
-        secret: config.get("mail.emailVerificationSecret"),
+        secret: config.get("system.emailVerificationSecret"),
         signOptions: {
-          expiresIn: config.get("mail.emailVerificationCallbackExpiration"),
+          expiresIn: config.get("system.emailVerificationCallbackExpiration"),
         },
       }),
       inject: [ConfigService],

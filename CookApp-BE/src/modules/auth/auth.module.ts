@@ -30,6 +30,7 @@ import { BasicAuthStrategy } from "./strategies/basicAuth.strategy";
 import { GoogleStrategy } from "./strategies/google.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { ChangePasswordCommandHandler } from "./useCases/changePassword";
+import { GetResetPasswordInfoQueryHandler } from "./useCases/getResetPasswordInfo";
 import { GetRolesQueryHandler } from "./useCases/getRoles";
 import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
@@ -47,7 +48,11 @@ const commandHandlers = [
   ResetPasswordCommandHandler,
 ];
 
-const queryHandlers = [GetRolesQueryHandler, RequestResetPasswordQueryHandler];
+const queryHandlers = [
+  GetRolesQueryHandler,
+  RequestResetPasswordQueryHandler,
+  GetResetPasswordInfoQueryHandler,
+];
 
 const eventHandlers = [UserCreatedEventHandler];
 

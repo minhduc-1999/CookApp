@@ -5,9 +5,11 @@ import {
   HttpCode,
   Post,
   Put,
+  Query,
+  Render,
   UseGuards,
 } from "@nestjs/common";
-import { CommandBus } from "@nestjs/cqrs";
+import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import {
   ApiBearerAuth,
   ApiBody,
@@ -49,11 +51,14 @@ import { RequestResetPasswordCommand } from "modules/auth/useCases/requestResetP
 import { RequestResetPasswordRequest } from "modules/auth/useCases/requestResetPassword/requestResetPasswordRequest";
 import { ResetPasswordRequest } from "modules/auth/useCases/resetPassword/resetPasswordRequest";
 import { ResetPasswordCommand } from "modules/auth/useCases/resetPassword";
+import { GetResetPasswordResponse } from "modules/auth/useCases/getResetPasswordInfo/getResetPasswordInfo.response";
+import { GetResetPasswordQuery } from "modules/auth/useCases/getResetPasswordInfo";
+import { GetResetPasswordInfoRequest } from "modules/auth/useCases/getResetPasswordInfo/getResetPasswordInfo.request";
 
 @Controller()
 @ApiTags("Authentication")
 export class AuthController {
-  constructor(private _commandBus: CommandBus) {}
+  constructor(private _commandBus: CommandBus, private _queryBus: QueryBus) {}
 
   @Post("register")
   @Public()
@@ -164,6 +169,25 @@ export class AuthController {
     return Result.ok(null, {
       messages: ["Send reset password email verification successfully"],
     });
+  }
+
+  @Get("reset-password")
+  @Public()
+  @NotRequireEmailVerification()
+  @Render("resetPassword")
+  async getResetPasswordPage(
+    @Query() search: GetResetPasswordInfoRequest
+  ): Promise<{ token: string; callback: string; username: string }> {
+    const query = new GetResetPasswordQuery(search);
+    const res = await this._queryBus.execute<
+      GetResetPasswordQuery,
+      GetResetPasswordResponse
+    >(query);
+    return {
+      token: res.token,
+      callback: res.callback,
+      username: res.username,
+    };
   }
 
   @Post("password/reset/callback")

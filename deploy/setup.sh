@@ -47,5 +47,8 @@ heroku config:set -a tastify-be MONGO_CONNECTION_STRING=$MONGO_CONNECTION_STRING
 heroku config:set -a tastify-be MONGO_DB_NAME=$MONGO_DB_NAME
 heroku config:set -a tastify-be NLP_LANGUAGE_CODE=$NLP_LANGUAGE_CODE
 heroku config:set -a tastify-be PROJECT_ID=$PROJECT_ID
+heroku config:set -a tastify-be RESET_PASSWORD_CALLBACK=$RESET_PASSWORD_CALLBACK
+heroku config:set -a tastify-be RESET_PASSWORD_PAGE_URL=$RESET_PASSWORD_PAGE_URL
+heroku config:set -a tastify-be LOGO_URL=$LOGO_URL
 
 heroku buildpacks:add -a tastify-be heroku/nodejs

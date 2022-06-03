@@ -10,7 +10,7 @@ import { UserErrorCode } from "enums/errorCode.enum";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 
-export const RESET_PASSWORD_TOKEN_LENGTH = 10;
+export const RESET_PASSWORD_TOKEN_LENGTH = 24;
 
 export class RequestResetPasswordCommand extends BaseCommand {
   requestDto: RequestResetPasswordRequest;

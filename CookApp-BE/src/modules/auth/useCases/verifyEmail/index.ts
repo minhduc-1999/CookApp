@@ -47,7 +47,7 @@ export class VerifyEmailCommandHandler
 
   decodeVerificationToken(token: string) {
     const emailVerificationSecret = this._configService.get(
-      "mail.emailVerificationSecret"
+      "system.emailVerificationSecret"
     );
     try {
       const payload = this._jwtService.verify(token, {

@@ -1,6 +1,7 @@
 import { MiddlewareConsumer, Module, NestModule } from "@nestjs/common";
 import { APP_INTERCEPTOR } from "@nestjs/core";
 import { MongooseModule } from "@nestjs/mongoose";
+import { ServeStaticModule } from "@nestjs/serve-static";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import "dotenv/config";
 import { AuthModule } from "modules/auth/auth.module";
@@ -12,6 +13,7 @@ import { UserModule } from "modules/user/user.module";
 import { RavenModule } from "nest-raven";
 import { ConfigModule, ConfigService } from "nestjs-config";
 import * as path from "path";
+import { join } from "path";
 import { AppController } from "./app.controller";
 import { AppService } from "./app.service";
 import "./boilerplate.polyfill";
@@ -41,6 +43,9 @@ import { contextMiddleware } from "./middleware/context.middleware";
         };
       },
       inject: [ConfigService]
+    }),
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', 'public')
     })
   ],
   controllers: [AppController],
