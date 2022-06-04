@@ -102,6 +102,7 @@ export class AuthController {
   @UseGuards(GoogleAuthGuard)
   @Public()
   @NotRequireEmailVerification()
+  @ApiOKResponseCustom(LoginResponse, "Login successfully")
   async googleAuthRedirect(@HttpUserReq() user: User) {
     const loginCommand = new LoginCommand(null, user);
     const result = await this._commandBus.execute(loginCommand);

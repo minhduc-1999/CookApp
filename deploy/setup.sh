@@ -9,6 +9,7 @@ heroku config:set -a tastify-be JWT_EXPIRES_IN=$JWT_EXPIRES_IN
 heroku config:set -a tastify-be GOOGLE_USER_INFO_URL=$GOOGLE_USER_INFO_URL
 heroku config:set -a tastify-be GOOGLE_CLIENT_ID=$GOOGLE_CLIENT_ID
 heroku config:set -a tastify-be GOOGLE_CLIENT_SECRET=$GOOGLE_CLIENT_SECRET
+heroku config:set -a tastify-be GOOGLE_CALLBACK_URL=$GOOGLE_CALLBACK_URL
 heroku config:set -a tastify-be PORT=$PORT
 heroku config:set -a tastify-be APP_ENV=$APP_ENV
 heroku config:set -a tastify-be SENTRY_URL=$SENTRY_URL
