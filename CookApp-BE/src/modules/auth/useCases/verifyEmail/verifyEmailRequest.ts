@@ -1,8 +1,10 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsJWT } from "class-validator";
+import { IsNumberString, Length } from "class-validator";
+import { EMAIL_VERIFICATION_CODE_LENGTH } from "modules/auth/constants";
 
 export class VerifyEmailRequest {
   @ApiProperty({ type: String })
-  @IsJWT()
-  token: string;
+  @IsNumberString()
+  @Length(EMAIL_VERIFICATION_CODE_LENGTH, EMAIL_VERIFICATION_CODE_LENGTH)
+  code: string;
 }

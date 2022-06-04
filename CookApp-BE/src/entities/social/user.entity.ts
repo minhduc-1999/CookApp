@@ -55,7 +55,9 @@ export class UserEntity extends AbstractEntity {
   @Column({ name: "display_name" })
   displayName: string;
 
-  @OneToOne(() => AccountEntity, (account) => account.user)
+  @OneToOne(() => AccountEntity, (account) => account.user, {
+    cascade: ["insert"],
+  })
   account: AccountEntity;
 
   @OneToMany(() => FollowEntity, (follow) => follow.followee)

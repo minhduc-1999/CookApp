@@ -10,6 +10,9 @@ import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { ResponseDTO } from "base/dtos/response.dto";
 import { User } from "domains/social/user.domain";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { UtilsService } from "providers/utils.service";
+import { EMAIL_VERIFICATION_CODE_LENGTH } from "modules/auth/constants";
+import { IAccountRepository } from "modules/auth/interfaces/repositories/account.interface";
 
 export class ResendEmailVerificationCommand extends BaseCommand {
   requestDto: ResendEmailVerificationRequest;
@@ -28,21 +31,29 @@ export class ResendEmailVerificationCommandHandler
 {
   constructor(
     @Inject("IMailService")
-    private _mailService: IMailService
+    private _mailService: IMailService,
+    @Inject("IAccountRepository")
+    private _accountRepo: IAccountRepository
   ) {}
   async execute(command: ResendEmailVerificationCommand): Promise<void> {
     const { user, requestDto } = command;
-    if (user.account.email !== requestDto.email) {
+    const { account } = user;
+    if (account.email !== requestDto.email) {
       throw new ForbiddenException(
         ResponseDTO.fail("Cannot verify email of other user")
       );
     }
-    if (user.account.emailVerified) {
+    if (account.emailVerified) {
       throw new BadRequestException(
         ResponseDTO.fail("Email has already verified")
       );
     }
-    this._mailService.sendEmailAddressVerification(user.id, requestDto.email);
+    const code = UtilsService.generateUniqueNumberCode(
+      EMAIL_VERIFICATION_CODE_LENGTH
+    );
+    await this._accountRepo.update(account, { verifyEmailCode: code });
+    account.verifyEmailCode = code;
+    this._mailService.sendEmailAddressVerification(account);
     return;
   }
 }

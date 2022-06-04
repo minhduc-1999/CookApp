@@ -6,7 +6,6 @@ import {
 import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
 import { RegisterRequest } from "./registerRequest";
 import { RegisterResponse } from "./registerResponse";
-import * as bcrypt from "bcrypt";
 import { User } from "domains/social/user.domain";
 import { IMailService } from "modules/share/adapters/out/services/mail.service";
 import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
@@ -21,6 +20,8 @@ import { ConfigService } from "nestjs-config";
 import { IRoleRepository } from "modules/auth/adapters/out/repositories/role.repository";
 import { UserCreatedEvent } from "domains/social/events/user.event";
 import { IAuthentication } from "modules/auth/services/authentication.service";
+import { UtilsService } from "providers/utils.service";
+import { EMAIL_VERIFICATION_CODE_LENGTH } from "modules/auth/constants";
 
 export class RegisterCommand extends BaseCommand {
   registerDto: RegisterRequest;
@@ -57,6 +58,7 @@ export class RegisterCommandHandler
       password: hashedPassword,
       emailVerified: !this._configService.get("app.emailVerificationRequire"),
       role: userRole,
+      verifyEmailCode: UtilsService.generateUniqueNumberCode(EMAIL_VERIFICATION_CODE_LENGTH)
     });
 
     const newUser = new User({
@@ -81,10 +83,9 @@ export class RegisterCommandHandler
     }
     await this._configurationService.setupConfigForNewUser(createdUser);
     this._mailService.sendEmailAddressVerification(
-      createdUser.id,
-      createdUser.account.email
+      createdUser.account
     );
     this._eventBus.publish(new UserCreatedEvent(createdUser));
-    return createdUser;
+    return new RegisterResponse(createdUser);
   }
 }

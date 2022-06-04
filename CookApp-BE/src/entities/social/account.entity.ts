@@ -78,6 +78,9 @@ export class AccountEntity extends AbstractEntity {
   @Column({ nullable: true, name: "reset_password_token" })
   resetPasswordToken: string;
 
+  @Column({ nullable: true, name: "verify_email_code" })
+  verifyEmailCode: string;
+
   @OneToOne(() => UserEntity, (user) => user.account, { nullable: false })
   @JoinColumn({ name: "user_id" })
   user: UserEntity;
@@ -101,6 +104,7 @@ export class AccountEntity extends AbstractEntity {
     this.user = user && new UserEntity(user);
     this.role = account?.role && new RoleEntity(account.role);
     this.resetPasswordToken = account?.resetPasswordToken
+    this.verifyEmailCode = account?.verifyEmailCode
   }
 
   toDomain(): Account {
@@ -117,7 +121,8 @@ export class AccountEntity extends AbstractEntity {
     return {
       emailVerified: data.emailVerified ?? this.emailVerified,
       password: data.password ?? this.password,
-      resetPasswordToken: data.resetPasswordToken ?? this.resetPasswordToken
+      resetPasswordToken: data.resetPasswordToken ?? this.resetPasswordToken,
+      verifyEmailCode: data.verifyEmailCode ?? this.verifyEmailCode
     };
   }
 }

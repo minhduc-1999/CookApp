@@ -131,6 +131,12 @@ export class UtilsService {
     }
   }
 
+  static generateUniqueNumberCode(length: number) {
+    const alphabet = '1234567890';
+    const nanoid = customAlphabet(alphabet, length);
+    return nanoid() //=> "4f90d13a42"
+  }
+
   static generateUniqueCode(length: number = 6) {
     const alphabet = '1234567890qwertyuioplkjhgfdsazxcvbnmQWERTYUIOPLKJHGFDSAZXCVBNM';
     const nanoid = customAlphabet(alphabet, length);

@@ -17,6 +17,17 @@
       #submit:hover {
         background: hsl(353, 82%, 64%);
       }
+      .code {
+        background: hsl(353, 82%, 56%);
+        border-radius: 3px;
+        width: fit-content;
+        padding: 8px 16px;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 4px;
+        margin: 10px auto;
+        color: white;
+      }
     </style>
   </head>
   <body
@@ -115,26 +126,10 @@
                           margin: 0;
                         "
                       >
-                        Please click the button below to confirm your email
+                        Please use the code below to verify your email
                         address
                       </p>
-                      <form
-                        target="_blank"
-                        method="post"
-                        action="{{callback}}"
-                        class="inline"
-                      >
-                        <input
-                          type="text"
-                          hidden
-                          name="token"
-                          value="{{token}}"
-                          style="display: none"
-                        />
-                        <button type="submit" value="Submit" id="submit">
-                          Confirm email
-                        </button>
-                      </form>
+                      <p class="code">{{code}}</p>
                       <p
                         style="
                           color: #455056;

@@ -1,4 +1,3 @@
-import { Type } from "@nestjs/common";
 import { IUpdatable } from "domains/interfaces/IUpdatable.interface";
 import { isFunction } from "lodash";
 import _ = require("lodash");

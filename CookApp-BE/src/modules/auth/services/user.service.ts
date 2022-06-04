@@ -10,7 +10,6 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
-import { IAccountRepository } from "../interfaces/repositories/account.interface";
 import { IUserRepository } from "../interfaces/repositories/user.interface";
 
 export interface IUserService {
@@ -24,7 +23,6 @@ class UserService implements IUserService {
   constructor(
     @Inject("IUserRepository") private _userRepo: IUserRepository,
     @Inject("IStorageService") private _storageService: IStorageService,
-    @Inject("IAccountRepository") private _accountRepo: IAccountRepository
   ) {}
 
   async getUsersByIds(ids: string[]): Promise<User[]> {
@@ -62,14 +60,6 @@ class UserService implements IUserService {
     if (!newUser) {
       throw new InternalServerErrorException();
     }
-
-    const account = await this._accountRepo
-      .setTransaction(tx)
-      .createAccount(newUser.account, newUser);
-    if (!account) {
-      throw new InternalServerErrorException();
-    }
-
     return newUser;
   }
 }

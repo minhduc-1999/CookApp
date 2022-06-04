@@ -1,11 +1,10 @@
 import { MailerService } from "@nestjs-modules/mailer";
 import { Injectable, Logger } from "@nestjs/common";
-import { JwtService } from "@nestjs/jwt";
 import { Account } from "domains/social/account.domain";
 import { ConfigService } from "nestjs-config";
 
 export interface IMailService {
-  sendEmailAddressVerification(userID: string, address: string): Promise<any>;
+  sendEmailAddressVerification(account: Account): Promise<any>;
   sendEmailResetPassword(account: Account): Promise<void>;
 }
 
@@ -15,7 +14,6 @@ export class MailService implements IMailService {
   private _logoUrl: string;
   constructor(
     private _mailerService: MailerService,
-    private _jwtService: JwtService,
     private _configService: ConfigService
   ) {
     this._logoUrl = this._configService.get("system.logoUrl");
@@ -43,29 +41,22 @@ export class MailService implements IMailService {
       .catch((err) => this.logger.error(err));
   }
 
-  async sendEmailAddressVerification(
-    userID: string,
-    address: string
-  ): Promise<any> {
-    const callback = this._configService.get(
-      "system.emailVerificationCallback"
-    );
+  async sendEmailAddressVerification(account: Account): Promise<any> {
+    const { email, verifyEmailCode, id } = account;
 
-    const token = this._jwtService.sign({ sub: userID, email: address });
     this._mailerService
       .sendMail({
-        to: [address],
+        to: [email],
         subject: `Verify your email for Tastify account`,
         template: "email_verification",
         context: {
-          callback,
-          token,
+          code: verifyEmailCode,
           logoUrl: this._logoUrl,
         },
       })
       .then((value) =>
         this.logger.log(
-          `Send email address verification [${value.messageId}] to user ${userID}'}`
+          `Send email address verification [${value.messageId}] to account ${id}'}`
         )
       )
       .catch((err) => this.logger.error(err));

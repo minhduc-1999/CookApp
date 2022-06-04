@@ -124,17 +124,20 @@ export class AuthController {
   }
 
   @Post("email-verification/callback")
-  @Public()
   @NotRequireEmailVerification()
-  @ApiOkResponse({ description: "Confirm email successfully" })
+  @ApiOkResponse({ description: "Verify email successfully" })
   @HttpRequestTransaction()
+  @ApiBearerAuth()
   async verifyEmailCallback(
     @Body() body: VerifyEmailRequest,
-    @HttpParamTransaction() tx: ITransaction
-  ): Promise<string> {
-    let command = new VerifyEmailCommand(body, tx);
+    @HttpParamTransaction() tx: ITransaction,
+    @HttpUserReq() user: User
+  ): Promise<Result<void>> {
+    let command = new VerifyEmailCommand(body, tx, user);
     await this._commandBus.execute(command);
-    return "Confirm email successfully";
+    return Result.ok(null, {
+      messages: ["Verify email successfully"],
+    });
   }
 
   @Post("resend-email-verification")

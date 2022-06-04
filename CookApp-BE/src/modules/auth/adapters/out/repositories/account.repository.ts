@@ -31,15 +31,16 @@ export class AccountRepository
 
   async update(account: Account, data: Partial<Account>): Promise<Account> {
     let accountEntity = new AccountEntity(account);
-    const queryRunner = this.tx.getRef() as QueryRunner;
+    const updateData = accountEntity.update(data);
+    const queryRunner = this.tx?.getRef() as QueryRunner;
     if (queryRunner && !queryRunner.isReleased) {
       await queryRunner.manager.update<AccountEntity>(
         AccountEntity,
         accountEntity.id,
-        accountEntity.update(data)
+        updateData
       );
     } else {
-      accountEntity = null;
+      await this._repo.update(accountEntity.id, updateData);
     }
     return accountEntity.toDomain();
   }

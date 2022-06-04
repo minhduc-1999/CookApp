@@ -2,7 +2,6 @@ import { MailerModule, MailerOptions } from "@nestjs-modules/mailer";
 import { HandlebarsAdapter } from "@nestjs-modules/mailer/dist/adapters/handlebars.adapter";
 import { DynamicModule, Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
-import { JwtModule } from "@nestjs/jwt";
 import { ThirdPartyProviders } from "enums/thirdPartyProvider.enum";
 import { ConfigModule, ConfigService } from "nestjs-config";
 import { join } from "path";
@@ -25,10 +24,9 @@ const handler = [GetUploadPresignedLinkQueryHandler];
     ConfigModule,
     MailerModule.forRootAsync({
       useFactory: async (config: ConfigService): Promise<MailerOptions> => {
-        const env = config.get("app.env")
+        const env = config.get("app.env");
         let auth: any;
-        if (env === "development")
-          auth = {}
+        if (env === "development") auth = {};
         else {
           auth = {
             type: "oauth2",
@@ -36,8 +34,8 @@ const handler = [GetUploadPresignedLinkQueryHandler];
             clientSecret: config.get("mail.clientSecret"),
             user: config.get("mail.user"),
             refreshToken: config.get("mail.refreshToken"),
-            accessToken: config.get("mail.accessToken")
-          }
+            accessToken: config.get("mail.accessToken"),
+          };
         }
         return {
           transport: {
@@ -45,7 +43,7 @@ const handler = [GetUploadPresignedLinkQueryHandler];
             port: config.get("mail.port"),
             ignoreTLS: false,
             secure: false,
-            auth
+            auth,
           },
           defaults: {
             from: config.get("mail.defaultFrom"),
@@ -59,15 +57,6 @@ const handler = [GetUploadPresignedLinkQueryHandler];
           },
         };
       },
-      inject: [ConfigService],
-    }),
-    JwtModule.registerAsync({
-      useFactory: async (config: ConfigService) => ({
-        secret: config.get("system.emailVerificationSecret"),
-        signOptions: {
-          expiresIn: config.get("system.emailVerificationCallbackExpiration"),
-        },
-      }),
       inject: [ConfigService],
     }),
   ],
@@ -91,7 +80,7 @@ const handler = [GetUploadPresignedLinkQueryHandler];
 })
 export class ShareModule {
   static register(options: { storage: StorageOptions }): DynamicModule {
-    let storageClass: any
+    let storageClass: any;
     switch (options.storage.provider) {
       case ThirdPartyProviders.FIREBASE:
         storageClass = FirebaseStorageProvider;
@@ -108,7 +97,7 @@ export class ShareModule {
           useClass: storageClass,
         },
       ],
-      exports: ["IStorageProvider"]
+      exports: ["IStorageProvider"],
     };
   }
 }

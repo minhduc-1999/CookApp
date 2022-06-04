@@ -34,12 +34,13 @@ export class ResetPasswordCommandHandler
       tx,
     } = command;
     const user = await this._userRepo.getUserByUsername(username);
+    const { account } = user;
     if (!user) {
       throw new NotFoundException(
         ResponseDTO.fail("User not found", UserErrorCode.USER_NOT_FOUND)
       );
     }
-    if (user.account.resetPasswordToken !== token) {
+    if (account.resetPasswordToken !== token) {
       throw new ForbiddenException(
         ResponseDTO.fail("Not allow to reset password")
       );
@@ -47,10 +48,8 @@ export class ResetPasswordCommandHandler
     const newHashedPass = await this._authService.getHashedPassword(
       newPassword
     );
-    await this._accountRepo.setTransaction(tx).update(user.account, {
-      password: newHashedPass,
-      resetPasswordToken: "",
-    });
+    account.changPassword(newHashedPass);
+    await this._accountRepo.setTransaction(tx).update(account, account);
     return;
   }
 }

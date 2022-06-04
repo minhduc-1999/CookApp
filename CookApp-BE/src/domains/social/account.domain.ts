@@ -60,8 +60,16 @@ export class Account extends Audit{
 
   resetPasswordToken: string
 
+  verifyEmailCode: string
+
   verify() {
     this.emailVerified = true
+    this.verifyEmailCode = ""
+  }
+
+  changPassword(newPass: string) {
+    this.password = newPass
+    this.resetPasswordToken = ""
   }
 
   constructor(account?: Partial<Account>) {
@@ -74,5 +82,6 @@ export class Account extends Audit{
     this.emailVerified = account?.emailVerified
     this.role = account?.role
     this.resetPasswordToken = account?.resetPasswordToken
+    this.verifyEmailCode = account?.verifyEmailCode
   }
 }
