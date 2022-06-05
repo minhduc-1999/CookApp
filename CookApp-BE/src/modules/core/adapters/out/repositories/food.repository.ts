@@ -12,7 +12,7 @@ import { RecipeStepEntity } from "entities/core/recipeStep.entity";
 import { FoodSaveEntity } from "entities/core/foodSave.entity";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { In, QueryRunner, Repository } from "typeorm";
-import { FoodSaveType } from "enums/core.enum";
+import { FoodSaveType, FoodStatusType } from "enums/core.enum";
 
 export interface IFoodRepository {
   getFoods(query: PageOptionsDto): Promise<[Food[], number]>;
@@ -185,7 +185,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     const [foodEntities, total] = await this._foodRepo.findAndCount({
       relations: ["medias", "author", "author.account", "author.account.role"],
       where: {
-        confirmed: true,
+        status: FoodStatusType.CONFIRMED,
       },
       skip: query.limit * query.offset,
       take: query.limit,
@@ -202,7 +202,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
       .leftJoinAndSelect("food.steps", "step")
       .leftJoinAndSelect("step.interaction", "stepInter")
       .leftJoinAndSelect("step.medias", "stepMedia")
-      .where("food.confirmed = :confirm", { confirm: false })
+      .where("food.status = :status", { status: FoodStatusType.UNCENSORED })
       .select([
         "food",
         "ingredient",

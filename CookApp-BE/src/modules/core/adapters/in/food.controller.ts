@@ -28,6 +28,7 @@ import {
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { ConfirmFoodCommand } from "modules/core/useCases/confirmFood";
+import { ConfirmFoodRequest } from "modules/core/useCases/confirmFood/confirmFoodRequest";
 import { CreateFoodCommand } from "modules/core/useCases/createFood";
 import { CreateFoodRequest } from "modules/core/useCases/createFood/createFoodRequest";
 import { CreateFoodResponse } from "modules/core/useCases/createFood/createFoodResponse";
@@ -156,17 +157,19 @@ export class FoodController {
 
   @Patch(":foodId/censorship")
   @ApiFailResponseCustom()
-  @ApiOKResponseCustomWithoutData("Confirm food successfully")
+  @ApiOKResponseCustomWithoutData("Successfully")
   @HttpRequestTransaction()
   @RequirePermissions("censor_food")
   async confirmFood(
     @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction,
-    @Param("foodId", ParseUUIDPipe) foodId: string
+    @Param("foodId", ParseUUIDPipe) foodId: string,
+    @Body() body: ConfirmFoodRequest
   ): Promise<Result<string>> {
-    const confirmFoodCommand = new ConfirmFoodCommand(tx, user, foodId);
+    body.foodId = foodId;
+    const confirmFoodCommand = new ConfirmFoodCommand(tx, user, body);
     await this._commandBus.execute(confirmFoodCommand);
-    return Result.ok(null, { messages: ["Confirm food successfully"] });
+    return Result.ok(null, { messages: ["Successfully"] });
   }
 
   @Post()

@@ -8,6 +8,7 @@ import { RecipeStepEntity } from "./recipeStep.entity";
 import { UserEntity } from "../../entities/social/user.entity";
 import { PostEntity } from "../../entities/social/post.entity";
 import { FoodVoteEntity } from "./foodVote.entity";
+import { FoodStatusType } from "../../enums/core.enum";
 
 @Entity({ name: "foods" })
 export class FoodEntity extends AbstractEntity {
@@ -29,12 +30,17 @@ export class FoodEntity extends AbstractEntity {
   @Column({ name: "video_url", nullable: true })
   videoUrl: string;
 
-  @Column({name: "rating", nullable: true, type: "float4"})
-  rating: number
+  @Column({ name: "rating", nullable: true, type: "float4" })
+  rating: number;
 
-  @Column({name: "confirmed", default: false})
-  confirmed: boolean
-  
+  @Column({
+    name: "status",
+    default: FoodStatusType.UNCENSORED,
+    type: "enum",
+    enum: FoodStatusType,
+  })
+  status: FoodStatusType;
+
   @OneToMany(() => FoodIngredientEntity, (foodIng) => foodIng.food, {
     cascade: ["insert"],
   })
@@ -52,11 +58,11 @@ export class FoodEntity extends AbstractEntity {
   @JoinColumn({ name: "author_id" })
   author: UserEntity;
 
-  @OneToMany(() => PostEntity, post => post.foodRef)
-  referredPosts: PostEntity[]
+  @OneToMany(() => PostEntity, (post) => post.foodRef)
+  referredPosts: PostEntity[];
 
-  @OneToMany(() => FoodVoteEntity, vote => vote.food)
-  votes: FoodVoteEntity[]
+  @OneToMany(() => FoodVoteEntity, (vote) => vote.food)
+  votes: FoodVoteEntity[];
 
   constructor(food: Food) {
     super(food);
@@ -67,7 +73,7 @@ export class FoodEntity extends AbstractEntity {
     this.servings = food?.servings;
     this.description = food?.description;
     this.url = food?.url;
-    this.confirmed = food?.confirmed
+    this.status = food?.status
     this.ingredients =
       food?.ingredients &&
       food.ingredients.map((ing) => new FoodIngredientEntity(ing));
@@ -82,7 +88,7 @@ export class FoodEntity extends AbstractEntity {
       photos: this.medias?.map((media) => media.toDomain()),
       steps: this.steps?.map((step) => step.toDomain()),
       ingredients: this.ingredients?.map((ing) => ing.toDomain()),
-      author: this.author?.toDomain()
+      author: this.author?.toDomain(),
     });
   }
 
@@ -94,7 +100,7 @@ export class FoodEntity extends AbstractEntity {
       description: data?.description ?? this.description,
       name: data?.name ?? this.name,
       videoUrl: data?.videoUrl ?? this.videoUrl,
-      confirmed: data?.confirmed ?? this.confirmed
+      status: data?.status ?? this.status
     };
   }
 }

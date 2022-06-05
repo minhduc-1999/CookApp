@@ -4,5 +4,6 @@ export enum NotificationTemplateEnum {
   ReactTemplate = "react",
   CommentTemplate = "comment",
   FoodConfirmationTemplate = "food_confirmation",
+  FoodDismissionTemplate = "food_dismission",
   NewFoodTemplate = "new_food"
 }

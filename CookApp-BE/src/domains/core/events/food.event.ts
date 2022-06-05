@@ -7,7 +7,7 @@ export class FoodCreatedEvent {
   }
 }
 
-export class FoodConfirmedEvent {
+export class FoodCensorshipEvent {
   food: Food;
   constructor(food: Food) {
     this.food = food;

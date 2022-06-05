@@ -7,14 +7,19 @@ import { IFoodRepository } from "modules/core/adapters/out/repositories/food.rep
 import { ResponseDTO } from "base/dtos/response.dto";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { Food } from "domains/core/food.domain";
-import { FoodConfirmedEvent, FoodCreatedEvent } from "domains/core/events/food.event";
+import {
+  FoodCensorshipEvent,
+  FoodCreatedEvent,
+} from "domains/core/events/food.event";
 import { IFoodService } from "modules/core/services/food.service";
+import { ConfirmFoodRequest } from "./confirmFoodRequest";
+import { FoodStatusType } from "enums/core.enum";
 
 export class ConfirmFoodCommand extends BaseCommand {
-  foodId: string;
-  constructor(tx: ITransaction, user: User, foodId: string) {
+  req: ConfirmFoodRequest;
+  constructor(tx: ITransaction, user: User, req: ConfirmFoodRequest) {
     super(tx, user);
-    this.foodId = foodId;
+    this.req = req;
   }
 }
 
@@ -30,11 +35,11 @@ export class ConfirmFoodCommandHandler
     private _foodService: IFoodService
   ) {}
   async execute(command: ConfirmFoodCommand): Promise<void> {
-    const { tx, foodId } = command;
+    const { tx, req } = command;
 
-    const food = await this._foodService.getById(foodId);
+    const food = await this._foodService.getById(req.foodId);
 
-    if (food.confirmed) {
+    if (food.status === FoodStatusType.CONFIRMED) {
       throw new ConflictException(
         ResponseDTO.fail(
           "Food already confirmed",
@@ -43,13 +48,20 @@ export class ConfirmFoodCommandHandler
       );
     }
 
+    if (food.status !== FoodStatusType.UNCENSORED)
+      throw new NotFoundException(
+        ResponseDTO.fail("Not found", UserErrorCode.FOOD_NOT_FOUND)
+      );
+
     const updateData: Partial<Food> = {
-      confirmed: true,
+      status: req.type,
     };
 
     await this._foodRepo.setTransaction(tx).updateFood(food, updateData);
-    this._eventBus.publish(new FoodConfirmedEvent(food));
-    this._eventBus.publish(new FoodCreatedEvent(food));
+    food.status = req.type;
+    this._eventBus.publish(new FoodCensorshipEvent(food));
+    if (food.status === FoodStatusType.CONFIRMED)
+      this._eventBus.publish(new FoodCreatedEvent(food));
     return;
   }
 }

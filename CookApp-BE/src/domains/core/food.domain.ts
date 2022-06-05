@@ -1,6 +1,6 @@
 import { User } from "domains/social/user.domain";
-import { RoleType } from "enums/system.enum";
-import { isNil } from "lodash";
+import { FoodStatusType } from "../../enums/core.enum";
+import { RoleType } from "../../enums/system.enum";
 import { Audit } from "../../domains/audit.domain";
 import { Image, Video } from "../../domains/social/media.domain";
 import { FoodIngredient } from "./ingredient.domain";
@@ -29,7 +29,7 @@ export class Food extends Audit {
 
   rating: number;
 
-  confirmed: boolean;
+  status: FoodStatusType;
 
   isValidFood(): boolean {
     if (this.photos?.length < 1) return false;
@@ -39,9 +39,9 @@ export class Food extends Audit {
 
   setCensoredStatus(creatorRole: RoleType) {
     if (creatorRole === "sys-admin") {
-      this.confirmed = true;
+      this.status = FoodStatusType.CONFIRMED;
     } else {
-      this.confirmed = false;
+      this.status = FoodStatusType.UNCENSORED;
     }
   }
 
@@ -58,6 +58,6 @@ export class Food extends Audit {
     this.url = food?.url;
     this.author = food?.author;
     this.rating = food?.rating;
-    this.confirmed = isNil(food?.confirmed) ? false : food?.confirmed;
+    this.status = food?.status
   }
 }

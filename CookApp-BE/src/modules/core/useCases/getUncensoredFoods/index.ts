@@ -1,4 +1,4 @@
-import { Inject } from "@nestjs/common";
+import { Inject, NotImplementedException } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
@@ -8,7 +8,6 @@ import { IStorageService } from "modules/share/adapters/out/services/storage.ser
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { Image } from "domains/social/media.domain";
 import { Food } from "domains/core/food.domain";
-import { IFoodSeService } from "modules/core/adapters/out/services/foodSe.service";
 import { GetUncensoredFoodsResponse } from "./getUncensoredFoodsResponse";
 export class GetUncensoredFoodsQuery extends BaseQuery {
   queryOptions: PageOptionsDto;
@@ -19,30 +18,28 @@ export class GetUncensoredFoodsQuery extends BaseQuery {
 }
 
 @QueryHandler(GetUncensoredFoodsQuery)
-export class GetUncensoredFoodsQueryHandler implements IQueryHandler<GetUncensoredFoodsQuery> {
+export class GetUncensoredFoodsQueryHandler
+  implements IQueryHandler<GetUncensoredFoodsQuery>
+{
   constructor(
     @Inject("IFoodRepository")
     private _foodRepo: IFoodRepository,
     @Inject("IStorageService")
-    private _storageService: IStorageService,
-    @Inject("IFoodSeService")
-    private _foodSeService: IFoodSeService
+    private _storageService: IStorageService
   ) {}
-  async execute(query: GetUncensoredFoodsQuery): Promise<GetUncensoredFoodsResponse> {
+  async execute(
+    query: GetUncensoredFoodsQuery
+  ): Promise<GetUncensoredFoodsResponse> {
     const { queryOptions } = query;
     let foods: Food[];
     let totalCount = 0;
 
     if (queryOptions.q) {
-      const [ids, total] = await this._foodSeService.findManyByNameAndCount(
-        queryOptions.q,
+      throw new NotImplementedException("Not support searching");
+    } else {
+      [foods, totalCount] = await this._foodRepo.getUncensoredFoods(
         queryOptions
       );
-      totalCount = total;
-      const queryResult = await this._foodRepo.getByIds(ids);
-      foods = ids.map((id) => queryResult.find((item) => item.id === id));
-    } else {
-      [foods, totalCount] = await this._foodRepo.getUncensoredFoods(queryOptions);
     }
 
     for (let food of foods) {

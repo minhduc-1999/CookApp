@@ -1,15 +1,19 @@
 import { Inject } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
-import { FoodConfirmedEvent } from "domains/core/events/food.event";
-import { Notification } from "domains/social/notification.domain";
+import { FoodCensorshipEvent } from "domains/core/events/food.event";
+import {
+  Notification,
+  NotificationTemplate,
+} from "domains/social/notification.domain";
+import { FoodStatusType } from "enums/core.enum";
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
 import { INotiRepository } from "modules/notification/adapters/out/repositories/notification.repository";
 import { INotificationService } from "modules/notification/adapters/out/services/notification.service";
 
-@EventsHandler(FoodConfirmedEvent)
+@EventsHandler(FoodCensorshipEvent)
 export class FoodConfirmedEventHandler
-  implements IEventHandler<FoodConfirmedEvent>
+  implements IEventHandler<FoodCensorshipEvent>
 {
   constructor(
     @Inject("INotiRepository")
@@ -20,19 +24,25 @@ export class FoodConfirmedEventHandler
     private _notiService: INotificationService
   ) {}
 
-  async handle(event: FoodConfirmedEvent): Promise<void> {
+  async handle(event: FoodCensorshipEvent): Promise<void> {
     const { food } = event;
-
-    const template = await this._notiRepository.getTemplate(
-      NotificationTemplateEnum.FoodConfirmationTemplate
-    );
 
     const notiConfig = await this._configurationService.getNotificationConfig(
       food.author
     );
 
     //Cancle if user dont want to receive notification for food confirmation
-    if (!notiConfig.foodConfirmation) return;
+    if (!notiConfig?.foodConfirmation) return;
+
+    let template: NotificationTemplate;
+    if (food.status === FoodStatusType.CONFIRMED) {
+      template = await this._notiRepository.getTemplate(
+        NotificationTemplateEnum.FoodConfirmationTemplate
+      );
+    } else
+      template = await this._notiRepository.getTemplate(
+        NotificationTemplateEnum.FoodDismissionTemplate
+      );
 
     const notification: Notification<{ foodID: string }> = {
       body: template.body.replace("$food", food.name),
