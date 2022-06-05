@@ -6,6 +6,7 @@ import { PostEntity } from "entities/social/post.entity";
 import { QueryRunner, Repository } from "typeorm";
 import { InteractionEntity } from "entities/social/interaction.entity";
 import { Post } from "domains/social/post.domain";
+import { PageOptionsDto } from "base/pageOptions.base";
 
 @Injectable()
 export class PostRepository extends BaseRepository implements IPostRepository {
@@ -15,6 +16,44 @@ export class PostRepository extends BaseRepository implements IPostRepository {
   ) {
     super();
   }
+
+  async getPostsByTag(
+    tag: string,
+    queryOpt: PageOptionsDto
+  ): Promise<[Post[], number]> {
+    const query = this._postRepo
+      .createQueryBuilder("post")
+      .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("author.account", "authorAccount")
+      .leftJoinAndSelect("authorAccount.role", "authorRole")
+      .leftJoinAndSelect("post.interaction", "interaction")
+      .leftJoinAndSelect("post.medias", "media")
+      .leftJoinAndSelect("media.interaction", "mediaInter")
+      .leftJoinAndSelect("post.foodRef", "foodRef")
+      .leftJoinAndSelect("foodRef.medias", "foodRefPhoto")
+      .leftJoinAndSelect("foodRef.author", "foodAuthor")
+      .where(`post.tags::jsonb ?| array['${tag}']`)
+      .orderBy("interaction.updatedAt", "DESC")
+      .select([
+        "post",
+        "interaction",
+        "author.id",
+        "author.displayName",
+        "author.avatar",
+        "media",
+        "mediaInter",
+        "foodRef",
+        "foodRefPhoto",
+        "foodAuthor",
+        "authorAccount",
+        "authorRole",
+      ])
+      .skip(queryOpt.limit * queryOpt.offset)
+      .take(queryOpt.limit);
+    const [entities, total] = await query.getManyAndCount();
+    return [entities?.map((entity) => entity.toDomain()), total];
+  }
+
   async createPost(post: Post): Promise<Post> {
     if (!post) return null;
     const queryRunner = this.tx.getRef() as QueryRunner;
@@ -50,7 +89,7 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         "foodRef",
         "foodRefPhoto",
         "account",
-        "role"
+        "role",
       ])
       .getOne();
     return postEntity?.toDomain();
@@ -73,11 +112,12 @@ export class PostRepository extends BaseRepository implements IPostRepository {
         .where("id = :id", { id: post.id })
         .execute();
 
-      await queryRunner.manager.createQueryBuilder()
-      .update(PostEntity)
-      .set(updateData)
-      .where("id = :postId", { postId: post.id})
-      .execute()
+      await queryRunner.manager
+        .createQueryBuilder()
+        .update(PostEntity)
+        .set(updateData)
+        .where("id = :postId", { postId: post.id })
+        .execute();
     }
   }
 }
