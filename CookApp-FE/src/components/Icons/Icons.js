@@ -3,6 +3,7 @@ import {
   MdChevronLeft,
   MdChevronRight,
   MdFastfood,
+  MdLogout,
   MdPeopleOutline,
 } from "react-icons/md";
 import { HiOutlineNewspaper } from "react-icons/hi";
@@ -10,6 +11,18 @@ import { BsReceipt, BsThreeDots } from "react-icons/bs";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import { GrUpgrade } from "react-icons/gr";
 import { AiOutlineFieldTime, AiOutlineStar } from "react-icons/ai";
+
+export const LogoutIcon = () => {
+  let color = useColorModeValue("gray.500", "white");
+  return (
+    <Icon
+      as={MdLogout}
+      alignItems="center"
+      justifyContent="center"
+      color={color}
+    />
+  );
+};
 
 export const RatingIcon = () => {
   let color = useColorModeValue("black", "white");

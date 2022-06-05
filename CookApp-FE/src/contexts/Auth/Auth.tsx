@@ -6,7 +6,7 @@ import { Redirect, Route } from "react-router-dom";
 interface AuthContextType {
   user: LoginResponse | null;
   signIn: (cre: Credential, cb: () => void) => Promise<void>;
-  signOut: (cb: () => void) => Promise<void>;
+  signOut: (cb?: () => void) => Promise<void>;
 }
 
 const authContext = createContext<AuthContextType | null>(null);
@@ -36,9 +36,9 @@ const useProvideAuth = () => {
     setUser(response);
     cb();
   };
-  const signOut = async (cb: () => void) => {
+  const signOut = async (cb?: () => void) => {
     setUser(null);
-    cb();
+    if (cb) cb();
   };
   return {
     user,
