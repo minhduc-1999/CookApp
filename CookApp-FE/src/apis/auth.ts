@@ -1,6 +1,11 @@
 import axios, { AxiosError } from "axios";
 import { networkChecking } from "utils/network";
-import { BaseResponse, LoginResponse, UserErrorCode } from "./base.type";
+import {
+  BaseResponse,
+  LoginResponse,
+  ProfileResponse,
+  UserErrorCode,
+} from "./base.type";
 import { baseUrl, token } from "./token";
 
 export type Credential = {
@@ -35,7 +40,7 @@ export const validatePassword = (password: string) => {
 };
 
 export const login = async (data: Credential): Promise<LoginResponse> => {
-  await networkChecking()
+  await networkChecking();
   return axios
     .post(baseUrl + "/login", data, {
       headers: {
@@ -48,9 +53,58 @@ export const login = async (data: Credential): Promise<LoginResponse> => {
     })
     .catch((err: AxiosError<BaseResponse>) => {
       if (
-        err.response?.data.meta.errorCode === UserErrorCode.INVALID_CREDENTIAL
+        err.response?.data?.meta?.errorCode === UserErrorCode.INVALID_CREDENTIAL
       )
         throw new Error("Wrong username or password");
       throw new Error("Login failed");
+    });
+};
+
+type ChangePasswordBody = {
+  oldPassword: string;
+  newPassword: string;
+};
+
+export const changePassword = async (data: ChangePasswordBody) => {
+  await networkChecking();
+  return axios
+    .put(baseUrl + "/password/change", data, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then(() => {
+      return;
+    })
+    .catch((err: AxiosError<BaseResponse>) => {
+      if (
+        err.response?.data.meta.errorCode ===
+        UserErrorCode.OLD_PASSWORD_NOT_CORRECT
+      )
+        throw new Error("Wrong old password");
+      throw new Error("Change password fail");
+    });
+};
+
+export type GetProfileResponse = ProfileResponse & {
+  avatar: {
+    url: string;
+  };
+  displayName: string;
+};
+
+export const getProfile = async (): Promise<GetProfileResponse> => {
+  await networkChecking();
+  return axios
+    .get(baseUrl + "/users/profile", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res) => res.data.data)
+    .catch(() => {
+      throw new Error("Fail to get profile");
     });
 };

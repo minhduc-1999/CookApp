@@ -20,6 +20,7 @@ import signInImage from "assets/img/signInImage.png";
 import { useAuth } from "contexts/Auth/Auth";
 import { useHistory, useLocation } from "react-router-dom";
 import { validatePassword, validateUsername } from "apis/auth";
+import { PasswordInput } from "components/PasswordInput/PasswordInput";
 
 function SignIn() {
   const [username, setUsername] = useState("");
@@ -139,13 +140,9 @@ function SignIn() {
               >
                 Password
               </FormLabel>
-              <Input
+              <PasswordInput
                 id="password"
-                borderRadius="15px"
-                fontSize="sm"
-                type="password"
                 placeholder="Your password"
-                size="lg"
                 value={password}
                 onFocus={onInputFocus}
                 onChange={(e) => {

@@ -18,7 +18,10 @@ export enum UserErrorCode {
   UNIT_ALREADY_EXISTED= "unit_already_existed",
   INGREDIENT_ALREADY_EXISTED= "ingredient_already_existed",
   TOPIC_ALREADY_EXISTED= "topic_already_existed",
-  FOOD_ALREADY_CONFIRMED = "food_already_confirmed"
+  FOOD_ALREADY_CONFIRMED = "food_already_confirmed",
+  FOOD_ALREADY_SAVED = "food_already_saved",
+  OLD_PASSWORD_NOT_CORRECT = "old_password_not_correct",
+  FOOD_NOT_SAVE = "food_not_save"
 }
 
 export enum InteractiveTargetType {

@@ -52,11 +52,25 @@ export const dashRoutes = [
       },
       {
         path: "/others",
-        name: "Other settings",
+        name: "System settings",
         icon: <DocumentIcon color="inherit" />,
         component: OtherSetting,
         layout: "/admin",
       },
+    ],
+  },
+  {
+    name: "OTHER",
+    category: "account",
+    state: "pageCollapse",
+    views: [
+      {
+        path: "/profile",
+        name: "Profile",
+        icon: <DocumentIcon color="inherit" />,
+        component: Profile,
+        layout: "/admin",
+      }
     ],
   },
 ];
