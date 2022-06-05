@@ -120,12 +120,17 @@ export const createFood = async (data: CreateFoodBody): Promise<void> => {
     });
 };
 
-export const confirmFood = async (foodId: string): Promise<void> => {
+export const confirmFood = async (
+  foodId: string,
+  type: "confirmed" | "dismissed"
+): Promise<void> => {
   await networkChecking();
   return axios
     .patch(
       baseUrl + `/foods/${foodId}/censorship`,
-      {},
+      {
+        type,
+      },
       {
         headers: {
           Authorization: `Bearer ${token}`,

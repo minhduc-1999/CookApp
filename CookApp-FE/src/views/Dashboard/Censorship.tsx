@@ -26,30 +26,54 @@ import { confirmFood, getUncensoredFood } from "apis/foods";
 import Card from "components/Card/Card";
 import { RatingIcon, ServingIcon, TotalTimeIcon } from "components/Icons/Icons";
 import Spinner from "components/Spinner";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
+const INIT_TOTAL_PAGE = 1;
+const TRIGGER_LOAD_MORE_OFFSET = 2; /*trigger when distance < OFFSET * window.innerHeight*/
 
 function Censorship() {
   const [foods, setFoods] = useState<FoodResponse[]>([]);
   const [foodLoading, setFoodLoading] = useState(false);
-  const [totalFoodPage, setTotalFoodPage] = useState(0);
+  const [totalFoodPage, setTotalFoodPage] = useState(INIT_TOTAL_PAGE);
   const [totalFood, setTotalFood] = useState(0);
+  const [curPage, setCurPage] = useState(0);
   const toast = useToast();
+  const foodListRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     fetchFoodData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
-    setFoodLoading(true);
   }, []);
 
+  useEffect(() => {
+    const onScroll = () => {
+      const bound = foodListRef?.current?.getBoundingClientRect();
+      if (
+        bound?.bottom &&
+        bound.bottom < TRIGGER_LOAD_MORE_OFFSET * window.innerHeight
+      ) {
+        if (!foodLoading) {
+          fetchFoodData(curPage + 1, INIT_PAGE_SIZE);
+        }
+      }
+    };
+    document.addEventListener("scroll", onScroll);
+    return () => {
+      document.removeEventListener("scroll", onScroll);
+    };
+  });
+
   const fetchFoodData = (page: number, size: number) => {
+    if (page === curPage || page > totalFoodPage) return;
+    setFoodLoading(true);
     getUncensoredFood(page, size)
       .then((data) => {
         const [foodResList, metadata] = data;
-        if (metadata.totalPage !== totalFoodPage)
+        if (metadata?.page) setCurPage(metadata.page);
+        if (metadata?.totalPage && metadata.totalPage !== totalFoodPage)
           setTotalFoodPage(metadata.totalPage);
-        if (metadata.totalCount !== totalFood)
+        if (metadata?.totalCount && metadata.totalCount !== totalFood)
           setTotalFood(metadata.totalCount);
         setFoods([...foods, ...foodResList]);
         setFoodLoading(false);
@@ -59,8 +83,32 @@ function Censorship() {
         console.error(err);
       });
   };
+  const onDismissed = (foodId: string) => {
+    confirmFood(foodId, "dismissed")
+      .then(() => {
+        const temp = foods.filter((food) => food.id !== foodId);
+        setFoods(temp);
+        setTotalFood(totalFood - 1);
+        toast({
+          title: "Successfully",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+      })
+      .catch((err: Error) => {
+        toast({
+          title: err.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+      });
+  };
   const onConfirmFood = (foodId: string) => {
-    confirmFood(foodId)
+    confirmFood(foodId, "confirmed")
       .then(() => {
         const temp = foods.filter((food) => food.id !== foodId);
         setFoods(temp);
@@ -90,6 +138,7 @@ function Censorship() {
         gap={8}
         justifyContent="center"
         alignItems="center"
+        ref={foodListRef}
       >
         {foods?.map((food, index) => {
           return (
@@ -252,7 +301,13 @@ function Censorship() {
                 >
                   Confirm
                 </Button>
-                <Button>Dismiss</Button>
+                <Button
+                  onClick={() => {
+                    onDismissed(food?.id);
+                  }}
+                >
+                  Dismiss
+                </Button>
               </Grid>
             </Card>
           );
