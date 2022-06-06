@@ -39,7 +39,7 @@ export class NewFoodEventHandler implements IEventHandler<FoodCreatedEvent> {
       NotificationTemplateEnum.NewFoodTemplate
     );
 
-    const notification: Notification<{ foodID: string }> = {
+    const notification: Notification<{ foodID: string; foodName: string }> = {
       body: template.body.replace("$user", food.author.displayName),
       title: template.title,
       templateId: template.id,
@@ -47,6 +47,7 @@ export class NewFoodEventHandler implements IEventHandler<FoodCreatedEvent> {
       targets: notiReceiver,
       data: {
         foodID: food.id,
+        foodName: food.name,
       },
     };
     this._notiRepository.push(notification);

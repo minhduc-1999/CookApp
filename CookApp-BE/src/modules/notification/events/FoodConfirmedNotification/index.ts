@@ -44,7 +44,7 @@ export class FoodConfirmedEventHandler
         NotificationTemplateEnum.FoodDismissionTemplate
       );
 
-    const notification: Notification<{ foodID: string }> = {
+    const notification: Notification<{ foodID: string; foodName: string }> = {
       body: template.body.replace("$food", food.name),
       title: template.title,
       templateId: template.id,
@@ -52,6 +52,7 @@ export class FoodConfirmedEventHandler
       targets: [food.author.id],
       data: {
         foodID: food.id,
+        foodName: food.name,
       },
     };
     this._notiRepository.push(notification);
