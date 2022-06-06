@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:tastify/ProfileScreen/EditProfileActivity.dart';
+
 
 import '../constants.dart';
 class TagsActivity extends StatefulWidget {
-  final List<String> tags;
+  final List<Topic> tags;
 
   const TagsActivity({Key key, this.tags}) : super(key: key);
   @override
@@ -11,7 +13,7 @@ class TagsActivity extends StatefulWidget {
 
 class _TagsActivityState extends State<TagsActivity> {
   TextEditingController searchController = TextEditingController();
-  List<String> tags;
+  List<Topic> tags;
 
   _TagsActivityState({this.tags});
   @override
@@ -71,7 +73,7 @@ class _TagsActivityState extends State<TagsActivity> {
                   itemCount: tags.length,
                   itemBuilder: (context, index) {
 
-                    return ListTile(title: Text(tags[index]), onTap: (){
+                    return ListTile(title: Text(tags[index].title), onTap: (){
                     Navigator.of(context).pop(tags[index]);
                     });
 

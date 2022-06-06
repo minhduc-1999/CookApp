@@ -62,10 +62,14 @@ dependencies:
   accordion: ^2.1.2
   rating_bar_flutter: ^1.0.0
   string_to_hex: ^0.2.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
+  flutter_native_splash: ^1.3.2
+flutter_native_splash:
+  color: "#ffffff"
+  image: assets/images/diet.png
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 
@@ -90,6 +94,7 @@ flutter:
     - assets/images/AppLogo.png
     - assets/images/default_avatar.png
     - assets/images/robot.png
+    - assets/images/diet.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware.
 

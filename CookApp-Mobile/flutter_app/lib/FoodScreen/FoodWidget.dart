@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:rating_bar_flutter/rating_bar_flutter.dart';
 import 'package:readmore/readmore.dart';
 import 'package:tastify/FoodScreen/FoodInstructionWidget.dart';
@@ -8,7 +9,10 @@ import 'package:tastify/FoodScreen/RatingActivity.dart';
 import 'package:tastify/FoodScreen/ShareFoodActivity.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tastify/Model/SaveFoodRequestModel.dart';
+import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
+import 'package:tastify/config.dart';
 import 'package:tastify/constants.dart';
 
 class FoodWidget extends StatefulWidget {
@@ -19,24 +23,43 @@ class FoodWidget extends StatefulWidget {
   });
 
   @override
-  _FoodWidgetState createState() => _FoodWidgetState(food: this.food,rating: this.food.rating.toDouble());
+  _FoodWidgetState createState() => _FoodWidgetState(food: this.food,rating: this.food.rating.toDouble(),saveType: this.food.saveType);
 }
 
 class _FoodWidgetState extends State<FoodWidget> {
   final Foods food;
   double rating;
+  String saveType;
   String ingredients = "";
-  _FoodWidgetState({this.food,this.rating});
+  FToast fToast;
+  _FoodWidgetState({this.food,this.rating,this.saveType});
   FutureOr updateRating(dynamic value) async{
     var data = await APIService.getFoodById(widget.food.id);
     print("ln");
     setState(() {
       rating = data.data.rating.toDouble();
+
     });
+  }
+  FutureOr updateSave(dynamic value) async{
+    var data = await APIService.getFoodById(widget.food.id);
+    print("ln");
+    setState(() {
+      saveType = data.data.saveType;
+
+    });
+
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    fToast = FToast();
+    fToast.init(context);
   }
   @override
   Widget build(BuildContext context) {
-    final double height = MediaQuery.of(context).size.height;
+    final Size size = MediaQuery.of(context).size;
     String ingredients = "";
     for (int i = 0; i < food.ingredients.length; i++) {
       if (food.ingredients[i].name != null) {
@@ -48,15 +71,60 @@ class _FoodWidgetState extends State<FoodWidget> {
       }
     }
     return Container(
-        margin: EdgeInsets.all(8.0),
+        margin: EdgeInsets.only(bottom: 10),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.all(Radius.circular(20.0)),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.grey.withOpacity(0.5),
+              blurRadius: 4,
+              offset: Offset(0, 3),
+            )
+          ]
         ),
         child: Padding(
           padding: const EdgeInsets.all(12.0),
           child: Column(
             children: [
+              Padding(
+                padding: EdgeInsets.only(left: 10, right: 10),
+                child: GestureDetector(
+                  onTap: (){
+
+                    Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                            pageBuilder: (context, animation,
+                                secondaryAnimation) =>
+                                ProfileActivity(
+                                  userId: food.author.id,
+                                ),
+                            transitionsBuilder: (context,
+                                animation,
+                                secondaryAnimation,
+                                child) {
+                              return FadeTransition(opacity: animation, child: child,);
+                            }));
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      CircleAvatar(
+                        radius: 17,
+                        backgroundColor: Colors.grey,
+                        backgroundImage: NetworkImage(food.author.avatar.url),
+                      ),
+
+                      SizedBox(
+                        width: size.width * 0.04,
+                      ),
+                      Text(food.author.displayName, style: TextStyle(fontWeight: FontWeight.bold, fontSize: 15)),
+                      SizedBox(width: 3,),
+                      food.author.isNutritionist ? Icon(Icons.check_circle, color: Colors.blue, size: 15,) : Container()
+                    ],
+                  ),
+                ),
+              ),
               GestureDetector(
                 onTap: (){
                   openInstruction(context: context, id: food.id, name: food.name);
@@ -65,12 +133,12 @@ class _FoodWidgetState extends State<FoodWidget> {
                   margin:
                       EdgeInsets.only(left: 10, top: 15, right: 10, bottom: 15),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.all(Radius.circular(5.0)),
+                    borderRadius: BorderRadius.all(Radius.circular(15.0)),
                     child: Image.network(
                       food.photos[0].url,
                       //"https://image.cooky.vn/recipe/g6/54859/s1242/cooky-recipe-637387013241463008.jpg",
                       fit: BoxFit.cover,
-                      height: height * 0.5,
+                      height: size.height * 0.5,
                     ),
                   ),
                 ),
@@ -151,9 +219,9 @@ class _FoodWidgetState extends State<FoodWidget> {
                             fontSize: 14, fontWeight: FontWeight.bold))),
               ),
               Container(
-              
+                margin: EdgeInsets.only(left: 10,right: 10),
                 child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     rating > 0 ? GestureDetector(
                       onTap: (){
@@ -202,7 +270,224 @@ class _FoodWidgetState extends State<FoodWidget> {
                       ),
                     ) : Text("No ratings"),
 
-                    SizedBox(width: 15,),
+
+                    GestureDetector(
+                      onTap: (){
+
+
+                        return showModalBottomSheet(
+                            context: context,
+                            builder: (context) {
+                              return saveType == Config.foodUnsaved ? Container(
+                                color: Color(0xFF737373),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: const Radius.circular(29),
+                                        topRight: const Radius.circular(29),
+                                      )),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Icon(Icons.remove, color: Colors.grey),
+                                      Text(
+                                        "Save",
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                                      ),
+                                      Divider(),
+                                      ListTile(
+                                        leading: Icon(
+                                          FontAwesomeIcons.circleCheck,
+                                          color: Colors.green,
+                                        ),
+                                        title: Text(
+                                          "Should",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        onTap: () async{
+
+                                          Navigator.of(context).pop();
+
+                                          APIService.saveFood(SaveFoodRequestModel(type: Config.shouldFoodType, forceUpdate: true), food.id).then((value) {
+                                            _showToast(value.meta.messages[0], size);
+                                            return updateSave(value);
+
+                                          });
+
+
+
+                                        },
+                                      ),
+                                      Divider(),
+                                      ListTile(
+                                        leading: Icon(
+                                          FontAwesomeIcons.circleXmark,
+                                          color: Colors.red,
+                                        ),
+                                        title: Text(
+                                          "Should not",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+
+                                          APIService.saveFood(SaveFoodRequestModel(type: Config.shouldnotFoodType, forceUpdate: true), food.id).then((value) {
+                                            _showToast(value.meta.messages[0], size);
+                                            return updateSave(value);
+
+                                          });
+
+                                        },
+                                      ),
+                                      Divider(),
+                                      SizedBox(height: 20,)
+                                    ],
+                                  ),
+                                ),
+                              ) : saveType == Config.shouldFoodType ? Container(
+                                color: Color(0xFF737373),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: const Radius.circular(29),
+                                        topRight: const Radius.circular(29),
+                                      )),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Icon(Icons.remove, color: Colors.grey),
+                                      Text(
+                                        "Save",
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                                      ),
+                                      Divider(),
+                                      ListTile(
+                                        leading: Icon(
+                                          FontAwesomeIcons.fileCircleXmark,
+                                          color: Colors.grey,
+                                        ),
+                                        title: Text(
+                                          "Unsaved",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+
+                                          APIService.unSaveFood(food.id).then((value) {
+                                            _showToast(value.meta.messages[0], size);
+                                            return updateSave(value);
+
+                                          });
+                                        },
+                                      ),
+                                      Divider(),
+                                      ListTile(
+                                        leading: Icon(
+                                          FontAwesomeIcons.circleXmark,
+                                          color: Colors.red,
+                                        ),
+                                        title: Text(
+                                          "Should not",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+
+                                          APIService.saveFood(SaveFoodRequestModel(type: Config.shouldnotFoodType, forceUpdate: true), food.id).then((value) {
+                                            _showToast(value.meta.messages[0], size);
+                                            return updateSave(value);
+
+                                          });
+
+                                        },
+                                      ),
+                                      Divider(),
+                                      SizedBox(height: 20,)
+                                    ],
+                                  ),
+                                ),
+                              ): saveType == Config.shouldnotFoodType ? Container(
+                                color: Color(0xFF737373),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.only(
+                                        topLeft: const Radius.circular(29),
+                                        topRight: const Radius.circular(29),
+                                      )),
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    mainAxisSize: MainAxisSize.min,
+                                    children: <Widget>[
+                                      Icon(Icons.remove, color: Colors.grey),
+                                      Text(
+                                        "Save",
+                                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+                                      ),
+                                      Divider(),
+                                      ListTile(
+                                        leading: Icon(
+                                          FontAwesomeIcons.fileCircleXmark,
+                                          color: Colors.grey,
+                                        ),
+                                        title: Text(
+                                          "Unsaved",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        onTap: () {
+                                          Navigator.of(context).pop();
+
+                                          APIService.unSaveFood(food.id).then((value) {
+                                            _showToast(value.meta.messages[0], size);
+                                            return updateSave(value);
+
+                                          });
+                                        },
+                                      ),
+                                      Divider(),
+                                      ListTile(
+                                        leading: Icon(
+                                          FontAwesomeIcons.circleCheck,
+                                          color: Colors.green,
+                                        ),
+                                        title: Text(
+                                          "Should",
+                                          style: TextStyle(fontSize: 16),
+                                        ),
+                                        onTap: () async{
+
+                                          Navigator.of(context).pop();
+
+                                          APIService.saveFood(SaveFoodRequestModel(type: Config.shouldFoodType, forceUpdate: true), food.id).then((value) {
+                                            _showToast(value.meta.messages[0], size);
+                                            return updateSave(value);
+
+                                          });
+                                        },
+                                      ),
+                                      Divider(),
+                                      SizedBox(height: 20,)
+                                    ],
+                                  ),
+                                ),
+                              ):Container();
+                            });
+                      },
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.end,
+                        children: [
+                          Icon(
+                            saveType == Config.foodUnsaved ? FontAwesomeIcons.solidFloppyDisk : saveType == Config.shouldFoodType ? FontAwesomeIcons.circleCheck : FontAwesomeIcons.circleXmark,
+                            color: saveType == Config.foodUnsaved ? Colors.grey : saveType == Config.shouldFoodType ? Colors.green : Colors.red, size: 20,),
+                          SizedBox(width: 5,),
+                          Text("Save")
+                        ],
+                      ),
+                    ),
                     GestureDetector(
                       onTap: (){
                         Navigator.push(
@@ -240,7 +525,36 @@ class _FoodWidgetState extends State<FoodWidget> {
       );
 
   }
+  _showToast(String content, Size size) {
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: customYellowColor,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: size.width * 0.73,
+            child: Text(content,
+                textAlign: TextAlign.center,
+                maxLines: 100,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                )),
+          ),
+        ],
+      ),
+    );
 
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(seconds: 3),
+    );
+  }
   void openInstruction({BuildContext context, String id, String name}) {
     Navigator.push(
         context,

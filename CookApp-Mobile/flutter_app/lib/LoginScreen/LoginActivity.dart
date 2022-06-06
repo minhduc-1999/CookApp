@@ -1,11 +1,13 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:tastify/ChooseTopicScreen/ChooseTopicActivity.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
 import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
 import 'package:tastify/Model/LoginRequestModel.dart';
 import 'package:tastify/Model/ResendEmailRequestModel.dart';
+import 'package:tastify/ProfileScreen/EditProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
@@ -13,6 +15,7 @@ import 'package:tastify/constants.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 
+import '../main.dart';
 import 'LoginButton.dart';
 
 class LoginActivity extends StatefulWidget {
@@ -166,7 +169,9 @@ class _LoginActivityState extends State<LoginActivity> {
           child: LoginButton(
             text: "Log in",
             press: () async {
+              FocusScope.of(context).unfocus();
               if (validateAndSave()) {
+
                 setState(() {
                   isAPIcallProcess = true;
                 });
@@ -174,16 +179,32 @@ class _LoginActivityState extends State<LoginActivity> {
                 var response = await APIService.login(model);
                 if (response.meta.ok) {
                   if (response.data.emailVerified) {
-                    //await auth.signInFirebaseWithToken(response.data.loginToken);
+                    await auth.signInFirebaseWithToken(response.data.loginToken);
                     await SharedService.setLoginDetails(response);
+                    var loginDetails = await SharedService.loginDetails();
+                    var dataTags = await APIService.getTags();
+
+                    for (var i in dataTags.data.topics) {
+                      tagsInit.add(Topic(id: i.id,title: i.title));
+
+                    }
+
+                    currentUserId = loginDetails.data.userId;
+                    role = loginDetails.data.role;
+
+                    var userTopic = await APIService.getUsersTopics();
                     setState(() {
                       isAPIcallProcess = false;
                     });
                     Navigator.pushAndRemoveUntil(context, MaterialPageRoute(
                       builder: (context) {
-                        return HomeActivity(
-                          auth: auth,
-                        );
+                        if (userTopic.data.topics.length > 0) {
+                          return HomeActivity(
+                                                    auth: auth,
+                                                  );
+                        } else {
+                          return ChooseTopicActivity();
+                        }
                       },
                     ), (route) => false);
                   } else if (!response.data.emailVerified) {

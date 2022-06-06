@@ -6,6 +6,7 @@ import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRespondModel.dart';
+import 'package:tastify/ProfileScreen/EditProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
@@ -13,6 +14,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:location/location.dart' as loca;
 import 'package:tastify/UploadScreen/TagsActivity.dart';
 import 'package:string_to_hex/string_to_hex.dart';
+import 'package:tastify/main.dart';
 import '../constants.dart';
 
 class UploadActivity extends StatefulWidget {
@@ -36,8 +38,7 @@ class _UploadActivityState extends State<UploadActivity> {
   int lastPage;
   int maxSelection = 1;
 
-  List<String> tagsInit = [];
-  List<String> userTags = [];
+  List<Topic> userTags = [];
   Placemark userLocation;
 
   _handleScrollEvent(ScrollNotification scroll) {
@@ -83,7 +84,6 @@ class _UploadActivityState extends State<UploadActivity> {
     super.initState();
     _initLocation();
     _fetchPhotos();
-    _fetchTags();
   }
 
   _initLocation() async {
@@ -93,17 +93,6 @@ class _UploadActivityState extends State<UploadActivity> {
 
     setState(() {
       userLocation = placemarks[0];
-    });
-  }
-
-  _fetchTags() async {
-    var dataTags = await APIService.getTags();
-    List<String> temp = [];
-    for (var i in dataTags.data.topics) {
-      temp.add(i.title);
-    }
-    setState(() {
-      tagsInit = temp;
     });
   }
 
@@ -257,6 +246,10 @@ class _UploadActivityState extends State<UploadActivity> {
                           }
                           List<String> objectName = [];
                           List<String> video = [];
+                          List<String> tags = [];
+                          for (var i in userTags) {
+                            tags.add(i.title);
+                          }
                           var response = await APIService.getPresignedLink(
                               PresignedLinkedRequestModel(fileNames: names));
                           //uploadImage(response, objectName);
@@ -271,7 +264,7 @@ class _UploadActivityState extends State<UploadActivity> {
                               images: objectName,
                               videos: video,
                               location: locationController.text,
-                              tags: userTags,
+                              tags: tags,
                               kind: "MOMENT",
                               name: "string"));
                           setState(() {
@@ -298,7 +291,6 @@ class _UploadActivityState extends State<UploadActivity> {
     return ListView(
       children: <Widget>[
         Column(
-
           children: <Widget>[
             uploading
                 ? LinearProgressIndicator()
@@ -337,13 +329,12 @@ class _UploadActivityState extends State<UploadActivity> {
             ListTile(
               leading: Icon(Icons.tag),
               title: Container(
-                child: TextField(
-                  enableInteractiveSelection: false, //
-                  focusNode: new AlwaysDisabledFocusNode(),
-                  decoration: InputDecoration(
-                      hintText: "Tags", border: InputBorder.none),
-                )),
-
+                  child: TextField(
+                enableInteractiveSelection: false, //
+                focusNode: new AlwaysDisabledFocusNode(),
+                decoration:
+                    InputDecoration(hintText: "Tags", border: InputBorder.none),
+              )),
               trailing: IconButton(
                 icon: Icon(Icons.attachment),
                 onPressed: () {
@@ -352,74 +343,80 @@ class _UploadActivityState extends State<UploadActivity> {
                     context: context,
                     builder: (BuildContext context) {
                       return TagsActivity(
-                        tags: this.tagsInit,
+                        tags: tagsInit,
                       );
                     },
                     isScrollControlled: true,
                     backgroundColor: Colors.transparent,
-                  ).then((value){
-
-                    setState(() {
-                      userTags.add(value);
-
-                    });
+                  ).then((value) {
+                    if (value != null) {
+                      if (!userTags.contains(value)) {
+                        setState(() {
+                          userTags.add(value);
+                        });
+                      }
+                    }
                     return FocusScope.of(context).unfocus();
-
                   });
                 },
               ),
             ),
-
-            userTags.length <= 0 ?Container(
-                ) : SizedBox(
-              height: 35,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                shrinkWrap: true,
-                itemCount: userTags.length,
-                separatorBuilder: (context, index) {
-                  return SizedBox(width: 5,);
-                },
-                itemBuilder: (context, index) {
-
-                  return Stack(
-                    children: [
-                      Container(
-                        child: Padding(
-                          padding: const EdgeInsets.only(left: 15, top: 8, bottom: 8, right: 15),
-                          child: Text(userTags[index], style: TextStyle(color: Colors.white),),
-                        ),
-                        decoration: BoxDecoration(
-                            color: userTags[index] != "Gymer" ? Color(StringToHex.toColor(userTags[index])): Color(defaultTagsColor) ,
-                            borderRadius: BorderRadius.circular(10)
-                        ),
-                      ),
-                      Positioned(
-                          top: 0,
-                          right: 3,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                userTags.remove(userTags[index]);
-                              });
-                            },
-                            child: Container(
-                              height: 15,
-                              width: 15,
-                              child: Icon(
-                                Icons.clear,
-                                color: Colors.white
-                                    .withOpacity(0.8),
-                                size: 15,
+            userTags.length <= 0
+                ? Container()
+                : SizedBox(
+                    height: 35,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      shrinkWrap: true,
+                      itemCount: userTags.length,
+                      separatorBuilder: (context, index) {
+                        return SizedBox(
+                          width: 5,
+                        );
+                      },
+                      itemBuilder: (context, index) {
+                        return Stack(
+                          children: [
+                            Container(
+                              child: Padding(
+                                padding: const EdgeInsets.only(
+                                    left: 15, top: 8, bottom: 8, right: 15),
+                                child: Text(
+                                  userTags[index].title,
+                                  style: TextStyle(color: Colors.white),
+                                ),
                               ),
+                              decoration: BoxDecoration(
+                                  color: userTags[index].title != "Gymer"
+                                      ? Color(StringToHex.toColor(
+                                          userTags[index].title))
+                                      : Color(defaultTagsColor),
+                                  borderRadius: BorderRadius.circular(10)),
                             ),
-                          )),
-                    ],
-                  );
-
-                },
-              ),
-            ),
+                            Positioned(
+                                top: 0,
+                                right: 3,
+                                child: GestureDetector(
+                                  onTap: () {
+                                    setState(() {
+                                      userTags.remove(userTags[index]);
+                                    });
+                                  },
+                                  child: Container(
+                                    height: 15,
+                                    width: 15,
+                                    child: Icon(
+                                      Icons.clear,
+                                      color: Colors.white.withOpacity(0.8),
+                                      size: 15,
+                                    ),
+                                  ),
+                                )),
+                          ],
+                        );
+                      },
+                    ),
+                  ),
             Divider(),
             ListTile(
               leading: Icon(Icons.pin_drop),
@@ -539,14 +536,13 @@ class PostForm extends StatelessWidget {
   final TextEditingController descriptionController;
   final TextEditingController locationController;
   final bool loading;
-  final List<String> tagsInit;
 
-  PostForm(
-      {this.imageFile,
-      this.descriptionController,
-      this.loading,
-      this.locationController,
-      this.tagsInit});
+  PostForm({
+    this.imageFile,
+    this.descriptionController,
+    this.loading,
+    this.locationController,
+  });
 
   Widget build(BuildContext context) {
     return Column(
@@ -601,7 +597,7 @@ class PostForm extends StatelessWidget {
                 context: context,
                 builder: (BuildContext context) {
                   return TagsActivity(
-                    tags: this.tagsInit,
+                    tags: tagsInit,
                   );
                 },
                 isScrollControlled: true,

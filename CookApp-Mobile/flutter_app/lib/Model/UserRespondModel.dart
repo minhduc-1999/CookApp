@@ -79,14 +79,15 @@ class Profile {
   String firstName;
   String lastName;
   String sex;
-
+  String bio;
   Profile(
       {this.height,
         this.weight,
         this.birthDate,
         this.firstName,
         this.lastName,
-        this.sex});
+        this.sex,
+      this.bio});
 
   Profile.fromJson(Map<String, dynamic> json) {
     height = json['height'] != null ? json['height'] : null;
@@ -95,6 +96,7 @@ class Profile {
     firstName = json['firstName'] != null ? json['firstName'] : null;
     lastName = json['lastName'] != null ? json['lastName'] : null;
     sex = json['sex'] != null ? json['sex'] : null;
+    bio = json['bio'] != null ? json['bio'] : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -105,6 +107,7 @@ class Profile {
     data['firstName'] = this.firstName;
     data['lastName'] = this.lastName;
     data['sex'] = this.sex;
+    data['bio'] = this.bio;
     return data;
   }
 }

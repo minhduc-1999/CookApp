@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_observer/Observable.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:tastify/ChooseTopicScreen/ChooseTopicActivity.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
@@ -18,14 +19,16 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:web_socket_channel/io.dart';
 import 'Model/LoginRespondModel.dart';
 import 'ProfileScreen/EditProfileActivity.dart';
+import 'Services/APIService.dart';
 import 'Services/Auth.dart';
 import 'Services/SharedService.dart';
 import 'config.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 String currentUserId;
+String role;
 Stream<SSEModel> sseModel;
-
+List<Topic> tagsInit = [];
 LoginRespondModel loginDetail;
 Widget _defaultHome = LoginActivity(
   auth: Auth(),
@@ -52,30 +55,33 @@ Future<void> main() async {
   await Firebase.initializeApp();
 
   bool isLoggedIn = await SharedService.isLoggedIn();
+
   if (isLoggedIn) {
     var loginDetails = await SharedService.loginDetails();
+    var dataTags = await APIService.getTags();
+
+    for (var i in dataTags.data.topics) {
+      tagsInit.add(Topic(id: i.id,title: i.title));
+
+    }
+    print("ln");
     currentUserId = loginDetails.data.userId;
-    /*IO.Socket socket =
-        IO.io(Config.chatURL,
-            IO.OptionBuilder()
-                .disableAutoConnect()
-                .setQuery({"token": loginDetails.data.accessToken})
-            .setTimeout(60000)
-                .build()
-        );
-    socket.on("connect", (data) =>  print("socket: connected"));
-    socket.on("connect_error", (data) =>  print("socket: connect_error : " + data));
-    socket.on("disconnect", (data) =>  print("socket: disconnect"));
-    socket.connect();*/
+    role = loginDetails.data.role;
+    var userTopic = await APIService.getUsersTopics();
     await SharedService.chatSSEService();
+
     sseModel.listen((event) {
       Map<dynamic,dynamic> data = json.decode(event.data);
       Observable.instance.notifyObservers(["_MessageActivityState","HomeActivityState","_ConversationsActivityState"], notifyName: "new_message",map: data);
     });
-    _defaultHome = HomeActivity(
-      auth: Auth(),
-    );
-    //_defaultHome = RecommendedPostActivity();
+    if (userTopic.data.topics.length > 0) {
+      _defaultHome = HomeActivity(
+            auth: Auth(),
+          );
+    } else {
+      _defaultHome = ChooseTopicActivity();
+    }
+    //_defaultHome = ChooseTopicActivity();
     //_defaultHome = UploadActivity();
   }
   runApp(MyApp());

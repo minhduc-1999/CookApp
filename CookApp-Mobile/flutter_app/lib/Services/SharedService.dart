@@ -26,6 +26,7 @@ class SharedService {
   static Future<void> setLoginDetails(LoginRespondModel model) async {
     APICacheDBModel cacheDBModel =  APICacheDBModel(key: "login", syncData: jsonEncode(model.toJson()));
     currentUserId = model.data.userId;
+    role = model.data.role;
     await APICacheManager().addCacheData(cacheDBModel);
   }
 
@@ -49,6 +50,7 @@ class SharedService {
   static Future<void> logout(BuildContext context) async {
     await APICacheManager().deleteCache("login");
     await OneSignal.shared.removeExternalUserId();
+    print("ln");
     Navigator.pushNamedAndRemoveUntil(context, '/login', (route) => false);
   }
 }

@@ -4,16 +4,20 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
+import 'package:string_to_hex/string_to_hex.dart';
 import 'package:tastify/Model/EditProfileRespondModel.dart';
 import 'package:tastify/Model/EditUserRequestModel.dart';
+import 'package:tastify/Model/InterestTopicRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
+import 'package:tastify/Model/UserInterestedTopicsRespondModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:intl/intl.dart';
-
+import 'package:tastify/UploadScreen/TagsActivity.dart';
 
 import '../constants.dart';
+import '../main.dart';
 
 class EditProfileActivity extends StatefulWidget {
   @override
@@ -30,7 +34,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   bool isAPIcallProcess = false;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   ImagePicker imagePicker = ImagePicker();
-  List<bool> _isSelected = [false, false];
+
   TextEditingController firstNameController = TextEditingController();
   TextEditingController lastNameController = TextEditingController();
   TextEditingController birthDayController = TextEditingController();
@@ -39,6 +43,8 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
   TextEditingController displayNameController = TextEditingController();
   TextEditingController bioController = TextEditingController();
   FToast fToast;
+
+
   @override
   void initState() {
     // TODO: implement initState
@@ -75,31 +81,39 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
           ),
           actions: [
             IconButton(
-                onPressed: () async{
+                onPressed: () async {
+                  FocusScope.of(context).unfocus();
                   setState(() {
                     isAPIcallProcess = true;
                   });
                   String objectName;
                   if (file != null) {
                     List<String> names = [];
-                    names.add(file.path.substring(file.path.lastIndexOf("/") + 1));
+                    names.add(
+                        file.path.substring(file.path.lastIndexOf("/") + 1));
                     var response = await APIService.getPresignedLink(
                         PresignedLinkedRequestModel(fileNames: names));
-                    await APIService.uploadImage(file, response.data.items[0].signedLink);
+                    await APIService.uploadImage(
+                        file, response.data.items[0].signedLink);
                     objectName = response.data.items[0].objectName;
                   }
                   EditUserRequestModel profile = EditUserRequestModel(
-                      displayName: displayNameController.text,
-                      avatar: file != null ? objectName : user.data.avatar,
-                        bio: bioController.text,
-                        height: int.parse(heightController.text != "" ? heightController.text : "0"),
-                        weight: int.parse(weightController.text != "" ? weightController.text : "0"),
-                        birthDate: DateTime.now().microsecondsSinceEpoch,
-                        firstName: firstNameController.text,
-                        lastName: lastNameController.text,
-                        sex: _groupsexual,
-                      );
-                  EditProfileRespondModel response = await APIService.editProfile(profile);
+                    displayName: displayNameController.text,
+                    avatar: file != null ? objectName : "",
+                    bio: bioController.text,
+                    height: int.parse(heightController.text != ""
+                        ? heightController.text
+                        : "0"),
+                    weight: int.parse(weightController.text != ""
+                        ? weightController.text
+                        : "0"),
+                    birthDate: DateTime.now().microsecondsSinceEpoch,
+                    firstName: firstNameController.text,
+                    lastName: lastNameController.text,
+                    sex: _groupsexual,
+                  );
+                  EditProfileRespondModel response =
+                      await APIService.editProfile(profile);
 
                   setState(() {
                     isAPIcallProcess = false;
@@ -112,21 +126,22 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                 icon: Icon(Icons.check))
           ],
         ),
-        body: circular ?
-        Center(child: CircularProgressIndicator(),) :
-        ProgressHUD(
-          child: Form(
-            key: globalFormKey,
-            child: _editProfileUI(context),
-          ),
-          inAsyncCall: isAPIcallProcess,
-          key: UniqueKey(),
-          opacity: 0.3,
-        )
-      );
-
+        body: circular
+            ? Center(
+                child: CircularProgressIndicator(),
+              )
+            : ProgressHUD(
+                child: Form(
+                  key: globalFormKey,
+                  child: _editProfileUI(context),
+                ),
+                inAsyncCall: isAPIcallProcess,
+                key: UniqueKey(),
+                opacity: 0.3,
+              ));
   }
-  Widget _editProfileUI (BuildContext context){
+
+  Widget _editProfileUI(BuildContext context) {
     return Container(
       padding: EdgeInsets.only(left: 15, top: 25, right: 15),
       child: GestureDetector(
@@ -143,8 +158,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                     height: 100,
                     decoration: BoxDecoration(
                         border: Border.all(
-                            width: 1,
-                            color: Colors.black.withOpacity(0.2)),
+                            width: 1, color: Colors.black.withOpacity(0.2)),
                         boxShadow: [
                           BoxShadow(
                               spreadRadius: 2,
@@ -158,17 +172,16 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                             image: file != null
                                 ? new FileImage(file)
                                 : user.data.avatar != null
-                                ? NetworkImage(user.data.avatar.url)
-                                : AssetImage(
-                                'assets/images/default_avatar.png'))),
+                                    ? NetworkImage(user.data.avatar.url)
+                                    : AssetImage(
+                                        'assets/images/default_avatar.png'))),
                   ),
                   Positioned(
                       bottom: 0,
                       right: 0,
                       child: GestureDetector(
                         onTap: () async {
-                          PickedFile imageFile =
-                          await imagePicker.getImage(
+                          PickedFile imageFile = await imagePicker.getImage(
                               source: ImageSource.gallery,
                               maxWidth: 1920,
                               maxHeight: 1200,
@@ -183,8 +196,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                           height: 35,
                           width: 35,
                           decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: appPrimaryColor),
+                              shape: BoxShape.circle, color: appPrimaryColor),
                           child: Icon(
                             Icons.edit,
                             color: Colors.white,
@@ -194,29 +206,30 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
                 ],
               ),
             ),
-            buildName("First Name",
-                firstNameController),
-            buildName("Last Name",
-                lastNameController),
-            buildName("Display Name",
-                displayNameController),
-            buildName("Bio",
-                bioController),
-            buildWeightAndHeight("Height (cm)",  heightController),
+            buildName("First Name", firstNameController),
+            buildName("Last Name", lastNameController),
+            buildName("Display Name", displayNameController),
+            buildName("Bio", bioController),
+            buildWeightAndHeight("Height (cm)", heightController),
             buildWeightAndHeight("Weight (kg)", weightController),
-            buildSexual()
+            buildSexual(),
+            SizedBox(
+              height: 10,
+            ),
+
           ],
         ),
       ),
     );
   }
-  Widget buildName(
-      String label,  TextEditingController controller) {
+
+  Widget buildName(String label, TextEditingController controller) {
     return TextField(
+      maxLines: 5,
+      minLines: 1,
       controller: controller,
       decoration: InputDecoration(
           labelText: label,
-
           hintStyle: TextStyle(
             fontSize: 16,
             color: Colors.grey.withOpacity(0.3),
@@ -224,20 +237,19 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
     );
   }
 
-  Widget buildWeightAndHeight(
-      String label, TextEditingController controller) {
+  Widget buildWeightAndHeight(String label, TextEditingController controller) {
     return TextField(
       controller: controller,
       keyboardType: TextInputType.number,
       decoration: InputDecoration(
           labelText: label,
-
           hintStyle: TextStyle(
             fontSize: 16,
             color: Colors.grey.withOpacity(0.3),
           )),
     );
   }
+
   _showToast(String content, Size size) {
     Widget toast = Container(
       padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
@@ -268,13 +280,19 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
       toastDuration: Duration(seconds: 3),
     );
   }
+
   void fetchData() async {
     var response = await APIService.getUser();
+
     setState(() {
       user = response;
+
       circular = false;
       if (user.data.profile.firstName != null) {
         firstNameController.text = user.data.profile.firstName;
+      }
+      if (user.data.profile.bio != null) {
+        bioController.text = user.data.profile.bio;
       }
       if (user.data.profile.lastName != null) {
         lastNameController.text = user.data.profile.lastName;
@@ -284,7 +302,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
             DateTime.fromMicrosecondsSinceEpoch(user.data.profile.birthDate)
                 .toString();
       }
-      if (user.data.displayName != null){
+      if (user.data.displayName != null) {
         displayNameController.text = user.data.displayName;
       }
       if (user.data.profile.height != null) {
@@ -293,11 +311,11 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
       if (user.data.profile.weight != null) {
         weightController.text = user.data.profile.weight.toString();
       }
-      if (user.data.profile.sex != null){
-        if(user.data.profile.sex == "MALE"){
-          _groupsexual = "male";
-        }else if (user.data.profile.sex == "FEMALE"){
-          _groupsexual = "female";
+      if (user.data.profile.sex != null) {
+        if (user.data.profile.sex == "MALE") {
+          _groupsexual = "MALE";
+        } else if (user.data.profile.sex == "FEMALE") {
+          _groupsexual = "FEMALE";
         }
       }
     });
@@ -361,7 +379,7 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
             "Sex: ",
             style: TextStyle(
               fontSize: 16,
-              color: Colors.black.withOpacity(0.6),
+              color: Colors.black,
             ),
           ),
           Divider(),
@@ -432,8 +450,6 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
     );
   }
 
-
-
   applyChanges() async {
     setState(() {
       isAPIcallProcess = true;
@@ -444,21 +460,20 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
 
       names.add(file.path.substring(file.path.lastIndexOf("/") + 1));
       var response = await APIService.getPresignedLink(
-              PresignedLinkedRequestModel(fileNames: names));
+          PresignedLinkedRequestModel(fileNames: names));
       await APIService.uploadImage(file, response.data.items[0].signedLink);
       objectName = response.data.items[0].objectName;
     }
     EditUserRequestModel profile = EditUserRequestModel(
-        displayName: displayNameController.text,
-        avatar: file != null ? objectName : user.data.avatar,
-
-          height: int.parse(heightController.text),
-          weight: int.parse(weightController.text),
-          birthDate: DateTime.now().microsecondsSinceEpoch,
-          firstName: firstNameController.text,
-          lastName: lastNameController.text,
-          sex: _groupsexual,
-        );
+      displayName: displayNameController.text,
+      avatar: file != null ? objectName : user.data.avatar,
+      height: int.parse(heightController.text),
+      weight: int.parse(weightController.text),
+      birthDate: DateTime.now().microsecondsSinceEpoch,
+      firstName: firstNameController.text,
+      lastName: lastNameController.text,
+      sex: _groupsexual,
+    );
     EditProfileRespondModel response = await APIService.editProfile(profile);
 
     setState(() {
@@ -470,4 +485,11 @@ class _EditProfileActivityState extends State<EditProfileActivity> {
 class AlwaysDisabledFocusNode extends FocusNode {
   @override
   bool get hasFocus => false;
+}
+
+class Topic {
+  String id;
+  String title;
+
+  Topic({this.id, this.title});
 }

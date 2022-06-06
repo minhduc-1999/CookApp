@@ -5,6 +5,7 @@ import 'dart:io';
 
 import 'package:tastify/Model/AlbumDetailsRespondModel.dart';
 import 'package:tastify/Model/AlbumRespondModel.dart';
+import 'package:tastify/Model/ChangePasswordRequestModel.dart';
 import 'package:tastify/Model/ChatBotRequestModel.dart';
 import 'package:tastify/Model/ChatBotRespondModel.dart';
 import 'package:tastify/Model/CommentRequestModel.dart';
@@ -21,7 +22,10 @@ import 'package:tastify/Model/EditUserRequestModel.dart';
 import 'package:tastify/Model/FoodDetailsRespondModel.dart';
 import 'package:tastify/Model/FoodInstructionRespondModel.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
+import 'package:tastify/Model/InfoRespondModel.dart';
 import 'package:tastify/Model/IngredientsRespondModel.dart';
+import 'package:tastify/Model/InterestTopicRequestModel.dart';
+import 'package:tastify/Model/InterestTopicRespondModel.dart';
 import 'package:tastify/Model/LoginByGoogleRequestModel.dart';
 import 'package:tastify/Model/LoginRequestModel.dart';
 import 'package:tastify/Model/LoginRespondModel.dart';
@@ -41,10 +45,14 @@ import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/RegisterRequestModel.dart';
 import 'package:tastify/Model/RegisterRespondModel.dart';
 import 'package:tastify/Model/ResendEmailRequestModel.dart';
+import 'package:tastify/Model/SaveFoodRequestModel.dart';
+import 'package:tastify/Model/SaveFoodRespondModel.dart';
 import 'package:tastify/Model/SavedPostRespondModel.dart';
 import 'package:tastify/Model/TagsRespondModel.dart';
+import 'package:tastify/Model/TopicsRespondModel.dart';
 import 'package:tastify/Model/TotalNewMessageRespondModel.dart';
 import 'package:tastify/Model/UnitsRespondModel.dart';
+import 'package:tastify/Model/UserInterestedTopicsRespondModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
 import 'package:tastify/Model/UserVoteRespondModel.dart';
 import 'package:tastify/Model/UserWallRespondModel.dart';
@@ -213,12 +221,22 @@ class APIService {
   }
 
 
-  static Future<NewFeedRespondModel> getNewFeed(int offset) async {
-    var url = Uri.parse(Config.apiURL + Config.userFeedAPI).replace(
-        queryParameters: <String, String>{
-          'offset': offset.toString(),
-          'limit': '10'
-        });
+  static Future<NewFeedRespondModel> getNewFeed({int offset, String tag}) async {
+    Uri url;
+    if (tag == "" || tag == null) {
+      url = Uri.parse(Config.apiURL + Config.userFeedAPI).replace(
+              queryParameters: <String, String>{
+                'offset': offset.toString(),
+                'limit': '10'
+              });
+    } else {
+      url = Uri.parse(Config.apiURL + Config.userFeedAPI).replace(
+          queryParameters: <String, String>{
+            'offset': offset.toString(),
+            'limit': '10',
+            'tag' : tag
+          });
+    }
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{
@@ -370,7 +388,7 @@ class APIService {
     return foodInstructionRespondModel(respone.body);
   }
   static Future<FoodRespondModel> getFood(int offset) async {
-    var url = Uri.parse(Config.apiURL + Config.foodAPI)
+    var url = Uri.parse(Config.apiURL + Config.foodCensoredAPI)
         .replace(queryParameters: <String, String>{
       'offset': offset.toString(),
       'limit': '10',
@@ -382,9 +400,51 @@ class APIService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
+    print("ln");
     return foodRespondModel(respone.body);
   }
 
+  static Future<FoodRespondModel> getSaveFood(int offset, String type) async {
+    var url = Uri.parse(Config.apiURL + Config.foodSaveAPI)
+        .replace(queryParameters: <String, String>{
+      'offset': offset.toString(),
+      'limit': '40',
+      'type' : type
+    });
+
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    print("ln");
+    return foodRespondModel(respone.body);
+  }
+  static Future<SaveFoodRespondModel> saveFood(SaveFoodRequestModel model, String foodId) async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI + "/" + foodId + "/save");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.post(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+    return saveFoodRespondModel(respone.body);
+  }
+  static Future<SaveFoodRespondModel> unSaveFood(String foodId) async {
+    var url = Uri.parse(Config.apiURL + Config.foodAPI + "/" + foodId + "/save");
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.delete(url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        );
+    return saveFoodRespondModel(respone.body);
+  }
   static Future<FoodRespondModel> getFoodByQuery(
       int offset, String query) async {
     var url = Uri.parse(Config.apiURL + Config.foodAPI).replace(
@@ -427,6 +487,8 @@ class APIService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
+    var data = userDelegateModel(respone.body);
+    print("ln");
     return userDelegateModel(respone.body);
   }
 
@@ -471,7 +533,7 @@ class APIService {
     return postDetailRespondModel(respone.body);
   }
 
-  static Future<bool> savePost(String postId) async {
+  static Future<SaveFoodRespondModel> savePost(String postId) async {
     var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId + "/save");
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
@@ -481,9 +543,9 @@ class APIService {
           'Authorization': 'Bearer ${loginDetails.data.accessToken}',
         },
         );
-    return respone.statusCode == 200;
+    return saveFoodRespondModel(respone.body);
   }
-  static Future<bool> deleteSavedPost(String postId) async {
+  static Future<SaveFoodRespondModel> deleteSavedPost(String postId) async {
     var url = Uri.parse(Config.apiURL + Config.uploadPostAPI + "/" + postId + "/save");
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
@@ -493,14 +555,14 @@ class APIService {
         'Authorization': 'Bearer ${loginDetails.data.accessToken}',
       },
     );
-    return respone.statusCode == 200;
+    return saveFoodRespondModel(respone.body);
   }
 
   static Future<SavedPostRespondModel> getSavedPosts() async {
     var url = Uri.parse(Config.apiURL + Config.savedPostsAPI).replace(
         queryParameters: <String, String>{
           'offset': '0',
-          'limit': '30',
+          'limit': '40',
 
         });
     print("url: " + url.toString());
@@ -509,6 +571,7 @@ class APIService {
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
+    print("ln");
     return savedPostRespondModel(respone.body);
   }
 
@@ -731,17 +794,61 @@ class APIService {
     return chatBotRespondModel(respone.body);
 
   }
-  static Future<TagsRespondModel> getTags() async {
+  static Future<TopicsRespondModel> getTags() async {
     var url = Uri.parse(Config.apiURL +
         Config.topicsAPI)
         .replace(
-        queryParameters: <String, String>{'offset': '0', 'limit': '10'});
+        queryParameters: <String, String>{'offset': '0', 'limit': '40'});
     print("url: " + url.toString());
     var loginDetails = await SharedService.loginDetails();
     var respone = await client.get(url, headers: <String, String>{
       'Content-Type': 'application/json',
       'Authorization': 'Bearer ${loginDetails.data.accessToken}',
     });
-    return tagsRespondModel(respone.body);
+    return topicsRespondModel(respone.body);
+  }
+  static Future<InterestTopicRespondModel> chooseTopic(InterestTopicRequestModel model) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.interestsTopicAPI);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+    return interestTopicRespondModel(respone.body);
+
+
+  }
+  static Future<InfoRespondModel> changePassword(ChangePasswordRequestModel model) async {
+    var url = Uri.parse(
+        Config.apiURL + Config.changePasswordAPI);
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.put(
+        url,
+        headers: <String, String>{
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+        },
+        body: jsonEncode(model.toJson()));
+    return infoRespondModel(respone.body);
+
+
+  }
+  static Future<UserInterestedTopicsRespondModel> getUsersTopics() async {
+    var url = Uri.parse(Config.apiURL +
+        Config.interestedTopicAPI);
+
+    print("url: " + url.toString());
+    var loginDetails = await SharedService.loginDetails();
+    var respone = await client.get(url, headers: <String, String>{
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ${loginDetails.data.accessToken}',
+    });
+    return userInterestedTopicsRespondModel(respone.body);
   }
 }

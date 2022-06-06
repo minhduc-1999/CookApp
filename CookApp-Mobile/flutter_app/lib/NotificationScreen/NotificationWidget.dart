@@ -168,6 +168,8 @@ class _NotificationWidgetState extends State<NotificationWidget> {
                 userId: data['followerID'],
               )));
 
+    } else if (templateID == "new_food") {
+
     }
   }
 

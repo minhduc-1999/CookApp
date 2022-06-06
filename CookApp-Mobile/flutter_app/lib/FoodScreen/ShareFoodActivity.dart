@@ -14,10 +14,12 @@ import 'package:location/location.dart' as loca;
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
+import 'package:tastify/ProfileScreen/EditProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:tastify/UploadScreen/TagsActivity.dart';
 import 'package:tastify/config.dart';
 import '../constants.dart';
+import '../main.dart';
 
 class ShareFoodActivity extends StatefulWidget {
   final String foodId;
@@ -47,29 +49,20 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
 
-  List<String> tagsInit = [];
-  List<String> userTags = [];
+
+  List<Topic> userTags = [];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     _initLocation();
-    fetchTags();
+
     fetchData();
 
     fToast = FToast();
     fToast.init(context);
   }
-  fetchTags() async {
-    var dataTags = await APIService.getTags();
-    List<String> temp = [];
-    for (var i in dataTags.data.topics) {
-      temp.add(i.title);
-    }
-    setState(() {
-      tagsInit = temp;
-    });
-  }
+
 
   @override
   Widget build(BuildContext context) {
@@ -110,6 +103,10 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         files[i], response.data.items[i].signedLink);
                     objectName.add(response.data.items[i].objectName);
                   }
+                  List<String> tags = [];
+                  for (var i in userTags){
+                    tags.add(i.id);
+                  }
                   print("object name " + objectName.length.toString());
                   await APIService.uploadPost(
                     PostRequestModel(
@@ -117,7 +114,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         images: objectName,
                         videos: video,
                         location: locationController.text,
-                        tags: userTags,
+                        tags: tags,
                         kind: Config.postFoodShareType,
                         name: "string",
                         foodRefId: widget.food.id),
@@ -315,7 +312,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                       context: context,
                       builder: (BuildContext context) {
                         return TagsActivity(
-                          tags: this.tagsInit,
+                          tags: tagsInit,
                         );
                       },
                       isScrollControlled: true,
@@ -350,10 +347,10 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         Container(
                           child: Padding(
                             padding: const EdgeInsets.only(left: 15, top: 8, bottom: 8, right: 15),
-                            child: Text(userTags[index], style: TextStyle(color: Colors.white),),
+                            child: Text(userTags[index].title, style: TextStyle(color: Colors.white),),
                           ),
                           decoration: BoxDecoration(
-                              color: userTags[index] != "Gymer" ? Color(StringToHex.toColor(userTags[index])): Color(defaultTagsColor) ,
+                              color: userTags[index].title != "Gymer" ? Color(StringToHex.toColor(userTags[index])): Color(defaultTagsColor) ,
                               borderRadius: BorderRadius.circular(10)
                           ),
                         ),

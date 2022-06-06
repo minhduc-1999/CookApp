@@ -1,10 +1,12 @@
 import 'dart:convert';
+
+import 'NewFeedRespondModel.dart';
+import 'PostDetailRespondModel.dart';
 SavedPostRespondModel savedPostRespondModel(String str) =>
     SavedPostRespondModel.fromJson(json.decode(str));
 class SavedPostRespondModel {
   Meta meta;
   Data data;
-
   SavedPostRespondModel({this.meta, this.data});
 
   SavedPostRespondModel.fromJson(Map<String, dynamic> json) {
@@ -102,10 +104,13 @@ class Post {
   int numOfComment;
   int numOfReaction;
   String kind;
+  List<String> tags;
+  String content;
   String location;
   List<Medias> medias;
   String reaction;
-  String content;
+  Ref ref;
+  Recomendation recomendation;
 
   Post(
       {this.createdAt,
@@ -115,10 +120,13 @@ class Post {
         this.numOfComment,
         this.numOfReaction,
         this.kind,
+        this.tags,
+        this.content,
         this.location,
         this.medias,
         this.reaction,
-        this.content});
+        this.ref,
+        this.recomendation});
 
   Post.fromJson(Map<String, dynamic> json) {
     createdAt = json['createdAt'];
@@ -129,6 +137,8 @@ class Post {
     numOfComment = json['numOfComment'];
     numOfReaction = json['numOfReaction'];
     kind = json['kind'];
+    tags = json['tags'].cast<String>();
+    content = json['content'];
     location = json['location'];
     if (json['medias'] != null) {
       medias = <Medias>[];
@@ -137,7 +147,10 @@ class Post {
       });
     }
     reaction = json['reaction'];
-    content = json['content'];
+    ref = json['ref'] != null ? new Ref.fromJson(json['ref']) : null;
+    recomendation = json['recomendation'] != null
+        ? new Recomendation.fromJson(json['recomendation'])
+        : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -151,12 +164,19 @@ class Post {
     data['numOfComment'] = this.numOfComment;
     data['numOfReaction'] = this.numOfReaction;
     data['kind'] = this.kind;
+    data['tags'] = this.tags;
+    data['content'] = this.content;
     data['location'] = this.location;
     if (this.medias != null) {
       data['medias'] = this.medias.map((v) => v.toJson()).toList();
     }
     data['reaction'] = this.reaction;
-    data['content'] = this.content;
+    if (this.ref != null) {
+      data['ref'] = this.ref.toJson();
+    }
+    if (this.recomendation != null) {
+      data['recomendation'] = this.recomendation.toJson();
+    }
     return data;
   }
 }
@@ -205,6 +225,115 @@ class Avatar {
   }
 }
 
+class Ref {
+  int createdAt;
+  String id;
+  int updatedAt;
+  int servings;
+  String name;
+  String description;
+  List<Photos> photos;
+  int totalTime;
+  int rating;
+
+  Ref(
+      {this.createdAt,
+        this.id,
+        this.updatedAt,
+        this.servings,
+        this.name,
+        this.description,
+        this.photos,
+        this.totalTime,
+
+        this.rating});
+
+  Ref.fromJson(Map<String, dynamic> json) {
+    createdAt = json['createdAt'];
+    id = json['id'];
+    updatedAt = json['updatedAt'];
+    servings = json['servings'];
+    name = json['name'];
+    description = json['description'];
+    if (json['photos'] != null) {
+      photos = <Photos>[];
+      json['photos'].forEach((v) {
+        photos.add(new Photos.fromJson(v));
+      });
+    }
+    totalTime = json['totalTime'];
+
+    rating = json['rating'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['createdAt'] = this.createdAt;
+    data['id'] = this.id;
+    data['updatedAt'] = this.updatedAt;
+    data['servings'] = this.servings;
+    data['name'] = this.name;
+    data['description'] = this.description;
+    if (this.photos != null) {
+      data['photos'] = this.photos.map((v) => v.toJson()).toList();
+    }
+    data['totalTime'] = this.totalTime;
+
+    data['rating'] = this.rating;
+    return data;
+  }
+}
+
+class Photos {
+  String url;
+  String type;
+  String id;
+
+  Photos({this.url, this.type, this.id});
+
+  Photos.fromJson(Map<String, dynamic> json) {
+    url = json['url'];
+    type = json['type'];
+    id = json['id'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['url'] = this.url;
+    data['type'] = this.type;
+    data['id'] = this.id;
+    return data;
+  }
+}
+
+class Recomendation {
+  Should should;
+  Should shouldNot;
+
+  Recomendation({this.should, this.shouldNot});
+
+  Recomendation.fromJson(Map<String, dynamic> json) {
+    should =
+    json['should'] != null ? new Should.fromJson(json['should']) : null;
+    shouldNot = json['shouldNot'] != null
+        ? new Should.fromJson(json['shouldNot'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.should != null) {
+      data['should'] = this.should.toJson();
+    }
+    if (this.shouldNot != null) {
+      data['shouldNot'] = this.shouldNot.toJson();
+    }
+    return data;
+  }
+}
+
+
+
 class Metadata {
   int page;
   int pageSize;
@@ -226,25 +355,6 @@ class Metadata {
     data['pageSize'] = this.pageSize;
     data['totalPage'] = this.totalPage;
     data['totalCount'] = this.totalCount;
-    return data;
-  }
-}
-class Medias {
-  String url;
-  String type;
-
-  Medias(
-      {this.url,
-        this.type,
-        });
-  Medias.fromJson(Map<String, dynamic> json) {
-    url = json['url'];
-    type = json['type'];
-  }
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['url'] = this.url;
-    data['type'] = this.type;
     return data;
   }
 }

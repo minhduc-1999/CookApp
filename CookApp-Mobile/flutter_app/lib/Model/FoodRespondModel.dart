@@ -1,6 +1,10 @@
 import 'dart:convert';
+
+import 'FoodDetailsRespondModel.dart';
+
 FoodRespondModel foodRespondModel(String str) =>
     FoodRespondModel.fromJson(json.decode(str));
+
 class FoodRespondModel {
   Meta meta;
   Data data;
@@ -85,20 +89,23 @@ class Foods {
   List<Steps> steps;
   List<Ingredients> ingredients;
   String videoUrl;
+  Author author;
   num rating;
+  String saveType;
   Foods(
       {this.createdAt,
-        this.id,
-        this.servings,
-        this.name,
-        this.description,
-        this.photos,
-        this.totalTime,
-
-        this.steps,
-        this.ingredients,
-        this.videoUrl,
-      this.rating});
+      this.id,
+      this.servings,
+      this.name,
+      this.description,
+      this.photos,
+      this.totalTime,
+      this.author,
+      this.steps,
+      this.ingredients,
+      this.videoUrl,
+      this.rating,
+      this.saveType});
 
   Foods.fromJson(Map<String, dynamic> json) {
     createdAt = json['createdAt'];
@@ -128,6 +135,8 @@ class Foods {
     }
     videoUrl = json['videoUrl'];
     rating = json['rating'] != null ? json['rating'] : 0;
+    saveType = json['saveType'] != null ? json['saveType'] : "unsaved";
+    author = json['author'] != null ? new Author.fromJson(json['author']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -149,6 +158,7 @@ class Foods {
       data['ingredients'] = this.ingredients.map((v) => v.toJson()).toList();
     }
     data['videoUrl'] = this.videoUrl;
+    data['author'] = this.author;
     return data;
   }
 }
@@ -157,6 +167,7 @@ class Photos {
   String key;
   String url;
   String id;
+
   Photos({this.key, this.url, this.id});
 
   Photos.fromJson(Map<String, dynamic> json) {

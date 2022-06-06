@@ -3,14 +3,17 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flare_flutter/flare_actor.dart';
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:string_to_hex/string_to_hex.dart';
 import 'package:tastify/CommentScreen/CommentActivity.dart';
 import 'package:tastify/EditPostScreen/EditPostActivity.dart';
+import 'package:tastify/EditPostScreen/EditRecommendedPostActivity.dart';
 import 'package:tastify/FoodScreen/FoodInstructionWidget.dart';
 import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/Model/PostDetailRespondModel.dart';
 import 'package:tastify/Model/ReactRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
+import 'package:tastify/NewFeedScreen/FeedTopicActivity.dart';
 import '../MultiImagesDetailScreen/MultiImagesDetailActivity.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
@@ -41,6 +44,7 @@ class Post extends StatefulWidget {
       this.foodName,
       this.foodDescription,
       this.tags,
+        this.isNutritionist,
       this.kind,
       this.should,
       this.shouldNot});
@@ -60,10 +64,11 @@ class Post extends StatefulWidget {
   final bool saved;
   final String foodRefId;
   final String foodImage;
-  final int totalTime;
-  final int servings;
   final String foodName;
   final String foodDescription;
+  final int totalTime;
+  final int servings;
+  final bool isNutritionist;
   final List<String> tags;
   final Should should;
   final Should shouldNot;
@@ -100,13 +105,15 @@ class _Post extends State<Post> with TickerProviderStateMixin {
   bool showHeart = false;
   int _current = 0;
   List<String> tags;
-
+  FToast fToast;
   TabController _tabController;
   int indexTab = 0;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    fToast = FToast();
+    fToast.init(context);
     _tabController = TabController(initialIndex: 0, length: 2, vsync: this);
   }
 
@@ -114,6 +121,7 @@ class _Post extends State<Post> with TickerProviderStateMixin {
   void dispose() {
     // TODO: implement dispose
     _tabController.dispose();
+
     super.dispose();
   }
 
@@ -155,7 +163,36 @@ class _Post extends State<Post> with TickerProviderStateMixin {
       this.liked,
       this.saved,
       this.tags});
+  _showToast(String content, Size size) {
+    Widget toast = Container(
+      padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 12.0),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(25.0),
+        color: customYellowColor,
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          SizedBox(
+            width: size.width * 0.73,
+            child: Text(content,
+                textAlign: TextAlign.center,
+                maxLines: 100,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Colors.white,
+                )),
+          ),
+        ],
+      ),
+    );
 
+    fToast.showToast(
+      child: toast,
+      gravity: ToastGravity.BOTTOM,
+      toastDuration: Duration(seconds: 3),
+    );
+  }
   Widget _buildFoodRef() {
     final Size size = MediaQuery.of(context).size;
     return GestureDetector(
@@ -364,7 +401,7 @@ class _Post extends State<Post> with TickerProviderStateMixin {
   }
 
   Widget buildPostHeader() {
-    final double width = MediaQuery.of(context).size.width;
+    final Size size = MediaQuery.of(context).size;
     return Padding(
       padding: const EdgeInsets.only(left: 15, right: 0, top: 3, bottom: 3),
       child: Row(
@@ -386,15 +423,21 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                   backgroundImage:
                       AssetImage('assets/images/default_avatar.png')),
           SizedBox(
-            width: width * 0.04,
+            width: size.width * 0.04,
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               GestureDetector(
-                child: displayName != null
-                    ? Text(displayName, style: boldStyle)
-                    : Text("user", style: boldStyle),
+                child: Row(
+                  children: [
+                    displayName != null
+                        ? Text(displayName, style: boldStyle)
+                        : Text("user", style: boldStyle),
+                    SizedBox(width: 3,),
+                    widget.isNutritionist ? Icon(Icons.check_circle, color: Colors.blue, size: 15,) : Container()
+                  ],
+                ),
                 onTap: () {
                   openProfile(context, userId);
                 },
@@ -410,9 +453,20 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                   : Container()
             ],
           ),
-          userId == currentUserId
+          userId == currentUserId || saved != null
               ? Expanded(
-                  child: Container(
+                  child: Align(
+                    alignment: Alignment.centerRight,
+                    child: IconButton(
+                        onPressed: () {
+                          //_showModalBottomSheet(context);
+                          return showModalBottomSheet(
+                              context: context,
+                              builder: (context) => buildMoreVert(size));
+                        },
+                        icon: Icon(Icons.more_vert)),
+                  )
+            /*Container(
                     alignment: Alignment.centerRight,
                     child: IconButton(
                       onPressed: () {
@@ -421,13 +475,31 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                             PageRouteBuilder(
                                 pageBuilder:
                                     (context, animation, secondaryAnimation) =>
-                                        EditPostActivity(
+                                        widget.kind == Config.postMomentType ? EditPostActivity(
                                           id: this.id,
                                           medias: this.medias,
                                           content: this.content,
                                           avatar: this.avatar,
                                           displayName: this.displayName,
                                           location: this.location,
+                                          foodRefId: "",
+                                        ) :  widget.kind == Config.postRecommendType? EditRecommendedPostActivity(
+                                          tags: tags,
+                                          should: widget.should,
+                                          shouldNot: widget.shouldNot,
+                                          caption: widget.content,
+                                          id: this.id,
+                                        ) : EditPostActivity(
+                                          id: this.id,
+                                          medias: this.medias,
+                                          content: this.content,
+                                          avatar: this.avatar,
+                                          displayName: this.displayName,
+                                          location: this.location,
+                                          foodImage: widget.foodImage,
+                                          foodRefId: widget.foodRefId,
+                                          foodDescription: widget.foodDescription,
+                                          foodName: widget.foodName,
                                         ),
                                 transitionsBuilder: (context, animation,
                                     secondaryAnimation, child) {
@@ -447,14 +519,119 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                       icon: Icon(Icons.edit_outlined),
                       color: Colors.black.withOpacity(0.7),
                     ),
-                  ),
+                  ),*/
                 )
               : Container()
         ],
       ),
     );
   }
+  Widget buildMoreVert(Size size){
+    return Container(
+      color: Color(0xFF737373),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: const Radius.circular(29),
+            topRight: const Radius.circular(29),
+          ),
+        ),
 
+        child: Column(
+
+          mainAxisAlignment: MainAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: <Widget>[
+            Icon(Icons.remove, color: Colors.grey),
+            Text(
+              "Options",
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 20),
+            ),
+            Divider(),
+            userId == currentUserId ? ListTile(
+              leading: Icon(
+                Icons.edit_outlined,
+                color: Colors.black,
+              ),
+              title: Text(
+                "Edit Post",
+                style: TextStyle(fontSize: 16),
+              ),
+              onTap: () {
+                Navigator.of(context).pop();
+                Timer(const Duration(milliseconds: 300), () {
+                  Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                          widget.kind == Config.postMomentType ? EditPostActivity(
+                            id: this.id,
+                            medias: this.medias,
+                            content: this.content,
+                            avatar: this.avatar,
+                            displayName: this.displayName,
+                            location: this.location,
+                            foodRefId: "",
+                          ) :  widget.kind == Config.postRecommendType? EditRecommendedPostActivity(
+                            tags: tags,
+                            should: widget.should,
+                            shouldNot: widget.shouldNot,
+                            caption: widget.content,
+                            id: this.id,
+                          ) : EditPostActivity(
+                            id: this.id,
+                            medias: this.medias,
+                            content: this.content,
+                            avatar: this.avatar,
+                            displayName: this.displayName,
+                            location: this.location,
+                            foodImage: widget.foodImage,
+                            foodRefId: widget.foodRefId,
+                            foodDescription: widget.foodDescription,
+                            foodName: widget.foodName,
+                          ),
+                          transitionsBuilder: (context, animation,
+                              secondaryAnimation, child) {
+                            const begin = Offset(0.0, 1.0);
+                            const end = Offset.zero;
+                            const curve = Curves.ease;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+
+                            return SlideTransition(
+                              position: animation.drive(tween),
+                              child: child,
+                            );
+                          })).then(_updatePost);
+                });
+
+              },
+            ) : Container(),
+            userId == currentUserId ? Divider() : Container(),
+            saved != null ? ListTile(
+              leading: Icon(
+                FontAwesomeIcons.solidFloppyDisk,
+                color: Colors.black,
+              ),
+              title: Text(
+                saved ? "Unsave Post" : "Save Post",
+                style: TextStyle(fontSize: 16),
+              ),
+              onTap: () async {
+                Navigator.of(context).pop();
+                savePost(size);
+              },
+            ) : Container(),
+            saved != null ? Divider() : Container(),
+            SizedBox(height: 20,)
+          ],
+        ),
+      ),
+    );
+  }
   Container loadingPlaceHolder = Container(
     height: 400.0,
     child: Center(child: CircularProgressIndicator()),
@@ -484,20 +661,46 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                       );
                     },
                     itemBuilder: (context, index) {
-                      return Container(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 8, top: 8, bottom: 8, right: 8),
-                          child: Text(
-                            tags[index],
-                            style: TextStyle(color: Colors.white, fontSize: 12),
+                      return GestureDetector(
+                        onTap: (){
+                          Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                  pageBuilder:
+                                      (context, animation, secondaryAnimation) =>
+                                   FeedTopicActivity(
+                                        topicName: tags[index],
+                                   ),
+                                  transitionsBuilder: (context, animation,
+                                      secondaryAnimation, child) {
+                                    const begin = Offset(0.0, 1.0);
+                                    const end = Offset.zero;
+                                    const curve = Curves.ease;
+
+                                    var tween = Tween(begin: begin, end: end)
+                                        .chain(CurveTween(curve: curve));
+
+                                    return SlideTransition(
+                                      position: animation.drive(tween),
+                                      child: child,
+                                    );
+                                  }));
+                        },
+                        child: Container(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 8, top: 8, bottom: 8, right: 8),
+                            child: Text(
+                              tags[index],
+                              style: TextStyle(color: Colors.white, fontSize: 12),
+                            ),
                           ),
+                          decoration: BoxDecoration(
+                              color: tags[index] != "Gymer"
+                                  ? Color(StringToHex.toColor(tags[index]))
+                                  : Color(defaultTagsColor),
+                              borderRadius: BorderRadius.circular(10)),
                         ),
-                        decoration: BoxDecoration(
-                            color: tags[index] != "Gymer"
-                                ? Color(StringToHex.toColor(tags[index]))
-                                : Color(defaultTagsColor),
-                            borderRadius: BorderRadius.circular(10)),
                       );
                     },
                   ),
@@ -702,37 +905,29 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                   Padding(
                       padding: const EdgeInsets.only(left: 15.0, top: 40.0)),
                   buildLikeIcon(),
-                  Padding(padding: const EdgeInsets.only(right: 20.0)),
-                  GestureDetector(
-                      child: const Icon(
-                        FontAwesomeIcons.comment,
-                        size: 25.0,
-                      ),
-                      onTap: () {
-                        return showModalBottomSheet(
-                          context: context,
-                          builder: (BuildContext context) {
-                            return CommentActivity(
-                              targetId: id,
-                              targetType: Config.postCommentsType,
-                              stepName: " ",
-                            );
-                          },
-                          isScrollControlled: true,
-                          backgroundColor: Colors.transparent,
-                        ).then(_updateTotalCommentLike);
-                      }),
+
                   Expanded(
                       child: Container(
                         margin: EdgeInsets.only(right: 15),
                         alignment: Alignment.centerRight,
                         child: GestureDetector(
                           onTap: () {
-                            savePost();
+                            return showModalBottomSheet(
+                              context: context,
+                              builder: (BuildContext context) {
+                                return CommentActivity(
+                                  targetId: id,
+                                  targetType: Config.postCommentsType,
+                                  stepName: " ",
+                                );
+                              },
+                              isScrollControlled: true,
+                              backgroundColor: Colors.transparent,
+                            ).then(_updateTotalCommentLike);
                           },
                           child: Icon(
-                            FontAwesomeIcons.solidFloppyDisk,
-                            color: saved ? Colors.black : Colors.grey,
+                            FontAwesomeIcons.comment,
+                            size: 25.0,
                           ),
                         ),
                       ))
@@ -807,20 +1002,46 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                       );
                     },
                     itemBuilder: (context, index) {
-                      return Container(
-                        child: Padding(
-                          padding: const EdgeInsets.only(
-                              left: 8, top: 8, bottom: 8, right: 8),
-                          child: Text(
-                            tags[index],
-                            style: TextStyle(color: Colors.white, fontSize: 12),
+                      return GestureDetector(
+                        onTap: (){
+                          Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                  pageBuilder:
+                                      (context, animation, secondaryAnimation) =>
+                                      FeedTopicActivity(
+                                        topicName: tags[index],
+                                      ),
+                                  transitionsBuilder: (context, animation,
+                                      secondaryAnimation, child) {
+                                    const begin = Offset(1.0, 0.0);
+                                    const end = Offset.zero;
+                                    const curve = Curves.ease;
+
+                                    var tween = Tween(begin: begin, end: end)
+                                        .chain(CurveTween(curve: curve));
+
+                                    return SlideTransition(
+                                      position: animation.drive(tween),
+                                      child: child,
+                                    );
+                                  }));
+                        },
+                        child: Container(
+                          child: Padding(
+                            padding: const EdgeInsets.only(
+                                left: 8, top: 8, bottom: 8, right: 8),
+                            child: Text(
+                              tags[index],
+                              style: TextStyle(color: Colors.white, fontSize: 12),
+                            ),
                           ),
+                          decoration: BoxDecoration(
+                              color: tags[index] != "Gymer"
+                                  ? Color(StringToHex.toColor(tags[index]))
+                                  : Color(defaultTagsColor),
+                              borderRadius: BorderRadius.circular(10)),
                         ),
-                        decoration: BoxDecoration(
-                            color: tags[index] != "Gymer"
-                                ? Color(StringToHex.toColor(tags[index]))
-                                : Color(defaultTagsColor),
-                            borderRadius: BorderRadius.circular(10)),
                       );
                     },
                   ),
@@ -837,12 +1058,13 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                   Padding(
                       padding: const EdgeInsets.only(left: 15.0, top: 40.0)),
                   buildLikeIcon(),
-                  Padding(padding: const EdgeInsets.only(right: 20.0)),
-                  GestureDetector(
-                      child: const Icon(
-                        FontAwesomeIcons.comment,
-                        size: 25.0,
-                      ),
+
+
+                  Expanded(
+                      child: Container(
+                    margin: EdgeInsets.only(right: 15),
+                    alignment: Alignment.centerRight,
+                    child: GestureDetector(
                       onTap: () {
                         return showModalBottomSheet(
                           context: context,
@@ -856,18 +1078,10 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                           isScrollControlled: true,
                           backgroundColor: Colors.transparent,
                         ).then(_updateTotalCommentLike);
-                      }),
-                  Expanded(
-                      child: Container(
-                    margin: EdgeInsets.only(right: 15),
-                    alignment: Alignment.centerRight,
-                    child: GestureDetector(
-                      onTap: () {
-                        savePost();
                       },
                       child: Icon(
-                        FontAwesomeIcons.solidFloppyDisk,
-                        color: saved ? Colors.black : Colors.grey,
+                        FontAwesomeIcons.comment,
+                        size: 25.0,
                       ),
                     ),
                   ))
@@ -967,14 +1181,20 @@ class _Post extends State<Post> with TickerProviderStateMixin {
                 )));
   }
 
-  void savePost() async {
+  void savePost(Size size) async {
     if (saved) {
-      await APIService.deleteSavedPost(this.id);
+      var res = await APIService.deleteSavedPost(this.id);
+      setState(() {
+        saved = !saved;
+      });
+      _showToast(res.meta.messages[0], size);
     } else {
-      await APIService.savePost(this.id);
+      var res = await APIService.savePost(this.id);
+      setState(() {
+        saved = !saved;
+      });
+      _showToast(res.meta.messages[0], size);
     }
-    setState(() {
-      saved = !saved;
-    });
+
   }
 }

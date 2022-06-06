@@ -39,7 +39,9 @@ class EditUserRequestModel {
       data['displayName'] = this.displayName;
     }
 
+    if (this.avatar != null && this.avatar != "") {
       data['avatar'] = this.avatar;
+    }
 
     if (this.height != "") {
       data['height'] = this.height;

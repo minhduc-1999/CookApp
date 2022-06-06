@@ -64,6 +64,7 @@ class _CommentActivityState extends State<CommentActivity> {
   }
 
   updateLabelText(String text, String replyFor) {
+    print('update label');
     setState(() {
       labelText = text;
       this.replyFor = replyFor;
@@ -703,8 +704,7 @@ class ChildComment extends StatelessWidget {
                     children: [
                       GestureDetector(
                           onTap: () {
-                            updateLabelText(
-                                "Replying to " + displayName, parentId);
+                            updateLabelText("Replying to " + displayName, parentId);
                             focusNode.requestFocus();
                           },
                           child: Text(

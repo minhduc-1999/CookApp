@@ -233,30 +233,7 @@ class Ingredients {
   }
 }
 
-class Author {
-  String id;
-  Photos avatar;
-  String displayName;
 
-  Author({this.id, this.avatar, this.displayName});
-
-  Author.fromJson(Map<String, dynamic> json) {
-    id = json['id'];
-    avatar =
-    json['avatar'] != null ? new Photos.fromJson(json['avatar']) : null;
-    displayName = json['displayName'];
-  }
-
-  Map<String, dynamic> toJson() {
-    final Map<String, dynamic> data = new Map<String, dynamic>();
-    data['id'] = this.id;
-    if (this.avatar != null) {
-      data['avatar'] = this.avatar.toJson();
-    }
-    data['displayName'] = this.displayName;
-    return data;
-  }
-}
 
 
 class Avatar {

@@ -78,14 +78,15 @@ class Topics {
   String id;
   int updatedAt;
   String title;
-
-  Topics({this.createdAt, this.id, this.updatedAt, this.title});
+  Cover cover;
+  Topics({this.createdAt, this.id, this.updatedAt, this.title, this.cover});
 
   Topics.fromJson(Map<String, dynamic> json) {
     createdAt = json['createdAt'];
     id = json['id'];
     updatedAt = json['updatedAt'];
     title = json['title'];
+    cover = json['cover'] != null ? new Cover.fromJson(json['cover']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -94,10 +95,30 @@ class Topics {
     data['id'] = this.id;
     data['updatedAt'] = this.updatedAt;
     data['title'] = this.title;
+    if (this.cover != null) {
+      data['cover'] = this.cover.toJson();
+    }
     return data;
   }
 }
+class Cover {
+  String url;
+  String type;
 
+  Cover({this.url, this.type});
+
+  Cover.fromJson(Map<String, dynamic> json) {
+    url = json['url'];
+    type = json['type'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['url'] = this.url;
+    data['type'] = this.type;
+    return data;
+  }
+}
 class Metadata {
   int page;
   int pageSize;

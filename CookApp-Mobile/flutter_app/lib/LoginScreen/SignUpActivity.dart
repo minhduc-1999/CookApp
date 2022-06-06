@@ -19,8 +19,9 @@ class SignUpActivity extends StatefulWidget {
 
 class _SignUpActivityState extends State<SignUpActivity> {
   bool isAPIcallProcess = false;
-  bool hidePassword = true;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
+  bool hidePassword = true;
+
   String username;
   String password;
   String email;
@@ -165,7 +166,9 @@ class _SignUpActivityState extends State<SignUpActivity> {
               child: LoginButton(
                 text: "Register",
                 press: () {
+                  FocusScope.of(context).unfocus();
                   if (validateAndSave()) {
+
                     setState(() {
                       isAPIcallProcess = true;
                     });
@@ -206,6 +209,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                         }
                       else
                         {
+
                           showDialog(
                             context: context,
                             builder: (_) => new AlertDialog(

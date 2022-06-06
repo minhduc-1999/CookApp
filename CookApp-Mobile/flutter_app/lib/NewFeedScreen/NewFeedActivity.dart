@@ -74,7 +74,12 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
             icon: Icon(Icons.add_circle_rounded),
             onPressed: () {
               //openUploadActivity();
-              _selectPostType(context);
+              if (role == Config.nutritionistRole) {
+                _selectPostType(context);
+              } else {
+
+                openUploadActivity();
+              }
             },
           ),
         ],
@@ -136,7 +141,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
       circular = true;
       offset = 0;
     });
-    var listPosts = await APIService.getNewFeed(offset);
+    var listPosts = await APIService.getNewFeed(offset: this.offset, tag: "");
     List<Post> tempData = [];
     for (var i in listPosts.data.posts) {
       tempData.add(
@@ -163,6 +168,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
           tags: i.tags,
           should: i.recomendation != null ? i.recomendation.should : null,
           shouldNot: i.recomendation != null ? i.recomendation.shouldNot : null,
+          isNutritionist: i.author.isNutritionist,
         ),
       );
     }
@@ -178,7 +184,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
   }
 
   void _getMoreData() async {
-    var listPosts = await APIService.getNewFeed(offset);
+    var listPosts = await APIService.getNewFeed(offset: this.offset,tag: "");
     List<Post> tempData = [];
     for (var i in listPosts.data.posts) {
       tempData.add(
@@ -205,6 +211,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
           tags: i.tags,
           should: i.recomendation != null ? i.recomendation.should : null,
           shouldNot: i.recomendation != null ? i.recomendation.shouldNot : null,
+          isNutritionist: i.author.isNutritionist,
         ),
       );
     }

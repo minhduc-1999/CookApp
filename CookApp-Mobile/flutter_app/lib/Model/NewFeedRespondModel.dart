@@ -109,7 +109,7 @@ class Posts {
       this.tags});
 
   Posts.fromJson(Map<String, dynamic> json) {
-    List <String> temp = [];
+
     id = json['id'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
@@ -290,14 +290,15 @@ class Author {
   String id;
   Avatar avatar;
   String displayName;
-
-  Author({this.id, this.avatar, this.displayName});
+  bool isNutritionist;
+  Author({this.id, this.avatar, this.displayName,this.isNutritionist});
 
   Author.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     avatar =
     json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
     displayName = json['displayName'];
+    isNutritionist = json['isNutritionist'] != null ? json['isNutritionist'] : false;
   }
 
   Map<String, dynamic> toJson() {
@@ -307,6 +308,7 @@ class Author {
       data['avatar'] = this.avatar.toJson();
     }
     data['displayName'] = this.displayName;
+    data['isNutritionist'] = this.isNutritionist;
     return data;
   }
 }
