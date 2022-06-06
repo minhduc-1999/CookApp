@@ -49,6 +49,8 @@ export class SavedPostRepository extends BaseRepository implements ISavedPostRep
       .leftJoinAndSelect("post.medias", "media")
       .leftJoinAndSelect("post.interaction", "interaction")
       .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("author.account", "account")
+      .leftJoinAndSelect("account.role", "role")
       .leftJoinAndSelect("post.foodRef", "foodRef")
       .leftJoinAndSelect("foodRef.medias", "foodMedias")
       .where("user.id = :userId", { userId: user.id })
