@@ -1,5 +1,5 @@
 import { ITransaction } from "adapters/typeormTransaction.adapter";
-import { Account } from "domains/social/account.domain";
+import { Account, Role } from "domains/social/account.domain";
 import { User } from "domains/social/user.domain";
 
 export interface IAccountRepository {
@@ -7,4 +7,6 @@ export interface IAccountRepository {
   update(account: Account, data: Partial<Account>): Promise<Account>;
   setTransaction(tx: ITransaction): IAccountRepository;
   getAccountByReseToken(token: string): Promise<Account>;
+  updateRole(account: Account, role: Role): Promise<void>
+  getAccountByUserId(id: string): Promise<Account>
 }

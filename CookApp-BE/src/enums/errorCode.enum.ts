@@ -21,5 +21,6 @@ export enum UserErrorCode {
   FOOD_ALREADY_CONFIRMED = "food_already_confirmed",
   FOOD_ALREADY_SAVED = "food_already_saved",
   OLD_PASSWORD_NOT_CORRECT = "old_password_not_correct",
-  FOOD_NOT_SAVE = "food_not_save"
+  FOOD_NOT_SAVE = "food_not_save",
+  ROLE_NOT_FOUND = "role_not_found"
 }

@@ -1,9 +1,9 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { BaseRepository } from "base/repository.base";
-import { Account } from "domains/social/account.domain";
+import { Account, Role } from "domains/social/account.domain";
 import { User } from "domains/social/user.domain";
-import { AccountEntity } from "entities/social/account.entity";
+import { AccountEntity, RoleEntity } from "entities/social/account.entity";
 import { TypeormException } from "exception_filter/postgresException.filter";
 import { IAccountRepository } from "modules/auth/interfaces/repositories/account.interface";
 import { QueryFailedError, QueryRunner, Repository } from "typeorm";
@@ -18,6 +18,21 @@ export class AccountRepository
     private _repo: Repository<AccountEntity>
   ) {
     super();
+  }
+  async getAccountByUserId(id: string): Promise<Account> {
+    const entity = await this._repo.findOne({
+      where: {
+        user: {
+          id,
+        },
+      },
+      relations: ["role"]
+    });
+    return entity?.toDomain();
+  }
+
+  async updateRole(account: Account, role: Role): Promise<void> {
+    await this._repo.update(account.id, { role: new RoleEntity(role) });
   }
 
   async getAccountByReseToken(token: string): Promise<Account> {

@@ -54,6 +54,9 @@ import { ResetPasswordCommand } from "modules/auth/useCases/resetPassword";
 import { GetResetPasswordResponse } from "modules/auth/useCases/getResetPasswordInfo/getResetPasswordInfo.response";
 import { GetResetPasswordQuery } from "modules/auth/useCases/getResetPasswordInfo";
 import { GetResetPasswordInfoRequest } from "modules/auth/useCases/getResetPasswordInfo/getResetPasswordInfo.request";
+import { ChangeRoleRequest } from "modules/auth/useCases/changeRole/changeRoleRequest";
+import { RequirePermissions } from "decorators/roles.decorator";
+import { ChangeRoleCommand } from "modules/auth/useCases/changeRole";
 
 @Controller()
 @ApiTags("Authentication")
@@ -207,5 +210,15 @@ export class AuthController {
     return Result.ok(null, {
       messages: ["Reset password successfully"],
     });
+  }
+
+  @Put("admin/change-role")
+  @ApiOKResponseCustomWithoutData("Change role successfully")
+  @RequirePermissions("manage_role")
+  @ApiBearerAuth()
+  async changeRole(@Body() body: ChangeRoleRequest) {
+    const command = new ChangeRoleCommand(body, null, null);
+    await this._commandBus.execute(command);
+    return Result.ok(null, { messages: ["Change role successfully"] });
   }
 }

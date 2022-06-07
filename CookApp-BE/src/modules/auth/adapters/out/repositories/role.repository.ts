@@ -10,7 +10,7 @@ import { Repository } from "typeorm";
 
 export interface IRoleRepository {
   setTransaction(tx: ITransaction): IRoleRepository;
-  getRole(slug: RoleType): Promise<Role>;
+  getRole(sign: RoleType): Promise<Role>;
   getRoles(opt: PageOptionsDto): Promise<[Role[], number]>;
 }
 
