@@ -11,6 +11,8 @@ export interface IUnitRepository {
   getUnits(query: PageOptionsDto): Promise<[Unit[], number]>;
   setTransaction(tx: ITransaction): IUnitRepository;
   insertUnit(unit: Unit): Promise<Unit>;
+  getById(id: string): Promise<Unit>;
+  deleteUnit(unit: Unit): Promise<void>;
 }
 
 @Injectable()
@@ -20,6 +22,22 @@ export class UnitRepository extends BaseRepository implements IUnitRepository {
     private _unitRepo: Repository<UnitEntity>
   ) {
     super();
+  }
+
+  async getById(id: string): Promise<Unit> {
+    const entity = await this._unitRepo.findOne({
+      where: {
+        id,
+      },
+    });
+    return entity?.toDomain();
+  }
+
+  async deleteUnit(unit: Unit): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.softDelete(UnitEntity, unit.id);
+    }
   }
 
   async insertUnit(unit: Unit): Promise<Unit> {

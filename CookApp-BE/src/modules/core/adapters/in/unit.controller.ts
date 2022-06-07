@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -8,6 +8,7 @@ import {
   ApiCreatedResponseCustomWithoutData,
   ApiFailResponseCustom,
   ApiOKResponseCustom,
+  ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
 import { RequirePermissions } from "decorators/roles.decorator";
 import {
@@ -18,7 +19,7 @@ import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { CreateUnitCommand } from "modules/core/useCases/createUnit";
 import { CreateUnitRequest } from "modules/core/useCases/createUnit/createUnitRequest";
-import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
+import { DeleteUnitCommand } from "modules/core/useCases/deleteUnit";
 import { GetUnitsQuery } from "modules/core/useCases/getUnits";
 import { GetUnitsResponse } from "modules/core/useCases/getUnits/getUnitsResponse";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
@@ -38,7 +39,7 @@ export class UnitController {
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,
     @HttpUserReq() user: User
-  ): Promise<Result<GetFoodsResponse>> {
+  ): Promise<Result<GetUnitsResponse>> {
     const unitsQuery = new GetUnitsQuery(user, query);
     const result = await this._queryBus.execute(unitsQuery);
     return Result.ok(result, {
@@ -57,7 +58,21 @@ export class UnitController {
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<string>> {
     const createUnitCommand = new CreateUnitCommand(user, req, tx);
-    const newFoodId = await this._commandBus.execute(createUnitCommand);
-    return Result.ok(newFoodId, { messages: ["Create unit successfully"] });
+    const newId = await this._commandBus.execute(createUnitCommand);
+    return Result.ok(newId, { messages: ["Create unit successfully"] });
+  }
+
+  @Delete(":unitId")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Delete unit successfully")
+  @HttpRequestTransaction()
+  async deleteUnit(
+    @HttpUserReq() user: User,
+    @Param("unitId", ParseUUIDPipe) unitId: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    const command = new DeleteUnitCommand(user, tx, unitId)
+    await this._commandBus.execute(command);
+    return Result.ok(null, { messages: ["Delete unit successfully"] });
   }
 }

@@ -130,20 +130,22 @@ export class AuthorResponse {
   }
 }
 
-export class UnitResponse {
+export class UnitResponse extends AuditResponse{
   @ApiResponseProperty({ type: String })
   name: string;
 
   constructor(unit: Unit) {
+    super(unit)
     this.name = unit?.name;
   }
 }
 
-export class IngredientResponse {
+export class IngredientResponse extends AuditResponse{
   @ApiResponseProperty({ type: String })
   name: string;
 
   constructor(ing: Ingredient) {
+    super(ing)
     this.name = ing?.name;
   }
 }

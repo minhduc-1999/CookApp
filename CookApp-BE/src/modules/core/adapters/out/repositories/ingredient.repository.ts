@@ -11,6 +11,8 @@ export interface IIngredientRepository {
   getIngredients(query: PageOptionsDto): Promise<[Ingredient[], number]>;
   insertIngredient(ingredient: Ingredient): Promise<Ingredient>;
   setTransaction(tx: ITransaction): IIngredientRepository;
+  getById(id: string): Promise<Ingredient>;
+  deleteIngredient(ingre: Ingredient): Promise<void>;
 }
 
 @Injectable()
@@ -24,6 +26,23 @@ export class IngredientRepository
   ) {
     super();
   }
+
+  async deleteIngredient(ingre: Ingredient): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.softDelete(IngredientEntity, ingre.id);
+    }
+  }
+
+  async getById(id: string): Promise<Ingredient> {
+    const entity = await this._ingredientRepo.findOne({
+      where: {
+        id,
+      },
+    });
+    return entity?.toDomain();
+  }
+
   async insertIngredient(ingredient: Ingredient): Promise<Ingredient> {
     if (!ingredient) return null;
     const queryRunner = this.tx.getRef() as QueryRunner;

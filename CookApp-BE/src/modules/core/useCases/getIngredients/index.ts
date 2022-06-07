@@ -4,7 +4,6 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
-import { IFoodSeService } from "modules/core/adapters/out/services/foodSe.service";
 import { Ingredient } from "domains/core/ingredient.domain";
 import { IIngredientRepository } from "modules/core/adapters/out/repositories/ingredient.repository";
 import { GetIngredientsResponse } from "./getIngredientsResponse";
@@ -23,24 +22,16 @@ export class GetIngredientsQueryHandler
 {
   constructor(
     @Inject("IIngredientRepository")
-    private _ingredientRepo: IIngredientRepository,
-    @Inject("IFoodSeService")
-    private _foodSeService: IFoodSeService
+    private _ingredientRepo: IIngredientRepository
   ) {}
   async execute(query: GetIngredientsQuery): Promise<GetIngredientsResponse> {
     const { queryOptions } = query;
     let ingredients: Ingredient[];
     let totalCount = 0;
 
-    if (queryOptions.q) {
-      // const [ids, total] = await this._foodSeService.findManyByNameAndCount(queryOptions.q, queryOptions)
-      // totalCount = total
-      // foods = await this._unitRepo.getByIds(ids)
-    } else {
-      [ingredients, totalCount] = await this._ingredientRepo.getIngredients(
-        queryOptions
-      );
-    }
+    [ingredients, totalCount] = await this._ingredientRepo.getIngredients(
+      queryOptions
+    );
 
     let meta: PageMetadata;
     if (ingredients.length > 0) {

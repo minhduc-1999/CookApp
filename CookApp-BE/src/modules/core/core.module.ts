@@ -36,6 +36,8 @@ import { CreateIngredientCommandHandler } from "./useCases/createIngredient";
 import { CreateUnitCommandHandler } from "./useCases/createUnit";
 import { DeleteFoodCommandHandler } from "./useCases/deleteFood";
 import { DeleteFoodSaveCommandHandler } from "./useCases/deleteFoodSave";
+import { DeleteIngredientCommandHandler } from "./useCases/deleteIngredient";
+import { DeleteUnitCommandHandler } from "./useCases/deleteUnit";
 import { EditVoteCommandHandler } from "./useCases/editVote";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
 import { GetFoodsQueryHandler } from "./useCases/getFoods";
@@ -57,7 +59,9 @@ const commandHandlers = [
   ConfirmFoodCommandHandler,
   SaveFoodCommandHandler,
   DeleteFoodSaveCommandHandler,
-  DeleteFoodCommandHandler
+  DeleteFoodCommandHandler,
+  DeleteIngredientCommandHandler,
+  DeleteUnitCommandHandler,
 ];
 const queryHandlers = [
   GetFoodsQueryHandler,
@@ -67,7 +71,7 @@ const queryHandlers = [
   GetFoodVotesQueryHandler,
   GetVoteQueryHandler,
   GetUncensoredFoodsQueryHandler,
-  GetFoodSavesQueryHandler
+  GetFoodSavesQueryHandler,
 ];
 
 const eventHandlers = [SyncFoodCreatedEventHandler];
@@ -126,7 +130,7 @@ const controller = [FoodController, IngredientController, UnitController];
       UnitEntity,
       IngredientEntity,
       FoodVoteEntity,
-      FoodSaveEntity
+      FoodSaveEntity,
     ]),
     forwardRef(() => UserModule),
     MongooseModule.forFeature([FoodModel]),

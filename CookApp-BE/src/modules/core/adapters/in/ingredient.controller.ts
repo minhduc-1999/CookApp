@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseUUIDPipe, Post, Query } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -8,6 +8,7 @@ import {
   ApiCreatedResponseCustomWithoutData,
   ApiFailResponseCustom,
   ApiOKResponseCustom,
+  ApiOKResponseCustomWithoutData,
 } from "decorators/apiSuccessResponse.decorator";
 import { RequirePermissions } from "decorators/roles.decorator";
 import {
@@ -18,7 +19,7 @@ import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { CreateIngredientCommand } from "modules/core/useCases/createIngredient";
 import { CreateIngredientRequest } from "modules/core/useCases/createIngredient/createIngredientRequest";
-import { GetFoodsResponse } from "modules/core/useCases/getFoods/getFoodsResponse";
+import { DeleteIngredientCommand } from "modules/core/useCases/deleteIngredient";
 import { GetIngredientsQuery } from "modules/core/useCases/getIngredients";
 import { GetIngredientsResponse } from "modules/core/useCases/getIngredients/getIngredientsResponse";
 import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
@@ -38,7 +39,7 @@ export class IngredientController {
     @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
     query: PageOptionsDto,
     @HttpUserReq() user: User
-  ): Promise<Result<GetFoodsResponse>> {
+  ): Promise<Result<GetIngredientsResponse>> {
     const ingredientsQuery = new GetIngredientsQuery(user, query);
     const result = await this._queryBus.execute(ingredientsQuery);
     return Result.ok(result, {
@@ -57,9 +58,23 @@ export class IngredientController {
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<string>> {
     const createIngredientCommand = new CreateIngredientCommand(user, req, tx);
-    const newFoodId = await this._commandBus.execute(createIngredientCommand);
-    return Result.ok(newFoodId, {
+    const newId = await this._commandBus.execute(createIngredientCommand);
+    return Result.ok(newId, {
       messages: ["Create ingredient successfully"],
     });
+  }
+
+  @Delete(":ingredientId")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Delete ingredient successfully")
+  @HttpRequestTransaction()
+  async deleteIngredient(
+    @HttpUserReq() user: User,
+    @Param("ingredientId", ParseUUIDPipe) ingredientId: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    const command = new DeleteIngredientCommand(user, tx, ingredientId);
+    await this._commandBus.execute(command);
+    return Result.ok(null, { messages: ["Delete ingredient successfully"] });
   }
 }
