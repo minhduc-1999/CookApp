@@ -16,7 +16,7 @@ import {
   AlertDescription,
 } from "@chakra-ui/react";
 // Assets
-import signInImage from "assets/img/signInImage.png";
+import signInImage from "assets/img/tastify-bg.png"
 import { useAuth } from "contexts/Auth/Auth";
 import { useHistory, useLocation } from "react-router-dom";
 import { validatePassword, validateUsername } from "apis/auth";
