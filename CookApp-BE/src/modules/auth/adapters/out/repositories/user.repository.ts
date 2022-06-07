@@ -45,16 +45,16 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   }
   async createUser(userData: User): Promise<User> {
     let userEntity = new UserEntity(userData);
-    const queryRunner = this.tx.getRef() as QueryRunner;
-    if (queryRunner && !queryRunner.isReleased) {
-      try {
+    const queryRunner = this.tx?.getRef() as QueryRunner;
+    try {
+      if (queryRunner && !queryRunner.isReleased) {
         userEntity = await queryRunner.manager.save<UserEntity>(userEntity);
-      } catch (err) {
-        if (err instanceof QueryFailedError) throw new TypeormException(err);
-        throw err;
+      } else {
+        userEntity = await this._repo.save(userEntity);
       }
-    } else {
-      userEntity = null;
+    } catch (err) {
+      if (err instanceof QueryFailedError) throw new TypeormException(err);
+      throw err;
     }
     return userEntity?.toDomain();
   }
