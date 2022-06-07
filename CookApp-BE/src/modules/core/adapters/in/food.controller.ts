@@ -32,6 +32,7 @@ import { ConfirmFoodRequest } from "modules/core/useCases/confirmFood/confirmFoo
 import { CreateFoodCommand } from "modules/core/useCases/createFood";
 import { CreateFoodRequest } from "modules/core/useCases/createFood/createFoodRequest";
 import { CreateFoodResponse } from "modules/core/useCases/createFood/createFoodResponse";
+import { DeleteFoodCommand } from "modules/core/useCases/deleteFood";
 import { DeleteFoodSaveCommand } from "modules/core/useCases/deleteFoodSave";
 import { EditVoteCommand } from "modules/core/useCases/editVote";
 import { EditVoteRequest } from "modules/core/useCases/editVote/editVoteRequest";
@@ -251,5 +252,19 @@ export class FoodController {
     const deleteFoodSaveCommand = new DeleteFoodSaveCommand(tx, user, foodId);
     await this._commandBus.execute(deleteFoodSaveCommand);
     return Result.ok(null, { messages: ["Delete food save successfully"] });
+  }
+
+  @Delete(":foodId")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Delete food successfully")
+  @HttpRequestTransaction()
+  async deleteFood(
+    @HttpUserReq() user: User,
+    @Param("foodId", ParseUUIDPipe) foodId: string,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<void>> {
+    const command = new DeleteFoodCommand(user, tx, foodId);
+    await this._commandBus.execute(command);
+    return Result.ok(null, { messages: ["Delete food successfully"] });
   }
 }

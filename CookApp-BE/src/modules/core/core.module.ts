@@ -34,6 +34,7 @@ import { ConfirmFoodCommandHandler } from "./useCases/confirmFood";
 import { CreateFoodCommandHandler } from "./useCases/createFood";
 import { CreateIngredientCommandHandler } from "./useCases/createIngredient";
 import { CreateUnitCommandHandler } from "./useCases/createUnit";
+import { DeleteFoodCommandHandler } from "./useCases/deleteFood";
 import { DeleteFoodSaveCommandHandler } from "./useCases/deleteFoodSave";
 import { EditVoteCommandHandler } from "./useCases/editVote";
 import { GetFoodDetailQueryHandler } from "./useCases/getFoodDetail";
@@ -55,7 +56,8 @@ const commandHandlers = [
   CreateIngredientCommandHandler,
   ConfirmFoodCommandHandler,
   SaveFoodCommandHandler,
-  DeleteFoodSaveCommandHandler
+  DeleteFoodSaveCommandHandler,
+  DeleteFoodCommandHandler
 ];
 const queryHandlers = [
   GetFoodsQueryHandler,

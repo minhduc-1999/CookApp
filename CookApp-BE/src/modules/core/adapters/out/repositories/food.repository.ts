@@ -32,6 +32,7 @@ export interface IFoodRepository {
     pageOpt?: PageOptionsDto
   ): Promise<[Food[], number]>;
   deleteFoodSave(foodSave: FoodSave): Promise<void>;
+  deleteFood(food: Food): Promise<void>;
 }
 
 @Injectable()
@@ -43,6 +44,13 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
     private _foodSaveRepo: Repository<FoodSaveEntity>
   ) {
     super();
+  }
+
+  async deleteFood(food: Food): Promise<void> {
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.softDelete(FoodEntity, food.id);
+    }
   }
 
   async deleteFoodSave(foodSave: FoodSave): Promise<void> {
