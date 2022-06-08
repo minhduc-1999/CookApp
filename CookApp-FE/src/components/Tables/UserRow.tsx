@@ -19,16 +19,8 @@ type UserRowProps = {
 };
 
 function UserRow(props: UserRowProps) {
-  const {
-    username,
-    email,
-    phoneNumber,
-    emailVerification,
-    createdAt,
-    displayName,
-    avatar,
-    role,
-  } = props.data;
+  const { createdAt, displayName, avatar, account } = props.data;
+  const { username, email, phone, emailVerified, role } = account;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
 
@@ -66,7 +58,7 @@ function UserRow(props: UserRowProps) {
 
       <Td>
         <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
-          {phoneNumber}
+          {phone}
         </Text>
       </Td>
 
@@ -78,7 +70,7 @@ function UserRow(props: UserRowProps) {
 
       <Td>
         <Flex justifyContent="center">
-          {emailVerification ? (
+          {emailVerified ? (
             <FaCheckSquare color="green" size="24px" />
           ) : (
             <IoWarning color={"red"} size="24px" />
@@ -87,11 +79,11 @@ function UserRow(props: UserRowProps) {
       </Td>
 
       <Td>
-        <RoleTag data={{ roleName: role?.name, roleSign: role?.sign }} />
+        <RoleTag data={{ roleName: role?.title, roleSign: role?.sign }} />
       </Td>
 
       <Td>
-        <RowMenuOption upgrade detail remove/>
+        <RowMenuOption upgrade />
       </Td>
     </Tr>
   );

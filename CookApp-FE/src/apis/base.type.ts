@@ -150,14 +150,16 @@ export type LoginResponse = {
 export type UserResponse = AuditResponse & {
   avatar: MediaResponse;
   displayName: string;
-  role: {
-    name: string;
-    sign: RoleType;
+  account: {
+    username: string;
+    email: string;
+    phone: string;
+    emailVerified: boolean;
+    role: {
+      title: string;
+      sign: RoleType;
+    };
   };
-  username: string;
-  email: string;
-  phoneNumber: string;
-  emailVerification: boolean;
 };
 
 export type UnitResponse = {

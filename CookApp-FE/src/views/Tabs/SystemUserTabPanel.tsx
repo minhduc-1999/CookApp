@@ -13,11 +13,11 @@ import CardHeader from "components/Card/CardHeader.js";
 import CardBody from "components/Card/CardBody.js";
 import { usePaginator } from "chakra-paginator";
 import Paginator from "components/Tables/Paginator";
-import { getUsers } from "dummy/users";
 import { UserResponse } from "apis/base.type";
 import UserTable from "components/Tables/UserTable";
 import { FaPlus } from "react-icons/fa";
 import CreateSystemUserModal from "components/Modals/CreateSystemUserModal";
+import { getUsers } from "apis/users";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;

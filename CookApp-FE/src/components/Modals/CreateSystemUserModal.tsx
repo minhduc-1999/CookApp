@@ -17,7 +17,7 @@ import {
 import { RoleResponse } from "apis/base.type";
 import { canSaveSystemUser, CreateSystemUserBody } from "apis/users";
 import { useEffect, useRef, useState } from "react";
-import { getRoles } from "dummy/roles";
+import { getRoles } from "../../apis/roles";
 
 type Props = {
   isOpen: boolean;
@@ -28,6 +28,8 @@ const saveSystemUser = async (body: CreateSystemUserBody) => {
   // TODO
   console.log(body);
 };
+const INIT_PAGE_SIZE = 50;
+const INIT_PAGE = 1;
 
 const CreateAccountModal = ({ isOpen, onClose }: Props) => {
   const initialRef = useRef<HTMLInputElement>(null);
@@ -54,7 +56,7 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
   }, [isOpen, username]);
 
   useEffect(() => {
-    getRoles(1, 1).then((data) => {
+    getRoles(INIT_PAGE, INIT_PAGE_SIZE).then((data) => {
       const [roles] = data;
       setRoleList(roles);
     });

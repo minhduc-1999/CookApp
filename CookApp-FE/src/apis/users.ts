@@ -34,7 +34,7 @@ export const getUsers = async (
 ): Promise<[UserResponse[], PageMetadata]> => {
   await networkChecking()
   return axios
-    .get(baseUrl + "/users", {
+    .get(baseUrl + "/admin/users", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -48,5 +48,5 @@ export const getUsers = async (
       if (res.status === 200)
         return [res.data.data.users, res.data.data.metadata];
       throw new Error("Fail");
-    });
+    })
 };
