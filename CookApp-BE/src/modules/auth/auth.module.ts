@@ -33,6 +33,7 @@ import { ChangePasswordCommandHandler } from "./useCases/changePassword";
 import { ChangeRoleCommandHandler } from "./useCases/changeRole";
 import { GetResetPasswordInfoQueryHandler } from "./useCases/getResetPasswordInfo";
 import { GetRolesQueryHandler } from "./useCases/getRoles";
+import { GetUsersQueryHandler } from "./useCases/getUsers";
 import { LoginCommandHandler } from "./useCases/login";
 import { RegisterCommandHandler } from "./useCases/register";
 import { RequestResetPasswordQueryHandler } from "./useCases/requestResetPassword";
@@ -54,6 +55,7 @@ const queryHandlers = [
   GetRolesQueryHandler,
   RequestResetPasswordQueryHandler,
   GetResetPasswordInfoQueryHandler,
+  GetUsersQueryHandler
 ];
 
 const eventHandlers = [UserCreatedEventHandler];

@@ -39,7 +39,7 @@ import { Album } from "domains/social/album.domain";
 import { Conversation, Message } from "domains/social/conversation.domain";
 import { FoodVote } from "domains/core/foodVote.domain";
 import { RoleType } from "enums/system.enum";
-import { Role } from "domains/social/account.domain";
+import { Account, Role } from "domains/social/account.domain";
 import { FoodSaveType } from "enums/core.enum";
 
 export class ResponseDTO<T> {
@@ -109,6 +109,70 @@ export class MediaResponse {
   }
 }
 
+export class RoleResponse {
+  @ApiResponseProperty({ type: String })
+  title: string;
+
+  @ApiResponseProperty({ type: String })
+  sign: RoleType;
+
+  constructor(role: Role) {
+    this.title = role?.title;
+    this.sign = role?.sign;
+  }
+}
+
+export class AccountResponse {
+  @ApiResponseProperty({ type: String })
+  username: string;
+
+  @ApiResponseProperty({ type: String })
+  email: string;
+
+  @ApiResponseProperty({ type: String })
+  phone?: string;
+
+  @ApiResponseProperty({ type: Boolean })
+  emailVerified: boolean;
+
+  @ApiResponseProperty({ type: RoleResponse })
+  role: RoleResponse;
+
+  constructor(account: Account) {
+    this.username = account?.username;
+    this.email = account?.email;
+    this.phone = account?.phone;
+    this.emailVerified = account?.emailVerified;
+    this.role = account?.role && new RoleResponse(account.role);
+  }
+}
+
+export class UserResponse extends AuditResponse {
+  @ApiResponseProperty({ type: MediaResponse })
+  avatar?: MediaResponse;
+
+  @ApiResponseProperty({ type: String })
+  displayName?: string;
+
+  @ApiResponseProperty({ type: String })
+  firstName?: string;
+
+  @ApiResponseProperty({ type: String })
+  lastName?: string;
+
+  @ApiResponseProperty({ type: AccountResponse })
+  account?: AccountResponse;
+
+  constructor(user: User) {
+    super(user);
+    this.avatar = user?.avatar && new MediaResponse(user?.avatar);
+    this.displayName = user?.displayName;
+    this.firstName = user?.firstName;
+    this.lastName = user?.lastName;
+    this.account = user?.account && new AccountResponse(user?.account);
+  }
+}
+
 export class AuthorResponse {
   @ApiResponseProperty({ type: String })
   id: string;
@@ -130,22 +194,22 @@ export class AuthorResponse {
   }
 }
 
-export class UnitResponse extends AuditResponse{
+export class UnitResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string;
 
   constructor(unit: Unit) {
-    super(unit)
+    super(unit);
     this.name = unit?.name;
   }
 }
 
-export class IngredientResponse extends AuditResponse{
+export class IngredientResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string;
 
   constructor(ing: Ingredient) {
-    super(ing)
+    super(ing);
     this.name = ing?.name;
   }
 }
@@ -256,9 +320,13 @@ export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ enum: FoodSaveType })
   saveType: FoodSaveType;
 
-  constructor(food: Food, steps?: RecipeStepResponse[], saveType?: FoodSaveType) {
+  constructor(
+    food: Food,
+    steps?: RecipeStepResponse[],
+    saveType?: FoodSaveType
+  ) {
     super(food);
-    this.saveType = saveType
+    this.saveType = saveType;
     this.servings = food?.servings;
     this.name = food?.name;
     this.description = food?.description;
@@ -595,18 +663,5 @@ export class ConversationResponse extends AuditResponse {
     this.members = conv?.members?.map((user) => new AuthorResponse(user));
     this.cover = conv?.cover;
     this.name = conv?.name;
-  }
-}
-
-export class RoleResponse {
-  @ApiResponseProperty({ type: String })
-  title: string;
-
-  @ApiResponseProperty({ type: String })
-  sign: RoleType;
-
-  constructor(role: Role) {
-    this.title = role?.title;
-    this.sign = role?.sign;
   }
 }

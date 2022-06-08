@@ -1,8 +1,4 @@
-import {
-  Injectable,
-  InternalServerErrorException,
-  NotImplementedException,
-} from "@nestjs/common";
+import { Injectable, InternalServerErrorException } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
@@ -19,6 +15,19 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     private _repo: Repository<UserEntity>
   ) {
     super();
+  }
+  async updateStatus(user: User, statusID?: string): Promise<void> {
+    throw new Error("Method not implemented.");
+  }
+  async getUserWithAccount(
+    queryOpt: PageOptionsDto
+  ): Promise<[User[], number]> {
+    const [entities, total] = await this._repo.findAndCount({
+      relations: ["account", "account.role"],
+      skip: queryOpt.limit * queryOpt.offset,
+      take: queryOpt.limit,
+    });
+    return [entities?.map((entity) => entity.toDomain()), total];
   }
 
   async getUsersByIds(ids: string[]): Promise<User[]> {
@@ -142,9 +151,5 @@ export class UserRepository extends BaseRepository implements IUserRepository {
       .take(query.limit)
       .getManyAndCount();
     return [entities?.map((entity) => entity.toDomain()), total];
-  }
-
-  async updateStatus(user: User, statusID?: string): Promise<void> {
-    throw new NotImplementedException();
   }
 }

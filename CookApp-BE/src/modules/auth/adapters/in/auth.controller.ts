@@ -57,6 +57,10 @@ import { GetResetPasswordInfoRequest } from "modules/auth/useCases/getResetPassw
 import { ChangeRoleRequest } from "modules/auth/useCases/changeRole/changeRoleRequest";
 import { RequirePermissions } from "decorators/roles.decorator";
 import { ChangeRoleCommand } from "modules/auth/useCases/changeRole";
+import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
+import { PageOptionsDto } from "base/pageOptions.base";
+import { GetUsersQuery } from "modules/auth/useCases/getUsers";
+import { GetUsersResponse } from "modules/auth/useCases/getUsers/getUsersResponse";
 
 @Controller()
 @ApiTags("Authentication")
@@ -220,5 +224,18 @@ export class AuthController {
     const command = new ChangeRoleCommand(body, null, null);
     await this._commandBus.execute(command);
     return Result.ok(null, { messages: ["Change role successfully"] });
+  }
+
+  @Get("admin/users")
+  @RequirePermissions("manage_user")
+  @ApiOKResponseCustom(GetUsersResponse, "Get users successfully")
+  @ApiBearerAuth()
+  async getUser(
+    @Query(new ParseHttpRequestPipe<typeof PageOptionsDto>())
+    query: PageOptionsDto
+  ) {
+    const getUserQuery = new GetUsersQuery(null, query);
+    const result = await this._queryBus.execute(getUserQuery);
+    return Result.ok(result, { messages: ["Get users successfully"] });
   }
 }
