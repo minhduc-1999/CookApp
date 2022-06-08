@@ -18,7 +18,7 @@ type Props = {
   editRole?: boolean;
   detailCallback?: () => void;
   onRemoveClick?: () => void;
-  editRoleCallback?: () => void;
+  editRoleClick?: () => void;
 };
 
 function RowMenuOption(props: Props) {
@@ -33,7 +33,7 @@ function RowMenuOption(props: Props) {
       />
       <MenuList>
         {props.editRole && (
-          <MenuItem onClick={props.editRoleCallback} icon={<EditRoleIcon />}>
+          <MenuItem onClick={props.editRoleClick} icon={<EditRoleIcon />}>
             Change role
           </MenuItem>
         )}

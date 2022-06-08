@@ -28,7 +28,7 @@ function UserTable({ users, curPage, limit }: UserTableProps) {
 
   useEffect(() => {
     getList(curPage);
-  }, [curPage]);
+  }, [curPage, users]);
 
   return (
     <Table variant="simple" color={textColor}>

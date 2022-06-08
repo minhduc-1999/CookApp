@@ -12,6 +12,8 @@ import RoleTag from "components/Tags/RoleTag";
 import { IoWarning } from "react-icons/io5";
 import { UserResponse } from "apis/base.type";
 import RowMenuOption from "components/Menu/RowMenuOption";
+import { useContext } from "react";
+import { SocialUserTabContext } from "views/Tabs/SocialUserTabPanel";
 
 type UserRowProps = {
   data: UserResponse;
@@ -19,10 +21,11 @@ type UserRowProps = {
 };
 
 function UserRow(props: UserRowProps) {
-  const { createdAt, displayName, avatar, account } = props.data;
+  const { id, createdAt, displayName, avatar, account } = props.data;
   const { username, email, phone, emailVerified, role } = account;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
+  const tabContext = useContext(SocialUserTabContext);
 
   return (
     <Tr>
@@ -83,7 +86,13 @@ function UserRow(props: UserRowProps) {
       </Td>
 
       <Td>
-        <RowMenuOption upgrade />
+        <RowMenuOption
+          editRole
+          editRoleClick={() => {
+            tabContext?.onChangeRoleTrigger &&
+              tabContext.onChangeRoleTrigger(id);
+          }}
+        />
       </Td>
     </Tr>
   );

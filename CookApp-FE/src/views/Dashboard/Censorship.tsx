@@ -312,7 +312,14 @@ function Censorship() {
             </Card>
           );
         })}
-        {foodLoading && <Spinner />}
+        {foodLoading ? (
+          <Spinner />
+        ) : foods?.length === 0 ? (
+          <Text fontSize={"2xl"} textAlign="center" color={"gray"}>
+            There are no food <br />
+            need to be confirmed
+          </Text>
+        ) : null}
       </Flex>
     </Flex>
   );
