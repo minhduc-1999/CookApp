@@ -151,3 +151,22 @@ export const confirmFood = async (
       throw new Error("Failed to confirm food");
     });
 };
+
+export const deleteFood = async (foodId: string): Promise<void> => {
+  await networkChecking();
+  return axios
+    .delete(baseUrl + `/foods/${foodId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res: AxiosResponse<BaseResponse>) => {
+      if (res.data.meta.ok) return;
+      throw new Error("Fail to delete food");
+    })
+    .catch((err: AxiosError<BaseResponse>) => {
+      if (err?.response?.status === 404) return
+      throw new Error("Fail to delete food");
+    });
+};

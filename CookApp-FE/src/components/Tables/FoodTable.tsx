@@ -34,7 +34,7 @@ function FoodTable({ foods, curPage, limit }: Props) {
 
   useEffect(() => {
     getList(curPage);
-  }, [curPage]);
+  }, [curPage, foods]);
 
   const getList = (curPage: number) => {
     const curPageList = foods[curPage];
