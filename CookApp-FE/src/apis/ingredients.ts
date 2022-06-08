@@ -1,4 +1,4 @@
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { baseUrl, token } from "./token";
 import { BaseResponse, IngredientResponse, PageMetadata } from "./base.type";
 import { networkChecking } from "utils/network";
@@ -18,7 +18,7 @@ export const getIngredients = async (
   limit: number,
   q = ""
 ): Promise<[IngredientResponse[], PageMetadata]> => {
-  await networkChecking()
+  await networkChecking();
   return axios
     .get(baseUrl + "/ingredients", {
       headers: {
@@ -40,7 +40,7 @@ export const getIngredients = async (
 export const createIngredient = async (
   data: CreateIngredientBody
 ): Promise<void> => {
-  await networkChecking()
+  await networkChecking();
   return axios
     .post(baseUrl + "/ingredients", data, {
       headers: {
@@ -51,5 +51,25 @@ export const createIngredient = async (
     .then((res: AxiosResponse<BaseResponse>) => {
       if (res.data.meta.ok) return;
       throw new Error("Failed to create new ingredient");
+    });
+};
+
+export const deleteIngredient = async (ingredientId: string): Promise<void> => {
+  await networkChecking();
+  return axios
+    .delete(baseUrl + `/ingredients/${ingredientId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res: AxiosResponse<BaseResponse>) => {
+      if (res.data.meta.ok) return;
+      throw new Error("Fail to delete ingredient");
+    })
+    .catch((err: AxiosError<BaseResponse>) => {
+      console.log(err);
+      if (err?.response?.status === 404) return;
+      throw new Error("Fail to delete ingredient");
     });
 };

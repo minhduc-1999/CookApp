@@ -7,7 +7,7 @@ import {
   MenuItem,
   MenuList,
 } from "@chakra-ui/react";
-import { DetailIcon, UpgradeIcon } from "components/Icons/Icons";
+import { DetailIcon, EditRoleIcon, UpgradeIcon } from "components/Icons/Icons";
 import { FaEllipsisV } from "react-icons/fa";
 
 type Props = {
@@ -15,7 +15,10 @@ type Props = {
   remove?: boolean;
   detail?: boolean;
   upgrade?: boolean;
+  editRole?: boolean;
   detailCallback?: () => void;
+  onRemoveClick?: () => void;
+  editRoleCallback?: () => void;
 };
 
 function RowMenuOption(props: Props) {
@@ -29,10 +32,23 @@ function RowMenuOption(props: Props) {
         bgColor={"inherit"}
       />
       <MenuList>
+        {props.editRole && (
+          <MenuItem onClick={props.editRoleCallback} icon={<EditRoleIcon />}>
+            Change role
+          </MenuItem>
+        )}
         {props.edit && <MenuItem icon={<EditIcon />}>Edit</MenuItem>}
-        {props.detail && <MenuItem onClick={props.detailCallback} icon={<DetailIcon />}>Detail</MenuItem>}
+        {props.detail && (
+          <MenuItem onClick={props.detailCallback} icon={<DetailIcon />}>
+            Detail
+          </MenuItem>
+        )}
         {props.upgrade && <MenuItem icon={<UpgradeIcon />}>Upgrade</MenuItem>}
-        {props.remove && <MenuItem  icon={<DeleteIcon />}>Delete</MenuItem>}
+        {props.remove && (
+          <MenuItem onClick={props.onRemoveClick} icon={<DeleteIcon />}>
+            Delete
+          </MenuItem>
+        )}
       </MenuList>
     </Menu>
   );

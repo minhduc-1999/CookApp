@@ -12,6 +12,19 @@ import { useColorModeValue } from "@chakra-ui/color-mode";
 import { GrUpgrade } from "react-icons/gr";
 import { AiOutlineFieldTime, AiOutlineStar } from "react-icons/ai";
 import { RiEyeLine, RiEyeOffLine } from "react-icons/ri";
+import { FaUserEdit } from "react-icons/fa";
+
+export const EditRoleIcon = () => {
+  let color = useColorModeValue("black", "white");
+  return (
+    <Icon
+      as={FaUserEdit}
+      alignItems="center"
+      justifyContent="center"
+      color={color}
+    />
+  );
+}
 
 export const EyeSlashIcon = () => {
   let color = useColorModeValue("black", "white");

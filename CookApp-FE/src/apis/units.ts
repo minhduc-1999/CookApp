@@ -22,7 +22,7 @@ export const getUnits = async (
   limit: number,
   q = ""
 ): Promise<[UnitResponse[], PageMetadata]> => {
-  await networkChecking()
+  await networkChecking();
   return axios
     .get(baseUrl + "/units", {
       headers: {
@@ -42,7 +42,7 @@ export const getUnits = async (
 };
 
 export const createUnit = async (data: CreateUnitBody): Promise<void> => {
-  await networkChecking()
+  await networkChecking();
   return axios
     .post(baseUrl + "/units", data, {
       headers: {
@@ -61,5 +61,24 @@ export const createUnit = async (data: CreateUnitBody): Promise<void> => {
       )
         throw new Error("Unit has already existed");
       throw new Error("Failed to create new unit");
+    });
+};
+
+export const deleteUnit = async (unitId: string): Promise<void> => {
+  await networkChecking();
+  return axios
+    .delete(baseUrl + `/units/${unitId}`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
+    .then((res: AxiosResponse<BaseResponse>) => {
+      if (res.data.meta.ok) return;
+      throw new Error("Fail to delete unit");
+    })
+    .catch((err: AxiosError<BaseResponse>) => {
+      console.log(err)
+      throw new Error("Fail to delete unit");
     });
 };

@@ -9,19 +9,19 @@ export enum UserErrorCode {
   POST_NOT_FOUND = "post_not_found",
   POST_NOT_SAVED = "post_not_saved",
   POST_SAVED_ALREADY = "post_saved_already",
-  COMMENT_NOT_FOUND = "comment_not_found" ,
+  COMMENT_NOT_FOUND = "comment_not_found",
   FOOD_NOT_FOUND = "food_not_found",
   ALBUM_NOT_FOUND = "album_not_found",
   CONVERSATION_NOT_FOUND = "conversation_not_found",
   MESSAGE_NOT_FOUND = "message_not_found",
   VOTE_NOT_FOUND = "vote_not_found",
-  UNIT_ALREADY_EXISTED= "unit_already_existed",
-  INGREDIENT_ALREADY_EXISTED= "ingredient_already_existed",
-  TOPIC_ALREADY_EXISTED= "topic_already_existed",
+  UNIT_ALREADY_EXISTED = "unit_already_existed",
+  INGREDIENT_ALREADY_EXISTED = "ingredient_already_existed",
+  TOPIC_ALREADY_EXISTED = "topic_already_existed",
   FOOD_ALREADY_CONFIRMED = "food_already_confirmed",
   FOOD_ALREADY_SAVED = "food_already_saved",
   OLD_PASSWORD_NOT_CORRECT = "old_password_not_correct",
-  FOOD_NOT_SAVE = "food_not_save"
+  FOOD_NOT_SAVE = "food_not_save",
 }
 
 export enum InteractiveTargetType {
@@ -162,11 +162,11 @@ export type UserResponse = AuditResponse & {
 
 export type UnitResponse = {
   name: string;
-};
+} & AuditResponse;
 
 export type IngredientResponse = {
   name: string;
-};
+} & AuditResponse;
 
 export type FoodIngredientResponse = {
   name: string;

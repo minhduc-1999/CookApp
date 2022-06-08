@@ -33,7 +33,7 @@ function IngredientTable({ ingredients, curPage, limit }: Props) {
 
   useEffect(() => {
     getList(curPage);
-  }, [curPage]);
+  }, [curPage, ingredients]);
 
   return (
     <TableContainer w="100%">
