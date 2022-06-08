@@ -201,12 +201,13 @@ const StepAddingRow = ({ step, onChange, onDelete }: StepAddingRowProps) => {
 type CreateFoodModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSaveCb: () => void
 };
 
 const INIT_UNIT_SIZE = 50;
 const INIT_INGREDIENT_SIZE = 50;
 
-const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
+const CreateFoodModal = ({ isOpen, onClose , onSaveCb}: CreateFoodModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [stepList, setStepList] = useState<string[]>([]);
   const [ingredientList, setIngredientList] = useState<Ingredient[]>([]);
@@ -625,6 +626,7 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
                       position: "top-right",
                     });
                     onClose();
+                    onSaveCb()
                   })
                   .catch(() => {
                     toast({

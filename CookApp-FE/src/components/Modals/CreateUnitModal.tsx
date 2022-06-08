@@ -20,9 +20,10 @@ import { useEffect, useRef, useState } from "react";
 type CreateUnitModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSaveCb: () => void
 };
 
-const CreateUnitModal = ({ isOpen, onClose }: CreateUnitModalProps) => {
+const CreateUnitModal = ({ isOpen, onClose , onSaveCb}: CreateUnitModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [canSave, setCanSave] = useState(true);
@@ -110,6 +111,7 @@ const CreateUnitModal = ({ isOpen, onClose }: CreateUnitModalProps) => {
                       position: "top-right",
                     });
                     onClose();
+                    onSaveCb()
                   })
                   .catch((err: Error) => {
                     toast({

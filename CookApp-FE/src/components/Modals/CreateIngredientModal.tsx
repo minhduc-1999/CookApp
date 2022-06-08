@@ -20,11 +20,13 @@ import { useEffect, useRef, useState } from "react";
 type CreateIngredientModalProps = {
   isOpen: boolean;
   onClose: () => void;
+  onSaveCb: () => void;
 };
 
 const CreateIngredientModal = ({
   isOpen,
   onClose,
+  onSaveCb
 }: CreateIngredientModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
@@ -113,6 +115,7 @@ const CreateIngredientModal = ({
                       position: "top-right",
                     });
                     onClose();
+                    onSaveCb()
                   })
                   .catch(() => {
                     toast({

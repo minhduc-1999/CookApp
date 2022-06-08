@@ -22,7 +22,7 @@ import React from "react";
 import DelelteAlertDialog from "components/Alert/DeleteAlertDialog";
 import { useAuth } from "contexts/Auth/Auth";
 
-const INIT_PAGE_SIZE = 3;
+const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
 
 type TabContextType = {
@@ -169,7 +169,14 @@ const IngredientTabPanel = () => {
             </Flex>
           </Card>
         )}
-        <CreateIngredientModal isOpen={isOpen} onClose={onClose} />
+        <CreateIngredientModal
+          isOpen={isOpen}
+          onClose={onClose}
+          onSaveCb={() => {
+            setIngredientLoading(true);
+            fetchIngredientData(INIT_CUR_PAGE, ingredientPageSize, true);
+          }}
+        />
         <DelelteAlertDialog
           title="Delete ingredient"
           isOpen={isModalOpen}

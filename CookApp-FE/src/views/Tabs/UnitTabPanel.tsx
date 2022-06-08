@@ -22,7 +22,7 @@ import DelelteAlertDialog from "components/Alert/DeleteAlertDialog";
 import React from "react";
 import { useAuth } from "contexts/Auth/Auth";
 
-const INIT_PAGE_SIZE = 3;
+const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
 
 type TabContextType = {
@@ -170,7 +170,14 @@ const UnitTabPanel = () => {
             </Flex>
           </Card>
         )}
-        <CreateUnitModal isOpen={isOpen} onClose={onClose} />
+        <CreateUnitModal
+          isOpen={isOpen}
+          onClose={onClose}
+          onSaveCb={() => {
+            setUnitLoading(true);
+            fetchUnitData(INIT_CUR_PAGE, unitPageSize, true);
+          }}
+        />
         <DelelteAlertDialog
           title="Delete unit"
           isOpen={isModalOpen}

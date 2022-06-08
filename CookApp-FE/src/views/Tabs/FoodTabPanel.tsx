@@ -170,7 +170,14 @@ const FoodTabPanel = () => {
             </Flex>
           </Card>
         )}
-        <CreateFoodModal isOpen={isOpen} onClose={onClose} />
+        <CreateFoodModal
+          isOpen={isOpen}
+          onClose={onClose}
+          onSaveCb={() => {
+            setFoodLoading(true);
+            fetchFoodData(INIT_CUR_PAGE, foodPageSize, true);
+          }}
+        />
         <DelelteAlertDialog
           title="Delete food"
           isOpen={isModalOpen}
