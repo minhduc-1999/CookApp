@@ -31,7 +31,7 @@ function UnitTable({ units, curPage, limit }: Props) {
 
   useEffect(() => {
     getList(curPage);
-  }, [curPage]);
+  }, [curPage, units]);
 
   return (
     <TableContainer w="100%">

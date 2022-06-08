@@ -1,11 +1,8 @@
-import {
-  Td,
-  Text,
-  Tr,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import { Td, Text, Tr, useColorModeValue } from "@chakra-ui/react";
 import { UnitResponse } from "apis/base.type";
 import RowMenuOption from "components/Menu/RowMenuOption";
+import { useContext } from "react";
+import { UnitTabContext } from "views/Tabs/UnitTabPanel";
 
 type Props = {
   data: UnitResponse;
@@ -13,9 +10,11 @@ type Props = {
 };
 
 function UnitRow(props: Props) {
-  const { name } = props.data;
+  const { name, id } = props.data;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
+
+  const tabContext = useContext(UnitTabContext);
 
   return (
     <Tr>
@@ -32,7 +31,12 @@ function UnitRow(props: Props) {
       </Td>
 
       <Td isNumeric w="8px">
-        <RowMenuOption remove/>
+        <RowMenuOption
+          remove
+          onRemoveClick={() => {
+            tabContext?.onRemoveTrigger && tabContext.onRemoveTrigger(id);
+          }}
+        />
       </Td>
     </Tr>
   );

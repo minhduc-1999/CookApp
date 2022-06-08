@@ -78,7 +78,7 @@ export const deleteUnit = async (unitId: string): Promise<void> => {
       throw new Error("Fail to delete unit");
     })
     .catch((err: AxiosError<BaseResponse>) => {
-      console.log(err)
+      if (err?.response?.status === 404) return
       throw new Error("Fail to delete unit");
     });
 };

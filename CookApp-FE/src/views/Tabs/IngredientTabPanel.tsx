@@ -94,7 +94,9 @@ const IngredientTabPanel = () => {
     const ingredientList = ingredients[nextPage];
     if (!ingredientList || ingredientList.length !== ingredientPageSize) {
       if (nextPage === totalIngredientPage) {
-        if (ingredientList?.length === totalIngredient % ingredientPageSize) {
+        const remain =
+          totalIngredient - (totalIngredientPage - 1) * ingredientPageSize;
+        if (ingredientList?.length === remain) {
           setCurrentIngredientPage(nextPage);
           return;
         }
@@ -167,6 +169,7 @@ const IngredientTabPanel = () => {
         )}
         <CreateIngredientModal isOpen={isOpen} onClose={onClose} />
         <DelelteAlertDialog
+          title="Delete ingredient"
           isOpen={isModalOpen}
           onClose={onModalClose}
           onDelete={onDeleteIngredient}

@@ -11,11 +11,12 @@ import {
 import { useRef, useState } from "react";
 
 type Props = {
+  title: string;
   isOpen: boolean;
   onClose: () => void;
   onDelete: () => Promise<void>;
 };
-const DelelteAlertDialog = ({ isOpen, onClose, onDelete }: Props) => {
+const DelelteAlertDialog = ({ isOpen, onClose, onDelete, title }: Props) => {
   const cancelRef = useRef<HTMLButtonElement>(null);
   const [deleting, setDeleting] = useState(false);
   const toast = useToast();
@@ -55,7 +56,7 @@ const DelelteAlertDialog = ({ isOpen, onClose, onDelete }: Props) => {
       <AlertDialogOverlay>
         <AlertDialogContent>
           <AlertDialogHeader fontSize="lg" fontWeight="bold">
-            Delete ingredient
+            {title}
           </AlertDialogHeader>
 
           <AlertDialogBody>
