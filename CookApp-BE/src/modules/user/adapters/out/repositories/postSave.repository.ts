@@ -54,6 +54,7 @@ export class SavedPostRepository extends BaseRepository implements ISavedPostRep
       .leftJoinAndSelect("post.foodRef", "foodRef")
       .leftJoinAndSelect("foodRef.medias", "foodMedias")
       .where("user.id = :userId", { userId: user.id })
+      .orderBy("saved.updatedAt", "DESC")
       .skip(queryOpt.limit * queryOpt.offset)
       .take(queryOpt.limit)
       .getManyAndCount()

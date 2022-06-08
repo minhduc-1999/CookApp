@@ -59,6 +59,7 @@ export class IngredientRepository
   async getIngredients(query: PageOptionsDto): Promise<[Ingredient[], number]> {
     const [ingredientEntities, total] = await this._ingredientRepo.findAndCount(
       {
+        order: { updatedAt: "DESC" },
         skip: query.limit * query.offset,
         take: query.limit,
       }

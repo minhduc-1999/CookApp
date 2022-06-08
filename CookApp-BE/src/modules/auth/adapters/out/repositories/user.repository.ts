@@ -24,6 +24,9 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   ): Promise<[User[], number]> {
     const [entities, total] = await this._repo.findAndCount({
       relations: ["account", "account.role"],
+      order: {
+        updatedAt: "DESC"
+      },
       skip: queryOpt.limit * queryOpt.offset,
       take: queryOpt.limit,
     });

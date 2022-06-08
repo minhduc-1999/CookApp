@@ -74,6 +74,9 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
         },
         type,
       },
+      order: {
+        updatedAt: "DESC"
+      },
       skip: limit * offset,
       take: limit,
     });
@@ -195,6 +198,9 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
       where: {
         status: FoodStatusType.CONFIRMED,
       },
+      order: {
+        updatedAt: "DESC"
+      },
       skip: query.limit * query.offset,
       take: query.limit,
     });
@@ -220,6 +226,7 @@ export class FoodRepository extends BaseRepository implements IFoodRepository {
         "stepInter",
         "stepMedia",
       ])
+      .orderBy("food.updatedAt", "ASC")
       .skip(query.limit * query.offset)
       .take(query.limit)
       .getManyAndCount();

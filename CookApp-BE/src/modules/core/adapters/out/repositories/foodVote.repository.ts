@@ -59,6 +59,9 @@ export class FoodVoteRepository
           id: food.id,
         },
       },
+      order: {
+        updatedAt: "DESC"
+      },
       skip: query.limit * query.offset,
       take: query.limit,
     });

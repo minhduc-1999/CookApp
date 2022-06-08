@@ -53,6 +53,7 @@ export class UnitRepository extends BaseRepository implements IUnitRepository {
 
   async getUnits(query: PageOptionsDto): Promise<[Unit[], number]> {
     const [unitEntities, total] = await this._unitRepo.findAndCount({
+      order: { updatedAt: "DESC" },
       skip: query.limit * query.offset,
       take: query.limit,
     });
