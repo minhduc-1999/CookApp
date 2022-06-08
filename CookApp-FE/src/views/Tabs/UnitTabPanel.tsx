@@ -20,6 +20,7 @@ import { FaPlus } from "react-icons/fa";
 import CreateUnitModal from "components/Modals/CreateUnitModal";
 import DelelteAlertDialog from "components/Alert/DeleteAlertDialog";
 import React from "react";
+import { useAuth } from "contexts/Auth/Auth";
 
 const INIT_PAGE_SIZE = 3;
 const INIT_CUR_PAGE = 1;
@@ -33,6 +34,7 @@ export const UnitTabContext = React.createContext<TabContextType | undefined>(
 
 const UnitTabPanel = () => {
   const textColor = useColorModeValue("gray.700", "white");
+  const { user } = useAuth();
 
   const [units, setUnits] = useState<{
     [key: number]: UnitResponse[];
@@ -67,7 +69,7 @@ const UnitTabPanel = () => {
     size: number,
     removeFollowingPage = false
   ) => {
-    getUnits(page, size)
+    getUnits(user?.accessToken, page, size)
       .then((data) => {
         const [unitResult, metadata] = data;
         if (metadata.totalPage !== totalUnitPage)
@@ -115,7 +117,7 @@ const UnitTabPanel = () => {
 
   const onDeleteUnit = async () => {
     if (deleteId === "") throw new Error("Some thing went wrong");
-    return deleteUnit(deleteId)
+    return deleteUnit(deleteId, user?.accessToken)
       .then(() => {
         setDeleteId("");
         reloadFromPage(currentUnitPage);

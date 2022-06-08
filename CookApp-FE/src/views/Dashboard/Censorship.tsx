@@ -26,6 +26,7 @@ import { confirmFood, getUncensoredFood } from "apis/foods";
 import Card from "components/Card/Card";
 import { RatingIcon, ServingIcon, TotalTimeIcon } from "components/Icons/Icons";
 import Spinner from "components/Spinner";
+import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
 
 const INIT_PAGE_SIZE = 10;
@@ -41,6 +42,7 @@ function Censorship() {
   const [curPage, setCurPage] = useState(0);
   const toast = useToast();
   const foodListRef = useRef<HTMLDivElement>(null);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchFoodData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
@@ -67,7 +69,7 @@ function Censorship() {
   const fetchFoodData = (page: number, size: number) => {
     if (page === curPage || page > totalFoodPage) return;
     setFoodLoading(true);
-    getUncensoredFood(page, size)
+    getUncensoredFood(user?.accessToken, page, size)
       .then((data) => {
         const [foodResList, metadata] = data;
         if (metadata?.page) setCurPage(metadata.page);
@@ -84,7 +86,7 @@ function Censorship() {
       });
   };
   const onDismissed = (foodId: string) => {
-    confirmFood(foodId, "dismissed")
+    confirmFood(foodId, "dismissed", user?.accessToken)
       .then(() => {
         const temp = foods.filter((food) => food.id !== foodId);
         setFoods(temp);
@@ -108,7 +110,7 @@ function Censorship() {
       });
   };
   const onConfirmFood = (foodId: string) => {
-    confirmFood(foodId, "confirmed")
+    confirmFood(foodId, "confirmed", user?.accessToken)
       .then(() => {
         const temp = foods.filter((food) => food.id !== foodId);
         setFoods(temp);

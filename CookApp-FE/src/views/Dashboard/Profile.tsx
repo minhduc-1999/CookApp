@@ -27,10 +27,10 @@ function Profile() {
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [passwordError, setChangePasswordError] = useState("");
   const [profile, setProfile] = useState<GetProfileResponse | null>(null);
-  const auth = useAuth();
+  const { user } = useAuth();
 
   useEffect(() => {
-    getProfile().then((profile) => {
+    getProfile(user?.accessToken).then((profile) => {
       setProfile(profile);
     });
   }, []);
@@ -69,7 +69,7 @@ function Profile() {
   };
 
   const onSaveChangePassword = () => {
-    changePassword({ oldPassword, newPassword })
+    changePassword({ oldPassword, newPassword }, user?.accessToken)
       .then(() => {
         clear();
         toast({
@@ -162,7 +162,7 @@ function Profile() {
                   color={emailColor}
                   fontWeight="semibold"
                 >
-                  {auth?.user?.email}
+                  {user?.email}
                 </Text>
               </Flex>
             </Flex>

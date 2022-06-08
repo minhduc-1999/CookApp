@@ -16,6 +16,7 @@ import {
 import { uploadImageToStorage } from "apis/storage";
 import { canSaveTopic, createTopic } from "apis/topics";
 import UploadedImage from "components/UploadedImage";
+import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 
@@ -36,6 +37,7 @@ const CreateTopicModal = ({
   const [saving, setSaving] = useState(false);
   const [topicCover, setTopicCover] = useState<ImageListType>([]);
   const toast = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     let checkSavingInterval: NodeJS.Timer;
@@ -70,11 +72,17 @@ const CreateTopicModal = ({
   };
 
   const saveTopic = async () => {
-    const photoObjectName = await uploadImageToStorage(topicCover[0]);
-    await createTopic({
-      title,
-      cover: photoObjectName,
-    });
+    const photoObjectName = await uploadImageToStorage(
+      topicCover[0],
+      user?.accessToken
+    );
+    await createTopic(
+      {
+        title,
+        cover: photoObjectName,
+      },
+      user?.accessToken
+    );
   };
 
   const resetModal = () => {

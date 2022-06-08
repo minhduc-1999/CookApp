@@ -6,7 +6,7 @@ import {
   UnitResponse,
   UserErrorCode,
 } from "./base.type";
-import { baseUrl, token } from "./token";
+import { apiUrl } from "./service.config";
 
 type CreateUnitBody = {
   name: string;
@@ -18,13 +18,15 @@ export const canSaveUnit = (body: CreateUnitBody) => {
 };
 
 export const getUnits = async (
+  token: string | undefined,
   page: number,
   limit: number,
   q = ""
 ): Promise<[UnitResponse[], PageMetadata]> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .get(baseUrl + "/units", {
+    .get(apiUrl + "/units", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -41,10 +43,11 @@ export const getUnits = async (
     });
 };
 
-export const createUnit = async (data: CreateUnitBody): Promise<void> => {
+export const createUnit = async (data: CreateUnitBody, token: string | undefined): Promise<void> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .post(baseUrl + "/units", data, {
+    .post(apiUrl + "/units", data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -64,10 +67,10 @@ export const createUnit = async (data: CreateUnitBody): Promise<void> => {
     });
 };
 
-export const deleteUnit = async (unitId: string): Promise<void> => {
+export const deleteUnit = async (unitId: string, token: string | undefined): Promise<void> => {
   await networkChecking();
   return axios
-    .delete(baseUrl + `/units/${unitId}`, {
+    .delete(apiUrl + `/units/${unitId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

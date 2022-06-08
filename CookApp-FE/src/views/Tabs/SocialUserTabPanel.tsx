@@ -26,6 +26,7 @@ import { RoleResponse, UserResponse } from "apis/base.type";
 import UserTable from "components/Tables/UserTable";
 import { changeRole, getUsers } from "apis/users";
 import { getRoles } from "apis/roles";
+import { useAuth } from "contexts/Auth/Auth";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
@@ -36,11 +37,12 @@ const INIT_ROLE_PAGE = 1;
 type TabContextType = {
   onChangeRoleTrigger: (userId: string) => void;
 };
-export const SocialUserTabContext = React.createContext<TabContextType | undefined>(
-  undefined
-);
+export const SocialUserTabContext = React.createContext<
+  TabContextType | undefined
+>(undefined);
 
 const SocialUserTabPanel = () => {
+  const { user } = useAuth();
   const textColor = useColorModeValue("gray.700", "white");
   const [users, setUsers] = useState<{
     [key: number]: UserResponse[];
@@ -65,14 +67,16 @@ const SocialUserTabPanel = () => {
 
   useEffect(() => {
     fetchData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
-    getRoles(INIT_ROLE_PAGE, INIT_ROLE_PAGE_SIZE).then((data) => {
-      const [roles] = data;
-      setRoleList(roles);
-    });
+    getRoles(user?.accessToken, INIT_ROLE_PAGE, INIT_ROLE_PAGE_SIZE).then(
+      (data) => {
+        const [roles] = data;
+        setRoleList(roles);
+      }
+    );
   }, []);
 
   const fetchData = (page: number, size: number) => {
-    getUsers(page, size)
+    getUsers(user?.accessToken, page, size)
       .then((data) => {
         const [usersResult, metadata] = data;
         if (metadata.totalPage !== totalUserPage)
@@ -178,7 +182,10 @@ const SocialUserTabPanel = () => {
                   onClick={() => {
                     setSaving(true);
                     if (role) {
-                      changeRole({ sign: role, userId: changeRoleUserId })
+                      changeRole(
+                        { sign: role, userId: changeRoleUserId },
+                        user?.accessToken
+                      )
                         .then(() => {
                           toast({
                             title: "Successfully",
@@ -187,7 +194,7 @@ const SocialUserTabPanel = () => {
                             isClosable: true,
                             position: "top-right",
                           });
-                          fetchData(currentPage, pageSize)
+                          fetchData(currentPage, pageSize);
                         })
                         .catch((err: Error) => {
                           toast({

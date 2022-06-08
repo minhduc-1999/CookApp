@@ -18,6 +18,7 @@ import UserTable from "components/Tables/UserTable";
 import { FaPlus } from "react-icons/fa";
 import CreateSystemUserModal from "components/Modals/CreateSystemUserModal";
 import { getUsers } from "apis/users";
+import { useAuth } from "contexts/Auth/Auth";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
@@ -37,12 +38,14 @@ const SystemlUserTabPanel = () => {
     initialState: { currentPage: INIT_CUR_PAGE, pageSize: INIT_PAGE_SIZE },
   });
 
+  const { user } = useAuth();
+
   useEffect(() => {
     fetchData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
   }, []);
 
   const fetchData = (page: number, size: number) => {
-    getUsers(page, size)
+    getUsers(user?.accessToken, page, size)
       .then((data) => {
         const [usersResult, metadata] = data;
         if (metadata.totalPage !== totalUserPage)

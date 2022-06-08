@@ -14,6 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { canSaveIngredient, createIngredient } from "apis/ingredients";
+import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
 
 type CreateIngredientModalProps = {
@@ -30,6 +31,7 @@ const CreateIngredientModal = ({
   const [canSave, setCanSave] = useState(true);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     let checkSavingInterval: NodeJS.Timer;
@@ -96,9 +98,12 @@ const CreateIngredientModal = ({
               colorScheme="teal"
               onClick={() => {
                 setSaving(true);
-                createIngredient({
-                  name,
-                })
+                createIngredient(
+                  {
+                    name,
+                  },
+                  user?.accessToken
+                )
                   .then(() => {
                     toast({
                       title: "Ingredient created",

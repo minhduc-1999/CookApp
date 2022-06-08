@@ -28,6 +28,7 @@ import { FoodResponse } from "apis/base.type";
 import { getFoodDetail } from "apis/foods";
 import { RatingIcon, ServingIcon, TotalTimeIcon } from "components/Icons/Icons";
 import Spinner from "components/Spinner";
+import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useState } from "react";
 
 type FoodDetailModalProps = {
@@ -39,9 +40,10 @@ type FoodDetailModalProps = {
 const FoodDetailModal = ({ isOpen, onClose, foodId }: FoodDetailModalProps) => {
   const [food, setFood] = useState<FoodResponse>();
   const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   useEffect(() => {
     if (foodId) {
-      getFoodDetail(foodId).then((res) => {
+      getFoodDetail(foodId, user?.accessToken).then((res) => {
         setFood(res);
         setLoading(false);
       });

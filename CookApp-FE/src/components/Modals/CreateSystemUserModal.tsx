@@ -16,6 +16,7 @@ import {
 } from "@chakra-ui/react";
 import { RoleResponse } from "apis/base.type";
 import { canSaveSystemUser, CreateSystemUserBody } from "apis/users";
+import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
 import { getRoles } from "../../apis/roles";
 
@@ -42,6 +43,7 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
   const [saving, setSaving] = useState(false);
   const [roleList, setRoleList] = useState<RoleResponse[]>([]);
   const toast = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     let checkSavingInterval: NodeJS.Timer;
@@ -56,7 +58,7 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
   }, [isOpen, username]);
 
   useEffect(() => {
-    getRoles(INIT_PAGE, INIT_PAGE_SIZE).then((data) => {
+    getRoles(user?.accessToken, INIT_PAGE, INIT_PAGE_SIZE).then((data) => {
       const [roles] = data;
       setRoleList(roles);
     });

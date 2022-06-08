@@ -6,7 +6,7 @@ import {
   TopicResponse,
   UserErrorCode,
 } from "./base.type";
-import { baseUrl, token } from "./token";
+import { apiUrl } from "./service.config";
 
 type CreateTopicBody = {
   title: string;
@@ -19,13 +19,15 @@ export const canSaveTopic = (body: CreateTopicBody) => {
 };
 
 export const getTopics = async (
+  token: string | undefined,
   page: number,
   limit: number,
   q = ""
 ): Promise<[TopicResponse[], PageMetadata]> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking()
   return axios
-    .get(baseUrl + "/topics", {
+    .get(apiUrl + "/topics", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -42,10 +44,11 @@ export const getTopics = async (
     });
 };
 
-export const createTopic = async (data: CreateTopicBody): Promise<void> => {
+export const createTopic = async (data: CreateTopicBody, token: string | undefined): Promise<void> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking()
   try {
-    const res = await axios.post(baseUrl + "/topics", data, {
+    const res = await axios.post(apiUrl + "/topics", data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

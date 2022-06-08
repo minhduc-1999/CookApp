@@ -20,6 +20,7 @@ import { FaPlus } from "react-icons/fa";
 import CreateIngredientModal from "components/Modals/CreateIngredientModal";
 import React from "react";
 import DelelteAlertDialog from "components/Alert/DeleteAlertDialog";
+import { useAuth } from "contexts/Auth/Auth";
 
 const INIT_PAGE_SIZE = 3;
 const INIT_CUR_PAGE = 1;
@@ -32,6 +33,7 @@ export const IngredientTabContext = React.createContext<
 >(undefined);
 
 const IngredientTabPanel = () => {
+  const { user } = useAuth();
   const textColor = useColorModeValue("gray.700", "white");
   const [ingredients, setIngredients] = useState<{
     [key: number]: IngredientResponse[];
@@ -65,7 +67,7 @@ const IngredientTabPanel = () => {
     size: number,
     removeFollowingPage = false
   ) => {
-    getIngredients(page, size)
+    getIngredients(user?.accessToken, page, size)
       .then((data) => {
         const [listResult, meta] = data;
         if (meta.totalPage !== totalIngredientPage)
@@ -114,7 +116,7 @@ const IngredientTabPanel = () => {
 
   const onDeleteIngredient = async () => {
     if (deleteId === "") throw new Error("Some thing went wrong");
-    return deleteIngredient(deleteId)
+    return deleteIngredient(deleteId, user?.accessToken)
       .then(() => {
         setDeleteId("");
         reloadFromPage(currentIngredientPage);

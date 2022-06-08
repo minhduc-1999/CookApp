@@ -1,7 +1,7 @@
 import axios from "axios";
 import { ImageType } from "react-images-uploading";
-import { baseUrl, token } from "./token";
-import { storage } from "./firebase";
+import { apiUrl } from "./service.config";
+import { storage } from "./firebase.config";
 import { ref, uploadBytes } from "firebase/storage";
 import { networkChecking } from "utils/network";
 
@@ -10,13 +10,14 @@ type SignedLinkResponseItem = {
   objectName: string;
 };
 
-export const uploadImageToStorage = async (data: ImageType | undefined) => {
+export const uploadImageToStorage = async (data: ImageType | undefined, token: string | undefined) => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking()
   if (!data || !data.file) throw new Error("No image found");
   try {
   const signedLinkItem: SignedLinkResponseItem = await axios
     .post(
-      baseUrl + "/storage/uploadSignedUrl",
+      apiUrl + "/storage/uploadSignedUrl",
       {
         fileNames: [data.file?.name],
       },

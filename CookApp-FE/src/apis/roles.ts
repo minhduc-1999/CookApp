@@ -1,16 +1,18 @@
 import axios from "axios";
 import { networkChecking } from "utils/network";
 import { PageMetadata, RoleResponse } from "./base.type";
-import { baseUrl, token } from "./token";
+import { apiUrl } from "./service.config";
 
 export const getRoles = async (
+  token: string | undefined,
   page: number,
   limit: number,
   q = ""
 ): Promise<[RoleResponse[], PageMetadata]> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking()
   return axios
-    .get(baseUrl + "/roles", {
+    .get(apiUrl + "/roles", {
       headers: {
         Authorization: `Bearer ${token}`,
       },

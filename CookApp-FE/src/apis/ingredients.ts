@@ -1,5 +1,5 @@
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { baseUrl, token } from "./token";
+import { apiUrl } from "./service.config";
 import { BaseResponse, IngredientResponse, PageMetadata } from "./base.type";
 import { networkChecking } from "utils/network";
 
@@ -14,13 +14,15 @@ export const canSaveIngredient = (body: CreateIngredientBody) => {
 };
 
 export const getIngredients = async (
+  token: string | undefined,
   page: number,
   limit: number,
   q = ""
 ): Promise<[IngredientResponse[], PageMetadata]> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .get(baseUrl + "/ingredients", {
+    .get(apiUrl + "/ingredients", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -38,11 +40,12 @@ export const getIngredients = async (
 };
 
 export const createIngredient = async (
-  data: CreateIngredientBody
+  data: CreateIngredientBody, token: string | undefined
 ): Promise<void> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .post(baseUrl + "/ingredients", data, {
+    .post(apiUrl + "/ingredients", data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -54,10 +57,11 @@ export const createIngredient = async (
     });
 };
 
-export const deleteIngredient = async (ingredientId: string): Promise<void> => {
+export const deleteIngredient = async (ingredientId: string, token: string | undefined): Promise<void> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .delete(baseUrl + `/ingredients/${ingredientId}`, {
+    .delete(apiUrl + `/ingredients/${ingredientId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

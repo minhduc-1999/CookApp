@@ -14,6 +14,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { canSaveUnit, createUnit } from "apis/units";
+import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
 
 type CreateUnitModalProps = {
@@ -27,6 +28,7 @@ const CreateUnitModal = ({ isOpen, onClose }: CreateUnitModalProps) => {
   const [canSave, setCanSave] = useState(true);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
+  const { user } = useAuth();
 
   useEffect(() => {
     let checkSavingInterval: NodeJS.Timer;
@@ -93,9 +95,12 @@ const CreateUnitModal = ({ isOpen, onClose }: CreateUnitModalProps) => {
               colorScheme="teal"
               onClick={() => {
                 setSaving(true);
-                createUnit({
-                  name,
-                })
+                createUnit(
+                  {
+                    name,
+                  },
+                  user?.accessToken
+                )
                   .then(() => {
                     toast({
                       title: "Unit created",

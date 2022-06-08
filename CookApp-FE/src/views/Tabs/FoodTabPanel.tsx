@@ -17,6 +17,7 @@ import CreateFoodModal from "components/Modals/CreateFoodModal";
 import Spinner from "components/Spinner";
 import FoodTable from "components/Tables/FoodTable";
 import Paginator from "components/Tables/Paginator";
+import { useAuth } from "contexts/Auth/Auth";
 import React from "react";
 import { useEffect, useState } from "react";
 import { FaPlus } from "react-icons/fa";
@@ -40,6 +41,7 @@ const FoodTabPanel = () => {
   const [foodloading, setFoodLoading] = useState(false);
   const [totalFoodPage, setTotalFoodPage] = useState(0);
   const [totalFood, setTotalFood] = useState(0);
+  const { user } = useAuth();
 
   const {
     currentPage: currentFoodPage,
@@ -67,7 +69,7 @@ const FoodTabPanel = () => {
     size: number,
     removeFollowingPage = false
   ) => {
-    getFoods(page, size)
+    getFoods(user?.accessToken, page, size)
       .then((data) => {
         const [foodResList, metadata] = data;
         if (metadata.totalPage !== totalFoodPage)
@@ -115,7 +117,7 @@ const FoodTabPanel = () => {
 
   const onDeleteFood = async () => {
     if (deleteId === "") throw new Error("Some thing went wrong");
-    return deleteFood(deleteId)
+    return deleteFood(deleteId, user?.accessToken)
       .then(() => {
         setDeleteId("");
         reloadFromPage(currentFoodPage);

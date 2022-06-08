@@ -6,7 +6,7 @@ import {
   ProfileResponse,
   UserErrorCode,
 } from "./base.type";
-import { baseUrl, token } from "./token";
+import { apiUrl } from "./service.config";
 
 export type Credential = {
   username: string;
@@ -42,9 +42,8 @@ export const validatePassword = (password: string) => {
 export const login = async (data: Credential): Promise<LoginResponse> => {
   await networkChecking();
   return axios
-    .post(baseUrl + "/login", data, {
+    .post(apiUrl + "/login", data, {
       headers: {
-        Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
       },
     })
@@ -65,10 +64,11 @@ type ChangePasswordBody = {
   newPassword: string;
 };
 
-export const changePassword = async (data: ChangePasswordBody) => {
+export const changePassword = async (data: ChangePasswordBody, token: string | undefined) => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .put(baseUrl + "/password/change", data, {
+    .put(apiUrl + "/password/change", data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -94,10 +94,11 @@ export type GetProfileResponse = ProfileResponse & {
   displayName: string;
 };
 
-export const getProfile = async (): Promise<GetProfileResponse> => {
+export const getProfile = async (token: string | undefined): Promise<GetProfileResponse> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .get(baseUrl + "/users/profile", {
+    .get(apiUrl + "/users/profile", {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

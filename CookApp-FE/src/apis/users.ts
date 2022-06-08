@@ -6,7 +6,7 @@ import {
   UserErrorCode,
   UserResponse,
 } from "./base.type";
-import { baseUrl, token } from "./token";
+import { apiUrl } from "./service.config";
 
 export type CreateSystemUserBody = {
   username: string;
@@ -30,13 +30,15 @@ export const canSaveSystemUser = (body: CreateSystemUserBody) => {
 };
 
 export const getUsers = async (
+  token: string | undefined,
   page: number,
   limit: number,
   q = ""
 ): Promise<[UserResponse[], PageMetadata]> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .get(baseUrl + "/admin/users", {
+    .get(apiUrl + "/admin/users", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -58,10 +60,11 @@ type ChangeRoleBody = {
   userId: string;
 };
 
-export const changeRole = async (body: ChangeRoleBody) => {
+export const changeRole = async (body: ChangeRoleBody, token: string | undefined) => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .put(baseUrl + "/admin/change-role", body, {
+    .put(apiUrl + "/admin/change-role", body, {
       headers: {
         Authorization: `Bearer ${token}`,
       },

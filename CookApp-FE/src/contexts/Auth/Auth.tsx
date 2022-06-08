@@ -3,16 +3,18 @@ import { LoginResponse } from "apis/base.type";
 import { createContext, useContext, useState } from "react";
 import { Redirect, Route } from "react-router-dom";
 
-interface AuthContextType {
+interface AuthContextType  {
   user: LoginResponse | null;
   signIn: (cre: Credential, cb: () => void) => Promise<void>;
   signOut: (cb?: () => void) => Promise<void>;
 }
 
-const authContext = createContext<AuthContextType | null>(null);
+const authContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
-  return useContext(authContext);
+  const auth = useContext(authContext);
+  if (!auth) throw new Error("Not authorize")
+  return auth
 };
 
 export const useAuthUser = () => {

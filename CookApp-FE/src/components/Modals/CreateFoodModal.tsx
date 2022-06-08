@@ -35,6 +35,7 @@ import { getIngredients } from "apis/ingredients";
 import { uploadImageToStorage } from "apis/storage";
 import { getUnits } from "apis/units";
 import UploadedImage from "components/UploadedImage";
+import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
 import ImageUploading, { ImageListType } from "react-images-uploading";
 
@@ -197,31 +198,6 @@ const StepAddingRow = ({ step, onChange, onDelete }: StepAddingRowProps) => {
   );
 };
 
-const saveFood = async (foodReq: {
-  steps: string[];
-  name: string;
-  description?: string;
-  servings: number;
-  totalTime: number;
-  videoUrl?: string;
-  photos: ImageListType;
-  ingredients: Ingredient[];
-}) => {
-  const photoObjectName = await uploadImageToStorage(foodReq.photos[0]);
-  await createFood({
-    steps: foodReq.steps.map((step) => {
-      return { content: step };
-    }),
-    name: foodReq.name,
-    description: foodReq.description,
-    servings: foodReq.servings,
-    totalTime: foodReq.totalTime,
-    videoUrl: foodReq.videoUrl,
-    ingredients: foodReq.ingredients,
-    photos: [photoObjectName],
-  });
-};
-
 type CreateFoodModalProps = {
   isOpen: boolean;
   onClose: () => void;
@@ -247,6 +223,8 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
   const [units, setUnits] = useState<string[]>([]);
   const [ingredients, setIngredients] = useState<string[]>([]);
 
+  const { user } = useAuth();
+
   useEffect(() => {
     let checkSavingInterval: NodeJS.Timer;
     if (isOpen)
@@ -270,14 +248,14 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
 
   useEffect(() => {
     if (isOpen) {
-      getUnits(1, INIT_UNIT_SIZE).then((res) => {
+      getUnits(user?.accessToken, 1, INIT_UNIT_SIZE).then((res) => {
         const [unitItems, _] = res;
         const temp = unitItems.map((item) => item.name);
         setUnits(temp);
       });
-      getIngredients(1, INIT_INGREDIENT_SIZE).then((res) => {
+      getIngredients(user?.accessToken, 1, INIT_INGREDIENT_SIZE).then((res) => {
         const [ingreItems, _] = res;
-        const temp = ingreItems.map((item) => item.name)
+        const temp = ingreItems.map((item) => item.name);
         setIngredients(temp);
       });
     }
@@ -344,6 +322,37 @@ const CreateFoodModal = ({ isOpen, onClose }: CreateFoodModalProps) => {
       return;
     }
     setCanSave(true);
+  };
+
+  const saveFood = async (foodReq: {
+    steps: string[];
+    name: string;
+    description?: string;
+    servings: number;
+    totalTime: number;
+    videoUrl?: string;
+    photos: ImageListType;
+    ingredients: Ingredient[];
+  }) => {
+    const photoObjectName = await uploadImageToStorage(
+      foodReq.photos[0],
+      user?.accessToken
+    );
+    await createFood(
+      {
+        steps: foodReq.steps.map((step) => {
+          return { content: step };
+        }),
+        name: foodReq.name,
+        description: foodReq.description,
+        servings: foodReq.servings,
+        totalTime: foodReq.totalTime,
+        videoUrl: foodReq.videoUrl,
+        ingredients: foodReq.ingredients,
+        photos: [photoObjectName],
+      },
+      user?.accessToken
+    );
   };
 
   const onUploadImagesChange = (

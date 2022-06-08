@@ -6,16 +6,18 @@ import {
   PageMetadata,
   UserErrorCode,
 } from "./base.type";
-import { baseUrl, token } from "./token";
+import { apiUrl } from "./service.config";
 
 export const getUncensoredFood = async (
+  token: string | undefined,
   page: number,
   limit: number,
   q = ""
 ): Promise<[FoodResponse[], PageMetadata]> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .get(baseUrl + "/foods/uncensored", {
+    .get(apiUrl + "/foods/uncensored", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -33,13 +35,15 @@ export const getUncensoredFood = async (
 };
 
 export const getFoods = async (
+  token: string | undefined,
   page: number,
   limit: number,
-  q = ""
+  q = "",
 ): Promise<[FoodResponse[], PageMetadata]> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .get(baseUrl + "/foods/censored", {
+    .get(apiUrl + "/foods/censored", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -56,10 +60,11 @@ export const getFoods = async (
     });
 };
 
-export const getFoodDetail = async (foodId: string): Promise<FoodResponse> => {
+export const getFoodDetail = async (foodId: string, token: string | undefined): Promise<FoodResponse> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .get(baseUrl + `/foods/${foodId}`, {
+    .get(apiUrl + `/foods/${foodId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
@@ -104,11 +109,12 @@ export const canSaveFood = (food: CreateFoodBody) => {
   return true;
 };
 
-export const createFood = async (data: CreateFoodBody): Promise<void> => {
+export const createFood = async (data: CreateFoodBody, token: string | undefined): Promise<void> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   if (!data.videoUrl) delete data.videoUrl;
   return axios
-    .post(baseUrl + "/foods", data, {
+    .post(apiUrl + "/foods", data, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",
@@ -122,12 +128,13 @@ export const createFood = async (data: CreateFoodBody): Promise<void> => {
 
 export const confirmFood = async (
   foodId: string,
-  type: "confirmed" | "dismissed"
+  type: "confirmed" | "dismissed", token: string | undefined
 ): Promise<void> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
     .patch(
-      baseUrl + `/foods/${foodId}/censorship`,
+      apiUrl + `/foods/${foodId}/censorship`,
       {
         type,
       },
@@ -152,10 +159,11 @@ export const confirmFood = async (
     });
 };
 
-export const deleteFood = async (foodId: string): Promise<void> => {
+export const deleteFood = async (foodId: string, token: string | undefined): Promise<void> => {
+  if (!token) throw new Error("Not login yet")
   await networkChecking();
   return axios
-    .delete(baseUrl + `/foods/${foodId}`, {
+    .delete(apiUrl + `/foods/${foodId}`, {
       headers: {
         Authorization: `Bearer ${token}`,
         "Content-Type": "application/json",

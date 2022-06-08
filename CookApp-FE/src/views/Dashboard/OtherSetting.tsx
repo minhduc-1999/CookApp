@@ -19,6 +19,7 @@ import { useEffect, useState } from "react";
 import { getTopics } from "apis/topics";
 import Spinner from "components/Spinner";
 import CreateTopicModal from "components/Modals/CreateTopicModal";
+import { useAuth } from "contexts/Auth/Auth";
 
 const INIT_TOPIC_PAGE_SIZE = 5;
 const INIT_TOPIC_PAGE = 1;
@@ -31,15 +32,20 @@ function OtherSetting() {
   const [totalTopic, setTotalTopic] = useState(0);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [refresh, setRefresh] = useState(false);
+  const { user } = useAuth();
 
   useEffect(() => {
     fetchTopics(INIT_TOPIC_PAGE, INIT_TOPIC_PAGE_SIZE);
     setTopicLoading(true);
   }, [refresh]);
 
-  const fetchTopics = async (page: number, size: number, isLoadMore = false) => {
+  const fetchTopics = async (
+    page: number,
+    size: number,
+    isLoadMore = false
+  ) => {
     try {
-      const [topicItems, meta] = await getTopics(page, size);
+      const [topicItems, meta] = await getTopics(user?.accessToken, page, size);
       if (isLoadMore) setTopics([...topics, ...topicItems]);
       else setTopics(topicItems);
       setNextTopicPage(page + 1);
