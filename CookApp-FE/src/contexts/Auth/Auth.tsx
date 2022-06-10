@@ -3,7 +3,7 @@ import { LoginResponse } from "apis/base.type";
 import { createContext, useContext, useState } from "react";
 import { Redirect, Route } from "react-router-dom";
 
-interface AuthContextType  {
+interface AuthContextType {
   user: LoginResponse | null;
   signIn: (cre: Credential, cb: () => void) => Promise<void>;
   signOut: (cb?: () => void) => Promise<void>;
@@ -13,8 +13,8 @@ const authContext = createContext<AuthContextType | undefined>(undefined);
 
 export const useAuth = () => {
   const auth = useContext(authContext);
-  if (!auth) throw new Error("Not authorize")
-  return auth
+  if (!auth) throw new Error("Not authorize");
+  return auth;
 };
 
 export const useAuthUser = () => {
@@ -35,6 +35,9 @@ const useProvideAuth = () => {
   const { user, setUser } = useAuthUser();
   const signIn = async (cre: Credential, cb: () => void) => {
     const response = await login(cre);
+    if (response.role !== "sys-admin") {
+      throw new Error("Wrong username or password");
+    }
     setUser(response);
     cb();
   };
