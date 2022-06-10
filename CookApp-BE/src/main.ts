@@ -20,12 +20,14 @@ const morganFormat =
   ':remote-addr - :remote-user [:date[clf]] ":method :url HTTP/:http-version" :status :res[content-length] ":referrer" ":user-agent" - :response-time ms';
 
 async function bootstrap() {
+  const allowedOrigins = JSON.parse(process.env.ALLOWED_ORIGINS)
+
   const app = await NestFactory.create<NestExpressApplication>(
     AppModule,
     new ExpressAdapter(),
     {
       cors: {
-        origin: ["http://localhost:8080"],
+        origin: allowedOrigins,
         credentials: true,
       },
     }
