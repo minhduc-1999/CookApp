@@ -1,4 +1,4 @@
-import { forwardRef, Module } from "@nestjs/common";
+import { Module } from "@nestjs/common";
 import { CqrsModule } from "@nestjs/cqrs";
 import { TypeOrmModule } from "@nestjs/typeorm";
 import { ConversationEntity, ConversationMemberEntity } from "entities/social/conversation.entity";
@@ -11,6 +11,7 @@ import { ConversationController } from "./adapters/in/conversation.controller";
 import { MessageController } from "./adapters/in/message.controller";
 import { ConversationRepository } from "./adapters/out/conversation.repository";
 import { MessageRepository } from "./adapters/out/message.repository";
+import { RealtimeService } from "./adapters/out/services/realtime.service";
 import { WsMiddlewareFactory } from "./adapters/out/wsMiddlewareFactory.service";
 import { ChatConnectCommandHandler } from "./usecases/chatConnect";
 import { ChatDisconnectCommandHandler } from "./usecases/chatDisconnect";
@@ -49,6 +50,10 @@ const repositories = [
   {
     provide: "IMessageRepository",
     useClass: MessageRepository
+  },
+  {
+    provide: "IRealtimeService",
+    useClass: RealtimeService
   }
 ]
 

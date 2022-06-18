@@ -1,4 +1,4 @@
-import { Body, Controller, Get, MessageEvent, Post, Req, Sse } from "@nestjs/common";
+import { Body, Controller, Get, MessageEvent, Post, Sse } from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";

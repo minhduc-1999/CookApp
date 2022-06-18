@@ -49,5 +49,6 @@ heroku config:set -a tastify-be RESET_PASSWORD_CALLBACK=$RESET_PASSWORD_CALLBACK
 heroku config:set -a tastify-be RESET_PASSWORD_PAGE_URL=$RESET_PASSWORD_PAGE_URL
 heroku config:set -a tastify-be LOGO_URL=$LOGO_URL
 heroku config:set -a tastify-be ALLOWED_ORIGINS=$ALLOWED_ORIGINS
+heroku config:set -a tastify-be ABLY_KEY=$ABLY_KEY
 
 heroku buildpacks:add -a tastify-be heroku/nodejs
