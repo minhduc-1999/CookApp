@@ -626,6 +626,17 @@ export class MessageResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   to: string;
 
+  @ApiPropertyOptional({
+    type: "object",
+    properties: {
+      width: {
+        type: "number",
+      },
+      height: {
+        type: "number",
+      },
+    },
+  })
   config: {
     width: number;
     height: number;

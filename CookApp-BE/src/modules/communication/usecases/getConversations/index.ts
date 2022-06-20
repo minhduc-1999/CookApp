@@ -4,7 +4,9 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { ConversationResponse } from "base/dtos/response.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
+import { Image } from "domains/social/media.domain";
 import { User } from "domains/social/user.domain";
+import { MessageContentType } from "enums/social.enum";
 import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
 import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
@@ -29,38 +31,54 @@ export class GetConversationsQueryHandler
     private _conversationRepo: IConversationRepository,
     @Inject("IStorageService")
     private _storageService: IStorageService
-  ) { }
-  async execute(query: GetConversationsQuery): Promise<GetConversationsResponse> {
+  ) {}
+  async execute(
+    query: GetConversationsQuery
+  ): Promise<GetConversationsResponse> {
     const { user, queryOptions } = query;
 
-    const [conversations, total] = await this._conversationRepo.findMany(user.id, queryOptions)
+    const [conversations, total] = await this._conversationRepo.findMany(
+      user.id,
+      queryOptions
+    );
 
     for (let conv of conversations) {
-      let members = await this._conversationRepo.getMembers(conv.id, 3)
-      members = members.filter(m => m.id !== user.id)
+      let members = await this._conversationRepo.getMembers(conv.id, 3);
+      members = members.filter((m) => m.id !== user.id);
       for (let member of members) {
-        [member.avatar] = await this._storageService.getDownloadUrls([member.avatar])
+        [member.avatar] = await this._storageService.getDownloadUrls([
+          member.avatar,
+        ]);
       }
-      conv.fillNameAndCover(members)
+      conv.fillNameAndCover(members);
     }
 
     let meta: PageMetadata;
     if (conversations.length > 0) {
-      meta = new PageMetadata(
-        queryOptions.offset,
-        queryOptions.limit,
-        total
-      );
+      meta = new PageMetadata(queryOptions.offset, queryOptions.limit, total);
     }
 
-    const tasks = conversations.map(async conv => {
-      const lastSeenMsg = await this._messageRepo.findLastSeenMessage(user.id, conv.id)
-      const isSeenAll = conv.isSeenAll(lastSeenMsg)
-      return new ConversationResponse(conv, isSeenAll)
-    })
+    const tasks = conversations.map(async (conv) => {
+      const lastSeenMsg = await this._messageRepo.findLastSeenMessage(
+        user.id,
+        conv.id
+      );
+      const isSeenAll = conv.isSeenAll(lastSeenMsg);
 
-    return await Promise.all(tasks).then(data => {
-      return new GetConversationsResponse(data, meta)
-    })
+      const { lastMessage } = conv
+
+      if (lastMessage.message.type === MessageContentType.IMAGE) {
+        conv.lastMessage.message.content = (
+          await this._storageService.getDownloadUrls([
+            new Image({ key: lastMessage.message.content }),
+          ])
+        )[0].url;
+      }
+      return new ConversationResponse(conv, isSeenAll);
+    });
+
+    return await Promise.all(tasks).then((data) => {
+      return new GetConversationsResponse(data, meta);
+    });
   }
 }
