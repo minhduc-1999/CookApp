@@ -5,58 +5,63 @@ import { User } from "./user.domain";
 export class Conversation extends Audit {
   type: ConversationType;
 
-  members: User[]
+  members: User[];
 
-  lastMessage: Message
+  lastMessage: Message;
 
-  cover: string
+  cover: string;
 
-  name: string
+  name: string;
 
   constructor(conversation: Partial<Conversation>) {
-    super(conversation)
-    this.type = conversation?.type
-    this.members = conversation?.members
-    this.lastMessage = conversation?.lastMessage
+    super(conversation);
+    this.type = conversation?.type;
+    this.members = conversation?.members;
+    this.lastMessage = conversation?.lastMessage;
   }
 
   isSeenAll(lastSeenMsg: Message): boolean {
-    if (!this.lastMessage)
-      return true
-    if (!lastSeenMsg)
-      return false
-    return lastSeenMsg.id === this.lastMessage.id
+    if (!this.lastMessage) return true;
+    if (!lastSeenMsg) return false;
+    return lastSeenMsg.id === this.lastMessage.id;
   }
 
   fillNameAndCover(members: User[]) {
-    this.cover = members[0].avatar.url
-    this.name = members[0].displayName
+    this.cover = members[0].avatar.url;
+    this.name = members[0].displayName;
   }
 }
 
+export type ImageConfig = {
+  width: number;
+  height: number;
+};
+
 export class Message extends Audit {
-  sender: User
+  sender: User;
 
-  message: MessageContent
+  message: MessageContent;
 
-  to: Conversation
+  to: Conversation;
 
   constructor(msg: Partial<Message>) {
-    super(msg)
-    this.sender = msg?.sender
-    this.message = msg?.message
-    this.to = msg?.to
+    super(msg);
+    this.sender = msg?.sender;
+    this.message = msg?.message;
+    this.to = msg?.to;
   }
 }
 
 export class MessageContent {
-  content: string
+  content: string;
 
-  type: MessageContentType
+  type: MessageContentType;
 
-  constructor(content: string, type: MessageContentType) {
-    this.content = content
-    this.type = type
+  config?: ImageConfig;
+
+  constructor(content: string, type: MessageContentType, config?: ImageConfig) {
+    this.content = content;
+    this.type = type;
+    this.config = config;
   }
 }
-

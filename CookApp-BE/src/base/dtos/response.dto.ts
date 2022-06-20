@@ -626,12 +626,18 @@ export class MessageResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   to: string;
 
+  config: {
+    width: number;
+    height: number;
+  };
+
   constructor(msg: Message) {
     super(msg);
     this.to = msg?.to?.id;
     this.content = msg?.message?.content;
     this.type = msg?.message?.type;
     this.sender = msg?.sender && new AuthorResponse(msg.sender);
+    this.config = msg?.message.config;
   }
 }
 

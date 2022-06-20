@@ -9,6 +9,16 @@ import { Media } from "domains/social/media.domain";
 import { MediaType } from "enums/social.enum";
 import { isNil } from "lodash";
 
+type FileTargetType =
+  | "post"
+  | "food"
+  | "recipe-step"
+  | "comment"
+  | "album"
+  | "avatar"
+  | "topic"
+  | "chat-image";
+
 export interface IStorageService {
   getUploadSignedLink(fileName: string): Promise<PreSignedLinkResponse>;
   setMetadata(objectName: string, meta: ObjectMetadata): Promise<any>;
@@ -19,14 +29,7 @@ export interface IStorageService {
   makePublic(
     objectNames: string[],
     mediaType: MediaType,
-    subPath:
-      | "post"
-      | "food"
-      | "recipe-step"
-      | "comment"
-      | "album"
-      | "avatar"
-      | "topic"
+    subPath: FileTargetType
   ): Promise<string[]>;
   getDownloadUrls(mediaArr: Media[]): Promise<Media[]>;
   deleteFiles(medias: Media[]): Promise<Media[]>;
@@ -48,15 +51,16 @@ export class FireBaseService implements IStorageService {
     temp: "temp/",
   };
 
-  private readonly _subPath = {
+  private readonly _subPath: Record<FileTargetType, string> = {
     post: "posts/",
     food: "foods/covers/",
     "recipe-step": "foods/step_photos/",
     album: "albums/",
     comment: "comments/",
     avatar: "avatars/",
-    topic: "topics/"
-  }
+    topic: "topics/",
+    "chat-image": "chat/images/",
+  };
   private bucket: Bucket;
 
   constructor(
@@ -73,10 +77,8 @@ export class FireBaseService implements IStorageService {
         file
           .delete({ ignoreNotFound: true })
           .then((res) => {
-            if (res[0].statusCode === 204) 
-              return media;
-            else 
-              return null;
+            if (res[0].statusCode === 204) return media;
+            else return null;
           })
           .catch((err) => {
             this.logger.error(err);
@@ -103,13 +105,7 @@ export class FireBaseService implements IStorageService {
   async makePublic(
     objectKeys: string[],
     mediaType: MediaType,
-    subPath:
-      | "post"
-      | "food"
-      | "recipe-step"
-      | "comment"
-      | "album"
-      | "avatar"
+    subPath: FileTargetType
   ): Promise<string[]> {
     if (!objectKeys || objectKeys.length === 0) return [];
     const tasks = [];
@@ -132,7 +128,7 @@ export class FireBaseService implements IStorageService {
           default:
             break;
         }
-        if (subPath) basePath += this._subPath[subPath]
+        if (subPath) basePath += this._subPath[subPath];
         tasks.push(
           file
             .move(basePath + getNameFromPath(name))
@@ -148,9 +144,13 @@ export class FireBaseService implements IStorageService {
         );
       }
     }
-    return Promise.all(tasks).then(() => {
-      return result;
-    });
+    return Promise.all(tasks)
+      .then(() => {
+        return result;
+      })
+      .catch((err) => {
+        throw err;
+      });
   }
 
   async setMetadata(objectName: string, meta: ObjectMetadata): Promise<any> {
@@ -183,7 +183,8 @@ export class FireBaseService implements IStorageService {
   ): Promise<PreSignedLinkResponse[]> {
     const tasks: Promise<PreSignedLinkResponse>[] = [];
     fileNames.forEach((file) => {
-      const objectName = this._storageTreeRoot.temp + addFilePrefix(file, userId);
+      const objectName =
+        this._storageTreeRoot.temp + addFilePrefix(file, userId);
       tasks.push(this.getUploadSignedLink(objectName));
     });
 

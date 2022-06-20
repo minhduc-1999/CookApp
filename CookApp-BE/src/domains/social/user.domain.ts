@@ -9,6 +9,7 @@ import { Reaction } from "./reaction.domain";
 import { IInteractable } from "domains/interfaces/IInteractable.interface";
 import { Comment } from "./comment.domain";
 import { Conversation, Message, MessageContent } from "./conversation.domain";
+import { SendMessageRequest } from "modules/communication/usecases/sendMessages/sendMessageRequest";
 
 export class Topic extends Audit {
   title: string;
@@ -113,15 +114,24 @@ export class User extends Audit {
     });
   }
 
-  inbox(
-    conv: Conversation,
-    content: string,
-    contentType: MessageContentType
-  ): Message {
-    return new Message({
-      to: conv,
-      sender: this,
-      message: new MessageContent(content, contentType),
-    });
+  inbox(conv: Conversation, reqDto: SendMessageRequest): Message {
+    const { message, type, imageContent } = reqDto;
+    switch (type) {
+      case MessageContentType.TEXT:
+        return new Message({
+          to: conv,
+          sender: this,
+          message: new MessageContent(message, type),
+        });
+      case MessageContentType.IMAGE:
+        return new Message({
+          to: conv,
+          sender: this,
+          message: new MessageContent(imageContent.image, type, {
+            width: imageContent.width,
+            height: imageContent.height,
+          }),
+        });
+    }
   }
 }

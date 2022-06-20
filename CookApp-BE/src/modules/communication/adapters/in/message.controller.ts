@@ -4,8 +4,15 @@ import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
 import { MessageResponse } from "base/dtos/response.dto";
 import { Result } from "base/result.base";
-import { ApiCreatedResponseCustom, ApiFailResponseCustom, ApiOKResponseCustom } from "decorators/apiSuccessResponse.decorator";
-import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
+import {
+  ApiCreatedResponseCustom,
+  ApiFailResponseCustom,
+  ApiOKResponseCustom,
+} from "decorators/apiSuccessResponse.decorator";
+import {
+  HttpParamTransaction,
+  HttpRequestTransaction,
+} from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { ChatEventType } from "modules/communication/events/eventType";
@@ -18,16 +25,14 @@ import { SpeakToBotCommand } from "modules/communication/usecases/speakToBot";
 import { SpeakToBotRequest } from "modules/communication/usecases/speakToBot/speakToBotRequest";
 import { SpeakToBotResponse } from "modules/communication/usecases/speakToBot/speakToBotResponse";
 import { TransmitMessagesQuery } from "modules/communication/usecases/transmitMessages";
+import { ParseSendMessageRequestPipe } from "pipes/parseSendMessageRequest.pipe";
 import { from, map, mergeMap, Observable } from "rxjs";
 
 @Controller("messages")
 @ApiTags("User/Chat")
 @ApiBearerAuth()
 export class MessageController {
-  constructor(
-    private _queryBus: QueryBus,
-    private _commandBus: CommandBus,
-  ) { }
+  constructor(private _queryBus: QueryBus, private _commandBus: CommandBus) {}
 
   @Get("status")
   @ApiFailResponseCustom()
@@ -45,7 +50,7 @@ export class MessageController {
   @ApiOKResponseCustom(SendMessageResponse, "Send message successfully")
   @HttpRequestTransaction()
   async sendMessage(
-    @Body() body: SendMessageRequest,
+    @Body(ParseSendMessageRequestPipe) body: SendMessageRequest,
     @HttpUserReq() user: User,
     @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<SendMessageResponse>> {
@@ -61,7 +66,7 @@ export class MessageController {
   @ApiOKResponseCustom(SpeakToBotResponse, "Successfully")
   async speakToBot(
     @Body() body: SpeakToBotRequest,
-    @HttpUserReq() user: User,
+    @HttpUserReq() user: User
   ): Promise<Result<SendMessageResponse>> {
     const command = new SpeakToBotCommand(user, body, null);
     const result = await this._commandBus.execute(command);
@@ -71,22 +76,24 @@ export class MessageController {
   }
 
   @Sse("sse")
-  getMessages(
-    @HttpUserReq() user: User,
-  ): Observable<MessageEvent> {
-    const query = new TransmitMessagesQuery(user)
+  getMessages(@HttpUserReq() user: User): Observable<MessageEvent> {
+    const query = new TransmitMessagesQuery(user);
 
-    const obs = from(this._queryBus.execute(query) as Promise<Observable<MessageResponse>>)
+    const obs = from(
+      this._queryBus.execute(query) as Promise<Observable<MessageResponse>>
+    );
 
     return obs.pipe(
-      mergeMap(ob => ob.pipe(
-        map(msgRes => {
-          return {
-            data: msgRes,
-            type: ChatEventType.OUT_MSG
-          }
-        })
-      ))
-    )
+      mergeMap((ob) =>
+        ob.pipe(
+          map((msgRes) => {
+            return {
+              data: msgRes,
+              type: ChatEventType.OUT_MSG,
+            };
+          })
+        )
+      )
+    );
   }
 }

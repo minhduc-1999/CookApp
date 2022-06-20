@@ -1,17 +1,53 @@
-import { ApiProperty } from "@nestjs/swagger"
-import { IsEnum, IsString, IsUUID } from "class-validator"
-import { MessageContentType } from "enums/social.enum"
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { Type } from "class-transformer";
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
+  Min,
+  ValidateNested,
+} from "class-validator";
+import { IsFileExtensions } from "decorators/isFileExtensions.decorator";
+import { MessageContentType } from "enums/social.enum";
+
+export class ImageContentRequest {
+  @ApiProperty({ type: String })
+  @IsString()
+  @IsFileExtensions(["jpeg", "png", "gif", "svg+xml", "jpg"])
+  @IsNotEmpty()
+  image: string;
+
+  @ApiProperty({ type: Number })
+  @IsNumber()
+  @Min(0)
+  width: number;
+
+  @ApiProperty({ type: Number })
+  @IsNumber()
+  @Min(0)
+  height: number;
+}
 
 export class SendMessageRequest {
   @ApiProperty({ type: String })
   @IsUUID()
-  to: string
+  to: string;
 
-  @ApiProperty({ type: String })
+  @ApiPropertyOptional({ type: String })
   @IsString()
-  message: string
+  @IsOptional()
+  message: string;
 
   @ApiProperty({ enum: MessageContentType })
   @IsEnum(MessageContentType)
-  type: MessageContentType
+  type: MessageContentType;
+
+  @ApiPropertyOptional({ type: ImageContentRequest })
+  @IsOptional()
+  @ValidateNested()
+  @Type(() => ImageContentRequest)
+  imageContent: ImageContentRequest;
 }

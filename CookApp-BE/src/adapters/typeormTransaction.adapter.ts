@@ -20,7 +20,6 @@ export class TypeOrmTransactionAdapter implements ITransaction {
   async beginTransaction(): Promise<void> {
     await this.queryRunner.connect()
     await this.queryRunner.startTransaction()
-    console.log("start transaction")
   }
   async commit(): Promise<void> {
     await this.queryRunner.commitTransaction()

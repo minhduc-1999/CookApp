@@ -1,6 +1,8 @@
 import {
   ForbiddenException,
   Inject,
+  InternalServerErrorException,
+  Logger,
   MethodNotAllowedException,
   NotFoundException,
 } from "@nestjs/common";
@@ -11,11 +13,16 @@ import { ResponseDTO } from "base/dtos/response.dto";
 import { Message } from "domains/social/conversation.domain";
 import { User } from "domains/social/user.domain";
 import { UserErrorCode } from "enums/errorCode.enum";
-import { ConversationType } from "enums/social.enum";
+import {
+  ConversationType,
+  MediaType,
+  MessageContentType,
+} from "enums/social.enum";
 import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
 import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
 import { IRealtimeService } from "modules/communication/adapters/out/services/realtime.service";
 import { NewMessageEvent } from "modules/communication/events/eventType";
+import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { SendMessageRequest } from "./sendMessageRequest";
 import { SendMessageResponse } from "./sendMessageResponse";
 
@@ -31,6 +38,7 @@ export class SendMessageCommand extends BaseCommand {
 export class SendMessageCommandHandler
   implements ICommandHandler<SendMessageCommand>
 {
+  private _logger = new Logger(SendMessageCommandHandler.name);
   constructor(
     @Inject("IConversationRepository")
     private _convRepo: IConversationRepository,
@@ -38,10 +46,14 @@ export class SendMessageCommandHandler
     private _msgRepo: IMessageRepository,
     private _eventBus: EventBus,
     @Inject("IRealtimeService")
-    private _realtimeService: IRealtimeService
+    private _realtimeService: IRealtimeService,
+    @Inject("IStorageService")
+    private _storageService: IStorageService
   ) {}
   async execute(command: SendMessageCommand): Promise<SendMessageResponse> {
     const { user, req, tx } = command;
+    let { type } = req;
+    const { imageContent } = req;
 
     //Check conversation existed
     const conversation = await this._convRepo.findById(req.to);
@@ -62,7 +74,20 @@ export class SendMessageCommandHandler
       throw new ForbiddenException(ResponseDTO.fail("Not in conversation"));
     }
 
-    let msg = user.inbox(conversation, req.message, req.type);
+    if (type === MessageContentType.IMAGE) {
+      const rawPath = imageContent.image;
+      [imageContent.image] = await this._storageService.makePublic(
+        [rawPath],
+        MediaType.IMAGE,
+        "chat-image"
+      );
+      if (!imageContent.image) {
+        this._logger.error(`Image [${rawPath}] not found`);
+        throw new InternalServerErrorException();
+      }
+    }
+
+    let msg = user.inbox(conversation, req);
 
     let result: Message;
 
