@@ -67,7 +67,7 @@ export class GetConversationsQueryHandler
 
       const { lastMessage } = conv
 
-      if (lastMessage.message.type === MessageContentType.IMAGE) {
+      if (lastMessage?.message.type === MessageContentType.IMAGE) {
         conv.lastMessage.message.content = (
           await this._storageService.getDownloadUrls([
             new Image({ key: lastMessage.message.content }),
