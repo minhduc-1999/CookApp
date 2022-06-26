@@ -9,7 +9,7 @@ export class GetConversationsResponse {
   @ApiResponseProperty({ type: PageMetadata })
   metadata: PageMetadata;
 
-  constructor(convRess: ConversationResponse[], meta: PageMetadata) {
+  constructor(convRess: ConversationResponse[], meta?: PageMetadata) {
     this.conversations = convRess
     this.metadata = meta;
   }

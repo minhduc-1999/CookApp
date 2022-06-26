@@ -46,6 +46,7 @@ export class GetConversationsQueryHandler
       const searchUserIds = await this._userRepo.findByDisplayName(
         queryOptions.q
       );
+      if (searchUserIds.length === 0) return new GetConversationsResponse([]);
       memberIds = searchUserIds.map((user) => user.id);
     }
 
