@@ -93,6 +93,8 @@ export class ConversationRepository
       .createQueryBuilder("conv")
       .leftJoin("conv.members", "member")
       .leftJoinAndSelect("conv.lastMessage", "message")
+      .leftJoinAndSelect("message.sender", "lastMsgSender")
+      .leftJoinAndSelect("lastMsgSender.user", "lastMsgSenderUser")
       .where("member.user_id = :userId", { userId })
       .orderBy("message.createdAt", "DESC", "NULLS LAST")
       .skip(queryOpt.limit * queryOpt.offset)

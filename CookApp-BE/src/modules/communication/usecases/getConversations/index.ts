@@ -65,7 +65,14 @@ export class GetConversationsQueryHandler
       );
       const isSeenAll = conv.isSeenAll(lastSeenMsg);
 
-      const { lastMessage } = conv
+      const { lastMessage } = conv;
+
+      if (lastMessage?.sender) {
+        [lastMessage.sender.avatar] =
+          await this._storageService.getDownloadUrls([
+            lastMessage.sender.avatar,
+          ]);
+      }
 
       if (lastMessage?.message.type === MessageContentType.IMAGE) {
         conv.lastMessage.message.content = (
