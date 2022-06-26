@@ -16,6 +16,16 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   ) {
     super();
   }
+  async findByDisplayName(displayName: string): Promise<User[]> {
+    const query = this._repo
+      .createQueryBuilder("user")
+      .where(`user.display_name LIKE :term`, { term: `${displayName}%` });
+
+    const entities = await query.getMany();
+
+    return entities?.map((entity) => entity.toDomain());
+  }
+
   async updateStatus(user: User, statusID?: string): Promise<void> {
     throw new Error("Method not implemented.");
   }
@@ -25,7 +35,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
     const [entities, total] = await this._repo.findAndCount({
       relations: ["account", "account.role"],
       order: {
-        updatedAt: "DESC"
+        updatedAt: "DESC",
       },
       skip: queryOpt.limit * queryOpt.offset,
       take: queryOpt.limit,

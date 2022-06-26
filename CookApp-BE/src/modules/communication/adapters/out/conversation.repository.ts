@@ -10,7 +10,7 @@ import {
   ConversationEntity,
   ConversationMemberEntity,
 } from "entities/social/conversation.entity";
-import { FindManyOptions, Not, QueryRunner, Repository } from "typeorm";
+import { FindManyOptions, QueryRunner, Repository } from "typeorm";
 
 export interface IConversationRepository {
   findById(id: string): Promise<Conversation>;
@@ -23,9 +23,10 @@ export interface IConversationRepository {
     memberId2: string
   ): Promise<Conversation>;
   findConversation(userId: string): Promise<Conversation[]>;
-  findMany(
+  findByUserIds(
     userId: string,
-    queryOpt: PageOptionsDto
+    queryOpt: PageOptionsDto,
+    otherMemberIds?: string[]
   ): Promise<[Conversation[], number]>;
   updateSeen(
     userId: string,
@@ -85,21 +86,33 @@ export class ConversationRepository
     }
   }
 
-  async findMany(
+  async findByUserIds(
     userId: string,
-    queryOpt: PageOptionsDto
+    queryOpt: PageOptionsDto,
+    otherMemberIds: string[] = []
   ): Promise<[Conversation[], number]> {
-    const [entities, total] = await this._conversationRepo
+    let query = this._conversationRepo
       .createQueryBuilder("conv")
       .leftJoin("conv.members", "member")
       .leftJoinAndSelect("conv.lastMessage", "message")
       .leftJoinAndSelect("message.sender", "lastMsgSender")
       .leftJoinAndSelect("lastMsgSender.user", "lastMsgSenderUser")
-      .where("member.user_id = :userId", { userId })
+      .where("member.user_id = :userId", { userId: userId });
+
+    if (otherMemberIds.length > 0) {
+      query = query
+      .leftJoin("conv.members", "member2")
+      .andWhere("member2.user_id IN (:...otherMemberIds)", {
+        otherMemberIds,
+      });
+    }
+
+    query = query
       .orderBy("message.createdAt", "DESC", "NULLS LAST")
       .skip(queryOpt.limit * queryOpt.offset)
-      .take(queryOpt.limit)
-      .getManyAndCount();
+      .take(queryOpt.limit);
+
+    const [entities, total] = await query.getManyAndCount();
 
     return [entities?.map((entity) => entity.toDomain()), total];
   }

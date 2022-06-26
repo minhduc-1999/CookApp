@@ -7,6 +7,7 @@ import { PageOptionsDto } from "base/pageOptions.base";
 import { Image } from "domains/social/media.domain";
 import { User } from "domains/social/user.domain";
 import { MessageContentType } from "enums/social.enum";
+import { IUserRepository } from "modules/auth/interfaces/repositories/user.interface";
 import { IConversationRepository } from "modules/communication/adapters/out/conversation.repository";
 import { IMessageRepository } from "modules/communication/adapters/out/message.repository";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
@@ -30,16 +31,28 @@ export class GetConversationsQueryHandler
     @Inject("IConversationRepository")
     private _conversationRepo: IConversationRepository,
     @Inject("IStorageService")
-    private _storageService: IStorageService
+    private _storageService: IStorageService,
+    @Inject("IUserRepository")
+    private _userRepo: IUserRepository
   ) {}
   async execute(
     query: GetConversationsQuery
   ): Promise<GetConversationsResponse> {
     const { user, queryOptions } = query;
 
-    const [conversations, total] = await this._conversationRepo.findMany(
+    let memberIds: string[] = [];
+
+    if (queryOptions.q) {
+      const searchUserIds = await this._userRepo.findByDisplayName(
+        queryOptions.q
+      );
+      memberIds = searchUserIds.map((user) => user.id);
+    }
+
+    const [conversations, total] = await this._conversationRepo.findByUserIds(
       user.id,
-      queryOptions
+      queryOptions,
+      memberIds
     );
 
     for (let conv of conversations) {

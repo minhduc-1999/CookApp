@@ -15,4 +15,5 @@ export interface IUserRepository {
   existAll(userIds: string[]): Promise<boolean>
   getUsersByIds(ids: string[]): Promise<User[]>
   getUserWithAccount(queryOpt: PageOptionsDto): Promise<[User[], number]>
+  findByDisplayName(displayName: string): Promise<User[]>
 }
