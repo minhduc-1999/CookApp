@@ -19,7 +19,7 @@ export class UserRepository extends BaseRepository implements IUserRepository {
   async findByDisplayName(displayName: string): Promise<User[]> {
     const query = this._repo
       .createQueryBuilder("user")
-      .where(`user.display_name ILIKE :term`, { term: `${displayName}%` });
+      .where(`user.display_name ILIKE :term`, { term: `%${displayName}%` });
 
     const entities = await query.getMany();
 
