@@ -37,9 +37,7 @@ class _NotificationSettingsActivityState
         title: Text(
           Config.notifications,
           style: TextStyle(
-              fontFamily: 'Billabong',
-              fontSize: 32,
-              fontStyle: FontStyle.italic),
+              ),
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(

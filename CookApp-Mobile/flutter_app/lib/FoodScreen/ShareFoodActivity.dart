@@ -105,7 +105,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                   }
                   List<String> tags = [];
                   for (var i in userTags){
-                    tags.add(i.id);
+                    tags.add(i.title);
                   }
                   print("object name " + objectName.length.toString());
                   await APIService.uploadPost(
@@ -318,11 +318,13 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                       isScrollControlled: true,
                       backgroundColor: Colors.transparent,
                     ).then((value){
-
-                      setState(() {
-                        userTags.add(value);
-
-                      });
+                      if (value != null) {
+                        if (!userTags.contains(value)) {
+                          setState(() {
+                            userTags.add(value);
+                          });
+                        }
+                      }
                       return FocusScope.of(context).unfocus();
 
                     });
@@ -350,7 +352,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                             child: Text(userTags[index].title, style: TextStyle(color: Colors.white),),
                           ),
                           decoration: BoxDecoration(
-                              color: userTags[index].title != "Gymer" ? Color(StringToHex.toColor(userTags[index])): Color(defaultTagsColor) ,
+                              color: userTags[index].title != "Gymer" ? Color(StringToHex.toColor(userTags[index].title)): Color(defaultTagsColor) ,
                               borderRadius: BorderRadius.circular(10)
                           ),
                         ),
@@ -385,6 +387,8 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
               title: Container(
                 width: 1000.0,
                 child: TextField(
+                  minLines: 1,
+                  maxLines: 6,
                   cursorColor: appPrimaryColor,
                   controller: descriptionController,
                   decoration: InputDecoration(

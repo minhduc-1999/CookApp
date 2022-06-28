@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
-import 'package:tastify/LoginScreen/LoginButton.dart';
-import 'package:tastify/LoginScreen/TextFieldContainer.dart';
+import 'Components/LoginButton.dart';
+import 'Components/TextFieldContainer.dart';
 import 'package:tastify/Model/RegisterRequestModel.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
@@ -9,8 +9,8 @@ import 'package:snippet_coder_utils/ProgressHUD.dart';
 
 import '../config.dart';
 import '../constants.dart';
-import 'RoundedPasswordFeild.dart';
-import 'RoundedTextField.dart';
+import 'Components/RoundedPasswordFeild.dart';
+import 'Components/RoundedTextField.dart';
 
 class SignUpActivity extends StatefulWidget {
   @override

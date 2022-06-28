@@ -41,7 +41,8 @@ class Config {
   static const String savedPostsAPI = "/api/users/posts/save";
   static const String changePasswordAPI = "/api/password/change";
   static const String albumAPI = "/api/users/albums";
-
+  static const String verifyEmailAPI = "/api/email-verification/callback";
+  static const String resetPasswordAPI = "/api/password/reset";
   static const String sendMessage = "/api/messages";
   static const String botAPI = "/api/messages/bot";
 
@@ -59,4 +60,6 @@ class Config {
   static const String shouldFoodType = "should";
   static const String shouldnotFoodType = "should_not";
   static const String foodUnsaved = "unsaved";
+  static const String messageTextType = "TEXT";
+  static const String messageImageType = "IMAGE";
 }

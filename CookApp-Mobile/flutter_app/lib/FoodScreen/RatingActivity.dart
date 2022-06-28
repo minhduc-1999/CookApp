@@ -2,7 +2,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:rating_bar_flutter/rating_bar_flutter.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
-import 'package:tastify/LoginScreen/LoginButton.dart';
+import '../LoginScreen/Components/LoginButton.dart';
 import 'package:tastify/Model/RatingFoodRequestModel.dart';
 import 'package:tastify/Model/UserVoteRespondModel.dart';
 import 'package:tastify/Model/VotesRespondModel.dart';

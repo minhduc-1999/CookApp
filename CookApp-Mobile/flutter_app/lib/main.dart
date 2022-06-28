@@ -1,3 +1,4 @@
+import 'package:api_cache_manager/utils/cache_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 //import 'package:firebase_messaging/firebase_messaging.dart';
@@ -9,6 +10,7 @@ import 'package:tastify/ChooseTopicScreen/ChooseTopicActivity.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
+import 'package:tastify/LoginScreen/VerifyActivity.dart';
 
 import 'package:tastify/UploadScreen/RecommendedPostActivity.dart';
 import 'dart:convert';
@@ -27,7 +29,6 @@ import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 String currentUserId;
 String role;
-Stream<SSEModel> sseModel;
 List<Topic> tagsInit = [];
 LoginRespondModel loginDetail;
 Widget _defaultHome = LoginActivity(
@@ -59,7 +60,7 @@ Future<void> main() async {
   if (isLoggedIn) {
     var loginDetails = await SharedService.loginDetails();
     var dataTags = await APIService.getTags();
-
+    tagsInit.clear();
     for (var i in dataTags.data.topics) {
       tagsInit.add(Topic(id: i.id,title: i.title));
 
@@ -68,12 +69,17 @@ Future<void> main() async {
     currentUserId = loginDetails.data.userId;
     role = loginDetails.data.role;
     var userTopic = await APIService.getUsersTopics();
-    await SharedService.chatSSEService();
+    await SharedService.chatService();
 
-    sseModel.listen((event) {
+    /*sseModel.listen((event) {
+      print("sse: aaa" );
       Map<dynamic,dynamic> data = json.decode(event.data);
       Observable.instance.notifyObservers(["_MessageActivityState","HomeActivityState","_ConversationsActivityState"], notifyName: "new_message",map: data);
     });
+    sseModel.handleError((e){
+      print("sse: error " + e );
+    });*/
+
     if (userTopic.data.topics.length > 0) {
       _defaultHome = HomeActivity(
             auth: Auth(),
@@ -81,9 +87,10 @@ Future<void> main() async {
     } else {
       _defaultHome = ChooseTopicActivity();
     }
-    //_defaultHome = ChooseTopicActivity();
+
     //_defaultHome = UploadActivity();
   }
+
   runApp(MyApp());
 }
 

@@ -296,7 +296,33 @@ class _UploadActivityState extends State<UploadActivity> {
                 ? LinearProgressIndicator()
                 : Padding(padding: EdgeInsets.only(top: 0.0)),
             Divider(),
-            Row(
+            ListTile(
+              leading: Container(
+                height: 45.0,
+                width: 45.0,
+                child: AspectRatio(
+                  aspectRatio: 487 / 451,
+                  child: Container(
+                    decoration: BoxDecoration(
+                        image: DecorationImage(
+                          fit: BoxFit.fill,
+                          alignment: FractionalOffset.topCenter,
+                          image: FileImage(files[0]),
+                        )),
+                  ),
+                ),
+              ),
+              title: Container(
+                width: 250.0,
+                child: TextField(
+                  controller: descriptionController,
+                  decoration: InputDecoration(
+                      hintText: "Write a caption...",
+                      border: InputBorder.none),
+                ),
+              ),
+            ),
+            /*Row(
               mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: <Widget>[
                 Container(
@@ -324,7 +350,7 @@ class _UploadActivityState extends State<UploadActivity> {
                   ),
                 ),
               ],
-            ),
+            ),*/
             Divider(),
             ListTile(
               leading: Icon(Icons.tag),

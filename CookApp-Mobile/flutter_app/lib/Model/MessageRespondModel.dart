@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:tastify/Model/ConversationsRespondModel.dart';
+
 
 
 MessageRespondModel messageRespondModel(String str) =>
@@ -85,7 +87,7 @@ class Messages {
   String type;
   Sender sender;
   String to;
-
+  ConfigImage config;
   Messages(
       {this.id,
         this.createdAt,
@@ -93,7 +95,8 @@ class Messages {
         this.content,
         this.type,
         this.sender,
-        this.to});
+        this.to,
+      this.config});
 
   Messages.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -104,6 +107,8 @@ class Messages {
     sender =
     json['sender'] != null ? new Sender.fromJson(json['sender']) : null;
     to = json['to'];
+    config =
+    json['config'] != null ? new ConfigImage.fromJson(json['config']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -117,6 +122,9 @@ class Messages {
       data['sender'] = this.sender.toJson();
     }
     data['to'] = this.to;
+    if (this.config != null) {
+      data['config'] = this.config.toJson();
+    }
     return data;
   }
 }

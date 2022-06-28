@@ -218,7 +218,7 @@ class _ChooseTopicActivityState extends State<ChooseTopicActivity> {
       ),
       topic.isSelected
           ? Positioned(
-              bottom: 130,
+              top: 10,
               right: 10,
               child: GestureDetector(
                 onTap: () async {},

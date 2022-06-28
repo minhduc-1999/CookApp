@@ -62,14 +62,26 @@ dependencies:
   accordion: ^2.1.2
   rating_bar_flutter: ^1.0.0
   string_to_hex: ^0.2.2
-
+  pinput: ^0.2.6
+  ably_flutter: ^1.2.14
+  image_size_getter: ^2.1.1
+  optimized_cached_image: ^3.0.0
 dev_dependencies:
   flutter_test:
     sdk: flutter
+  flutter_launcher_icons: ^0.9.2
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/images/diet.png"
+
   flutter_native_splash: ^1.3.2
 flutter_native_splash:
   color: "#ffffff"
   image: assets/images/diet.png
+
+
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

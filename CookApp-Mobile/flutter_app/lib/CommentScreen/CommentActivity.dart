@@ -368,6 +368,7 @@ class Comment extends StatefulWidget {
   final String targetType;
   final String targetId;
   final List<Medias> medias;
+
   Comment({
     this.displayName,
     this.userId,

@@ -15,7 +15,7 @@
         </intent>
     </queries>
    <application
-        android:label="tastify"
+        android:label="Tastify"
         android:icon="@mipmap/ic_launcher">
         <activity
             android:name=".MainActivity"

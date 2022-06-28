@@ -184,6 +184,7 @@ class _NewFeedActivityState extends State<NewFeedActivity> {
   }
 
   void _getMoreData() async {
+    print("get more");
     var listPosts = await APIService.getNewFeed(offset: this.offset,tag: "");
     List<Post> tempData = [];
     for (var i in listPosts.data.posts) {

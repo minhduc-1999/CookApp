@@ -62,17 +62,25 @@ class _ChangePasswordActivityState extends State<ChangePasswordActivity> {
     final Size size = MediaQuery.of(context).size;
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
+
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: appPrimaryColor),
+          icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
             Navigator.of(context).pop();
           },
         ),
         title: Text(
           "Change Password",
-          style: TextStyle(color: Colors.black),
+
+        ),
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.centerLeft,
+              end: Alignment.centerRight,
+              colors: <Color>[appPrimaryColor, appPrimaryColor],
+            ),
+          ),
         ),
 
       ),
@@ -92,7 +100,7 @@ class _ChangePasswordActivityState extends State<ChangePasswordActivity> {
       child: Column(
         children: [
           SizedBox(
-            height: size.height * 0.015,
+            height: size.height * 0.02,
           ),
           FormHelper.inputFieldWidget(
               context, "currentPassword", "Current Password",
