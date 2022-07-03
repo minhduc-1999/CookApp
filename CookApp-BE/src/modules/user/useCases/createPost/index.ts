@@ -28,6 +28,7 @@ import { Food } from "domains/core/food.domain";
 import { IFoodRepository } from "modules/core/adapters/out/repositories/food.repository";
 import { UserErrorCode } from "enums/errorCode.enum";
 import { PostCreatedEvent } from "domains/social/events/post.event";
+import { IPostSeService } from "modules/user/adapters/out/services/postSe.service";
 
 export class CreatePostCommand extends BaseCommand {
   req: CreatePostRequest;
@@ -48,7 +49,9 @@ export class CreatePostCommandHandler
     private _storageService: IStorageService,
     @Inject("IFoodRepository")
     private _foodRepo: IFoodRepository,
-    private _eventBus: EventBus
+    private _eventBus: EventBus,
+    @Inject("IPostSeService")
+    private _postSeService: IPostSeService
   ) {}
   async execute(command: CreatePostCommand): Promise<CreatePostResponse> {
     const { req, user, tx } = command;
@@ -159,6 +162,7 @@ export class CreatePostCommandHandler
     }
 
     const result = await this._postService.createPost(creatingPost, tx);
+    await this._postSeService.insertNewPostDoc(result);
     this._eventBus.publish(new PostCreatedEvent(result, user));
     return new CreatePostResponse(result);
   }

@@ -77,6 +77,9 @@ import { ReactCommandHandler } from "./useCases/react";
 import { SavePostCommandHandler } from "./useCases/savePost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
+import { PostSeService } from "./adapters/out/services/postSe.service";
+import { MongooseModule } from "@nestjs/mongoose";
+import { PostModel } from "./entities/se/post.schema";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -124,6 +127,10 @@ const services = [
   {
     provide: "ICommentService",
     useClass: CommentService,
+  },
+  {
+    provide: "IPostSeService",
+    useClass: PostSeService,
   },
 ];
 const repositories = [
@@ -194,6 +201,7 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
     AuthModule,
+    MongooseModule.forFeature([PostModel]),
     TypeOrmModule.forFeature([
       UserEntity,
       AccountEntity,
