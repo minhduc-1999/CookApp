@@ -4,13 +4,13 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
+/*import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';*/
 import 'package:image_picker/image_picker.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:string_to_hex/string_to_hex.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
-import 'package:location/location.dart' as loca;
+//import 'package:location/location.dart' as loca;
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
@@ -34,7 +34,7 @@ class ShareFoodActivity extends StatefulWidget {
 
 class _ShareFoodActivityState extends State<ShareFoodActivity> {
   Foods food;
-  Placemark userLocation;
+  //Placemark userLocation;
   bool isAPIcallProcess = false;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   bool circular = true;
@@ -55,7 +55,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
   void initState() {
     // TODO: implement initState
     super.initState();
-    _initLocation();
+    //_initLocation();
 
     fetchData();
 
@@ -113,7 +113,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         content: descriptionController.text,
                         images: objectName,
                         videos: video,
-                        location: locationController.text,
+
                         tags: tags,
                         kind: Config.postFoodShareType,
                         name: "string",
@@ -331,7 +331,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                   },
                 ),
               ),
-
+              Divider(),
               userTags.length <= 0 ?Container(
               ) : SizedBox(
                 height: 35,
@@ -397,7 +397,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
               ),
             ),
             Divider(),
-            ListTile(
+           /* ListTile(
               leading: Icon(Icons.pin_drop),
               title: Container(
                 width: 1000.0,
@@ -410,8 +410,8 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                 ),
               ),
             ),
-            Divider(),
-            (userLocation == null)
+            Divider(),*/
+           /* (userLocation == null)
                 ? Container()
                 : SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -423,11 +423,11 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         buildLocationButton(userLocation.administrativeArea),
                         buildLocationButton(userLocation.country),
                       ],
-                    ))
+                    ))*/
           ]));
   }
 
-  buildLocationButton(String locationName) {
+  /*buildLocationButton(String locationName) {
     if (locationName != null ?? locationName.isNotEmpty) {
       return InkWell(
         onTap: () {
@@ -506,7 +506,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
-  }
+  }*/
 
   Widget _buildFoodRef() {
     final Size size = MediaQuery.of(context).size;

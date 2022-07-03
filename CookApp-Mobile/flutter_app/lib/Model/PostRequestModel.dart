@@ -6,11 +6,11 @@ class PostRequestModel {
   String kind;
   String name;
 
-  String location;
+  //String location;
   String foodRefId;
   Should should;
   Should shouldNot;
-  PostRequestModel({this.content, this.images, this.videos, this.tags, this.kind, this.name, this.location,this.foodRefId, this.should, this.shouldNot});
+  PostRequestModel({this.content, this.images, this.videos, this.tags, this.kind, this.name,this.foodRefId, this.should, this.shouldNot});
 
 
   Map<String, dynamic> toJson() {
@@ -24,10 +24,10 @@ class PostRequestModel {
       data['videos'] = this.videos;
     }
     data['kind'] = this.kind;
-
+/*
     if (location != null) {
       data['location'] = this.location;
-    }
+    }*/
     if(foodRefId != null ){
       data['foodRefId'] = this.foodRefId;
     }

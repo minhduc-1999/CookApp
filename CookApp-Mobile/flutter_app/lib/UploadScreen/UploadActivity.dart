@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
-import 'package:geocoding/geocoding.dart';
+//import 'package:geocoding/geocoding.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
@@ -10,8 +10,8 @@ import 'package:tastify/ProfileScreen/EditProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:photo_manager/photo_manager.dart';
-import 'package:geolocator/geolocator.dart';
-import 'package:location/location.dart' as loca;
+/*import 'package:geolocator/geolocator.dart';
+import 'package:location/location.dart' as loca;*/
 import 'package:tastify/UploadScreen/TagsActivity.dart';
 import 'package:string_to_hex/string_to_hex.dart';
 import 'package:tastify/main.dart';
@@ -28,9 +28,9 @@ class _UploadActivityState extends State<UploadActivity> {
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   ImagePicker imagePicker = ImagePicker();
   bool circular = false;
-  Map<String, double> currentLocation = Map();
+  //Map<String, double> currentLocation = Map();
   TextEditingController descriptionController = TextEditingController();
-  TextEditingController locationController = TextEditingController();
+  //TextEditingController locationController = TextEditingController();
   bool uploading = false;
   List<AssetEntity> _selectedList = [];
   List<Widget> _photoList = [];
@@ -39,7 +39,7 @@ class _UploadActivityState extends State<UploadActivity> {
   int maxSelection = 1;
 
   List<Topic> userTags = [];
-  Placemark userLocation;
+  //Placemark userLocation;
 
   _handleScrollEvent(ScrollNotification scroll) {
     if (scroll.metrics.pixels / scroll.metrics.maxScrollExtent > 0.33) {
@@ -82,11 +82,11 @@ class _UploadActivityState extends State<UploadActivity> {
   initState() {
     //variables with location assigned as 0.0
     super.initState();
-    _initLocation();
+    //_initLocation();
     _fetchPhotos();
   }
 
-  _initLocation() async {
+  /*_initLocation() async {
     Position position = await _determinePosition();
     List<Placemark> placemarks =
         await placemarkFromCoordinates(position.latitude, position.longitude);
@@ -94,9 +94,9 @@ class _UploadActivityState extends State<UploadActivity> {
     setState(() {
       userLocation = placemarks[0];
     });
-  }
+  }*/
 
-  Future<Position> _determinePosition() async {
+  /*Future<Position> _determinePosition() async {
     bool serviceEnabled;
     LocationPermission permission;
     loca.Location location = new loca.Location();
@@ -135,7 +135,7 @@ class _UploadActivityState extends State<UploadActivity> {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
-  }
+  }*/
 
   @override
   Widget build(BuildContext context) {
@@ -263,7 +263,7 @@ class _UploadActivityState extends State<UploadActivity> {
                               content: descriptionController.text,
                               images: objectName,
                               videos: video,
-                              location: locationController.text,
+
                               tags: tags,
                               kind: "MOMENT",
                               name: "string"));
@@ -443,7 +443,7 @@ class _UploadActivityState extends State<UploadActivity> {
                       },
                     ),
                   ),
-            Divider(),
+           /* Divider(),
             ListTile(
               leading: Icon(Icons.pin_drop),
               title: Container(
@@ -455,11 +455,11 @@ class _UploadActivityState extends State<UploadActivity> {
                       border: InputBorder.none),
                 ),
               ),
-            )
+            )*/
           ],
         ),
         Divider(),
-        (userLocation == null)
+        /*(userLocation == null)
             ? Container()
             : SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
@@ -471,7 +471,7 @@ class _UploadActivityState extends State<UploadActivity> {
                     buildLocationButton(userLocation.administrativeArea),
                     buildLocationButton(userLocation.country),
                   ],
-                ))
+                ))*/
       ],
     );
   }
@@ -483,7 +483,7 @@ class _UploadActivityState extends State<UploadActivity> {
     });
   }
 
-  buildLocationButton(String locationName) {
+  /*buildLocationButton(String locationName) {
     if (locationName != null ?? locationName.isNotEmpty) {
       return InkWell(
         onTap: () {
@@ -511,7 +511,7 @@ class _UploadActivityState extends State<UploadActivity> {
     } else {
       return Container();
     }
-  }
+  }*/
 }
 
 class PhotoPickerItem extends StatefulWidget {
