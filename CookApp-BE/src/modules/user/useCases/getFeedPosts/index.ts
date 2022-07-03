@@ -4,6 +4,7 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { Post } from "domains/social/post.domain";
 import { User } from "domains/social/user.domain";
+import { ITopicRepository } from "modules/user/adapters/out/repositories/topic.repository";
 import { IFeedRepository } from "modules/user/interfaces/repositories/feed.interface";
 import { IPostRepository } from "modules/user/interfaces/repositories/post.interface";
 import { IReactionRepository } from "modules/user/interfaces/repositories/reaction.interface";
@@ -34,7 +35,9 @@ export class GetFeedPostsQueryHandler
     @Inject("IPostService")
     private _postService: IPostService,
     @Inject("IPostRepository")
-    private _postRepo: IPostRepository
+    private _postRepo: IPostRepository,
+    @Inject("ITopicRepository")
+    private _topicRepository: ITopicRepository
   ) {}
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { req, user } = query;
@@ -43,6 +46,14 @@ export class GetFeedPostsQueryHandler
     if (req.tag) {
       [posts, total] = await this._postRepo.getPostsByTag(req.tag, req);
     } else [posts, total] = await this._feedRepo.getPosts(user, req);
+
+    if (posts.length === 0) {
+      const topics = await this._topicRepository.getInterestTopics(user);
+      const tags = topics.map((topic) => topic.title);
+      if (topics.length > 0) {
+        [posts, total] = await this._postRepo.getPostsByTags(tags, req);
+      }
+    }
 
     posts = await this._postService.fulfillData(posts);
 

@@ -17,6 +17,43 @@ export class PostRepository extends BaseRepository implements IPostRepository {
     super();
   }
 
+  async getPostsByTags(
+    tags: string[],
+    queryOpt: PageOptionsDto
+  ): Promise<[Post[], number]> {
+    const query = this._postRepo
+      .createQueryBuilder("post")
+      .leftJoinAndSelect("post.author", "author")
+      .leftJoinAndSelect("author.account", "authorAccount")
+      .leftJoinAndSelect("authorAccount.role", "authorRole")
+      .leftJoinAndSelect("post.interaction", "interaction")
+      .leftJoinAndSelect("post.medias", "media")
+      .leftJoinAndSelect("media.interaction", "mediaInter")
+      .leftJoinAndSelect("post.foodRef", "foodRef")
+      .leftJoinAndSelect("foodRef.medias", "foodRefPhoto")
+      .leftJoinAndSelect("foodRef.author", "foodAuthor")
+      .where(`post.tags::jsonb ?| array${JSON.stringify(tags).replace(/"/g, `'`)}`)
+      .orderBy("interaction.updatedAt", "DESC")
+      .select([
+        "post",
+        "interaction",
+        "author.id",
+        "author.displayName",
+        "author.avatar",
+        "media",
+        "mediaInter",
+        "foodRef",
+        "foodRefPhoto",
+        "foodAuthor",
+        "authorAccount",
+        "authorRole",
+      ])
+      .skip(queryOpt.limit * queryOpt.offset)
+      .take(queryOpt.limit);
+    const [entities, total] = await query.getManyAndCount();
+    return [entities?.map((entity) => entity.toDomain()), total];
+  }
+
   async getPostsByTag(
     tag: string,
     queryOpt: PageOptionsDto

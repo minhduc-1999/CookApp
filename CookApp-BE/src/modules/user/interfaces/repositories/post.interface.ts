@@ -9,4 +9,5 @@ export interface IPostRepository {
   updatePost(post: Post, data: Partial<Post>): Promise<void>;
   setTransaction(tx: ITransaction): IPostRepository
   getPostsByTag(tag: string, query: PageOptionsDto): Promise<[Post[], number]>
+  getPostsByTags(tag: string[], query: PageOptionsDto): Promise<[Post[], number]>
 }

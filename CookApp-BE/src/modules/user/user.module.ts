@@ -128,10 +128,6 @@ const services = [
     provide: "ICommentService",
     useClass: CommentService,
   },
-  {
-    provide: "IPostSeService",
-    useClass: PostSeService,
-  },
 ];
 const repositories = [
   {
@@ -201,7 +197,6 @@ const repositories = [
       storage: { provider: ThirdPartyProviders.FIREBASE },
     }),
     AuthModule,
-    MongooseModule.forFeature([PostModel]),
     TypeOrmModule.forFeature([
       UserEntity,
       AccountEntity,
