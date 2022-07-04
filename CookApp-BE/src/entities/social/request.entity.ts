@@ -46,4 +46,14 @@ export class RequestEntity extends AbstractEntity {
       certificates: this.certificates?.map((cert) => cert.toDomain()),
     });
   }
+
+  constructor(request: Request) {
+    super(request);
+    this.type = request?.type;
+    this.status = request?.status;
+    this.sender = request?.sender && new UserEntity(request.sender);
+    this.certificates = request?.certificates?.map(
+      (cert) => new CertificateEntity(cert)
+    );
+  }
 }

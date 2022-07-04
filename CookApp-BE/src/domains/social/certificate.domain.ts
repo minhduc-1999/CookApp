@@ -12,6 +12,8 @@ export class Certificate extends Audit {
 
   image: Image
 
+  number: string
+
   constructor(obj: Partial<Certificate>) {
     super(obj);
     this.issueAt = obj?.issueAt;
@@ -19,5 +21,6 @@ export class Certificate extends Audit {
     this.title = obj?.title;
     this.expireAt = obj?.expireAt;
     this.image = obj?.image;
+    this.number = obj?.number
   }
 }

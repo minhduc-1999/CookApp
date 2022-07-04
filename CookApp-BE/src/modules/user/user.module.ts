@@ -77,9 +77,10 @@ import { ReactCommandHandler } from "./useCases/react";
 import { SavePostCommandHandler } from "./useCases/savePost";
 import { UnfolllowCommandHandler } from "./useCases/unfollow";
 import { UpdateProfileCommandHandler } from "./useCases/updateProfile";
-import { PostSeService } from "./adapters/out/services/postSe.service";
-import { MongooseModule } from "@nestjs/mongoose";
-import { PostModel } from "./entities/se/post.schema";
+import { SendRequestUseCase } from "./useCases/sendRequest";
+import { RequestEntity } from "entities/social/request.entity";
+import { CertificateEntity } from "entities/social/certificate.entity";
+import { RequestController } from "./adapters/in/request.controller";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -100,6 +101,7 @@ const commandHandlers = [
   EditAlbumCommandHandler,
   ChooseInterestsCommandHandler,
   CreateTopicCommandHandler,
+  SendRequestUseCase
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
@@ -213,6 +215,8 @@ const repositories = [
       AlbumMediaEntity,
       TopicEntity,
       UserTopicEntity,
+      RequestEntity,
+      CertificateEntity
     ]),
     forwardRef(() => CommunicationModule),
     forwardRef(() => CoreModule),
@@ -226,6 +230,7 @@ const repositories = [
     UserController,
     ReactionController,
     TopicController,
+    RequestController
   ],
   providers: [
     ...commandHandlers,

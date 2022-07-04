@@ -54,9 +54,14 @@ export type UnitPermissionType =
   | "read_unit"
   | "manage_unit";
 
-export type WallPermissionType = "read_wall_info"
+export type WallPermissionType = "read_wall_info";
 
-export type RolePermissionType = "manage_role"
+export type RolePermissionType = "manage_role";
+
+export type RequestPermissionType =
+  | "send_request"
+  | "read_request"
+  | "manage_request";
 
 export type PermisstionType =
   | PostPermissionType
@@ -69,3 +74,4 @@ export type PermisstionType =
   | UnitPermissionType
   | RolePermissionType
   | WallPermissionType
+  | RequestPermissionType;

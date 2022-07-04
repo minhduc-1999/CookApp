@@ -22,9 +22,21 @@ export class CertificateEntity extends AbstractEntity {
   @Column({ name: "image", nullable: false })
   image: string;
 
+  @Column({ name: "number", nullable: false, unique: true })
+  number: string;
+
   @ManyToOne(() => RequestEntity, { nullable: false })
   @JoinColumn({ name: "request_id" })
   request: RequestEntity;
+
+  constructor(obj: Certificate) {
+    super(obj);
+    this.title = obj?.title;
+    this.issueAt = obj?.issueAt;
+    this.issueBy = obj?.issueBy;
+    this.image = obj?.image?.key;
+    this.number = obj?.number;
+  }
 
   toDomain(): Certificate {
     const audit = new Audit(this);
@@ -35,6 +47,7 @@ export class CertificateEntity extends AbstractEntity {
       issueAt: this.issueAt,
       expireAt: this.expireAt,
       image: this.image && new Image({ key: this.image }),
+      number: this.number,
     });
   }
 }
