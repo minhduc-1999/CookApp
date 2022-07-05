@@ -17,7 +17,8 @@ type FileTargetType =
   | "album"
   | "avatar"
   | "topic"
-  | "chat-image";
+  | "chat-image"
+  | "certificate";
 
 export interface IStorageService {
   getUploadSignedLink(fileName: string): Promise<PreSignedLinkResponse>;
@@ -60,6 +61,7 @@ export class FireBaseService implements IStorageService {
     avatar: "avatars/",
     topic: "topics/",
     "chat-image": "chat/images/",
+    "certificate": "certificates/"
   };
   private bucket: Bucket;
 
