@@ -83,6 +83,8 @@ import { CertificateEntity } from "entities/social/certificate.entity";
 import { RequestController } from "./adapters/in/request.controller";
 import { RequestRepository } from "./adapters/out/repositories/request.repository";
 import { CertificateRepository } from "./adapters/out/repositories/certificate.repository";
+import { GetRequestsUseCase } from "./useCases/getRequests";
+import { CertificateService } from "./services/certificate.service";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -118,6 +120,7 @@ const queryHandlers = [
   GetAlbumDetailQueryHandler,
   GetTopicsQueryHandler,
   GetInterestedTopicsQueryHandler,
+  GetRequestsUseCase
 ];
 const services = [
   {
@@ -132,6 +135,10 @@ const services = [
     provide: "ICommentService",
     useClass: CommentService,
   },
+  {
+    provide: "ICertificateService",
+    useClass: CertificateService
+  }
 ];
 const repositories = [
   {

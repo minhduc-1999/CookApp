@@ -41,6 +41,10 @@ import { FoodVote } from "domains/core/foodVote.domain";
 import { RoleType } from "enums/system.enum";
 import { Account, Role } from "domains/social/account.domain";
 import { FoodSaveType } from "enums/core.enum";
+import { CertificateStatus } from "constants/certificate.constant";
+import { Certificate } from "domains/social/certificate.domain";
+import { Request } from "domains/social/request.domain";
+import { RequestStatus, RequestType } from "constants/request.constant";
 
 export class ResponseDTO<T> {
   constructor(meta: MetaDTO, data?: T) {
@@ -341,6 +345,67 @@ export class FoodResponse extends AuditResponse {
     this.videoUrl = food?.videoUrl;
     this.author = food?.author && new AuthorResponse(food.author);
     this.rating = food?.rating;
+  }
+}
+
+export class CertificateResponse extends AuditResponse {
+  @ApiResponseProperty({ type: String })
+  issueAt: string;
+
+  @ApiResponseProperty({ type: String })
+  issueBy: string;
+
+  @ApiResponseProperty({ type: String })
+  title: string;
+
+  @ApiResponseProperty({ type: String })
+  expireAt: string;
+
+  @ApiResponseProperty({ type: MediaResponse })
+  image: MediaResponse;
+
+  @ApiResponseProperty({ type: String })
+  number: string;
+
+  @ApiResponseProperty({ enum: CertificateStatus })
+  status: CertificateStatus;
+
+  @ApiResponseProperty({ type: AuthorResponse })
+  owner: AuthorResponse;
+
+  constructor(cert: Certificate) {
+    super(cert);
+    this.issueBy = cert?.issueBy;
+    this.issueAt = cert?.issueAt.toISOString();
+    this.title = cert?.title;
+    this.expireAt = cert?.expireAt.toISOString();
+    this.image = cert?.image && new MediaResponse(cert.image);
+    this.owner = cert?.owner && new AuthorResponse(cert.owner);
+    this.status = cert?.status;
+  }
+}
+
+export class RequestResponse extends AuditResponse {
+  @ApiResponseProperty({ enum: RequestStatus })
+  status: RequestStatus;
+
+  @ApiResponseProperty({ enum: RequestType })
+  type: RequestType;
+
+  @ApiResponseProperty({ type: AuthorResponse })
+  sender: AuthorResponse;
+
+  @ApiResponseProperty({ type: [CertificateResponse] })
+  certificates: CertificateResponse[];
+
+  constructor(request: Request) {
+    super(request);
+    this.status = request?.status;
+    this.type = request?.type;
+    this.sender = request?.sender && new AuthorResponse(request.sender);
+    this.certificates = request?.certificates?.map(
+      (cert) => new CertificateResponse(cert)
+    );
   }
 }
 

@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { PageOptionsDto } from "base/pageOptions.base";
 import { BaseRepository } from "base/repository.base";
 import { RequestStatus } from "constants/request.constant";
 import { Request } from "domains/social/request.domain";
@@ -12,6 +13,10 @@ export interface IRequestResitory {
   createRequest(request: Request): Promise<Request>;
   setTransaction(tx: ITransaction): IRequestResitory;
   getRequests(user: User, statuses: RequestStatus[]): Promise<Request[]>;
+  getRequestsPaggination(
+    user: User,
+    queryOpt: PageOptionsDto
+  ): Promise<[Request[], number]>;
 }
 
 @Injectable()
@@ -25,11 +30,24 @@ export class RequestRepository
   ) {
     super();
   }
+  async getRequestsPaggination(
+    user: User,
+    queryOpt: PageOptionsDto
+  ): Promise<[Request[], number]> {
+    let query = this._requestRepo
+      .createQueryBuilder("request")
+      .leftJoinAndSelect("request.certificates", "certs")
+      .where("request.senderId = :senderId", { senderId: user.id })
+      .skip(queryOpt.limit * queryOpt.offset)
+      .take(queryOpt.limit);
+    const [entities, total] = await query.getManyAndCount();
+    return [entities?.map((entity) => entity.toDomain()), total];
+  }
 
   async getRequests(user: User, statuses: RequestStatus[]): Promise<Request[]> {
     let query = this._requestRepo
       .createQueryBuilder("request")
-      .andWhere("request.senderId = :senderId", { senderId: user.id });
+      .where("request.senderId = :senderId", { senderId: user.id });
 
     if (statuses?.length > 0) {
       query = query.andWhere("request.status IN (:...statuses)", { statuses });
