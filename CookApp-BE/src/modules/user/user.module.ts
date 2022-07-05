@@ -85,6 +85,8 @@ import { RequestRepository } from "./adapters/out/repositories/request.repositor
 import { CertificateRepository } from "./adapters/out/repositories/certificate.repository";
 import { GetRequestsUseCase } from "./useCases/getRequests";
 import { CertificateService } from "./services/certificate.service";
+import { GetCertsUseCase } from "./useCases/getCertificates";
+import { CertificateController } from "./adapters/in/cert.controller";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -120,7 +122,8 @@ const queryHandlers = [
   GetAlbumDetailQueryHandler,
   GetTopicsQueryHandler,
   GetInterestedTopicsQueryHandler,
-  GetRequestsUseCase
+  GetRequestsUseCase,
+  GetCertsUseCase
 ];
 const services = [
   {
@@ -247,7 +250,8 @@ const repositories = [
     UserController,
     ReactionController,
     TopicController,
-    RequestController
+    RequestController,
+    CertificateController
   ],
   providers: [
     ...commandHandlers,
