@@ -24,7 +24,7 @@ import { contextMiddleware } from "./middleware/context.middleware";
   imports: [
     ConfigModule.load(path.resolve(__dirname, "config", "**/!(*.d).{ts,js}")),
     TypeOrmModule.forRootAsync({
-      useFactory: (config: ConfigService) => config.get('database'),
+      useFactory: (config: ConfigService) => config.get("database"),
       inject: [ConfigService],
     }),
     RavenModule,
@@ -42,11 +42,11 @@ import { contextMiddleware } from "./middleware/context.middleware";
           dbName: database,
         };
       },
-      inject: [ConfigService]
+      inject: [ConfigService],
     }),
     ServeStaticModule.forRoot({
-      rootPath: join(__dirname, '..', 'public')
-    })
+      rootPath: join(__dirname, "..", "public"),
+    }),
   ],
   controllers: [AppController],
   providers: [

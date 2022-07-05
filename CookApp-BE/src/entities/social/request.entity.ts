@@ -27,13 +27,13 @@ export class RequestEntity extends AbstractEntity {
   type: RequestType;
 
   @Column({ name: "sender_id" })
-  userId: string;
+  senderId: string;
 
   @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "sender_id" })
   sender: UserEntity;
 
-  @OneToMany(() => CertificateEntity, (cert) => cert.request)
+  @OneToMany(() => CertificateEntity, (cert) => cert.request, {cascade: ['insert']})
   certificates: CertificateEntity[];
 
   toDomain(): Request {

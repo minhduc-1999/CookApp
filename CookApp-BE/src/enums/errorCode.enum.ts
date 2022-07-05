@@ -22,5 +22,6 @@ export enum UserErrorCode {
   FOOD_ALREADY_SAVED = "food_already_saved",
   OLD_PASSWORD_NOT_CORRECT = "old_password_not_correct",
   FOOD_NOT_SAVE = "food_not_save",
-  ROLE_NOT_FOUND = "role_not_found"
+  ROLE_NOT_FOUND = "role_not_found",
+  REQUEST_ALREADY_EXISTED = "request_already_existed"
 }

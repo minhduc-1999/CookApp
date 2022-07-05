@@ -4,6 +4,7 @@ import { Audit } from "../../domains/audit.domain";
 import { Certificate } from "../../domains/social/certificate.domain";
 import { Image } from "../../domains/social/media.domain";
 import { RequestEntity } from "./request.entity";
+import { CertificateStatus } from "../../constants/certificate.constant";
 
 @Entity({ name: "certificates" })
 export class CertificateEntity extends AbstractEntity {
@@ -25,6 +26,14 @@ export class CertificateEntity extends AbstractEntity {
   @Column({ name: "number", nullable: false, unique: true })
   number: string;
 
+  @Column({
+    name: "status",
+    type: "enum",
+    enum: CertificateStatus,
+    default: CertificateStatus.WAITING
+  })
+  status: CertificateStatus
+
   @ManyToOne(() => RequestEntity, { nullable: false })
   @JoinColumn({ name: "request_id" })
   request: RequestEntity;
@@ -36,6 +45,8 @@ export class CertificateEntity extends AbstractEntity {
     this.issueBy = obj?.issueBy;
     this.image = obj?.image?.key;
     this.number = obj?.number;
+    this.status = obj?.status
+    this.expireAt = obj?.expireAt
   }
 
   toDomain(): Certificate {
@@ -48,6 +59,7 @@ export class CertificateEntity extends AbstractEntity {
       expireAt: this.expireAt,
       image: this.image && new Image({ key: this.image }),
       number: this.number,
+      status: this.status
     });
   }
 }

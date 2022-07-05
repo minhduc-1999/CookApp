@@ -1,3 +1,4 @@
+import { CertificateStatus } from "../../constants/certificate.constant";
 import { Audit } from "../../domains/audit.domain";
 import { Image } from "./media.domain";
 
@@ -10,9 +11,11 @@ export class Certificate extends Audit {
 
   expireAt: Date;
 
-  image: Image
+  image: Image;
 
-  number: string
+  number: string;
+
+  status: CertificateStatus;
 
   constructor(obj: Partial<Certificate>) {
     super(obj);
@@ -21,6 +24,19 @@ export class Certificate extends Audit {
     this.title = obj?.title;
     this.expireAt = obj?.expireAt;
     this.image = obj?.image;
-    this.number = obj?.number
+    this.number = obj?.number;
+    this.status = obj?.status;
+  }
+
+  isWaiting(): boolean {
+    return this.status === CertificateStatus.WAITING;
+  }
+
+  isConfirmed(): boolean {
+    return this.status === CertificateStatus.CONFIRMED;
+  }
+
+  isRejected(): boolean {
+    return this.status === CertificateStatus.REJECTED;
   }
 }

@@ -8,15 +8,24 @@ export class Request extends Audit {
 
   type: RequestType;
 
-  sender: User
+  sender: User;
 
-  certificates: Certificate[]
+  certificates: Certificate[];
 
   constructor(obj: Partial<Request>) {
     super(obj);
     this.status = obj?.status;
     this.type = obj?.type;
-    this.sender = obj?.sender
-    this.certificates = obj?.certificates
+    this.sender = obj?.sender;
+    this.certificates = obj?.certificates;
+  }
+
+  static createRequest(sender: User, certs: Certificate[]): Request {
+    const request = new Request({
+      sender,
+      certificates: certs,
+    });
+    request.status = RequestStatus.WAITING;
+    return request;
   }
 }

@@ -1,6 +1,9 @@
 import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
 import { Type } from "class-transformer";
 import {
+  ArrayMinSize,
+  ArrayUnique,
+  IsArray,
   IsEnum,
   IsNotEmpty,
   IsNumber,
@@ -10,6 +13,8 @@ import {
   ValidateNested,
 } from "class-validator";
 import { RequestType } from "constants/request.constant";
+import { Certificate } from "domains/social/certificate.domain";
+import { Image } from "domains/social/media.domain";
 
 export class CertificateRequestDTO {
   @ApiProperty({ type: String })
@@ -35,11 +40,22 @@ export class CertificateRequestDTO {
   @IsOptional()
   expireAt?: number;
 
-  @ApiProperty({type: String})
-  number: string
+  @ApiProperty({ type: String })
+  number: string;
 
-  @ApiProperty({type: String})
-  title: string
+  @ApiProperty({ type: String })
+  title: string;
+
+  toDomain(): Certificate {
+    return new Certificate({
+      title: this.title,
+      issueAt: new Date(this.issueAt),
+      issueBy: this.issueBy,
+      expireAt: new Date(this.expireAt),
+      image: new Image({ key: this.image }),
+      number: this.number
+    });
+  }
 }
 
 export class SendRequestRequestDTO {
@@ -50,5 +66,8 @@ export class SendRequestRequestDTO {
   @ApiProperty({ type: [CertificateRequestDTO] })
   @ValidateNested()
   @Type(() => CertificateRequestDTO)
+  @IsArray()
+  @ArrayMinSize(1)
+  @ArrayUnique(cert => cert.number)
   certs: CertificateRequestDTO[];
 }

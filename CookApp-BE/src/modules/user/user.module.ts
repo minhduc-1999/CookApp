@@ -81,6 +81,8 @@ import { SendRequestUseCase } from "./useCases/sendRequest";
 import { RequestEntity } from "entities/social/request.entity";
 import { CertificateEntity } from "entities/social/certificate.entity";
 import { RequestController } from "./adapters/in/request.controller";
+import { RequestRepository } from "./adapters/out/repositories/request.repository";
+import { CertificateRepository } from "./adapters/out/repositories/certificate.repository";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -187,6 +189,14 @@ const repositories = [
   {
     provide: "ITopicRepository",
     useClass: TopicRepository,
+  },
+  {
+    provide: "IRequestRepository",
+    useClass: RequestRepository,
+  },
+  {
+    provide: "ICertificateRepository",
+    useClass: CertificateRepository,
   },
 ];
 
