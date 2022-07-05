@@ -1,6 +1,7 @@
 import { CertificateStatus } from "../../constants/certificate.constant";
 import { Audit } from "../../domains/audit.domain";
 import { Image } from "./media.domain";
+import { User } from "./user.domain";
 
 export class Certificate extends Audit {
   issueAt: Date;
@@ -17,6 +18,8 @@ export class Certificate extends Audit {
 
   status: CertificateStatus;
 
+  owner: User
+
   constructor(obj: Partial<Certificate>) {
     super(obj);
     this.issueAt = obj?.issueAt;
@@ -26,6 +29,7 @@ export class Certificate extends Audit {
     this.image = obj?.image;
     this.number = obj?.number;
     this.status = obj?.status;
+    this.owner =  obj?.owner
   }
 
   isWaiting(): boolean {

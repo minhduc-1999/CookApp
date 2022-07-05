@@ -49,25 +49,27 @@ export class SendRequestUseCase implements ICommandHandler<SendRequestCommand> {
     }
 
     const newCertNumbers = certs.map((cert) => cert.number);
-    const existedCerts = await this._certRepo.getByNumbers(newCertNumbers, [
-      CertificateStatus.CONFIRMED,
-      CertificateStatus.WAITING,
-    ]);
+    const existedCerts = await this._certRepo.getByNumbers(
+      newCertNumbers,
+      user,
+      [CertificateStatus.CONFIRMED, CertificateStatus.REJECTED]
+    );
 
-    const existedWaitingCerts = existedCerts.filter((c) => c.isWaiting());
-    const existedWaitingCertNumbers = existedWaitingCerts.map((c) => c.id);
     const existedConfirmedCertNumbers = existedCerts
-      .filter((cert) => cert.isConfirmed())
-      .map((c) => c.id);
+      .filter((c) => c.isConfirmed())
+      .map((c) => c.number);
+
+    const existedRejectedCertNumbers = existedCerts
+      .filter((c) => c.isRejected())
+      .map((c) => c.number);
 
     const relatedCerts = certs
       .filter(
         (cert) =>
           !existedConfirmedCertNumbers.includes(cert.number) &&
-          !existedWaitingCertNumbers.includes(cert.number)
+          !existedRejectedCertNumbers.includes(cert.number)
       )
-      .map((c) => c.toDomain())
-      .concat(existedWaitingCerts);
+      .map((c) => c.toDomain(user));
 
     if (relatedCerts.length === 0) {
       throw new BadRequestException(

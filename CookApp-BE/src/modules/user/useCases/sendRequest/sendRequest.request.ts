@@ -5,16 +5,16 @@ import {
   ArrayUnique,
   IsArray,
   IsEnum,
+  IsISO8601,
   IsNotEmpty,
-  IsNumber,
   IsOptional,
-  IsPositive,
   IsString,
   ValidateNested,
 } from "class-validator";
 import { RequestType } from "constants/request.constant";
 import { Certificate } from "domains/social/certificate.domain";
 import { Image } from "domains/social/media.domain";
+import { User } from "domains/social/user.domain";
 
 export class CertificateRequestDTO {
   @ApiProperty({ type: String })
@@ -22,23 +22,19 @@ export class CertificateRequestDTO {
   @IsNotEmpty()
   issueBy: string;
 
-  @ApiProperty({ type: Number })
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
-  issueAt: number;
+  @ApiProperty({ type: String, default: "2022-07-05T16:23:47.174Z" })
+  @IsISO8601()
+  issueAt: string;
 
   @ApiProperty({ type: String })
   @IsString()
   @IsNotEmpty()
   image: string;
 
-  @ApiPropertyOptional({ type: Number })
-  @IsNumber()
-  @IsPositive()
-  @IsNotEmpty()
+  @ApiPropertyOptional({ type: String, default: "2022-07-05T17:09:25.000Z" })
+  @IsISO8601()
   @IsOptional()
-  expireAt?: number;
+  expireAt?: string;
 
   @ApiProperty({ type: String })
   number: string;
@@ -46,14 +42,15 @@ export class CertificateRequestDTO {
   @ApiProperty({ type: String })
   title: string;
 
-  toDomain(): Certificate {
+  toDomain(owner: User): Certificate {
     return new Certificate({
       title: this.title,
       issueAt: new Date(this.issueAt),
       issueBy: this.issueBy,
       expireAt: new Date(this.expireAt),
       image: new Image({ key: this.image }),
-      number: this.number
+      number: this.number,
+      owner,
     });
   }
 }
@@ -68,6 +65,6 @@ export class SendRequestRequestDTO {
   @Type(() => CertificateRequestDTO)
   @IsArray()
   @ArrayMinSize(1)
-  @ArrayUnique(cert => cert.number)
+  @ArrayUnique((cert) => cert.number)
   certs: CertificateRequestDTO[];
 }
