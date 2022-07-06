@@ -82,6 +82,7 @@ export class CertificateRepository
       where: {
         id: certId,
       },
+      relations: ["user"]
     });
     return entity?.toDomain();
   }

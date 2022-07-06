@@ -5,5 +5,9 @@ export enum NotificationTemplateEnum {
   CommentTemplate = "comment",
   FoodConfirmationTemplate = "food_confirmation",
   FoodDismissionTemplate = "food_dismission",
-  NewFoodTemplate = "new_food"
+  NewFoodTemplate = "new_food",
+  CertConfirmationTemplate = "cert_confirmation",
+  CertRejectionTemplate = "cert_rejection",
+  RequestConfirmationTemplate = "request_confirmation",
+  RequestRejectionTemplate = "request_rejection",
 }
