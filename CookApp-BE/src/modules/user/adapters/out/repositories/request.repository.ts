@@ -47,7 +47,7 @@ export class RequestRepository
       where: {
         id: requestId,
       },
-      relations: ["certificates"],
+      relations: ["certificates", "sender"],
     });
     return entity?.toDomain();
   }
