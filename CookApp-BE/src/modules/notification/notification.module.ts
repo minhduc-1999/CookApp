@@ -13,6 +13,7 @@ import { ConfigurationModule } from "modules/configuration/configuration.module"
 import { FoodConfirmedEventHandler } from "./events/FoodConfirmedNotification";
 import { NewFoodEventHandler } from "./events/NewFoodNotification";
 import { NotifyCertificateConfirmationUseCase } from "./events/NotifyCertConfirmed";
+import { NotifyCertificateRejectionUseCase } from "./events/NotifyCertRejection";
 
 const eventHandlers = [
   NewPostEventHandler,
@@ -21,7 +22,8 @@ const eventHandlers = [
   CommentPostEventHandler,
   FoodConfirmedEventHandler,
   NewFoodEventHandler,
-  NotifyCertificateConfirmationUseCase
+  NotifyCertificateConfirmationUseCase,
+  NotifyCertificateRejectionUseCase
 ];
 
 const repositories = [
