@@ -1,5 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { BaseRepository } from "base/repository.base";
 import { CertificateStatus } from "constants/certificate.constant";
 import { Certificate } from "domains/social/certificate.domain";
 import { User } from "domains/social/user.domain";
@@ -17,14 +19,28 @@ export interface ICertificateRepository {
     user: User,
     queryOpt: GetCertsRequest
   ): Promise<[Certificate[], number]>;
+  getById(certId: string): Promise<Certificate>;
+  setTransaction(tx: ITransaction): ICertificateRepository;
+  updateCert(cert: Certificate): Promise<void>;
 }
 
 @Injectable()
-export class CertificateRepository implements ICertificateRepository {
+export class CertificateRepository
+  extends BaseRepository
+  implements ICertificateRepository
+{
   constructor(
     @InjectRepository(CertificateEntity)
     private _certRepo: Repository<CertificateEntity>
-  ) {}
+  ) {
+    super();
+  }
+
+  async updateCert(cert: Certificate): Promise<void> {
+    const entity = new CertificateEntity(cert);
+    await this._certRepo.save(entity)
+  }
+
   async getByUser(
     user: User,
     queryOpt: GetCertsRequest
@@ -59,5 +75,14 @@ export class CertificateRepository implements ICertificateRepository {
     }
     const entities = await query.getMany();
     return entities?.map((entity) => entity.toDomain());
+  }
+
+  async getById(certId: string): Promise<Certificate> {
+    const entity = await this._certRepo.findOne({
+      where: {
+        id: certId,
+      },
+    });
+    return entity?.toDomain();
   }
 }

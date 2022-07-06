@@ -23,5 +23,6 @@ export enum UserErrorCode {
   OLD_PASSWORD_NOT_CORRECT = "old_password_not_correct",
   FOOD_NOT_SAVE = "food_not_save",
   ROLE_NOT_FOUND = "role_not_found",
-  REQUEST_ALREADY_EXISTED = "request_already_existed"
+  REQUEST_ALREADY_EXISTED = "request_already_existed",
+  CERTIFICATE_NOT_FOUND = 'certificate_not_found'
 }

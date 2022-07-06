@@ -18,7 +18,9 @@ export class Certificate extends Audit {
 
   status: CertificateStatus;
 
-  owner: User
+  owner: User;
+
+  note: string;
 
   constructor(obj: Partial<Certificate>) {
     super(obj);
@@ -29,7 +31,12 @@ export class Certificate extends Audit {
     this.image = obj?.image;
     this.number = obj?.number;
     this.status = obj?.status;
-    this.owner =  obj?.owner
+    this.owner = obj?.owner;
+    this.note = obj?.note;
+  }
+
+  takeNote(note: string): void {
+    this.note = note;
   }
 
   isWaiting(): boolean {
@@ -42,5 +49,12 @@ export class Certificate extends Audit {
 
   isRejected(): boolean {
     return this.status === CertificateStatus.REJECTED;
+  }
+
+  confirm(newStatus: CertificateStatus): Error {
+    if (newStatus === CertificateStatus.WAITING)
+      return new Error("New status is not valid");
+    this.status = newStatus;
+    return null;
   }
 }

@@ -15,7 +15,7 @@ export class CertificateEntity extends AbstractEntity {
   @Column({ name: "issue_at", nullable: false })
   issueAt: Date;
 
-  @Column({ name: "expire_at", nullable: true})
+  @Column({ name: "expire_at", nullable: true })
   expireAt: Date;
 
   @Column({ name: "issue_by", nullable: false })
@@ -38,6 +38,9 @@ export class CertificateEntity extends AbstractEntity {
   @Column({ name: "user_id" })
   userId: string;
 
+  @Column({ name: "note", nullable: true })
+  note: string;
+
   @ManyToOne(() => RequestEntity, { nullable: false })
   @JoinColumn({ name: "request_id" })
   request: RequestEntity;
@@ -56,6 +59,7 @@ export class CertificateEntity extends AbstractEntity {
     this.status = obj?.status;
     this.expireAt = obj?.expireAt;
     this.user = obj?.owner && new UserEntity(obj.owner);
+    this.note = obj?.note;
   }
 
   toDomain(): Certificate {
@@ -70,6 +74,7 @@ export class CertificateEntity extends AbstractEntity {
       number: this.number,
       status: this.status,
       owner: this.user?.toDomain(),
+      note: this.note,
     });
   }
 }

@@ -88,6 +88,8 @@ import { GetCertsUseCase } from "./useCases/getCertificates";
 import { CertificateController } from "./adapters/in/cert.controller";
 import { GetOwnRequestsUseCase } from "./useCases/getOwnRequests";
 import { GetAllRequestsUseCase } from "./useCases/getAllRequests";
+import { AdminController } from "./adapters/in/admin.controller";
+import { ConfirmCertUseCase } from "./useCases/confirmCertRequest";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -108,7 +110,8 @@ const commandHandlers = [
   EditAlbumCommandHandler,
   ChooseInterestsCommandHandler,
   CreateTopicCommandHandler,
-  SendRequestUseCase
+  SendRequestUseCase,
+  ConfirmCertUseCase
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,
@@ -253,7 +256,8 @@ const repositories = [
     ReactionController,
     TopicController,
     RequestController,
-    CertificateController
+    CertificateController,
+    AdminController
   ],
   providers: [
     ...commandHandlers,
