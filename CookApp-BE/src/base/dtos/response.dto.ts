@@ -367,11 +367,15 @@ export class CertificateResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   number: string;
 
+  @ApiResponseProperty({ type: String })
+  note: string;
+
   @ApiResponseProperty({ enum: CertificateStatus })
   status: CertificateStatus;
 
   @ApiResponseProperty({ type: AuthorResponse })
   owner: AuthorResponse;
+
 
   constructor(cert: Certificate) {
     super(cert);
@@ -382,10 +386,14 @@ export class CertificateResponse extends AuditResponse {
     this.image = cert?.image && new MediaResponse(cert.image);
     this.owner = cert?.owner && new AuthorResponse(cert.owner);
     this.status = cert?.status;
+    this.note = cert?.note
   }
 }
 
 export class RequestResponse extends AuditResponse {
+  @ApiResponseProperty({ type: String })
+  note: string;
+
   @ApiResponseProperty({ enum: RequestStatus })
   status: RequestStatus;
 
@@ -406,6 +414,7 @@ export class RequestResponse extends AuditResponse {
     this.certificates = request?.certificates?.map(
       (cert) => new CertificateResponse(cert)
     );
+    this.note = request?.note
   }
 }
 
