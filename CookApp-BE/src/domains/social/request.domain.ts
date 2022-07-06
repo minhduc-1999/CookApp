@@ -12,12 +12,19 @@ export class Request extends Audit {
 
   certificates: Certificate[];
 
+  note?: string
+
   constructor(obj: Partial<Request>) {
     super(obj);
     this.status = obj?.status;
     this.type = obj?.type;
     this.sender = obj?.sender;
     this.certificates = obj?.certificates;
+    this.note = obj?.note
+  }
+
+  takeNote(note: string) {
+    this.note = note
   }
 
   static createRequest(sender: User, certs: Certificate[]): Request {

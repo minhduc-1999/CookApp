@@ -29,11 +29,16 @@ export class RequestEntity extends AbstractEntity {
   @Column({ name: "sender_id" })
   senderId: string;
 
+  @Column({ name: "note", nullable: true })
+  note: string;
+
   @ManyToOne(() => UserEntity, { nullable: false })
   @JoinColumn({ name: "sender_id" })
   sender: UserEntity;
 
-  @OneToMany(() => CertificateEntity, (cert) => cert.request, {cascade: ['insert']})
+  @OneToMany(() => CertificateEntity, (cert) => cert.request, {
+    cascade: ["insert"],
+  })
   certificates: CertificateEntity[];
 
   toDomain(): Request {
@@ -44,12 +49,14 @@ export class RequestEntity extends AbstractEntity {
       type: this.type,
       sender: this.sender?.toDomain(),
       certificates: this.certificates?.map((cert) => cert.toDomain()),
+      note: this.note,
     });
   }
 
   constructor(request: Request) {
     super(request);
     this.type = request?.type;
+    this.note = request?.note;
     this.status = request?.status;
     this.sender = request?.sender && new UserEntity(request.sender);
     this.certificates = request?.certificates?.map(
