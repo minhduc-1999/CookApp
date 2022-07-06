@@ -47,7 +47,7 @@ export class CertificateRequestDTO {
       title: this.title,
       issueAt: new Date(this.issueAt),
       issueBy: this.issueBy,
-      expireAt: new Date(this.expireAt),
+      expireAt:this.expireAt && new Date(this.expireAt),
       image: new Image({ key: this.image }),
       number: this.number,
       owner,

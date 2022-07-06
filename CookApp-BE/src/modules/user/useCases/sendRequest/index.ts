@@ -95,6 +95,7 @@ export class SendRequestUseCase implements ICommandHandler<SendRequestCommand> {
         );
       }
     }
+
     const relatedCerts = relatedCertDtos.map((c) => c.toDomain(user));
 
     if (relatedCerts.length === 0) {

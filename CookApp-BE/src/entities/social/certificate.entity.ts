@@ -15,7 +15,7 @@ export class CertificateEntity extends AbstractEntity {
   @Column({ name: "issue_at", nullable: false })
   issueAt: Date;
 
-  @Column({ name: "expire_at" })
+  @Column({ name: "expire_at", nullable: true})
   expireAt: Date;
 
   @Column({ name: "issue_by", nullable: false })
