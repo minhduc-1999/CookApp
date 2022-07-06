@@ -15,6 +15,8 @@ import { GetAllRequestsResponseDTO } from "modules/user/useCases/getAllRequests/
 import { GetAllRequestsRequestDTO } from "modules/user/useCases/getAllRequests/getAllRequests.request";
 import { ConfirmCertRequestDTO } from "modules/user/useCases/confirmCertRequest/confirmCertRequest";
 import { ConfirmCertCommand } from "modules/user/useCases/confirmCertRequest";
+import { ConfirmRequestDTO } from "modules/user/useCases/confirmRequest/confirmRequest";
+import { ConfirmRequestCommand } from "modules/user/useCases/confirmRequest";
 
 @Controller("admin")
 @ApiTags("Requests")
@@ -47,6 +49,20 @@ export class AdminController {
     body.certId = certId;
     const confirmCertCommand = new ConfirmCertCommand(null, user, body);
     await this._commandBus.execute(confirmCertCommand);
+    return Result.ok(null, { messages: ["Successfully"] });
+  }
+
+  @Put("requests/:requestId/censorship")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustomWithoutData("Successfully")
+  async confirmRequest(
+    @HttpUserReq() user: User,
+    @Param("requestId", ParseUUIDPipe) requestId: string,
+    @Body() body: ConfirmRequestDTO
+  ): Promise<Result<string>> {
+    body.requestId = requestId;
+    const command = new ConfirmRequestCommand(null, user, body);
+    await this._commandBus.execute(command);
     return Result.ok(null, { messages: ["Successfully"] });
   }
 }

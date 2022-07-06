@@ -4,7 +4,7 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
-import { IRequestResitory } from "modules/user/adapters/out/repositories/request.repository";
+import { IRequestRepository } from "modules/user/adapters/out/repositories/request.repository";
 import { ICertificateService } from "modules/user/services/certificate.service";
 import { GetOwnRequestsResponse } from "./getOwnRequest.response";
 
@@ -20,7 +20,7 @@ export class GetOwnRequestsQuery extends BaseQuery {
 export class GetOwnRequestsUseCase implements IQueryHandler<GetOwnRequestsQuery> {
   constructor(
     @Inject("IRequestRepository")
-    private _requestRepo: IRequestResitory,
+    private _requestRepo: IRequestRepository,
     @Inject("ICertificateService")
     private _certService: ICertificateService
   ) {}

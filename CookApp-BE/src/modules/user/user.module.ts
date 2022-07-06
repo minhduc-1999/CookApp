@@ -90,6 +90,7 @@ import { GetOwnRequestsUseCase } from "./useCases/getOwnRequests";
 import { GetAllRequestsUseCase } from "./useCases/getAllRequests";
 import { AdminController } from "./adapters/in/admin.controller";
 import { ConfirmCertUseCase } from "./useCases/confirmCertRequest";
+import { ConfirmRequestUseCase } from "./useCases/confirmRequest";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -111,7 +112,8 @@ const commandHandlers = [
   ChooseInterestsCommandHandler,
   CreateTopicCommandHandler,
   SendRequestUseCase,
-  ConfirmCertUseCase
+  ConfirmCertUseCase,
+  ConfirmRequestUseCase
 ];
 const queryHandlers = [
   GetPostDetailQueryHandler,

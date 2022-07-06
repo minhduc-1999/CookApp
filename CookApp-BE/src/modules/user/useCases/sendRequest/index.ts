@@ -17,7 +17,7 @@ import { UserErrorCode } from "enums/errorCode.enum";
 import { MediaType } from "enums/social.enum";
 import { IStorageService } from "modules/share/adapters/out/services/storage.service";
 import { ICertificateRepository } from "modules/user/adapters/out/repositories/certificate.repository";
-import { IRequestResitory } from "modules/user/adapters/out/repositories/request.repository";
+import { IRequestRepository } from "modules/user/adapters/out/repositories/request.repository";
 import { SendRequestRequestDTO } from "./sendRequest.request";
 import { SendRequestResponseDTO } from "./sendRequest.response";
 
@@ -36,7 +36,7 @@ export class SendRequestUseCase implements ICommandHandler<SendRequestCommand> {
   private _logger = new Logger(SendRequestUseCase.name);
   constructor(
     @Inject("IRequestRepository")
-    private _requestRepo: IRequestResitory,
+    private _requestRepo: IRequestRepository,
     @Inject("ICertificateRepository")
     private _certRepo: ICertificateRepository,
     @Inject("IStorageService")

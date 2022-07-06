@@ -1,6 +1,6 @@
 export enum RequestStatus {
   CONFIRMED = "confirmed",
-  REJECT = "rejected",
+  REJECTED = "rejected",
   WAITING = "waiting",
 }
 

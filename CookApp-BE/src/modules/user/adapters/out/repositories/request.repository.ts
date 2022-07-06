@@ -10,9 +10,9 @@ import { RequestEntity } from "entities/social/request.entity";
 import { GetAllRequestsRequestDTO } from "modules/user/useCases/getAllRequests/getAllRequests.request";
 import { Repository } from "typeorm";
 
-export interface IRequestResitory {
+export interface IRequestRepository {
   createRequest(request: Request): Promise<Request>;
-  setTransaction(tx: ITransaction): IRequestResitory;
+  setTransaction(tx: ITransaction): IRequestRepository;
   getRequests(user: User, statuses: RequestStatus[]): Promise<Request[]>;
   getAllRequest(
     queryOpt: GetAllRequestsRequestDTO
@@ -21,12 +21,14 @@ export interface IRequestResitory {
     user: User,
     queryOpt: PageOptionsDto
   ): Promise<[Request[], number]>;
+  getById(requestId: string): Promise<Request>;
+  updateRequest(request: Request): Promise<void>;
 }
 
 @Injectable()
 export class RequestRepository
   extends BaseRepository
-  implements IRequestResitory
+  implements IRequestRepository
 {
   constructor(
     @InjectRepository(RequestEntity)
@@ -34,6 +36,22 @@ export class RequestRepository
   ) {
     super();
   }
+
+  async updateRequest(request: Request): Promise<void> {
+    const entity = new RequestEntity(request);
+    await this._requestRepo.save(entity);
+  }
+
+  async getById(requestId: string): Promise<Request> {
+    const entity = await this._requestRepo.findOne({
+      where: {
+        id: requestId,
+      },
+      relations: ["certificates"],
+    });
+    return entity?.toDomain();
+  }
+
   async getRequestsPaggination(
     user: User,
     queryOpt: PageOptionsDto
