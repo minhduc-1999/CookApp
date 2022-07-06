@@ -3,7 +3,7 @@ import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { RequestResponse } from "base/dtos/response.dto";
 import { Request } from "domains/social/request.domain";
 
-export class GetRequestsResponse {
+export class GetAllRequestsResponseDTO {
   @ApiResponseProperty({ type: [RequestResponse] })
   requests: RequestResponse[];
 

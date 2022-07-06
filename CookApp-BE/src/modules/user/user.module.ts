@@ -83,10 +83,11 @@ import { CertificateEntity } from "entities/social/certificate.entity";
 import { RequestController } from "./adapters/in/request.controller";
 import { RequestRepository } from "./adapters/out/repositories/request.repository";
 import { CertificateRepository } from "./adapters/out/repositories/certificate.repository";
-import { GetRequestsUseCase } from "./useCases/getRequests";
 import { CertificateService } from "./services/certificate.service";
 import { GetCertsUseCase } from "./useCases/getCertificates";
 import { CertificateController } from "./adapters/in/cert.controller";
+import { GetOwnRequestsUseCase } from "./useCases/getOwnRequests";
+import { GetAllRequestsUseCase } from "./useCases/getAllRequests";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -122,8 +123,9 @@ const queryHandlers = [
   GetAlbumDetailQueryHandler,
   GetTopicsQueryHandler,
   GetInterestedTopicsQueryHandler,
-  GetRequestsUseCase,
-  GetCertsUseCase
+  GetOwnRequestsUseCase,
+  GetCertsUseCase,
+  GetAllRequestsUseCase
 ];
 const services = [
   {

@@ -16,34 +16,37 @@ import {
 } from "decorators/transaction.decorator";
 import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
-import { GetRequestsQuery } from "modules/user/useCases/getRequests";
-import { GetRequestsResponse } from "modules/user/useCases/getRequests/getRequest.response";
+import { GetOwnRequestsQuery } from "modules/user/useCases/getOwnRequests";
+import { GetOwnRequestsResponse } from "modules/user/useCases/getOwnRequests/getOwnRequest.response";
 import { SendRequestCommand } from "modules/user/useCases/sendRequest";
 import { SendRequestRequestDTO } from "modules/user/useCases/sendRequest/sendRequest.request";
 import { SendRequestResponseDTO } from "modules/user/useCases/sendRequest/sendRequest.response";
+import { GetAllRequestsQuery } from "modules/user/useCases/getAllRequests";
+import { GetAllRequestsResponseDTO } from "modules/user/useCases/getAllRequests/getAllRequests.response";
+import { GetAllRequestsRequestDTO } from "modules/user/useCases/getAllRequests/getAllRequests.request";
 
-@Controller("requests")
+@Controller()
 @ApiTags("Requests")
 @ApiBearerAuth()
 @RequirePermissions("manage_request")
 export class RequestController {
   constructor(private _queryBus: QueryBus, private _commandBus: CommandBus) {}
 
-  @Get()
+  @Get("requests")
   @ApiFailResponseCustom()
-  @ApiOKResponseCustom(GetRequestsResponse)
+  @ApiOKResponseCustom(GetOwnRequestsResponse)
   @RequirePermissions("read_request")
-  async getRequests(
+  async getOwnRequests(
     @Query()
     queryOpt: PageOptionsDto,
     @HttpUserReq() user: User
-  ): Promise<Result<void>> {
-    const query = new GetRequestsQuery(user, queryOpt);
+  ): Promise<Result<GetOwnRequestsResponse>> {
+    const query = new GetOwnRequestsQuery(user, queryOpt);
     const result = await this._queryBus.execute(query);
     return Result.ok(result, { messages: ["Successfully"] });
   }
 
-  @Post()
+  @Post("requests")
   @ApiFailResponseCustom()
   @ApiCreatedResponseCustom(SendRequestResponseDTO, "Create post successfully")
   @HttpRequestTransaction()
@@ -56,5 +59,18 @@ export class RequestController {
     const createPostCommand = new SendRequestCommand(user, body, tx);
     const result = await this._commandBus.execute(createPostCommand);
     return Result.ok(result, { messages: ["Send request successfully"] });
+  }
+
+  @Get("admin/requests")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(GetAllRequestsResponseDTO)
+  async getRequests(
+    @Query()
+    queryOpt: GetAllRequestsRequestDTO,
+    @HttpUserReq() user: User
+  ): Promise<Result<GetAllRequestsResponseDTO>> {
+    const query = new GetAllRequestsQuery(user, queryOpt);
+    const result = await this._queryBus.execute(query);
+    return Result.ok(result, { messages: ["Successfully"] });
   }
 }

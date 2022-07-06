@@ -7,12 +7,16 @@ import { RequestStatus } from "constants/request.constant";
 import { Request } from "domains/social/request.domain";
 import { User } from "domains/social/user.domain";
 import { RequestEntity } from "entities/social/request.entity";
+import { GetAllRequestsRequestDTO } from "modules/user/useCases/getAllRequests/getAllRequests.request";
 import { Repository } from "typeorm";
 
 export interface IRequestResitory {
   createRequest(request: Request): Promise<Request>;
   setTransaction(tx: ITransaction): IRequestResitory;
   getRequests(user: User, statuses: RequestStatus[]): Promise<Request[]>;
+  getAllRequest(
+    queryOpt: GetAllRequestsRequestDTO
+  ): Promise<[Request[], number]>;
   getRequestsPaggination(
     user: User,
     queryOpt: PageOptionsDto
@@ -38,6 +42,7 @@ export class RequestRepository
       .createQueryBuilder("request")
       .leftJoinAndSelect("request.certificates", "certs")
       .where("request.senderId = :senderId", { senderId: user.id })
+      .orderBy("request.createdAt", "DESC")
       .skip(queryOpt.limit * queryOpt.offset)
       .take(queryOpt.limit);
     const [entities, total] = await query.getManyAndCount();
@@ -61,5 +66,27 @@ export class RequestRepository
     const entity = new RequestEntity(request);
     const saved = await this._requestRepo.save(entity);
     return saved?.toDomain();
+  }
+
+  async getAllRequest(
+    queryOpt: GetAllRequestsRequestDTO
+  ): Promise<[Request[], number]> {
+    let query = this._requestRepo
+      .createQueryBuilder("request")
+      .leftJoinAndSelect("request.certificates", "certs");
+
+    if (queryOpt.status) {
+      query = query.where("request.status = :status", {
+        status: queryOpt.status,
+      });
+    }
+
+    query = query
+      .orderBy("request.createdAt", "DESC")
+      .skip(queryOpt.limit * queryOpt.offset)
+      .take(queryOpt.limit);
+
+    const [entities, total] = await query.getManyAndCount();
+    return [entities?.map((entity) => entity.toDomain()), total];
   }
 }

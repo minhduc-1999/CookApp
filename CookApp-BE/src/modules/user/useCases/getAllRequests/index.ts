@@ -2,35 +2,36 @@ import { Inject } from "@nestjs/common";
 import { IQueryHandler, QueryHandler } from "@nestjs/cqrs";
 import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
-import { PageOptionsDto } from "base/pageOptions.base";
 import { User } from "domains/social/user.domain";
 import { IRequestResitory } from "modules/user/adapters/out/repositories/request.repository";
 import { ICertificateService } from "modules/user/services/certificate.service";
-import { GetRequestsResponse } from "./getRequest.response";
+import { GetAllRequestsRequestDTO } from "./getAllRequests.request";
+import { GetAllRequestsResponseDTO } from "./getAllRequests.response";
 
-export class GetRequestsQuery extends BaseQuery {
-  queryOpt: PageOptionsDto;
-  constructor(user: User, queryOptions?: PageOptionsDto) {
+export class GetAllRequestsQuery extends BaseQuery {
+  queryOpt: GetAllRequestsRequestDTO;
+  constructor(user: User, queryOptions: GetAllRequestsRequestDTO) {
     super(user);
     this.queryOpt = queryOptions;
   }
 }
 
-@QueryHandler(GetRequestsQuery)
-export class GetRequestsUseCase implements IQueryHandler<GetRequestsQuery> {
+@QueryHandler(GetAllRequestsQuery)
+export class GetAllRequestsUseCase
+  implements IQueryHandler<GetAllRequestsQuery>
+{
   constructor(
     @Inject("IRequestRepository")
     private _requestRepo: IRequestResitory,
     @Inject("ICertificateService")
     private _certService: ICertificateService
   ) {}
-  async execute(query: GetRequestsQuery): Promise<GetRequestsResponse> {
-    const { queryOpt, user } = query;
+  async execute(
+    query: GetAllRequestsQuery
+  ): Promise<GetAllRequestsResponseDTO> {
+    const { queryOpt } = query;
 
-    const [requests, total] = await this._requestRepo.getRequestsPaggination(
-      user,
-      queryOpt
-    );
+    const [requests, total] = await this._requestRepo.getAllRequest(queryOpt);
 
     for (const request of requests) {
       request.certificates = await this._certService.fulfillData(
@@ -43,6 +44,6 @@ export class GetRequestsUseCase implements IQueryHandler<GetRequestsQuery> {
       meta = new PageMetadata(queryOpt.offset, queryOpt.limit, total);
     }
 
-    return new GetRequestsResponse(requests, meta);
+    return new GetAllRequestsResponseDTO(requests, meta);
   }
 }
