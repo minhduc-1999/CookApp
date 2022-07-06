@@ -15,6 +15,7 @@ import { NewFoodEventHandler } from "./events/NewFoodNotification";
 import { NotifyCertificateConfirmationUseCase } from "./events/NotifyCertConfirmed";
 import { NotifyCertificateRejectionUseCase } from "./events/NotifyCertRejection";
 import { NotifyRequestConfirmationUseCase } from "./events/NotifyRequestConfirmation";
+import { NotifyRequestRejectionUseCase } from "./events/NotifyRequestRejection";
 
 const eventHandlers = [
   NewPostEventHandler,
@@ -25,7 +26,8 @@ const eventHandlers = [
   NewFoodEventHandler,
   NotifyCertificateConfirmationUseCase,
   NotifyCertificateRejectionUseCase,
-  NotifyRequestConfirmationUseCase
+  NotifyRequestConfirmationUseCase,
+  NotifyRequestRejectionUseCase
 ];
 
 const repositories = [
