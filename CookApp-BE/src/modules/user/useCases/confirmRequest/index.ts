@@ -50,7 +50,7 @@ export class ConfirmRequestUseCase
 
     if (existedRequest.isConfirmed()) {
       throw new ConflictException(
-        ResponseDTO.fail("Request already confirmed")
+        ResponseDTO.fail("Request already confirmed", UserErrorCode.REQUEST_ALREADY_CONFIRMED)
       );
     }
 
@@ -63,7 +63,7 @@ export class ConfirmRequestUseCase
     const confirmError = existedRequest.confirm(status);
 
     if (confirmError) {
-      throw new BadRequestException(ResponseDTO.fail(confirmError.message));
+      throw new BadRequestException(ResponseDTO.fail(confirmError.message, confirmError.errorCode));
     }
 
     await this._requestRepository.updateRequest(existedRequest);

@@ -25,5 +25,8 @@ export enum UserErrorCode {
   ROLE_NOT_FOUND = "role_not_found",
   REQUEST_ALREADY_EXISTED = "request_already_existed",
   CERTIFICATE_NOT_FOUND = 'certificate_not_found',
-  REQUEST_NOT_FOUND = 'request_not_found'
+  REQUEST_NOT_FOUND = 'request_not_found',
+  REQUEST_ALREADY_CONFIRMED = 'request_already_confirmed',
+  CERTIFICATE_ALREADY_CONFIRMED = 'certificate_already_confirmed',
+  NEED_CONFIRM_ALL_CERT = 'need_confirm_all_cert'
 }

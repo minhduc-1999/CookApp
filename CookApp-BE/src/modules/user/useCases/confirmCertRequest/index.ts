@@ -50,7 +50,7 @@ export class ConfirmCertUseCase implements ICommandHandler<ConfirmCertCommand> {
       throw new ConflictException(
         ResponseDTO.fail(
           "Certficate already confirmed",
-          UserErrorCode.FOOD_ALREADY_CONFIRMED
+          UserErrorCode.CERTIFICATE_ALREADY_CONFIRMED
         )
       );
     }
