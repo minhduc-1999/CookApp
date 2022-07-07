@@ -46,7 +46,7 @@ export class ConfirmCertUseCase implements ICommandHandler<ConfirmCertCommand> {
       );
     }
 
-    if (existedCert.isConfirmed()) {
+    if (existedCert.isConfirmed() || existedCert.isRejected()) {
       throw new ConflictException(
         ResponseDTO.fail(
           "Certficate already confirmed",
@@ -54,14 +54,6 @@ export class ConfirmCertUseCase implements ICommandHandler<ConfirmCertCommand> {
         )
       );
     }
-
-    if (existedCert.isRejected())
-      throw new NotFoundException(
-        ResponseDTO.fail(
-          "Certificate not found",
-          UserErrorCode.CERTIFICATE_NOT_FOUND
-        )
-      );
 
     existedCert.takeNote(note);
 

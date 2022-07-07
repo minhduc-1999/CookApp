@@ -48,16 +48,11 @@ export class ConfirmRequestUseCase
       );
     }
 
-    if (existedRequest.isConfirmed()) {
+    if (existedRequest.isConfirmed() || existedRequest.isRejected()) {
       throw new ConflictException(
         ResponseDTO.fail("Request already confirmed", UserErrorCode.REQUEST_ALREADY_CONFIRMED)
       );
     }
-
-    if (existedRequest.isRejected())
-      throw new NotFoundException(
-        ResponseDTO.fail("Request not found", UserErrorCode.REQUEST_NOT_FOUND)
-      );
 
     existedRequest.takeNote(note);
     const confirmError = existedRequest.confirm(status);
