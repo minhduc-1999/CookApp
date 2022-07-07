@@ -387,6 +387,7 @@ export class CertificateResponse extends AuditResponse {
     this.owner = cert?.owner && new AuthorResponse(cert.owner);
     this.status = cert?.status;
     this.note = cert?.note
+    this.number = cert?.number
   }
 }
 

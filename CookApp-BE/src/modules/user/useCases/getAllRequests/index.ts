@@ -4,7 +4,7 @@ import { BaseQuery } from "base/cqrs/query.base";
 import { PageMetadata } from "base/dtos/pageMetadata.dto";
 import { User } from "domains/social/user.domain";
 import { IRequestRepository } from "modules/user/adapters/out/repositories/request.repository";
-import { ICertificateService } from "modules/user/services/certificate.service";
+import { IRequestService } from "modules/user/services/request.service";
 import { GetAllRequestsRequestDTO } from "./getAllRequests.request";
 import { GetAllRequestsResponseDTO } from "./getAllRequests.response";
 
@@ -23,21 +23,17 @@ export class GetAllRequestsUseCase
   constructor(
     @Inject("IRequestRepository")
     private _requestRepo: IRequestRepository,
-    @Inject("ICertificateService")
-    private _certService: ICertificateService
+    @Inject("IRequestService")
+    private _requestService: IRequestService
   ) {}
   async execute(
     query: GetAllRequestsQuery
   ): Promise<GetAllRequestsResponseDTO> {
     const { queryOpt } = query;
 
-    const [requests, total] = await this._requestRepo.getAllRequest(queryOpt);
+    let [requests, total] = await this._requestRepo.getAllRequest(queryOpt);
 
-    for (const request of requests) {
-      request.certificates = await this._certService.fulfillData(
-        request.certificates
-      );
-    }
+    requests = await this._requestService.fulfillData(requests);
 
     let meta: PageMetadata;
     if (requests.length > 0) {

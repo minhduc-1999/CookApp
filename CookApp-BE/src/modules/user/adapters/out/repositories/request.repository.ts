@@ -91,7 +91,8 @@ export class RequestRepository
   ): Promise<[Request[], number]> {
     let query = this._requestRepo
       .createQueryBuilder("request")
-      .leftJoinAndSelect("request.certificates", "certs");
+      .leftJoinAndSelect("request.certificates", "certs")
+      .leftJoinAndSelect("request.sender", "sender");
 
     if (queryOpt.status) {
       query = query.where("request.status = :status", {

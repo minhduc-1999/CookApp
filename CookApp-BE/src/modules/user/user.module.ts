@@ -93,6 +93,7 @@ import { ConfirmCertUseCase } from "./useCases/confirmCertRequest";
 import { ConfirmRequestUseCase } from "./useCases/confirmRequest";
 import { GetCertificateDetailUseCase } from "./useCases/getCertificateDetail";
 import { GetRequestDetailUseCase } from "./useCases/getRequestDetail";
+import { RequestService } from "./services/request.service";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -152,6 +153,10 @@ const services = [
   {
     provide: "ICertificateService",
     useClass: CertificateService
+  },
+  {
+    provide: "IRequestService",
+    useClass: RequestService
   }
 ];
 const repositories = [
