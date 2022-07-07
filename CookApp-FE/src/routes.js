@@ -14,7 +14,7 @@ import {
   RocketIcon,
 } from "components/Icons/Icons";
 import OtherSetting from "views/Dashboard/OtherSetting";
-import Censorship from "views/Dashboard/Censorship";
+import FoodCensorship from "views/Dashboard/FoodCensorship";
 
 export const dashRoutes = [
   // {
@@ -25,10 +25,10 @@ export const dashRoutes = [
   //   layout: "/admin",
   // },
   {
-    path: "/censorship",
-    name: "Censorship",
+    path: "/food-censorship",
+    name: "Food censorship",
     icon: <StatsIcon color="inherit" />,
-    component: Censorship,
+    component: FoodCensorship,
     layout: "/admin",
   },
   {

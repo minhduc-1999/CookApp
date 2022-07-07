@@ -34,7 +34,7 @@ const INIT_CUR_PAGE = 1;
 const INIT_TOTAL_PAGE = 1;
 const TRIGGER_LOAD_MORE_OFFSET = 2; /*trigger when distance < OFFSET * window.innerHeight*/
 
-function Censorship() {
+function FoodCensorship() {
   const [foods, setFoods] = useState<FoodResponse[]>([]);
   const [foodLoading, setFoodLoading] = useState(false);
   const [totalFoodPage, setTotalFoodPage] = useState(INIT_TOTAL_PAGE);
@@ -327,4 +327,4 @@ function Censorship() {
   );
 }
 
-export default Censorship;
+export default FoodCensorship;
