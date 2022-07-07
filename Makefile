@@ -6,3 +6,6 @@ deploy-api:
 
 deploy-api-force:
 	git push tastify-be `git subtree split --prefix=CookApp-BE main`:main --force
+
+deploy-fe:
+	vercel ./CookApp-FE --prod
