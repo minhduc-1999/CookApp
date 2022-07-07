@@ -10,9 +10,13 @@ import {
   ModalOverlay,
   Text,
   useDisclosure,
+  useToast,
 } from "@chakra-ui/react";
 import { CertificateResponse, CertificateStatus } from "apis/base.type";
+import { confirmCert } from "apis/requests";
 import CertificateStatusTag from "components/Tags/CertificateStatusTag";
+import { useAuth } from "contexts/Auth/Auth";
+import { useState } from "react";
 import { calendarTime } from "utils/time";
 
 type Props = {
@@ -21,8 +25,38 @@ type Props = {
 };
 
 const Certificate = (props: Props) => {
-  const { cert, key } = props;
+  const { cert: propCert, key } = props;
+  const [cert, setCert] = useState<CertificateResponse>(propCert);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const toast = useToast();
+  const { user } = useAuth();
+
+  const onConfirmCert = (status: CertificateStatus) => {
+    confirmCert(cert.id, { status }, user?.accessToken)
+      .then(() => {
+        setCert({
+          ...cert,
+          status,
+        });
+        toast({
+          title: "Confirm successfully",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+      })
+      .catch((err: Error) => {
+        toast({
+          title: err.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+      });
+  };
+
   return (
     <Flex
       key={key}
@@ -58,7 +92,7 @@ const Certificate = (props: Props) => {
             <Modal isOpen={isOpen} onClose={onClose} size="6xl">
               <ModalOverlay />
               <ModalContent>
-                <ModalCloseButton color={"teal.300"}/>
+                <ModalCloseButton color={"teal.300"} />
                 <Image
                   src={cert.image.url ?? ""}
                   alt={`${cert?.title}'s image`}
@@ -100,10 +134,21 @@ const Certificate = (props: Props) => {
           templateColumns="repeat(2, 1fr)"
           gap={6}
         >
-          <Button onClick={() => {}} colorScheme="teal">
+          <Button
+            onClick={() => {
+              onConfirmCert(CertificateStatus.CONFIRMED);
+            }}
+            colorScheme="teal"
+          >
             Confirm
           </Button>
-          <Button onClick={() => {}}>Dismiss</Button>
+          <Button
+            onClick={() => {
+              onConfirmCert(CertificateStatus.REJECTED);
+            }}
+          >
+            Dismiss
+          </Button>
         </Grid>
       )}
     </Flex>

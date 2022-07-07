@@ -79,9 +79,14 @@ export const confirmRequest = async (
     });
 };
 
+type ConfirmCertBody = {
+  status: CertificateStatus,
+  note?: string
+}
+
 export const confirmCert = async (
   certId: string,
-  type: CertificateStatus,
+  body: ConfirmCertBody,
   token: string | undefined
 ): Promise<void> => {
   if (!token) throw new Error("Not login yet");
@@ -89,9 +94,7 @@ export const confirmCert = async (
   return axios
     .put(
       apiUrl + `/admin/certificates/${certId}/censorship`,
-      {
-        type,
-      },
+      body,
       {
         headers: {
           Authorization: `Bearer ${token}`,
