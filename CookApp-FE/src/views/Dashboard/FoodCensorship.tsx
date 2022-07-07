@@ -148,6 +148,7 @@ function FoodCensorship() {
         justifyContent="center"
         alignItems="center"
         ref={foodListRef}
+        w={1000}
       >
         {foods?.map((food, index) => {
           return (
