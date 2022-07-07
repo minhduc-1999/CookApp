@@ -10,6 +10,10 @@ import {
   Grid,
   GridItem,
   Image,
+  Modal,
+  ModalCloseButton,
+  ModalContent,
+  ModalOverlay,
   Table,
   TableContainer,
   Tbody,
@@ -18,6 +22,7 @@ import {
   Th,
   Thead,
   Tr,
+  useDisclosure,
   useToast,
   VStack,
 } from "@chakra-ui/react";
@@ -43,6 +48,8 @@ function FoodCensorship() {
   const toast = useToast();
   const foodListRef = useRef<HTMLDivElement>(null);
   const { user } = useAuth();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const [fullViewImage, setFullViewImage] = useState("");
 
   useEffect(() => {
     fetchFoodData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
@@ -167,12 +174,26 @@ function FoodCensorship() {
                   gap={4}
                 >
                   <GridItem>
-                    <Image
-                      src={food?.photos ? food?.photos[0]?.url ?? "" : ""}
-                      alt={`${food?.name}'s image`}
-                      objectFit="contain"
-                      borderRadius={3}
-                    />
+                    <Flex
+                      w="100%"
+                      h="100%"
+                      justifyContent={"center"}
+                      alignItems="center"
+                      paddingX={2}
+                    >
+                      <Image
+                        src={food?.photos ? food?.photos[0]?.url ?? "" : ""}
+                        alt={`${food?.name}'s image`}
+                        objectFit="contain"
+                        borderRadius={3}
+                        maxH={200}
+                        cursor="zoom-in"
+                        onClick={() => {
+                          setFullViewImage(food?.photos[0]?.url ?? "");
+                          onOpen();
+                        }}
+                      />
+                    </Flex>
                   </GridItem>
                   <GridItem>
                     <Flex direction="column" alignItems="start">
@@ -323,6 +344,18 @@ function FoodCensorship() {
           </Text>
         ) : null}
       </Flex>
+      <Modal isOpen={isOpen} onClose={onClose} size="6xl">
+        <ModalOverlay />
+        <ModalContent minH={"20"}>
+          <ModalCloseButton color={"teal.300"} />
+          <Image
+            src={fullViewImage}
+            alt={`Image view`}
+            objectFit="contain"
+            borderRadius={3}
+          />
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 }
