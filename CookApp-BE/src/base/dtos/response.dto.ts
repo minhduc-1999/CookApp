@@ -380,9 +380,9 @@ export class CertificateResponse extends AuditResponse {
   constructor(cert: Certificate) {
     super(cert);
     this.issueBy = cert?.issueBy;
-    this.issueAt = cert?.issueAt.toISOString();
+    this.issueAt = cert?.issueAt?.toISOString();
     this.title = cert?.title;
-    this.expireAt = cert?.expireAt.toISOString();
+    this.expireAt = cert?.expireAt?.toISOString();
     this.image = cert?.image && new MediaResponse(cert.image);
     this.owner = cert?.owner && new AuthorResponse(cert.owner);
     this.status = cert?.status;

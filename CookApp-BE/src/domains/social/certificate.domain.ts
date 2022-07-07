@@ -35,6 +35,10 @@ export class Certificate extends Audit {
     this.note = obj?.note;
   }
 
+  isOwnedBy(user: User): boolean {
+    return this.owner.id === user.id;
+  }
+
   takeNote(note: string): void {
     this.note = note;
   }

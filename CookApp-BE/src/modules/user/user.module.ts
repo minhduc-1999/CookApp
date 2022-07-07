@@ -91,6 +91,7 @@ import { GetAllRequestsUseCase } from "./useCases/getAllRequests";
 import { AdminController } from "./adapters/in/admin.controller";
 import { ConfirmCertUseCase } from "./useCases/confirmCertRequest";
 import { ConfirmRequestUseCase } from "./useCases/confirmRequest";
+import { GetCertificateDetailUseCase } from "./useCases/getCertificateDetail";
 
 const eventHandlers = [
   PropagatePostCreatedEventHandler,
@@ -130,7 +131,8 @@ const queryHandlers = [
   GetInterestedTopicsQueryHandler,
   GetOwnRequestsUseCase,
   GetCertsUseCase,
-  GetAllRequestsUseCase
+  GetAllRequestsUseCase,
+  GetCertificateDetailUseCase
 ];
 const services = [
   {
