@@ -91,7 +91,7 @@ const Certificate = (props: Props) => {
             />
             <Modal isOpen={isOpen} onClose={onClose} size="6xl">
               <ModalOverlay />
-              <ModalContent>
+              <ModalContent minH={"20"}>
                 <ModalCloseButton color={"teal.300"} />
                 <Image
                   src={cert.image.url ?? ""}

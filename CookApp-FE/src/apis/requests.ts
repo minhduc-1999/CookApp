@@ -37,26 +37,25 @@ export const getWaitingRequest = async (
     });
 };
 
+type ConfirmRequestBody = {
+  status: RequestStatus;
+  note?: string;
+};
+
 export const confirmRequest = async (
   requestId: string,
-  type: RequestStatus,
+  body: ConfirmRequestBody,
   token: string | undefined
 ): Promise<void> => {
   if (!token) throw new Error("Not login yet");
   await networkChecking();
   return axios
-    .put(
-      apiUrl + `/admin/requests/${requestId}/censorship`,
-      {
-        type,
+    .put(apiUrl + `/admin/requests/${requestId}/censorship`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    })
     .then((res: AxiosResponse<BaseResponse>) => {
       if (res.data.meta.ok) return;
       throw new Error("Failed to confirm request");
@@ -80,9 +79,9 @@ export const confirmRequest = async (
 };
 
 type ConfirmCertBody = {
-  status: CertificateStatus,
-  note?: string
-}
+  status: CertificateStatus;
+  note?: string;
+};
 
 export const confirmCert = async (
   certId: string,
@@ -92,16 +91,12 @@ export const confirmCert = async (
   if (!token) throw new Error("Not login yet");
   await networkChecking();
   return axios
-    .put(
-      apiUrl + `/admin/certificates/${certId}/censorship`,
-      body,
-      {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      }
-    )
+    .put(apiUrl + `/admin/certificates/${certId}/censorship`, body, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
+      },
+    })
     .then((res: AxiosResponse<BaseResponse>) => {
       if (res.data.meta.ok) return;
       throw new Error("Failed to confirm certificate");

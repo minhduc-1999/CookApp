@@ -12,16 +12,14 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import {
-  RequestResponse,
-  RequestStatus,
-} from "apis/base.type";
+import { RequestResponse, RequestStatus } from "apis/base.type";
 import { confirmRequest, getWaitingRequest } from "apis/requests";
 import Card from "components/Card/Card";
 import Certificate from "components/Certificates";
 import Spinner from "components/Spinner";
 import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
+import { calendarTime } from "utils/time";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
@@ -40,7 +38,7 @@ function RequestCensorship() {
 
   useEffect(() => {
     fetchRequestData(INIT_CUR_PAGE, INIT_PAGE_SIZE);
-    setRequestLoading(true)
+    setRequestLoading(true);
   }, []);
 
   useEffect(() => {
@@ -79,32 +77,8 @@ function RequestCensorship() {
         console.error(err);
       });
   };
-  const onRejectRequest = (requestId: string) => {
-    confirmRequest(requestId, RequestStatus.REJECTED, user?.accessToken)
-      .then(() => {
-        const temp = requests.filter((request) => request.id !== requestId);
-        setRequests(temp);
-        setTotalRequest(totalRequest - 1);
-        toast({
-          title: "Successfully",
-          status: "success",
-          duration: 3000,
-          isClosable: true,
-          position: "top-right",
-        });
-      })
-      .catch((err: Error) => {
-        toast({
-          title: err.message,
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-          position: "top-right",
-        });
-      });
-  };
-  const onConfirmRequest = (requestId: string) => {
-    confirmRequest(requestId, RequestStatus.CONFIRMED, user?.accessToken)
+  const onConfirmRequest = (requestId: string, status: RequestStatus) => {
+    confirmRequest(requestId, { status }, user?.accessToken)
       .then(() => {
         const temp = requests.filter((request) => request.id !== requestId);
         setRequests(temp);
@@ -142,19 +116,31 @@ function RequestCensorship() {
             <Card key={index}>
               <Flex direction="column">
                 <Flex
-                  direction="row"
-                  marginBottom={4}
-                  justifyContent="start"
+                  direction={"row"}
+                  justifyContent="space-between"
                   alignItems="center"
-                  gap={2}
                 >
-                  <Avatar
-                    name={request.sender?.displayName}
-                    src={request.sender?.avatar?.url}
-                  />
-                  <VStack>
-                    <Text fontWeight="bold">{request.sender?.displayName}</Text>
-                  </VStack>
+                  <Flex
+                    direction="row"
+                    marginBottom={4}
+                    justifyContent="start"
+                    alignItems="center"
+                    gap={3}
+                  >
+                    <Avatar
+                      name={request.sender?.displayName}
+                      src={request.sender?.avatar?.url}
+                    />
+                    <VStack>
+                      <Text fontWeight="bold">
+                        {request.sender?.displayName}
+                      </Text>
+                    </VStack>
+                  </Flex>
+                  <Text justifySelf="end">
+                    <b>Requested at: </b>
+                    {calendarTime(request.createdAt)}
+                  </Text>
                 </Flex>
 
                 <Accordion mt={5} allowToggle w="100%">
@@ -185,7 +171,7 @@ function RequestCensorship() {
               >
                 <Button
                   onClick={() => {
-                    onConfirmRequest(request?.id);
+                    onConfirmRequest(request?.id, RequestStatus.CONFIRMED);
                   }}
                   colorScheme="teal"
                 >
@@ -193,7 +179,7 @@ function RequestCensorship() {
                 </Button>
                 <Button
                   onClick={() => {
-                    onRejectRequest(request?.id);
+                    onConfirmRequest(request?.id, RequestStatus.REJECTED);
                   }}
                 >
                   Dismiss
