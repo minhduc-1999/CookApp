@@ -15,6 +15,7 @@ import {
 } from "components/Icons/Icons";
 import OtherSetting from "views/Dashboard/OtherSetting";
 import FoodCensorship from "views/Dashboard/FoodCensorship";
+import RequestCensorship from "views/Dashboard/RequestCensorship";
 
 export const dashRoutes = [
   // {
@@ -29,6 +30,13 @@ export const dashRoutes = [
     name: "Food censorship",
     icon: <StatsIcon color="inherit" />,
     component: FoodCensorship,
+    layout: "/admin",
+  },
+  {
+    path: "/request",
+    name: "Request",
+    icon: <StatsIcon color="inherit" />,
+    component: RequestCensorship,
     layout: "/admin",
   },
   {
