@@ -22,7 +22,13 @@ export enum UserErrorCode {
   FOOD_ALREADY_SAVED = "food_already_saved",
   OLD_PASSWORD_NOT_CORRECT = "old_password_not_correct",
   FOOD_NOT_SAVE = "food_not_save",
-  ROLE_NOT_FOUND = "role_not_found"
+  ROLE_NOT_FOUND = "role_not_found",
+  REQUEST_ALREADY_EXISTED = "request_already_existed",
+  CERTIFICATE_NOT_FOUND = 'certificate_not_found',
+  REQUEST_NOT_FOUND = 'request_not_found',
+  REQUEST_ALREADY_CONFIRMED = 'request_already_confirmed',
+  CERTIFICATE_ALREADY_CONFIRMED = 'certificate_already_confirmed',
+  NEED_CONFIRM_ALL_CERT = 'need_confirm_all_cert'
 }
 
 export enum InteractiveTargetType {
@@ -68,6 +74,22 @@ export type BaseResponse<T = any> = {
   };
   data: T;
 };
+
+export enum CertificateStatus {
+  CONFIRMED = "confirmed",
+  REJECTED = "rejected",
+  WAITING = "waiting",
+}
+
+export enum RequestStatus {
+  CONFIRMED = "confirmed",
+  REJECTED = "rejected",
+  WAITING = "waiting",
+}
+
+export enum RequestType {
+  REQUEST_TO_BE_NUTRITIONIST = "request_to_be_nutritionist",
+}
 
 export enum MessageContentType {
   TEXT = "TEXT",
@@ -228,6 +250,38 @@ export type FoodResponse = AuditResponse & {
 
   rating: number;
 };
+
+export type CertificateResponse =  AuditResponse & {
+  issueAt: string;
+
+  issueBy: string;
+
+  title: string;
+
+  expireAt: string;
+
+  image: MediaResponse;
+
+  number: string;
+
+  note: string;
+
+  status: CertificateStatus;
+
+  owner: AuthorResponse;
+}
+
+export type RequestResponse =  AuditResponse  & {
+  note: string;
+
+  status: RequestStatus;
+
+  type: RequestType;
+
+  sender: AuthorResponse;
+
+  certificates: CertificateResponse[];
+}
 
 export type RecommendationItemResponse = {
   advice: string;
