@@ -258,21 +258,21 @@ export type CertificateResponse =  AuditResponse & {
 
   title: string;
 
-  expireAt: string;
+  expireAt?: string;
 
   image: MediaResponse;
 
   number: string;
 
-  note: string;
+  note?: string;
 
   status: CertificateStatus;
 
-  owner: AuthorResponse;
+  owner?: AuthorResponse;
 }
 
 export type RequestResponse =  AuditResponse  & {
-  note: string;
+  note?: string;
 
   status: RequestStatus;
 
