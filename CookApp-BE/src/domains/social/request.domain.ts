@@ -27,6 +27,10 @@ export class Request extends Audit {
     this.note = note;
   }
 
+  isSenderBy(user: User) :boolean {
+    return this.sender.id === user.id
+  }
+
   isConfirmed(): boolean {
     return this.status === RequestStatus.CONFIRMED;
   }

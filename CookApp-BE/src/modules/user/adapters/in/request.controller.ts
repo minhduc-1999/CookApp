@@ -1,7 +1,16 @@
-import { Body, Controller, Get, Post, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  Query,
+} from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
+import { RequestResponse } from "base/dtos/response.dto";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { Result } from "base/result.base";
 import {
@@ -18,6 +27,7 @@ import { HttpUserReq } from "decorators/user.decorator";
 import { User } from "domains/social/user.domain";
 import { GetOwnRequestsQuery } from "modules/user/useCases/getOwnRequests";
 import { GetOwnRequestsResponse } from "modules/user/useCases/getOwnRequests/getOwnRequest.response";
+import { GetRequestDetailQuery } from "modules/user/useCases/getRequestDetail";
 import { SendRequestCommand } from "modules/user/useCases/sendRequest";
 import { SendRequestRequestDTO } from "modules/user/useCases/sendRequest/sendRequest.request";
 import { SendRequestResponseDTO } from "modules/user/useCases/sendRequest/sendRequest.response";
@@ -39,6 +49,19 @@ export class RequestController {
     @HttpUserReq() user: User
   ): Promise<Result<GetOwnRequestsResponse>> {
     const query = new GetOwnRequestsQuery(user, queryOpt);
+    const result = await this._queryBus.execute(query);
+    return Result.ok(result, { messages: ["Successfully"] });
+  }
+
+  @Get(":requestId")
+  @ApiFailResponseCustom()
+  @ApiOKResponseCustom(RequestResponse)
+  @RequirePermissions("read_request")
+  async getRequestDetail(
+    @HttpUserReq() user: User,
+    @Param("requestId", ParseUUIDPipe) requestId: string
+  ): Promise<Result<GetOwnRequestsResponse>> {
+    const query = new GetRequestDetailQuery(requestId, user);
     const result = await this._queryBus.execute(query);
     return Result.ok(result, { messages: ["Successfully"] });
   }
