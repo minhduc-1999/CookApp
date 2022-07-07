@@ -62,13 +62,13 @@ export const confirmRequest = async (
     })
     .catch((err: AxiosError<BaseResponse>) => {
       if (
-        err?.response?.data.meta.errorCode ===
+        err?.response?.data?.meta?.errorCode ===
         UserErrorCode.REQUEST_ALREADY_CONFIRMED
       )
         return;
 
       if (
-        err?.response?.data.meta.errorCode ===
+        err?.response?.data?.meta?.errorCode ===
         UserErrorCode.NEED_CONFIRM_ALL_CERT
       )
         throw new Error(

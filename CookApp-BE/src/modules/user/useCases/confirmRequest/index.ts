@@ -4,7 +4,12 @@ import {
   Inject,
   NotFoundException,
 } from "@nestjs/common";
-import { CommandHandler, EventBus, ICommandHandler } from "@nestjs/cqrs";
+import {
+  CommandBus,
+  CommandHandler,
+  EventBus,
+  ICommandHandler,
+} from "@nestjs/cqrs";
 import { User } from "domains/social/user.domain";
 import { BaseCommand } from "base/cqrs/command.base";
 import { ITransaction } from "adapters/typeormTransaction.adapter";
@@ -17,6 +22,7 @@ import {
   RequestConfirmedEvent,
   RequestRejectedEvent,
 } from "domains/social/events/request.event";
+import { ChangeRoleCommand } from "modules/auth/useCases/changeRole";
 
 export class ConfirmRequestCommand extends BaseCommand {
   req: ConfirmRequestDTO;
@@ -33,10 +39,11 @@ export class ConfirmRequestUseCase
   constructor(
     @Inject("IRequestRepository")
     private _requestRepository: IRequestRepository,
-    private _eventBus: EventBus
+    private _eventBus: EventBus,
+    private _commandBus: CommandBus
   ) {}
   async execute(command: ConfirmRequestCommand): Promise<void> {
-    const { req } = command;
+    const { req, tx, user } = command;
     const { requestId, status, note } = req;
 
     const existedRequest = await this._requestRepository.getById(requestId);
@@ -50,7 +57,10 @@ export class ConfirmRequestUseCase
 
     if (existedRequest.isConfirmed() || existedRequest.isRejected()) {
       throw new ConflictException(
-        ResponseDTO.fail("Request already confirmed", UserErrorCode.REQUEST_ALREADY_CONFIRMED)
+        ResponseDTO.fail(
+          "Request already confirmed",
+          UserErrorCode.REQUEST_ALREADY_CONFIRMED
+        )
       );
     }
 
@@ -58,12 +68,25 @@ export class ConfirmRequestUseCase
     const confirmError = existedRequest.confirm(status);
 
     if (confirmError) {
-      throw new BadRequestException(ResponseDTO.fail(confirmError.message, confirmError.errorCode));
+      throw new BadRequestException(
+        ResponseDTO.fail(confirmError.message, confirmError.errorCode)
+      );
     }
 
-    await this._requestRepository.updateRequest(existedRequest);
+    await this._requestRepository
+      .setTransaction(tx)
+      .updateRequest(existedRequest);
     switch (existedRequest.status) {
       case RequestStatus.CONFIRMED:
+        const changeRoleCommand = new ChangeRoleCommand(
+          {
+            userId: existedRequest.sender.id,
+            sign: "nutritionist",
+          },
+          tx,
+          user
+        );
+        await this._commandBus.execute(changeRoleCommand);
         this._eventBus.publish(new RequestConfirmedEvent(existedRequest));
         break;
       case RequestStatus.REJECTED:

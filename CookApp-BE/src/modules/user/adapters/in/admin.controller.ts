@@ -1,4 +1,12 @@
-import { Body, Controller, Get, Param, ParseUUIDPipe, Put, Query } from "@nestjs/common";
+import {
+  Body,
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Put,
+  Query,
+} from "@nestjs/common";
 import { CommandBus, QueryBus } from "@nestjs/cqrs";
 import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 import { Result } from "base/result.base";
@@ -17,6 +25,8 @@ import { ConfirmCertRequestDTO } from "modules/user/useCases/confirmCertRequest/
 import { ConfirmCertCommand } from "modules/user/useCases/confirmCertRequest";
 import { ConfirmRequestDTO } from "modules/user/useCases/confirmRequest/confirmRequest";
 import { ConfirmRequestCommand } from "modules/user/useCases/confirmRequest";
+import { HttpParamTransaction, HttpRequestTransaction } from "decorators/transaction.decorator";
+import { ITransaction } from "adapters/typeormTransaction.adapter";
 
 @Controller("admin")
 @ApiTags("Requests")
@@ -55,13 +65,15 @@ export class AdminController {
   @Put("requests/:requestId/censorship")
   @ApiFailResponseCustom()
   @ApiOKResponseCustomWithoutData("Successfully")
+  @HttpRequestTransaction()
   async confirmRequest(
     @HttpUserReq() user: User,
     @Param("requestId", ParseUUIDPipe) requestId: string,
-    @Body() body: ConfirmRequestDTO
+    @Body() body: ConfirmRequestDTO,
+    @HttpParamTransaction() tx: ITransaction
   ): Promise<Result<string>> {
     body.requestId = requestId;
-    const command = new ConfirmRequestCommand(null, user, body);
+    const command = new ConfirmRequestCommand(tx, user, body);
     await this._commandBus.execute(command);
     return Result.ok(null, { messages: ["Successfully"] });
   }

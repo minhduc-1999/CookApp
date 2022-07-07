@@ -8,7 +8,7 @@ import { Request } from "domains/social/request.domain";
 import { User } from "domains/social/user.domain";
 import { RequestEntity } from "entities/social/request.entity";
 import { GetAllRequestsRequestDTO } from "modules/user/useCases/getAllRequests/getAllRequests.request";
-import { Repository } from "typeorm";
+import { QueryRunner, Repository } from "typeorm";
 
 export interface IRequestRepository {
   createRequest(request: Request): Promise<Request>;
@@ -39,6 +39,11 @@ export class RequestRepository
 
   async updateRequest(request: Request): Promise<void> {
     const entity = new RequestEntity(request);
+    const queryRunner = this.tx.getRef() as QueryRunner;
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.save<RequestEntity>(entity);
+      return;
+    }
     await this._requestRepo.save(entity);
   }
 
