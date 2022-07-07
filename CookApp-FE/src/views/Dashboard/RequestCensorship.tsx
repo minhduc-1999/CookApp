@@ -84,7 +84,7 @@ function RequestCensorship() {
         setRequests(temp);
         setTotalRequest(totalRequest - 1);
         toast({
-          title: "Confirm successfully",
+          title: "Successfully",
           status: "success",
           duration: 3000,
           isClosable: true,

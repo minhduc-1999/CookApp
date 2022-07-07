@@ -39,7 +39,7 @@ const Certificate = (props: Props) => {
           status,
         });
         toast({
-          title: "Confirm successfully",
+          title: "Successfully",
           status: "success",
           duration: 3000,
           isClosable: true,
