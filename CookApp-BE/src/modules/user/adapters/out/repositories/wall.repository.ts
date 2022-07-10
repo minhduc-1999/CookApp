@@ -29,6 +29,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
         .leftJoinAndSelect("post.interaction", "interaction")
         .leftJoinAndSelect("post.author", "author")
         .leftJoinAndSelect("post.foodRef", "foodRef")
+        .leftJoinAndSelect("foodRef.medias", "refMedias")
         .leftJoinAndSelect("post.medias", "media")
         .leftJoinAndSelect("media.interaction", "mediaInter")
         .where("author.id = :authorId", { authorId })
@@ -41,6 +42,7 @@ export class WallRepository extends BaseRepository implements IWallRepository {
           "mediaInter",
           "foodRef",
           "author",
+          "refMedias",
         ])
         .skip(query.limit * query.offset)
         .take(query.limit)
