@@ -1,4 +1,4 @@
-import { UserErrorCode } from "enums/errorCode.enum";
+import { UserErrorCode } from "../../enums/errorCode.enum";
 import { RequestStatus, RequestType } from "../../constants/request.constant";
 import { Audit } from "../../domains/audit.domain";
 import { Certificate } from "./certificate.domain";
