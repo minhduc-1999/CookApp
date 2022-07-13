@@ -321,6 +321,9 @@ export class FoodResponse extends AuditResponse {
   @ApiResponseProperty({ type: Number })
   rating: number;
 
+  @ApiResponseProperty({ type: Number })
+  kcal: number;
+
   @ApiResponseProperty({ enum: FoodSaveType })
   saveType: FoodSaveType;
 
@@ -345,6 +348,7 @@ export class FoodResponse extends AuditResponse {
     this.videoUrl = food?.videoUrl;
     this.author = food?.author && new AuthorResponse(food.author);
     this.rating = food?.rating;
+    this.kcal = food?.kcal > 0 ? food?.kcal : undefined
   }
 }
 

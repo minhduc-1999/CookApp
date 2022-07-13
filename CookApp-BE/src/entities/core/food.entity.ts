@@ -33,6 +33,9 @@ export class FoodEntity extends AbstractEntity {
   @Column({ name: "rating", nullable: true, type: "float4" })
   rating: number;
 
+  @Column({ name: "kcal", nullable: true, type: "float4" })
+  kcal: number;
+
   @Column({
     name: "status",
     default: FoodStatusType.UNCENSORED,
@@ -74,6 +77,7 @@ export class FoodEntity extends AbstractEntity {
     this.description = food?.description;
     this.url = food?.url;
     this.status = food?.status
+    this.kcal = food?.kcal
     this.ingredients =
       food?.ingredients &&
       food.ingredients.map((ing) => new FoodIngredientEntity(ing));

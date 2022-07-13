@@ -9,12 +9,15 @@ export class FoodIngredient extends Audit {
 
   kcal: number;
 
+  unitToGram: number
+
   constructor(obj: Partial<FoodIngredient>) {
     super(obj);
     this.name = obj?.name;
     this.quantity = obj?.quantity;
     this.unit = obj?.unit;
     this.kcal = obj?.kcal;
+    this.unitToGram = obj?.unitToGram
   }
 }
 

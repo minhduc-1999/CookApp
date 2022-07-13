@@ -17,6 +17,9 @@ export class FoodIngredientEntity extends AbstractEntity {
   @Column({ name: "kcal", nullable: true })
   kcal: number;
 
+  @Column({ name: "unit_to_gram", nullable: true, type: "float" })
+  unitToGram: number;
+
   @ManyToOne(() => FoodEntity, (food) => food.ingredients, { nullable: false })
   @JoinColumn({ name: "food_id" })
   food: FoodEntity;
@@ -26,7 +29,8 @@ export class FoodIngredientEntity extends AbstractEntity {
     this.quantity = ingre?.quantity;
     this.unit = ingre?.unit;
     this.ingredient = ingre?.name;
-    this.kcal = ingre?.kcal
+    this.kcal = ingre?.kcal;
+    this.unitToGram = ingre?.unitToGram;
   }
 
   toDomain(): FoodIngredient {
@@ -34,7 +38,8 @@ export class FoodIngredientEntity extends AbstractEntity {
       name: this.ingredient,
       quantity: this.quantity,
       unit: this.unit,
-      kcal: this.kcal
+      kcal: this.kcal,
+      unitToGram: this.unitToGram,
     });
   }
 
