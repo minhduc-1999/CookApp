@@ -10,10 +10,12 @@ import { apiUrl } from "./service.config";
 
 type CreateUnitBody = {
   name: string;
+  toGram: number;
 };
 export const canSaveUnit = (body: CreateUnitBody) => {
   if (!body) return false;
   if (!body.name) return false;
+  if (!body.toGram) return false;
   return true;
 };
 
@@ -23,7 +25,7 @@ export const getUnits = async (
   limit: number,
   q = ""
 ): Promise<[UnitResponse[], PageMetadata]> => {
-  if (!token) throw new Error("Not login yet")
+  if (!token) throw new Error("Not login yet");
   await networkChecking();
   return axios
     .get(apiUrl + "/units", {
@@ -43,8 +45,11 @@ export const getUnits = async (
     });
 };
 
-export const createUnit = async (data: CreateUnitBody, token: string | undefined): Promise<void> => {
-  if (!token) throw new Error("Not login yet")
+export const createUnit = async (
+  data: CreateUnitBody,
+  token: string | undefined
+): Promise<void> => {
+  if (!token) throw new Error("Not login yet");
   await networkChecking();
   return axios
     .post(apiUrl + "/units", data, {
@@ -67,7 +72,10 @@ export const createUnit = async (data: CreateUnitBody, token: string | undefined
     });
 };
 
-export const deleteUnit = async (unitId: string, token: string | undefined): Promise<void> => {
+export const deleteUnit = async (
+  unitId: string,
+  token: string | undefined
+): Promise<void> => {
   await networkChecking();
   return axios
     .delete(apiUrl + `/units/${unitId}`, {
@@ -81,7 +89,7 @@ export const deleteUnit = async (unitId: string, token: string | undefined): Pro
       throw new Error("Fail to delete unit");
     })
     .catch((err: AxiosError<BaseResponse>) => {
-      if (err?.response?.status === 404) return
+      if (err?.response?.status === 404) return;
       throw new Error("Fail to delete unit");
     });
 };

@@ -10,6 +10,11 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
   useToast,
   VStack,
 } from "@chakra-ui/react";
@@ -20,12 +25,17 @@ import { useEffect, useRef, useState } from "react";
 type CreateUnitModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSaveCb: () => void
+  onSaveCb: () => void;
 };
 
-const CreateUnitModal = ({ isOpen, onClose , onSaveCb}: CreateUnitModalProps) => {
+const CreateUnitModal = ({
+  isOpen,
+  onClose,
+  onSaveCb,
+}: CreateUnitModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
+  const [toGram, setToGram] = useState(0);
   const [canSave, setCanSave] = useState(true);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
@@ -47,6 +57,7 @@ const CreateUnitModal = ({ isOpen, onClose , onSaveCb}: CreateUnitModalProps) =>
     if (
       canSaveUnit({
         name,
+        toGram,
       })
     ) {
       setCanSave(true);
@@ -80,6 +91,22 @@ const CreateUnitModal = ({ isOpen, onClose , onSaveCb}: CreateUnitModalProps) =>
                 }}
               />
             </FormControl>
+            <FormControl isRequired isInvalid={toGram ? false : true}>
+              <FormLabel htmlFor="to-gram">To gram</FormLabel>
+              <NumberInput
+                min={1}
+                value={toGram}
+                onChange={(_, newValue) => {
+                  setToGram(newValue);
+                }}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </FormControl>
           </VStack>
         </ModalBody>
 
@@ -99,6 +126,7 @@ const CreateUnitModal = ({ isOpen, onClose , onSaveCb}: CreateUnitModalProps) =>
                 createUnit(
                   {
                     name,
+                    toGram,
                   },
                   user?.accessToken
                 )
@@ -111,7 +139,7 @@ const CreateUnitModal = ({ isOpen, onClose , onSaveCb}: CreateUnitModalProps) =>
                       position: "top-right",
                     });
                     onClose();
-                    onSaveCb()
+                    onSaveCb();
                   })
                   .catch((err: Error) => {
                     toast({
