@@ -34,6 +34,7 @@ export class CreateIngredientCommandHandler
 
     const newIngredient = new Ingredient({
       name: req.name,
+      kcal: req.kcal
     });
 
     try {

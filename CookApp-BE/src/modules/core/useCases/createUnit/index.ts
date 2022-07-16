@@ -34,6 +34,7 @@ export class CreateUnitCommandHandler
 
     const newUnit = new Unit({
       name: req.name,
+      toGram: req.toGram
     });
 
     try {

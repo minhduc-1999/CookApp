@@ -1,5 +1,5 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { IsString } from "class-validator";
+import { ApiProperty, ApiPropertyOptional } from "@nestjs/swagger";
+import { IsNumber, IsOptional, IsPositive, IsString } from "class-validator";
 import { WordLength } from "decorators/wordLength.decorator";
 
 export class CreateIngredientRequest {
@@ -7,4 +7,10 @@ export class CreateIngredientRequest {
   @ApiProperty({ type: String })
   @IsString()
   name: string;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  kcal?: number;
 }
