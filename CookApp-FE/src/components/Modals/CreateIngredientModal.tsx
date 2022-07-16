@@ -10,6 +10,11 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  NumberDecrementStepper,
+  NumberIncrementStepper,
+  NumberInput,
+  NumberInputField,
+  NumberInputStepper,
   useToast,
   VStack,
 } from "@chakra-ui/react";
@@ -26,10 +31,11 @@ type CreateIngredientModalProps = {
 const CreateIngredientModal = ({
   isOpen,
   onClose,
-  onSaveCb
+  onSaveCb,
 }: CreateIngredientModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
+  const [kcal, setKcal] = useState(0);
   const [canSave, setCanSave] = useState(true);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
@@ -51,6 +57,7 @@ const CreateIngredientModal = ({
     if (
       canSaveIngredient({
         name,
+        kcal,
       })
     ) {
       setCanSave(true);
@@ -84,6 +91,23 @@ const CreateIngredientModal = ({
                 }}
               />
             </FormControl>
+
+            <FormControl isRequired isInvalid={kcal ? false : true}>
+              <FormLabel htmlFor="kcal">Kcal</FormLabel>
+              <NumberInput
+                min={0}
+                value={kcal}
+                onChange={(_, newValue) => {
+                  setKcal(newValue);
+                }}
+              >
+                <NumberInputField />
+                <NumberInputStepper>
+                  <NumberIncrementStepper />
+                  <NumberDecrementStepper />
+                </NumberInputStepper>
+              </NumberInput>
+            </FormControl>
           </VStack>
         </ModalBody>
 
@@ -103,6 +127,7 @@ const CreateIngredientModal = ({
                 createIngredient(
                   {
                     name,
+                    kcal,
                   },
                   user?.accessToken
                 )
@@ -115,7 +140,7 @@ const CreateIngredientModal = ({
                       position: "top-right",
                     });
                     onClose();
-                    onSaveCb()
+                    onSaveCb();
                   })
                   .catch(() => {
                     toast({

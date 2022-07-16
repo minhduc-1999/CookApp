@@ -5,11 +5,13 @@ import { networkChecking } from "utils/network";
 
 type CreateIngredientBody = {
   name: string;
+  kcal: number;
 };
 
 export const canSaveIngredient = (body: CreateIngredientBody) => {
   if (!body) return false;
   if (!body.name) return false;
+  if (!body.kcal) return false;
   return true;
 };
 
@@ -19,7 +21,7 @@ export const getIngredients = async (
   limit: number,
   q = ""
 ): Promise<[IngredientResponse[], PageMetadata]> => {
-  if (!token) throw new Error("Not login yet")
+  if (!token) throw new Error("Not login yet");
   await networkChecking();
   return axios
     .get(apiUrl + "/ingredients", {
@@ -40,9 +42,10 @@ export const getIngredients = async (
 };
 
 export const createIngredient = async (
-  data: CreateIngredientBody, token: string | undefined
+  data: CreateIngredientBody,
+  token: string | undefined
 ): Promise<void> => {
-  if (!token) throw new Error("Not login yet")
+  if (!token) throw new Error("Not login yet");
   await networkChecking();
   return axios
     .post(apiUrl + "/ingredients", data, {
@@ -57,8 +60,11 @@ export const createIngredient = async (
     });
 };
 
-export const deleteIngredient = async (ingredientId: string, token: string | undefined): Promise<void> => {
-  if (!token) throw new Error("Not login yet")
+export const deleteIngredient = async (
+  ingredientId: string,
+  token: string | undefined
+): Promise<void> => {
+  if (!token) throw new Error("Not login yet");
   await networkChecking();
   return axios
     .delete(apiUrl + `/ingredients/${ingredientId}`, {
