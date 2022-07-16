@@ -88,6 +88,8 @@ export type CreateFoodBody = {
     name: string;
     unit: string;
     quantity: number;
+    kcal: number;
+    toGram: number;
   }[];
   videoUrl?: string | undefined;
   name: string;

@@ -30,6 +30,7 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
+import { IngredientResponse, UnitResponse } from "apis/base.type";
 import { canSaveFood, createFood } from "apis/foods";
 import { getIngredients } from "apis/ingredients";
 import { uploadImageToStorage } from "apis/storage";
@@ -43,14 +44,16 @@ type Ingredient = {
   name: string;
   unit: string;
   quantity: number;
+  kcal: number;
+  toGram: number;
 };
 
 type IngredientAddingRowProps = {
   ingredient: Ingredient;
   onChange: (ingredient: Ingredient) => void;
   onDelete: () => void;
-  ingredientList: string[];
-  unitList: string[];
+  ingredientList: IngredientResponse[];
+  unitList: UnitResponse[];
 };
 
 const IngredientAddingRow = ({
@@ -65,11 +68,19 @@ const IngredientAddingRow = ({
   const [selectedUnit, setSelectedUnit] = useState(ingredient.unit);
   const [selectedQuantity, setSelectedQuantity] = useState(ingredient.quantity);
 
-  const onAnyChange = (ingredient: string, unit: string, quantity: number) => {
+  const onAnyChange = (
+    ingredientName: string,
+    unit: string,
+    quantity: number
+  ) => {
+    const newIngre = ingredientList.find((ing) => ing.name === ingredientName);
+    const newUnit = unitList.find((u) => u.name === unit);
     onChange({
       quantity,
       unit,
-      name: ingredient,
+      name: ingredientName,
+      kcal: newIngre?.kcal ?? 0,
+      toGram: newUnit?.toGram ?? 0,
     });
   };
 
@@ -98,8 +109,8 @@ const IngredientAddingRow = ({
           }}
         >
           {ingredientList?.map((ing, index) => (
-            <option key={index} value={ing}>
-              {ing}
+            <option key={index} value={ing.name}>
+              {ing.name}
             </option>
           ))}
         </Select>
@@ -137,8 +148,8 @@ const IngredientAddingRow = ({
           }}
         >
           {unitList?.map((unit, index) => (
-            <option key={index} value={unit}>
-              {unit}
+            <option key={index} value={unit.name}>
+              {unit.name}
             </option>
           ))}
         </Select>
@@ -201,13 +212,17 @@ const StepAddingRow = ({ step, onChange, onDelete }: StepAddingRowProps) => {
 type CreateFoodModalProps = {
   isOpen: boolean;
   onClose: () => void;
-  onSaveCb: () => void
+  onSaveCb: () => void;
 };
 
 const INIT_UNIT_SIZE = 50;
 const INIT_INGREDIENT_SIZE = 50;
 
-const CreateFoodModal = ({ isOpen, onClose , onSaveCb}: CreateFoodModalProps) => {
+const CreateFoodModal = ({
+  isOpen,
+  onClose,
+  onSaveCb,
+}: CreateFoodModalProps) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [stepList, setStepList] = useState<string[]>([]);
   const [ingredientList, setIngredientList] = useState<Ingredient[]>([]);
@@ -221,8 +236,8 @@ const CreateFoodModal = ({ isOpen, onClose , onSaveCb}: CreateFoodModalProps) =>
   const [foodPhotos, setFoodPhotos] = useState<ImageListType>([]);
   const toast = useToast();
 
-  const [units, setUnits] = useState<string[]>([]);
-  const [ingredients, setIngredients] = useState<string[]>([]);
+  const [units, setUnits] = useState<UnitResponse[]>([]);
+  const [ingredients, setIngredients] = useState<IngredientResponse[]>([]);
 
   const { user } = useAuth();
 
@@ -251,13 +266,11 @@ const CreateFoodModal = ({ isOpen, onClose , onSaveCb}: CreateFoodModalProps) =>
     if (isOpen) {
       getUnits(user?.accessToken, 1, INIT_UNIT_SIZE).then((res) => {
         const [unitItems, _] = res;
-        const temp = unitItems.map((item) => item.name);
-        setUnits(temp);
+        setUnits(unitItems);
       });
       getIngredients(user?.accessToken, 1, INIT_INGREDIENT_SIZE).then((res) => {
         const [ingreItems, _] = res;
-        const temp = ingreItems.map((item) => item.name);
-        setIngredients(temp);
+        setIngredients(ingreItems);
       });
     }
   }, [isOpen]);
@@ -288,6 +301,8 @@ const CreateFoodModal = ({ isOpen, onClose , onSaveCb}: CreateFoodModalProps) =>
       name: "",
       quantity: 0,
       unit: "",
+      kcal: 0,
+      toGram: 1,
     });
     setIngredientList(ingredients);
   };
@@ -626,7 +641,7 @@ const CreateFoodModal = ({ isOpen, onClose , onSaveCb}: CreateFoodModalProps) =>
                       position: "top-right",
                     });
                     onClose();
-                    onSaveCb()
+                    onSaveCb();
                   })
                   .catch(() => {
                     toast({
