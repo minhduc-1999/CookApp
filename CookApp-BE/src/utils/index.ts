@@ -1,9 +1,16 @@
 import { IUpdatable } from "domains/interfaces/IUpdatable.interface";
 import { isFunction } from "lodash";
 import _ = require("lodash");
+import * as util from "util";
 const randomWords = require("random-words");
 
 export { default as time } from "./time";
+
+export function deepLog(o: any) {
+  console.log(
+    util.inspect(o, { showHidden: false, depth: null, colors: true })
+  );
+}
 
 export function createUpdatingNestedObject<T, R>(
   childName: string,
@@ -24,9 +31,7 @@ export function createUpdatingNestedObject<T, R>(
   return updatingObj;
 }
 
-export function createUpdatingObject<T>(
-  updateObj: T,
-): Partial<T> {
+export function createUpdatingObject<T>(updateObj: T): Partial<T> {
   const keys = Object.keys(updateObj).filter(
     (key) => updateObj[key] !== null && updateObj[key] !== undefined
   );
@@ -88,7 +93,8 @@ export function generateDisplayName() {
   );
 }
 
-export function retrieveObjectNameFromUrl(url: string,
+export function retrieveObjectNameFromUrl(
+  url: string,
   eliminatedSeed: string
 ): string {
   const a = url.slice(url.indexOf(eliminatedSeed) + eliminatedSeed.length);
@@ -110,8 +116,10 @@ export function sleep(ms: number) {
 }
 
 export function inspectObj(obj: any) {
-  const util = require('util')
-  console.log(util.inspect(obj, { showHidden: false, depth: null, colors: true }))
+  const util = require("util");
+  console.log(
+    util.inspect(obj, { showHidden: false, depth: null, colors: true })
+  );
 }
 
 export function mapWsPayload(payload: unknown): { data: any; ack?: Function } {
@@ -136,22 +144,25 @@ export function mapWsPayload(payload: unknown): { data: any; ack?: Function } {
 export function mapWsAck(payload: unknown): Function {
   if (!Array.isArray(payload)) {
     if (isFunction(payload)) {
-      return payload as Function
+      return payload as Function;
     }
-    return null
+    return null;
   }
   const lastElement = payload[payload.length - 1];
   if (isFunction(lastElement)) {
-    return lastElement
+    return lastElement;
   }
-  return null
+  return null;
 }
 
-export function loadUpdateData<T extends IUpdatable<T>>(object: any, target: T): Partial<T>{
-  const keys = target.getUpdatableFields()
-  const updatePayload: Partial<T> = {}
-  for (let key of keys)  {
-      updatePayload[key] = object[key] ?? target[key]
+export function loadUpdateData<T extends IUpdatable<T>>(
+  object: any,
+  target: T
+): Partial<T> {
+  const keys = target.getUpdatableFields();
+  const updatePayload: Partial<T> = {};
+  for (let key of keys) {
+    updatePayload[key] = object[key] ?? target[key];
   }
-  return updatePayload
+  return updatePayload;
 }

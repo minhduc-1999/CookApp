@@ -1,4 +1,4 @@
-import { Inject } from "@nestjs/common";
+import { Inject, Logger } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { FoodCreatedEvent } from "domains/core/events/food.event";
 import { NotificationTemplateEnum } from "enums/notification.enum";
@@ -10,6 +10,7 @@ import { IConfigurationService } from "modules/configuration/adapters/out/servic
 
 @EventsHandler(FoodCreatedEvent)
 export class NewFoodEventHandler implements IEventHandler<FoodCreatedEvent> {
+  private _logger = new Logger(NewFoodEventHandler.name);
   constructor(
     @Inject("IFollowRepository")
     private _followRepo: IFollowRepository,
@@ -50,6 +51,9 @@ export class NewFoodEventHandler implements IEventHandler<FoodCreatedEvent> {
         foodName: food.name,
       },
     };
+    this._logger.log(
+      `Send notification for ${FoodCreatedEvent.name}, food [${food.id}]`
+    );
     this._notiRepository.push(notification);
     this._notiService.sendNotificationToUser(notification);
   }

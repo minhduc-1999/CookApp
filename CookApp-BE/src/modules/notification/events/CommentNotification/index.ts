@@ -1,4 +1,4 @@
-import { Inject } from "@nestjs/common";
+import { Inject, Logger } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { Notification } from "domains/social/notification.domain";
 import { Post } from "domains/social/post.domain";
@@ -20,6 +20,7 @@ export class CommentPostEvent {
 export class CommentPostEventHandler
   implements IEventHandler<CommentPostEvent>
 {
+  private _logger = new Logger(CommentPostEventHandler.name)
   constructor(
     @Inject("INotiRepository")
     private _notiRepository: INotiRepository,
@@ -54,6 +55,7 @@ export class CommentPostEventHandler
         postID: post.id,
       },
     };
+    this._logger.log(`Send notification for ${CommentPostEvent.name}, post [${post.id}]`)
     this._notiRepository.push(notification);
     this._notiService.sendNotificationToUser(notification);
   }

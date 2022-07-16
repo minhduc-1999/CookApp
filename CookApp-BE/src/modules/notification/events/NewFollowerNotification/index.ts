@@ -1,4 +1,4 @@
-import { Inject } from "@nestjs/common";
+import { Inject, Logger } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { Notification } from "domains/social/notification.domain";
 import { User } from "domains/social/user.domain";
@@ -19,6 +19,7 @@ export class NewFollowerEvent {
 export class NewFollowerEventHandler
   implements IEventHandler<NewFollowerEvent>
 {
+  private _logger = new Logger(NewFollowerEventHandler.name);
   constructor(
     @Inject("IConfigurationService")
     private _configurationService: IConfigurationService,
@@ -49,6 +50,9 @@ export class NewFollowerEventHandler
         followerID: follower.id,
       },
     };
+    this._logger.log(
+      `Send notification for ${NewFollowerEvent.name}, followee [${target.id}], follower [${follower.id}]`
+    );
     this._notiRepository.push(notification);
     this._notiService.sendNotificationToUser(notification);
   }

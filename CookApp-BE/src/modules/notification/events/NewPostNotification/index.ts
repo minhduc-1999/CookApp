@@ -1,4 +1,4 @@
-import { Inject } from "@nestjs/common";
+import { Inject, Logger } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { PostCreatedEvent } from "domains/social/events/post.event";
 import { Notification } from "domains/social/notification.domain";
@@ -11,6 +11,7 @@ import { IFollowRepository } from "modules/user/interfaces/repositories/follow.i
 
 @EventsHandler(PostCreatedEvent)
 export class NewPostEventHandler implements IEventHandler<PostCreatedEvent> {
+  private _logger = new Logger(NewPostEventHandler.name);
   constructor(
     @Inject("INotiRepository")
     private _notiRepository: INotiRepository,
@@ -52,6 +53,9 @@ export class NewPostEventHandler implements IEventHandler<PostCreatedEvent> {
         postID: event.post.id,
       },
     };
+    this._logger.log(
+      `Send notification for ${PostCreatedEvent.name}, post [${event.post.id}]`
+    );
     this._notiRepository.push(notification);
     this._notiService.sendNotificationToUser(notification);
   }

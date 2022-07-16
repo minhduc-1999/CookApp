@@ -7,6 +7,7 @@ import {
 import { NotificationTemplateEnum } from "enums/notification.enum";
 import { NotificationEntity } from "modules/notification/entities/notification.entity";
 import { IStorageProvider } from "modules/share/adapters/out/services/provider.service";
+import { deepLog } from "utils";
 
 export interface INotiRepository {
   push(notification: Notification): Promise<void>;
@@ -46,6 +47,6 @@ export class NotiRepository implements INotiRepository {
         ...notiEntity,
       });
     });
-    batch.commit();
+    await batch.commit();
   }
 }

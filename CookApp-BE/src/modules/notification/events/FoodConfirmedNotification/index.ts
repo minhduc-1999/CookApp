@@ -1,4 +1,4 @@
-import { Inject } from "@nestjs/common";
+import { Inject, Logger } from "@nestjs/common";
 import { EventsHandler, IEventHandler } from "@nestjs/cqrs";
 import { FoodCensorshipEvent } from "domains/core/events/food.event";
 import {
@@ -15,6 +15,7 @@ import { INotificationService } from "modules/notification/adapters/out/services
 export class FoodConfirmedEventHandler
   implements IEventHandler<FoodCensorshipEvent>
 {
+  private _logger = new Logger(FoodConfirmedEventHandler.name);
   constructor(
     @Inject("INotiRepository")
     private _notiRepository: INotiRepository,
@@ -55,7 +56,16 @@ export class FoodConfirmedEventHandler
         foodName: food.name,
       },
     };
-    this._notiRepository.push(notification);
+    this._logger.log(
+      `Send notification for ${FoodCensorshipEvent.name}, food [${food.id}]`
+    );
+    this._notiRepository
+      .push(notification)
+      .catch((err) =>
+        this._logger.error(
+          `Error when save notification, reason: ${err.message}`
+        )
+      );
     this._notiService.sendNotificationToUser(notification);
   }
 }
