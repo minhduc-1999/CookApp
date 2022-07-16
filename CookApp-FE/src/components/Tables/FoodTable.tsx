@@ -53,6 +53,7 @@ function FoodTable({ foods, curPage, limit }: Props) {
               <Th color="gray.400">Name</Th>
               <Th color="gray.400">Servings</Th>
               <Th color="gray.400">Total Time</Th>
+              <Th color="gray.400">Kcal</Th>
               <Th color="gray.400">Created At</Th>
               <Th></Th>
             </Tr>

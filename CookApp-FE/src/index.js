@@ -30,7 +30,7 @@ ReactDOM.render(
         <Route path={`/auth`} component={AuthLayout} />
         <PrivateRoute path={`/admin`} component={AdminLayout}>
         </PrivateRoute>
-        <Redirect from={`/`} to="/admin/censorship" />
+        <Redirect from={`/`} to="/admin/food-censorship" />
       </Switch>
     </BrowserRouter>
   </ProvideAuth>,

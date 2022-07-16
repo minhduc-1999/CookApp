@@ -20,7 +20,7 @@ type Props = {
 };
 
 function FoodRow(props: Props) {
-  const { name, createdAt, totalTime, servings, photos, id } = props.data;
+  const { name, createdAt, totalTime, kcal, servings, photos, id } = props.data;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
   const tabContext = useContext(FoodTabContext);
@@ -62,6 +62,12 @@ function FoodRow(props: Props) {
       <Td>
         <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
           {durationFormat(totalTime)}
+        </Text>
+      </Td>
+
+      <Td>
+        <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
+          {kcal > 1 ? Math.round(kcal) : ""}
         </Text>
       </Td>
 

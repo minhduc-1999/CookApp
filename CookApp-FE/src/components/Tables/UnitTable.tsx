@@ -42,6 +42,7 @@ function UnitTable({ units, curPage, limit }: Props) {
               Index
             </Th>
             <Th color="gray.400">Name</Th>
+            <Th color="gray.400">To gram</Th>
             <Th></Th>
           </Tr>
         </Thead>

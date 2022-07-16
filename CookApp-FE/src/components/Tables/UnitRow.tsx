@@ -10,7 +10,7 @@ type Props = {
 };
 
 function UnitRow(props: Props) {
-  const { name, id } = props.data;
+  const { toGram, name, id } = props.data;
   const index = props.index + 1;
   const textColor = useColorModeValue("gray.700", "white");
 
@@ -27,6 +27,12 @@ function UnitRow(props: Props) {
       <Td>
         <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
           {name}
+        </Text>
+      </Td>
+
+      <Td>
+        <Text fontSize="md" color={textColor} fontWeight="bold" pb=".5rem">
+          {toGram}
         </Text>
       </Td>
 

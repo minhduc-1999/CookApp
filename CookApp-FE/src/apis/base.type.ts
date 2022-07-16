@@ -187,10 +187,12 @@ export type UserResponse = AuditResponse & {
 
 export type UnitResponse = {
   name: string;
+  toGram: number
 } & AuditResponse;
 
 export type IngredientResponse = {
   name: string;
+  kcal: number;
 } & AuditResponse;
 
 export type FoodIngredientResponse = {
@@ -225,6 +227,8 @@ export type RecipeStepResponse = {
 
 export type FoodResponse = AuditResponse & {
   servings: number;
+
+  kcal: number;
 
   name: string;
 

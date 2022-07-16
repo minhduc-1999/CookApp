@@ -44,6 +44,7 @@ function IngredientTable({ ingredients, curPage, limit }: Props) {
               Index
             </Th>
             <Th color="gray.400">Name</Th>
+            <Th color="gray.400">Kcal</Th>
             <Th></Th>
           </Tr>
         </Thead>
