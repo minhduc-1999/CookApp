@@ -31,7 +31,7 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { IngredientResponse, UnitResponse } from "apis/base.type";
-import { canSaveFood, createFood } from "apis/foods";
+import { createFood } from "apis/foods";
 import { getIngredients } from "apis/ingredients";
 import { uploadImageToStorage } from "apis/storage";
 import { getUnits } from "apis/units";
@@ -54,7 +54,14 @@ type IngredientAddingRowProps = {
   onDelete: () => void;
   ingredientList: IngredientResponse[];
   unitList: UnitResponse[];
+  saveError: CreateFoodErrorType;
 };
+
+type IngredientRowErrorType =
+  | "ingredientError"
+  | "unitError"
+  | "quantityError"
+  | "none";
 
 const IngredientAddingRow = ({
   ingredient,
@@ -62,11 +69,30 @@ const IngredientAddingRow = ({
   onDelete,
   ingredientList,
   unitList,
+  saveError,
 }: IngredientAddingRowProps) => {
   const [deleteBtnOpacity, setDeleteBtnOpacity] = useState(0);
   const [selectedIngredient, setSelectedIngredient] = useState(ingredient.name);
   const [selectedUnit, setSelectedUnit] = useState(ingredient.unit);
   const [selectedQuantity, setSelectedQuantity] = useState(ingredient.quantity);
+  const [error, setError] = useState<IngredientRowErrorType>("none");
+
+  useEffect(() => {
+    if (saveError === "ingredientsError") {
+      if (!selectedIngredient) {
+        setError("ingredientError");
+        return
+      }
+      if (!selectedQuantity) {
+        setError("quantityError");
+        return
+      }
+      if (!selectedUnit) {
+        setError("unitError");
+        return
+      }
+    }
+  }, [saveError]);
 
   const onAnyChange = (
     ingredientName: string,
@@ -98,7 +124,10 @@ const IngredientAddingRow = ({
       alignItems={"center"}
       w="100%"
     >
-      <FormControl isInvalid={selectedIngredient ? false : true}>
+      <FormControl
+        isInvalid={error === "ingredientError"}
+        onFocus={() => setError("none")}
+      >
         <Select
           placeholder="Ingredient..."
           value={selectedIngredient ? selectedIngredient : undefined}
@@ -115,13 +144,16 @@ const IngredientAddingRow = ({
           ))}
         </Select>
       </FormControl>
-      <FormControl isInvalid={selectedQuantity ? false : true}>
+      <FormControl
+        isInvalid={error === "quantityError"}
+        onFocus={() => setError("none")}
+      >
         <NumberInput
           id="quantity"
           step={0.5}
           precision={1}
-          defaultValue={0}
-          min={0}
+          defaultValue={1}
+          min={1}
           max={180}
           maxW={200}
           value={selectedQuantity}
@@ -137,7 +169,10 @@ const IngredientAddingRow = ({
           </NumberInputStepper>
         </NumberInput>
       </FormControl>
-      <FormControl isInvalid={selectedUnit ? false : true}>
+      <FormControl
+        isInvalid={error === "unitError"}
+        onFocus={() => setError("none")}
+      >
         <Select
           placeholder="Unit..."
           value={selectedUnit ? selectedUnit : undefined}
@@ -218,6 +253,17 @@ type CreateFoodModalProps = {
 const INIT_UNIT_SIZE = 50;
 const INIT_INGREDIENT_SIZE = 50;
 
+type CreateFoodErrorType =
+  | "nameError"
+  | "descriptionError"
+  | "servingsError"
+  | "totalTimeError"
+  | "videoUrlError"
+  | "foodPhotosError"
+  | "stepsError"
+  | "ingredientsError"
+  | "none";
+
 const CreateFoodModal = ({
   isOpen,
   onClose,
@@ -231,36 +277,15 @@ const CreateFoodModal = ({
   const [servings, setServings] = useState(0);
   const [totalTime, setTotalTime] = useState(0);
   const [videoUrl, setVideoUrl] = useState("");
-  const [canSave, setCanSave] = useState(false);
   const [saving, setSaving] = useState(false);
   const [foodPhotos, setFoodPhotos] = useState<ImageListType>([]);
   const toast = useToast();
+  const [error, setError] = useState<CreateFoodErrorType>("none");
 
   const [units, setUnits] = useState<UnitResponse[]>([]);
   const [ingredients, setIngredients] = useState<IngredientResponse[]>([]);
 
   const { user } = useAuth();
-
-  useEffect(() => {
-    let checkSavingInterval: NodeJS.Timer;
-    if (isOpen)
-      checkSavingInterval = setInterval(() => {
-        checkSaving();
-      }, 500);
-
-    return () => {
-      if (checkSavingInterval) clearInterval(checkSavingInterval);
-    };
-  }, [
-    isOpen,
-    stepList,
-    name,
-    ingredientList,
-    servings,
-    totalTime,
-    foodPhotos,
-    description,
-  ]);
 
   useEffect(() => {
     if (isOpen) {
@@ -320,24 +345,41 @@ const CreateFoodModal = ({
   };
 
   const checkSaving = () => {
-    if (
-      !canSaveFood({
-        name,
-        servings,
-        totalTime,
-        ingredients: ingredientList,
-        steps: stepList.map((step) => {
-          return { content: step };
-        }),
-        videoUrl,
-        description,
-        photos: foodPhotos.map((photo) => photo.file?.name ?? ""),
-      })
-    ) {
-      setCanSave(false);
-      return;
+    switch (true) {
+      case !name:
+        setError("nameError");
+        return false;
+      case !description:
+        setError("descriptionError");
+        return false;
+      case !servings:
+        setError("servingsError");
+        return;
+      case !totalTime:
+        setError("totalTimeError");
+        return false;
+      case !ingredientList || !ingredientList.length:
+        setError("ingredientsError");
+        return false;
+      case !stepList || !stepList.length:
+        setError("stepsError");
+        return false;
+      case !foodPhotos || !foodPhotos.length:
+        return false;
     }
-    setCanSave(true);
+    for (const ingre of ingredientList) {
+      if (!ingre.name || !ingre.unit || !ingre.quantity) {
+        setError("ingredientsError");
+        return false;
+      }
+    }
+    for (const step of stepList) {
+      if (!step) {
+        setError("stepsError");
+        return false;
+      }
+    }
+    return true;
   };
 
   const saveFood = async (foodReq: {
@@ -378,6 +420,60 @@ const CreateFoodModal = ({
     setFoodPhotos(imgList);
   };
 
+  const onInputFocus = () => {
+    setError("none");
+  };
+
+  const clearAll = () => {
+    setName("");
+    setStepList([]);
+    setIngredientList([]);
+    setDescription("");
+    setServings(0);
+    setTotalTime(0);
+    setVideoUrl("");
+    setFoodPhotos([]);
+  };
+
+  const onSaveFood = () => {
+    if (!checkSaving()) return;
+    setSaving(true);
+    saveFood({
+      steps: stepList,
+      name,
+      servings,
+      totalTime,
+      ingredients: ingredientList,
+      photos: foodPhotos,
+      videoUrl,
+      description,
+    })
+      .then(() => {
+        toast({
+          title: "Food created",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+        onClose();
+        onSaveCb();
+        clearAll();
+      })
+      .catch(() => {
+        toast({
+          title: "Fail to create food",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+      })
+      .finally(() => {
+        setSaving(false);
+      });
+  };
+
   return (
     <Modal
       initialFocusRef={initialRef}
@@ -391,7 +487,11 @@ const CreateFoodModal = ({
         <ModalCloseButton />
         <ModalBody pb={6}>
           <VStack spacing={4}>
-            <FormControl isRequired isInvalid={name ? false : true}>
+            <FormControl
+              isRequired
+              isInvalid={error === "nameError"}
+              onFocus={() => setError("none")}
+            >
               <FormLabel htmlFor="food-name">Food name</FormLabel>
               <Input
                 id="food-name"
@@ -404,7 +504,11 @@ const CreateFoodModal = ({
               />
             </FormControl>
 
-            <FormControl isRequired isInvalid={description ? false : true}>
+            <FormControl
+              isRequired
+              isInvalid={error === "descriptionError"}
+              onFocus={onInputFocus}
+            >
               <FormLabel htmlFor="description">Description</FormLabel>
               <Textarea
                 id="description"
@@ -423,7 +527,11 @@ const CreateFoodModal = ({
               justifyContent={"space-between"}
               alignItems="center"
             >
-              <FormControl isRequired isInvalid={servings >= 1 ? false : true}>
+              <FormControl
+                isRequired
+                isInvalid={error === "servingsError"}
+                onFocus={onInputFocus}
+              >
                 <FormLabel htmlFor="servings">Servings</FormLabel>
                 <HStack>
                   <NumberInput
@@ -448,7 +556,11 @@ const CreateFoodModal = ({
                 </HStack>
               </FormControl>
 
-              <FormControl isRequired isInvalid={totalTime >= 1 ? false : true}>
+              <FormControl
+                isRequired
+                isInvalid={error === "totalTimeError"}
+                onFocus={onInputFocus}
+              >
                 <FormLabel htmlFor="total-time">Total time</FormLabel>
                 <HStack>
                   <NumberInput
@@ -474,12 +586,13 @@ const CreateFoodModal = ({
               </FormControl>
             </Flex>
             <Accordion allowToggle w="100%">
-              <AccordionItem borderTop={"none"}>
+              <AccordionItem
+                border={error === "ingredientsError" ? "2px solid red" : "none"}
+                borderRadius="5px"
+                onFocus={onInputFocus}
+              >
                 <AccordionButton px={0}>
-                  <FormControl
-                    isRequired
-                    isInvalid={ingredientList.length > 0 ? false : true}
-                  >
+                  <FormControl isRequired>
                     <Flex
                       direction={"row"}
                       alignItems="center"
@@ -500,6 +613,7 @@ const CreateFoodModal = ({
                         onDelete={onIngredientRowDelete(index)}
                         unitList={units}
                         ingredientList={ingredients}
+                        saveError={error}
                       />
                     ))}
                     <IconButton
@@ -512,12 +626,13 @@ const CreateFoodModal = ({
                 </AccordionPanel>
               </AccordionItem>
 
-              <AccordionItem borderBottom="none">
+              <AccordionItem
+                border={error === "stepsError" ? "2px solid red" : "none"}
+                borderRadius="5px"
+                onFocus={onInputFocus}
+              >
                 <AccordionButton px={0}>
-                  <FormControl
-                    isRequired
-                    isInvalid={stepList.length > 0 ? false : true}
-                  >
+                  <FormControl isRequired>
                     <Flex
                       direction={"row"}
                       alignItems="center"
@@ -548,29 +663,29 @@ const CreateFoodModal = ({
                 </AccordionPanel>
               </AccordionItem>
             </Accordion>
-            <ImageUploading
-              multiple={false}
-              value={foodPhotos}
-              onChange={onUploadImagesChange}
-            >
-              {({
-                imageList,
-                onImageUpload,
-                onImageRemoveAll,
-                onImageUpdate,
-                onImageRemove,
-                isDragging,
-                dragProps,
-              }) => (
-                // write your building UI
-                <FormControl
-                  isRequired
-                  isInvalid={foodPhotos.length > 0 ? false : true}
-                >
-                  <FormLabel htmlFor="photo">Photo</FormLabel>
+            <FormControl isRequired>
+              <FormLabel htmlFor="photo">Photo</FormLabel>
+              <ImageUploading
+                multiple={false}
+                value={foodPhotos}
+                onChange={onUploadImagesChange}
+              >
+                {({
+                  imageList,
+                  onImageUpload,
+                  onImageRemoveAll,
+                  onImageUpdate,
+                  onImageRemove,
+                  isDragging,
+                  dragProps,
+                }) => (
+                  // write your building UI
                   <VStack>
                     {imageList.length > 0 ? null : (
                       <Button
+                        border={
+                          error === "foodPhotosError" ? "2px solid red" : "none"
+                        }
                         color={isDragging ? "red" : "inherit"}
                         onClick={onImageUpload}
                         w="100%"
@@ -592,9 +707,9 @@ const CreateFoodModal = ({
                       />
                     ))}
                   </VStack>
-                </FormControl>
-              )}
-            </ImageUploading>
+                )}
+              </ImageUploading>
+            </FormControl>
             <FormControl>
               <FormLabel htmlFor="video-url">Video URL</FormLabel>
               <Input
@@ -618,46 +733,7 @@ const CreateFoodModal = ({
               variant="outline"
             />
           ) : (
-            <Button
-              colorScheme="teal"
-              onClick={() => {
-                setSaving(true);
-                saveFood({
-                  steps: stepList,
-                  name,
-                  servings,
-                  totalTime,
-                  ingredients: ingredientList,
-                  photos: foodPhotos,
-                  videoUrl,
-                  description,
-                })
-                  .then(() => {
-                    toast({
-                      title: "Food created",
-                      status: "success",
-                      duration: 3000,
-                      isClosable: true,
-                      position: "top-right",
-                    });
-                    onClose();
-                    onSaveCb();
-                  })
-                  .catch(() => {
-                    toast({
-                      title: "Fail to create food",
-                      status: "error",
-                      duration: 3000,
-                      isClosable: true,
-                      position: "top-right",
-                    });
-                  })
-                  .finally(() => {
-                    setSaving(false);
-                  });
-              }}
-              disabled={!canSave}
-            >
+            <Button colorScheme="teal" onClick={onSaveFood}>
               Save
             </Button>
           )}
