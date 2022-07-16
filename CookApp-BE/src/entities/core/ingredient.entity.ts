@@ -7,7 +7,7 @@ export class IngredientEntity extends AbstractEntity {
   @Column({ name: "name", unique: true, nullable: false })
   name: string;
 
-  @Column({ name: "kcal",  nullable: true })
+  @Column({ name: "kcal", nullable: true, type: "float" })
   kcal: number;
 
   toDomain(): Ingredient {
@@ -17,7 +17,7 @@ export class IngredientEntity extends AbstractEntity {
   constructor(ing: Ingredient) {
     super(ing);
     this.name = ing?.name;
-    this.kcal = ing?.kcal
+    this.kcal = ing?.kcal;
   }
 }
 
@@ -26,6 +26,9 @@ export class UnitEntity extends AbstractEntity {
   @Column({ name: "name", nullable: false, unique: true })
   name: string;
 
+  @Column({ name: "to_gram", nullable: true, type: "float" })
+  toGram: number;
+
   toDomain(): Unit {
     return new Unit(this);
   }
@@ -33,5 +36,6 @@ export class UnitEntity extends AbstractEntity {
   constructor(unit: Unit) {
     super(unit);
     this.name = unit?.name;
+    this.toGram = unit?.toGram;
   }
 }

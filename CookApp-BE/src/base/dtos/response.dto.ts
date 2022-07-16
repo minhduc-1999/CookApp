@@ -202,9 +202,13 @@ export class UnitResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string;
 
+  @ApiResponseProperty({ type: Number })
+  toGram: number;
+
   constructor(unit: Unit) {
     super(unit);
     this.name = unit?.name;
+    this.toGram = unit?.toGram;
   }
 }
 
@@ -212,9 +216,13 @@ export class IngredientResponse extends AuditResponse {
   @ApiResponseProperty({ type: String })
   name: string;
 
+  @ApiResponseProperty({ type: Number })
+  kcal: number
+
   constructor(ing: Ingredient) {
     super(ing);
     this.name = ing?.name;
+    this.kcal = ing?.kcal;
   }
 }
 

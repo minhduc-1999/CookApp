@@ -36,8 +36,11 @@ export class Ingredient extends Audit {
 export class Unit extends Audit {
   name: string;
 
+  toGram: number
+
   constructor(unit: Partial<Unit>) {
     super(unit);
     this.name = unit?.name;
+    this.toGram = unit?.toGram
   }
 }
