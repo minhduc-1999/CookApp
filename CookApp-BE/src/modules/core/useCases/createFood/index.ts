@@ -29,7 +29,7 @@ export class CreateFoodCommandHandler
     @Inject("IStorageService")
     private _storageService: IStorageService,
     @Inject("IFoodRepository")
-    private _foodRepo: IFoodRepository,
+    private _foodRepo: IFoodRepository
   ) {}
   async execute(command: CreateFoodCommand): Promise<CreateFoodResponse> {
     const { req, user, tx } = command;
@@ -81,6 +81,8 @@ export class CreateFoodCommandHandler
       url: req?.url,
       author: user,
     });
+
+    food.calculateKcal();
 
     food.setCensoredStatus(user.account.role.sign);
 

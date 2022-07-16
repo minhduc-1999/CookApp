@@ -31,7 +31,7 @@ export class Food extends Audit {
 
   status: FoodStatusType;
 
-  kcal: number
+  kcal: number;
 
   isValidFood(): boolean {
     if (this.photos?.length < 1) return false;
@@ -47,6 +47,17 @@ export class Food extends Audit {
     }
   }
 
+  calculateKcal(): void {
+    const sumKcal = this.ingredients.reduce((acc, cur) => {
+      const { kcal, quantity, toGram } = cur;
+      if (kcal && quantity && toGram) {
+        acc += (kcal * (toGram * quantity)) / 100;
+      }
+      return acc;
+    }, 0);
+    this.kcal = sumKcal;
+  }
+
   constructor(food: Partial<Food>) {
     super(food);
     this.servings = food?.servings;
@@ -60,7 +71,7 @@ export class Food extends Audit {
     this.url = food?.url;
     this.author = food?.author;
     this.rating = food?.rating;
-    this.status = food?.status
-    this.kcal = food?.kcal
+    this.status = food?.status;
+    this.kcal = food?.kcal;
   }
 }

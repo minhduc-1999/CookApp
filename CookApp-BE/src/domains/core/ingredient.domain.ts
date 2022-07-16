@@ -9,7 +9,7 @@ export class FoodIngredient extends Audit {
 
   kcal: number;
 
-  unitToGram: number
+  toGram: number
 
   constructor(obj: Partial<FoodIngredient>) {
     super(obj);
@@ -17,7 +17,7 @@ export class FoodIngredient extends Audit {
     this.quantity = obj?.quantity;
     this.unit = obj?.unit;
     this.kcal = obj?.kcal;
-    this.unitToGram = obj?.unitToGram
+    this.toGram = obj?.toGram
   }
 }
 

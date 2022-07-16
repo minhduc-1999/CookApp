@@ -30,7 +30,7 @@ export class FoodIngredientEntity extends AbstractEntity {
     this.unit = ingre?.unit;
     this.ingredient = ingre?.name;
     this.kcal = ingre?.kcal;
-    this.unitToGram = ingre?.unitToGram;
+    this.unitToGram = ingre?.toGram;
   }
 
   toDomain(): FoodIngredient {
@@ -39,7 +39,7 @@ export class FoodIngredientEntity extends AbstractEntity {
       quantity: this.quantity,
       unit: this.unit,
       kcal: this.kcal,
-      unitToGram: this.unitToGram,
+      toGram: this.unitToGram,
     });
   }
 

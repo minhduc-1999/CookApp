@@ -8,6 +8,7 @@ import {
   IsNotEmpty,
   IsNumber,
   IsOptional,
+  IsPositive,
   IsString,
   Min,
   ValidateNested,
@@ -29,6 +30,18 @@ class IngredientRequest {
   @ApiPropertyOptional({ type: Number })
   @Min(0)
   quantity: number;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  toGram?: number;
+
+  @ApiPropertyOptional({ type: Number })
+  @IsOptional()
+  @IsNumber()
+  @IsPositive()
+  kcal?: number;
 }
 
 class RecipeStepRequest {
