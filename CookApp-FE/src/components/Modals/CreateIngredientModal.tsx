@@ -20,7 +20,7 @@ import {
 } from "@chakra-ui/react";
 import { canSaveIngredient, createIngredient } from "apis/ingredients";
 import { useAuth } from "contexts/Auth/Auth";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type CreateIngredientModalProps = {
   isOpen: boolean;
@@ -36,22 +36,22 @@ const CreateIngredientModal = ({
   const initialRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [kcal, setKcal] = useState(0);
-  const [canSave, setCanSave] = useState(true);
+  const [canSave, setCanSave] = useState(false);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
   const { user } = useAuth();
 
-  useEffect(() => {
-    let checkSavingInterval: NodeJS.Timer;
-    if (isOpen)
-      checkSavingInterval = setInterval(() => {
-        checkSaving();
-      }, 500);
+  // useEffect(() => {
+  //   let checkSavingInterval: NodeJS.Timer;
+  //   if (isOpen)
+  //     checkSavingInterval = setInterval(() => {
+  //       checkSaving();
+  //     }, 500);
 
-    return () => {
-      if (checkSavingInterval) clearInterval(checkSavingInterval);
-    };
-  }, [isOpen, name]);
+  //   return () => {
+  //     if (checkSavingInterval) clearInterval(checkSavingInterval);
+  //   };
+  // }, [isOpen, name]);
 
   const checkSaving = () => {
     if (
@@ -88,6 +88,7 @@ const CreateIngredientModal = ({
                 value={name}
                 onChange={(e) => {
                   setName(e.target.value);
+                  checkSaving()
                 }}
               />
             </FormControl>
@@ -99,6 +100,7 @@ const CreateIngredientModal = ({
                 value={kcal}
                 onChange={(_, newValue) => {
                   setKcal(newValue);
+                  checkSaving()
                 }}
               >
                 <NumberInputField />

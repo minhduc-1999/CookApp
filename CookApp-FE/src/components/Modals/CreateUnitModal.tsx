@@ -18,9 +18,9 @@ import {
   useToast,
   VStack,
 } from "@chakra-ui/react";
-import { canSaveUnit, createUnit } from "apis/units";
+import { createUnit } from "apis/units";
 import { useAuth } from "contexts/Auth/Auth";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 
 type CreateUnitModalProps = {
   isOpen: boolean;
@@ -36,34 +36,58 @@ const CreateUnitModal = ({
   const initialRef = useRef<HTMLInputElement>(null);
   const [name, setName] = useState("");
   const [toGram, setToGram] = useState(0);
-  const [canSave, setCanSave] = useState(true);
   const [saving, setSaving] = useState(false);
   const toast = useToast();
   const { user } = useAuth();
+  const [nameError, setNameError] = useState(false);
+  const [toGramError, setToGramError] = useState(false);
 
-  useEffect(() => {
-    let checkSavingInterval: NodeJS.Timer;
-    if (isOpen)
-      checkSavingInterval = setInterval(() => {
-        checkSaving();
-      }, 500);
-
-    return () => {
-      if (checkSavingInterval) clearInterval(checkSavingInterval);
-    };
-  }, [isOpen, name]);
-
-  const checkSaving = () => {
-    if (
-      canSaveUnit({
-        name,
-        toGram,
-      })
-    ) {
-      setCanSave(true);
+  const saveUnit = () => {
+    if (!name) {
+      setNameError(true);
       return;
     }
-    setCanSave(false);
+    if (!toGram) {
+      setToGramError(true);
+      return;
+    }
+    setSaving(true);
+    createUnit(
+      {
+        name,
+        toGram,
+      },
+      user?.accessToken
+    )
+      .then(() => {
+        toast({
+          title: "Unit created",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+        onClose();
+        onSaveCb();
+        clearAll();
+      })
+      .catch((err: Error) => {
+        toast({
+          title: err.message,
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+      })
+      .finally(() => {
+        setSaving(false);
+      });
+  };
+
+  const clearAll = () => {
+    setName("");
+    setToGram(0);
   };
 
   return (
@@ -79,7 +103,11 @@ const CreateUnitModal = ({
         <ModalCloseButton />
         <ModalBody pb={6}>
           <VStack spacing={4}>
-            <FormControl isRequired isInvalid={name ? false : true}>
+            <FormControl
+              isRequired
+              isInvalid={nameError}
+              onFocus={() => setNameError(false)}
+            >
               <FormLabel htmlFor="unit-name">Name</FormLabel>
               <Input
                 id="unit-name"
@@ -91,7 +119,11 @@ const CreateUnitModal = ({
                 }}
               />
             </FormControl>
-            <FormControl isRequired isInvalid={toGram ? false : true}>
+            <FormControl
+              onFocus={() => setToGramError(false)}
+              isRequired
+              isInvalid={toGramError}
+            >
               <FormLabel htmlFor="to-gram">To gram</FormLabel>
               <NumberInput
                 min={1}
@@ -119,43 +151,7 @@ const CreateUnitModal = ({
               variant="outline"
             />
           ) : (
-            <Button
-              colorScheme="teal"
-              onClick={() => {
-                setSaving(true);
-                createUnit(
-                  {
-                    name,
-                    toGram,
-                  },
-                  user?.accessToken
-                )
-                  .then(() => {
-                    toast({
-                      title: "Unit created",
-                      status: "success",
-                      duration: 3000,
-                      isClosable: true,
-                      position: "top-right",
-                    });
-                    onClose();
-                    onSaveCb();
-                  })
-                  .catch((err: Error) => {
-                    toast({
-                      title: err.message,
-                      status: "error",
-                      duration: 3000,
-                      isClosable: true,
-                      position: "top-right",
-                    });
-                  })
-                  .finally(() => {
-                    setSaving(false);
-                  });
-              }}
-              disabled={!canSave}
-            >
+            <Button colorScheme="teal" onClick={saveUnit}>
               Save
             </Button>
           )}
