@@ -39,7 +39,7 @@ export const getWaitingRequest = async (
 
 type ConfirmRequestBody = {
   status: RequestStatus;
-  note?: string;
+  note?: string | undefined;
 };
 
 export const confirmRequest = async (
@@ -80,7 +80,7 @@ export const confirmRequest = async (
 
 type ConfirmCertBody = {
   status: CertificateStatus;
-  note?: string;
+  note?: string | undefined;
 };
 
 export const confirmCert = async (

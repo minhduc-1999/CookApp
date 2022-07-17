@@ -1,22 +1,28 @@
 import {
   Button,
   Flex,
+  FormControl,
   Grid,
   GridItem,
   Image,
   Modal,
+  ModalBody,
   ModalCloseButton,
   ModalContent,
+  ModalFooter,
+  ModalHeader,
   ModalOverlay,
   Text,
+  Textarea,
   useDisclosure,
   useToast,
+  VStack,
 } from "@chakra-ui/react";
 import { CertificateResponse, CertificateStatus } from "apis/base.type";
 import { confirmCert } from "apis/requests";
 import CertificateStatusTag from "components/Tags/CertificateStatusTag";
 import { useAuth } from "contexts/Auth/Auth";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { calendarTime } from "utils/time";
 
 type Props = {
@@ -27,12 +33,20 @@ type Props = {
 const Certificate = (props: Props) => {
   const { cert: propCert, key } = props;
   const [cert, setCert] = useState<CertificateResponse>(propCert);
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const {
+    isOpen: isImageOpen,
+    onOpen: onImageOpen,
+    onClose: onImageClose,
+  } = useDisclosure();
   const toast = useToast();
   const { user } = useAuth();
+  const initialRef = useRef<HTMLTextAreaElement>(null);
+  const [saving, setSaving] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
-  const onConfirmCert = (status: CertificateStatus) => {
-    confirmCert(cert.id, { status }, user?.accessToken)
+  const onConfirmCert = (status: CertificateStatus, note?: string) => {
+    setSaving(true);
+    confirmCert(cert.id, { status, note }, user?.accessToken)
       .then(() => {
         setCert({
           ...cert,
@@ -54,6 +68,10 @@ const Certificate = (props: Props) => {
           isClosable: true,
           position: "top-right",
         });
+      })
+      .finally(() => {
+        setSaving(false);
+        onClose()
       });
   };
 
@@ -87,9 +105,9 @@ const Certificate = (props: Props) => {
               borderRadius={3}
               maxH={200}
               cursor="zoom-in"
-              onClick={onOpen}
+              onClick={onImageOpen}
             />
-            <Modal isOpen={isOpen} onClose={onClose} size="6xl">
+            <Modal isOpen={isImageOpen} onClose={onImageClose} size="6xl">
               <ModalOverlay />
               <ModalContent minH={"20"}>
                 <ModalCloseButton color={"teal.300"} />
@@ -143,14 +161,54 @@ const Certificate = (props: Props) => {
             Confirm
           </Button>
           <Button
-            onClick={() => {
-              onConfirmCert(CertificateStatus.REJECTED);
-            }}
+            onClick={onOpen}
           >
             Dismiss
           </Button>
         </Grid>
       )}
+      <Modal
+        initialFocusRef={initialRef}
+        isOpen={isOpen}
+        onClose={onClose}
+        size="lg"
+      >
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Enter rejection reason</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody pb={6}>
+            <VStack spacing={4}>
+              <FormControl>
+                <Textarea id="note" ref={initialRef} placeholder="Note" />
+              </FormControl>
+            </VStack>
+          </ModalBody>
+
+          <ModalFooter>
+            {saving ? (
+              <Button
+                isLoading
+                loadingText="Saving"
+                colorScheme="teal"
+                variant="outline"
+              />
+            ) : (
+              <Button
+                colorScheme="teal"
+                onClick={() => {
+                  onConfirmCert(
+                    CertificateStatus.REJECTED,
+                    initialRef?.current?.value
+                  );
+                }}
+              >
+                OK
+              </Button>
+            )}
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </Flex>
   );
 };
