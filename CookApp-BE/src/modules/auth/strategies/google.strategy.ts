@@ -7,6 +7,7 @@ import AuthConfig from "../../../config/auth";
 import { IUserRepository } from "../interfaces/repositories/user.interface";
 import { Account, ExternalProvider } from "domains/social/account.domain";
 import { IRoleRepository } from "../adapters/out/repositories/role.repository";
+import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
@@ -14,7 +15,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     @Inject("IUserRepository")
     private _userRepo: IUserRepository,
     @Inject("IRoleRepository")
-    private _roleRepo: IRoleRepository
+    private _roleRepo: IRoleRepository,
+    @Inject("IConfigurationService")
+    private _configurationService: IConfigurationService
   ) {
     super({
       clientID: AuthConfig.googleClientID,
@@ -40,7 +43,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
       }),
       emailVerified: true,
       role: userRole,
-      username: emails[0].value
+      username: emails[0].value,
     });
     const user: User = new User({
       avatar: photos[0].value,
@@ -54,8 +57,9 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     if (!res) {
       try {
         res = await this._userRepo.createUser(user);
+        await this._configurationService.setupConfigForNewUser(res);
       } catch (err) {
-        console.log(err)
+        console.log(err);
         done(err, null);
       }
     }
