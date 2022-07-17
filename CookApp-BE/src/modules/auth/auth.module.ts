@@ -31,6 +31,7 @@ import { GoogleStrategy } from "./strategies/google.strategy";
 import { JwtStrategy } from "./strategies/jwt.strategy";
 import { ChangePasswordCommandHandler } from "./useCases/changePassword";
 import { ChangeRoleCommandHandler } from "./useCases/changeRole";
+import { CreateUserUseCase } from "./useCases/createUser";
 import { GetResetPasswordInfoQueryHandler } from "./useCases/getResetPasswordInfo";
 import { GetRolesQueryHandler } from "./useCases/getRoles";
 import { GetUsersQueryHandler } from "./useCases/getUsers";
@@ -49,6 +50,7 @@ const commandHandlers = [
   ChangePasswordCommandHandler,
   ResetPasswordCommandHandler,
   ChangeRoleCommandHandler,
+  CreateUserUseCase
 ];
 
 const queryHandlers = [

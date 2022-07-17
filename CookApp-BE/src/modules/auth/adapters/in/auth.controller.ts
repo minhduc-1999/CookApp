@@ -61,6 +61,8 @@ import { ParseHttpRequestPipe } from "pipes/parseRequest.pipe";
 import { PageOptionsDto } from "base/pageOptions.base";
 import { GetUsersQuery } from "modules/auth/useCases/getUsers";
 import { GetUsersResponse } from "modules/auth/useCases/getUsers/getUsersResponse";
+import { CreateUserRequest } from "modules/auth/useCases/createUser/createUserRequest";
+import { CreateUserCommand } from "modules/auth/useCases/createUser";
 
 @Controller()
 @ApiTags("Authentication")
@@ -224,6 +226,22 @@ export class AuthController {
     const command = new ChangeRoleCommand(body, null, null);
     await this._commandBus.execute(command);
     return Result.ok(null, { messages: ["Change role successfully"] });
+  }
+
+  @Post("admin/users")
+  @ApiFailResponseCustom()
+  @ApiCreatedResponseCustom(RegisterResponse, "Create user successfully")
+  @HttpRequestTransaction()
+  @RequirePermissions("manage_user")
+  @ApiBearerAuth()
+  async createPost(
+    @Body() body: CreateUserRequest,
+    @HttpUserReq() user: User,
+    @HttpParamTransaction() tx: ITransaction
+  ): Promise<Result<RegisterResponse>> {
+    const createUserCommand = new CreateUserCommand(body, tx, user);
+    const createdPost = await this._commandBus.execute(createUserCommand);
+    return Result.ok(createdPost, { messages: ["Create user successfully"] });
   }
 
   @Get("admin/users")
