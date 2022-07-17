@@ -29,7 +29,7 @@ import {
 import { FoodResponse } from "apis/base.type";
 import { confirmFood, getUncensoredFood } from "apis/foods";
 import Card from "components/Card/Card";
-import { RatingIcon, ServingIcon, TotalTimeIcon } from "components/Icons/Icons";
+import { PowerIcon, RatingIcon, ServingIcon, TotalTimeIcon } from "components/Icons/Icons";
 import Spinner from "components/Spinner";
 import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
@@ -220,6 +220,12 @@ function FoodCensorship() {
                           <Flex alignItems="center" justifyContent="center">
                             <RatingIcon />
                             <Text ml={1}>{food?.rating}/5</Text>
+                          </Flex>
+                        )}
+                        {food?.kcal && (
+                          <Flex alignItems="center" justifyContent="center">
+                            <PowerIcon />
+                            <Text ml={1}>{food?.kcal} kcal</Text>
                           </Flex>
                         )}
                       </Flex>

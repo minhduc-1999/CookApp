@@ -10,9 +10,25 @@ import { HiOutlineNewspaper } from "react-icons/hi";
 import { BsReceipt, BsThreeDots } from "react-icons/bs";
 import { useColorModeValue } from "@chakra-ui/color-mode";
 import { GrUpgrade } from "react-icons/gr";
-import { AiOutlineFieldTime, AiOutlineStar } from "react-icons/ai";
+import {
+  AiOutlineFieldTime,
+  AiOutlineStar,
+  AiOutlineThunderbolt,
+} from "react-icons/ai";
 import { RiEyeLine, RiEyeOffLine } from "react-icons/ri";
 import { FaUserEdit } from "react-icons/fa";
+
+export const PowerIcon = () => {
+  let color = useColorModeValue("black", "white");
+  return (
+    <Icon
+      as={AiOutlineThunderbolt}
+      alignItems="center"
+      justifyContent="center"
+      color={color}
+    />
+  );
+};
 
 export const EditRoleIcon = () => {
   let color = useColorModeValue("black", "white");
@@ -24,7 +40,7 @@ export const EditRoleIcon = () => {
       color={color}
     />
   );
-}
+};
 
 export const EyeSlashIcon = () => {
   let color = useColorModeValue("black", "white");
@@ -36,7 +52,7 @@ export const EyeSlashIcon = () => {
       color={color}
     />
   );
-}
+};
 
 export const EyeIcon = () => {
   let color = useColorModeValue("black", "white");
@@ -48,7 +64,7 @@ export const EyeIcon = () => {
       color={color}
     />
   );
-}
+};
 
 export const LogoutIcon = () => {
   let color = useColorModeValue("gray.500", "white");
