@@ -110,7 +110,6 @@ function SignIn() {
               </FormLabel>
               <Input
                 id="username"
-                borderRadius="15px"
                 fontSize="sm"
                 type="text"
                 placeholder="Your username/email adress"

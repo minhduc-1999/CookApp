@@ -4,6 +4,7 @@ import {
   Button,
   Flex,
   FormControl,
+  HStack,
   Modal,
   ModalBody,
   ModalCloseButton,
@@ -27,6 +28,8 @@ import UserTable from "components/Tables/UserTable";
 import { changeRole, getUsers } from "apis/users";
 import { getRoles } from "apis/roles";
 import { useAuth } from "contexts/Auth/Auth";
+import { FaPlus } from "react-icons/fa";
+import CreateSystemUserModal from "components/Modals/CreateSystemUserModal";
 
 const INIT_PAGE_SIZE = 10;
 const INIT_CUR_PAGE = 1;
@@ -62,6 +65,7 @@ const SocialUserTabPanel = () => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [changeRoleUserId, setChangeRoleUserId] = useState("");
+  const { isOpen: isCreateUserOpen, onOpen: onCreateUserOpen, onClose: onCreateUserClose } = useDisclosure();
 
   const initialRef = useRef<HTMLSelectElement>(null);
 
@@ -118,10 +122,20 @@ const SocialUserTabPanel = () => {
     <SocialUserTabContext.Provider value={{ onChangeRoleTrigger }}>
       <Flex direction="column">
         <Card overflowX={{ sm: "scroll", xl: "hidden" }}>
-          <CardHeader p="6px 0px 22px 0px">
+          <CardHeader p="6px 0px 22px 0px" justifyContent="space-between">
             <Text fontSize="xl" color={textColor} fontWeight="bold">
               Social Users
             </Text>
+            <HStack spacing="10px">
+              <Button
+                leftIcon={<FaPlus />}
+                variant="ghost"
+                colorScheme="teal"
+                onClick={onCreateUserOpen}
+              >
+                Add account
+              </Button>
+            </HStack>
           </CardHeader>
           <CardBody justifyContent="center" alignItems="center">
             {loading ? (
@@ -138,6 +152,7 @@ const SocialUserTabPanel = () => {
             />
           </Flex>
         </Card>
+        <CreateSystemUserModal onClose={onCreateUserClose} isOpen={isCreateUserOpen} />
         <Modal
           initialFocusRef={initialRef}
           isOpen={isOpen}

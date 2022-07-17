@@ -28,7 +28,7 @@ export enum UserErrorCode {
   REQUEST_NOT_FOUND = 'request_not_found',
   REQUEST_ALREADY_CONFIRMED = 'request_already_confirmed',
   CERTIFICATE_ALREADY_CONFIRMED = 'certificate_already_confirmed',
-  NEED_CONFIRM_ALL_CERT = 'need_confirm_all_cert'
+  NEED_CONFIRM_ALL_CERT = 'need_confirm_all_cert',
 }
 
 export enum InteractiveTargetType {

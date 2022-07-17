@@ -1,6 +1,7 @@
 import {
   Button,
   FormControl,
+  FormErrorMessage,
   FormLabel,
   Input,
   Modal,
@@ -15,7 +16,13 @@ import {
   VStack,
 } from "@chakra-ui/react";
 import { RoleResponse } from "apis/base.type";
-import { canSaveSystemUser, CreateSystemUserBody } from "apis/users";
+import {
+  checkPasswordConstrain,
+  checkPhoneConstrain,
+  checkUsernameConstrain,
+  CreateSystemUserBody,
+} from "apis/users";
+import { PasswordInput } from "components/PasswordInput/PasswordInput";
 import { useAuth } from "contexts/Auth/Auth";
 import { useEffect, useRef, useState } from "react";
 import { getRoles } from "../../apis/roles";
@@ -32,6 +39,14 @@ const saveSystemUser = async (body: CreateSystemUserBody) => {
 const INIT_PAGE_SIZE = 50;
 const INIT_PAGE = 1;
 
+type CreateUserErrorType =
+  | "usernameError"
+  | "passwordError"
+  | "emailError"
+  | "phoneError"
+  | "roleError"
+  | "none";
+
 const CreateAccountModal = ({ isOpen, onClose }: Props) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [username, setUsername] = useState("");
@@ -39,23 +54,13 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
   const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [role, setRole] = useState("");
-  const [canSave, setCanSave] = useState(true);
   const [saving, setSaving] = useState(false);
   const [roleList, setRoleList] = useState<RoleResponse[]>([]);
   const toast = useToast();
   const { user } = useAuth();
 
-  useEffect(() => {
-    let checkSavingInterval: NodeJS.Timer;
-    if (isOpen)
-      checkSavingInterval = setInterval(() => {
-        checkSaving();
-      }, 500);
-
-    return () => {
-      if (checkSavingInterval) clearInterval(checkSavingInterval);
-    };
-  }, [isOpen, username]);
+  const [error, setError] = useState<CreateUserErrorType>("none");
+  const [errorMsg, setErrorMsg] = useState("");
 
   useEffect(() => {
     getRoles(user?.accessToken, INIT_PAGE, INIT_PAGE_SIZE).then((data) => {
@@ -65,19 +70,71 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
   }, []);
 
   const checkSaving = () => {
-    if (
-      canSaveSystemUser({
-        username,
-        email,
-        rawPassword,
-        phone,
-        role,
-      })
-    ) {
-      setCanSave(true);
-      return;
+    const userNameCheckError = checkUsernameConstrain(username);
+    if (userNameCheckError) {
+      setError("usernameError");
+      setErrorMsg(userNameCheckError.message);
+      return false;
     }
-    setCanSave(false);
+    const passwordCheckError = checkPasswordConstrain(rawPassword);
+    if (passwordCheckError) {
+      setError("passwordError");
+      setErrorMsg(passwordCheckError.message);
+      return false;
+    }
+    const phoneCheckError = checkPhoneConstrain(phone);
+    if (phoneCheckError) {
+      setError("phoneError");
+      setErrorMsg(phoneCheckError.message);
+      return false;
+    }
+    switch (true) {
+      case !email:
+        setError("emailError");
+        return false;
+      case !role:
+        return false;
+    }
+    return true;
+  };
+
+  const onSaveUser = () => {
+    if (!checkSaving()) return;
+    setSaving(true);
+    saveSystemUser({
+      username,
+      phone,
+      email,
+      role,
+      rawPassword,
+    })
+      .then(() => {
+        toast({
+          title: "Account created",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+        onClose();
+      })
+      .catch(() => {
+        toast({
+          title: "Fail to create account",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+          position: "top-right",
+        });
+      })
+      .finally(() => {
+        setSaving(false);
+      });
+  };
+
+  const onInputFocus = () => {
+    setError("none");
+    setErrorMsg("");
   };
 
   return (
@@ -93,52 +150,86 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
         <ModalCloseButton />
         <ModalBody pb={6}>
           <VStack spacing={4}>
-            <FormControl isRequired isInvalid={username ? false : true}>
-              <FormLabel htmlFor="name">Name</FormLabel>
+            <FormControl
+              isRequired
+              isInvalid={error === "usernameError"}
+              onFocus={onInputFocus}
+            >
+              <FormLabel htmlFor="name">Username</FormLabel>
               <Input
-                id="name"
+                id="username"
                 ref={initialRef}
-                placeholder="Name"
+                placeholder="Username"
                 value={username}
                 onChange={(e) => {
                   setUsername(e.target.value);
                 }}
               />
+              {error === "usernameError" && (
+                <FormErrorMessage>{errorMsg}</FormErrorMessage>
+              )}
             </FormControl>
-            <FormControl isRequired isInvalid={rawPassword ? false : true}>
+            <FormControl
+              isRequired
+              isInvalid={error === "passwordError"}
+              onFocus={onInputFocus}
+            >
               <FormLabel htmlFor="password">Password</FormLabel>
-              <Input
+              <PasswordInput
                 id="password"
                 placeholder="Password"
                 value={rawPassword}
                 onChange={(e) => {
                   setRawPassword(e.target.value);
                 }}
-              />
+              />{" "}
+              {error === "passwordError" && (
+                <FormErrorMessage>{errorMsg}</FormErrorMessage>
+              )}
             </FormControl>
-            <FormControl>
+            <FormControl
+              isRequired
+              isInvalid={error === "emailError"}
+              onFocus={onInputFocus}
+            >
               <FormLabel htmlFor="email">Email</FormLabel>
               <Input
                 id="email"
                 placeholder="Email"
+                type="email"
                 value={email}
                 onChange={(e) => {
                   setEmail(e.target.value);
                 }}
               />
+              {error === "emailError" && (
+                <FormErrorMessage>{errorMsg}</FormErrorMessage>
+              )}
             </FormControl>
-            <FormControl>
+            <FormControl
+              isRequired
+              isInvalid={error === "phoneError"}
+              onFocus={onInputFocus}
+            >
               <FormLabel htmlFor="phone">Phone</FormLabel>
               <Input
                 id="phone"
+                type="tel"
                 placeholder="Phone"
                 value={phone}
                 onChange={(e) => {
                   setPhone(e.target.value);
                 }}
               />
+              {error === "phoneError" && (
+                <FormErrorMessage>{errorMsg}</FormErrorMessage>
+              )}
             </FormControl>
-            <FormControl isRequired isInvalid={role ? false : true}>
+            <FormControl
+              isRequired
+              isInvalid={error === "roleError"}
+              onFocus={onInputFocus}
+            >
               <FormLabel htmlFor="role">Role</FormLabel>
               <Select
                 placeholder="Role..."
@@ -154,6 +245,9 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
                   </option>
                 ))}
               </Select>
+              {error === "roleError" && (
+                <FormErrorMessage>{errorMsg}</FormErrorMessage>
+              )}
             </FormControl>
           </VStack>
         </ModalBody>
@@ -167,42 +261,7 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
               variant="outline"
             />
           ) : (
-            <Button
-              colorScheme="teal"
-              onClick={() => {
-                setSaving(true);
-                saveSystemUser({
-                  username,
-                  phone,
-                  email,
-                  role,
-                  rawPassword,
-                })
-                  .then(() => {
-                    toast({
-                      title: "Account created",
-                      status: "success",
-                      duration: 3000,
-                      isClosable: true,
-                      position: "top-right",
-                    });
-                    onClose();
-                  })
-                  .catch(() => {
-                    toast({
-                      title: "Fail to create account",
-                      status: "error",
-                      duration: 3000,
-                      isClosable: true,
-                      position: "top-right",
-                    });
-                  })
-                  .finally(() => {
-                    setSaving(false);
-                  });
-              }}
-              disabled={!canSave}
-            >
+            <Button colorScheme="teal" onClick={onSaveUser}>
               Save
             </Button>
           )}

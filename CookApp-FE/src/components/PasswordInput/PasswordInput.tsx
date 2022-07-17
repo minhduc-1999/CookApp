@@ -21,7 +21,6 @@ export const PasswordInput = ({ value, onChange, placeholder, id , onFocus}: Pro
     <InputGroup size="md">
       <Input
         id={id}
-        borderRadius="15px"
         fontSize="sm"
         size="lg"
         value={value}
