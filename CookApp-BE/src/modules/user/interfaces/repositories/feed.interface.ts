@@ -7,4 +7,5 @@ export interface IFeedRepository {
   pushNewPost(post: Post, users: User[]): Promise<void>;
   getPosts(user: User, query: PageOptionsDto): Promise<[Post[], number]>;
   setTransaction(tx: ITransaction): IFeedRepository
+  pushNewPosts(post: Post[], users: User): Promise<void>
 }

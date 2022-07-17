@@ -16,6 +16,15 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
   ) {
     super();
   }
+  async pushNewPosts(posts: Post[], user: User): Promise<void> {
+    const queryRunner = this.tx?.getRef() as QueryRunner;
+    const entities = posts.map((post) => new FeedEntity(user, post));
+    if (queryRunner && !queryRunner.isReleased) {
+      await queryRunner.manager.save<FeedEntity>(entities);
+    } else {
+      await this._feedRepo.save(entities);
+    }
+  }
 
   async pushNewPost(post: Post, users: User[]): Promise<void> {
     const queryRunner = this.tx?.getRef() as QueryRunner;
@@ -55,7 +64,7 @@ export class FeedRepository extends BaseRepository implements IFeedRepository {
         "foodRefPhoto",
         "foodAuthor",
         "authorAccount",
-        "authorRole"
+        "authorRole",
       ])
       .skip(query.limit * query.offset)
       .take(query.limit)

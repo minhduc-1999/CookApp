@@ -37,7 +37,9 @@ export class GetFeedPostsQueryHandler
     @Inject("IPostRepository")
     private _postRepo: IPostRepository,
     @Inject("ITopicRepository")
-    private _topicRepository: ITopicRepository
+    private _topicRepository: ITopicRepository,
+    @Inject("IFeedRepository")
+    private _feedRepository: IFeedRepository
   ) {}
   async execute(query: GetFeedPostsQuery): Promise<GetFeedPostsResponse> {
     const { req, user } = query;
@@ -52,6 +54,7 @@ export class GetFeedPostsQueryHandler
       const tags = topics.map((topic) => topic.title);
       if (topics.length > 0) {
         [posts, total] = await this._postRepo.getPostsByTags(tags, req);
+        await this._feedRepository.pushNewPosts(posts, user);
       }
     }
 

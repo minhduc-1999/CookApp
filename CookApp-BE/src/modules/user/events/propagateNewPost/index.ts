@@ -26,11 +26,12 @@ export class PropagatePostCreatedEventHandler
     const relatedUser = (
       await this._userSeService.findManyByInterestsTopic(post.tags)
     ).map((id) => new User({ id }));
+
     const receiver = lodash.uniqBy(
       [...followers, ...relatedUser, author],
       "id"
     );
 
-    this._feedRepository.pushNewPost(post, receiver);
+    await this._feedRepository.pushNewPost(post, receiver);
   }
 }
