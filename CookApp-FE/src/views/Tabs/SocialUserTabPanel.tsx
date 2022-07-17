@@ -65,7 +65,11 @@ const SocialUserTabPanel = () => {
 
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [changeRoleUserId, setChangeRoleUserId] = useState("");
-  const { isOpen: isCreateUserOpen, onOpen: onCreateUserOpen, onClose: onCreateUserClose } = useDisclosure();
+  const {
+    isOpen: isCreateUserOpen,
+    onOpen: onCreateUserOpen,
+    onClose: onCreateUserClose,
+  } = useDisclosure();
 
   const initialRef = useRef<HTMLSelectElement>(null);
 
@@ -79,7 +83,11 @@ const SocialUserTabPanel = () => {
     );
   }, []);
 
-  const fetchData = (page: number, size: number) => {
+  const fetchData = (
+    page: number,
+    size: number,
+    removeFollowingPage = false
+  ) => {
     getUsers(user?.accessToken, page, size)
       .then((data) => {
         const [usersResult, metadata] = data;
@@ -89,6 +97,13 @@ const SocialUserTabPanel = () => {
           setTotalUser(metadata.totalCount);
         const temp = { ...users };
         temp[page] = usersResult;
+        if (removeFollowingPage) {
+          let iterator = 1;
+          while (iterator <= totalUserPage) {
+            if (iterator !== page) temp[iterator] = [];
+            iterator++;
+          }
+        }
         setUsers(temp);
         setLoading(false);
       })
@@ -152,7 +167,14 @@ const SocialUserTabPanel = () => {
             />
           </Flex>
         </Card>
-        <CreateSystemUserModal onClose={onCreateUserClose} isOpen={isCreateUserOpen} />
+        <CreateSystemUserModal
+          onClose={onCreateUserClose}
+          isOpen={isCreateUserOpen}
+          saveCb={() => {
+            setLoading(true);
+            fetchData(currentPage, pageSize, true);
+          }}
+        />
         <Modal
           initialFocusRef={initialRef}
           isOpen={isOpen}

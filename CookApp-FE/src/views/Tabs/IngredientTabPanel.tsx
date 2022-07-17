@@ -77,9 +77,9 @@ const IngredientTabPanel = () => {
         const temp = { ...ingredients };
         temp[page] = listResult;
         if (removeFollowingPage) {
-          let iterator = page + 1;
+          let iterator = 1;
           while (iterator <= totalIngredientPage) {
-            temp[iterator] = [];
+            if (iterator !== page) temp[iterator] = [];
             iterator++;
           }
         }
@@ -174,7 +174,11 @@ const IngredientTabPanel = () => {
           onClose={onClose}
           onSaveCb={() => {
             setIngredientLoading(true);
-            fetchIngredientData(INIT_CUR_PAGE, ingredientPageSize, true);
+            fetchIngredientData(
+              currentIngredientPage,
+              ingredientPageSize,
+              true
+            );
           }}
         />
         <DelelteAlertDialog

@@ -79,9 +79,9 @@ const FoodTabPanel = () => {
         const temp = { ...foods };
         temp[page] = foodResList;
         if (removeFollowingPage) {
-          let iterator = page + 1;
+          let iterator = 1;
           while (iterator <= totalFoodPage) {
-            temp[iterator] = [];
+            if (iterator !== page) temp[iterator] = [];
             iterator++;
           }
         }
@@ -175,7 +175,7 @@ const FoodTabPanel = () => {
           onClose={onClose}
           onSaveCb={() => {
             setFoodLoading(true);
-            fetchFoodData(INIT_CUR_PAGE, foodPageSize, true);
+            fetchFoodData(currentFoodPage, foodPageSize, true);
           }}
         />
         <DelelteAlertDialog

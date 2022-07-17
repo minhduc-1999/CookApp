@@ -79,9 +79,11 @@ const UnitTabPanel = () => {
         const temp = { ...units };
         temp[page] = unitResult;
         if (removeFollowingPage) {
-          let iterator = page + 1;
+          let iterator = 1;
           while (iterator <= totalUnitPage) {
-            temp[iterator] = [];
+            if (iterator !== page) {
+              temp[iterator] = [];
+            }
             iterator++;
           }
         }
@@ -175,7 +177,7 @@ const UnitTabPanel = () => {
           onClose={onClose}
           onSaveCb={() => {
             setUnitLoading(true);
-            fetchUnitData(INIT_CUR_PAGE, unitPageSize, true);
+            fetchUnitData(currentUnitPage, unitPageSize, true);
           }}
         />
         <DelelteAlertDialog

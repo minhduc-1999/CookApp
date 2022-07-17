@@ -20,7 +20,7 @@ import {
   checkPasswordConstrain,
   checkPhoneConstrain,
   checkUsernameConstrain,
-  CreateSystemUserBody,
+  createUser,
 } from "apis/users";
 import { PasswordInput } from "components/PasswordInput/PasswordInput";
 import { useAuth } from "contexts/Auth/Auth";
@@ -30,12 +30,9 @@ import { getRoles } from "../../apis/roles";
 type Props = {
   isOpen: boolean;
   onClose: () => void;
+  saveCb: () => void;
 };
 
-const saveSystemUser = async (body: CreateSystemUserBody) => {
-  // TODO
-  console.log(body);
-};
 const INIT_PAGE_SIZE = 50;
 const INIT_PAGE = 1;
 
@@ -47,7 +44,7 @@ type CreateUserErrorType =
   | "roleError"
   | "none";
 
-const CreateAccountModal = ({ isOpen, onClose }: Props) => {
+const CreateAccountModal = ({ isOpen, onClose, saveCb }: Props) => {
   const initialRef = useRef<HTMLInputElement>(null);
   const [username, setUsername] = useState("");
   const [rawPassword, setRawPassword] = useState("");
@@ -98,16 +95,27 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
     return true;
   };
 
+  const clearAll = () => {
+    setUsername("");
+    setRawPassword("");
+    setEmail("");
+    setPhone("");
+    setRole("");
+  };
+
   const onSaveUser = () => {
     if (!checkSaving()) return;
     setSaving(true);
-    saveSystemUser({
-      username,
-      phone,
-      email,
-      role,
-      rawPassword,
-    })
+    createUser(
+      {
+        username,
+        phone,
+        email,
+        role,
+        rawPassword,
+      },
+      user?.accessToken
+    )
       .then(() => {
         toast({
           title: "Account created",
@@ -116,11 +124,13 @@ const CreateAccountModal = ({ isOpen, onClose }: Props) => {
           isClosable: true,
           position: "top-right",
         });
+        clearAll();
         onClose();
+        saveCb();
       })
-      .catch(() => {
+      .catch((err: Error) => {
         toast({
-          title: "Fail to create account",
+          title: err.message,
           status: "error",
           duration: 3000,
           isClosable: true,
