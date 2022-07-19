@@ -8,6 +8,8 @@ import { IUserRepository } from "../interfaces/repositories/user.interface";
 import { Account, ExternalProvider } from "domains/social/account.domain";
 import { IRoleRepository } from "../adapters/out/repositories/role.repository";
 import { IConfigurationService } from "modules/configuration/adapters/out/services/configuration.service";
+import { EventBus } from "@nestjs/cqrs";
+import { UserCreatedEvent } from "domains/social/events/user.event";
 
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
@@ -17,7 +19,8 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
     @Inject("IRoleRepository")
     private _roleRepo: IRoleRepository,
     @Inject("IConfigurationService")
-    private _configurationService: IConfigurationService
+    private _configurationService: IConfigurationService,
+    private _eventBus: EventBus
   ) {
     super({
       clientID: AuthConfig.googleClientID,
@@ -58,6 +61,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, "google") {
       try {
         res = await this._userRepo.createUser(user);
         await this._configurationService.setupConfigForNewUser(res);
+        this._eventBus.publish(new UserCreatedEvent(res))
       } catch (err) {
         console.log(err);
         done(err, null);
