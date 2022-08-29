@@ -118,6 +118,7 @@ class _FoodActivityState extends State<FoodActivity> {
   void fetchData() async {
     var temp = await APIService.getFood(offset);
     List<FoodWidget> tempFoodData = [];
+
     for (var i in temp.data.foods) {
       tempFoodData.add(FoodWidget(
         food: i,

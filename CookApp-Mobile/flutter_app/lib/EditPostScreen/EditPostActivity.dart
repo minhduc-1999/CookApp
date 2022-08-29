@@ -20,6 +20,10 @@ class EditPostActivity extends StatefulWidget {
   final String displayName;
   final String avatar;
   final String location;
+  final String foodImage;
+  final String foodName;
+  final String foodDescription;
+  final String foodRefId;
 
   const EditPostActivity(
       {Key key,
@@ -29,7 +33,10 @@ class EditPostActivity extends StatefulWidget {
       this.displayName,
       this.avatar,
       this.location,
-      })
+      this.foodName,
+      this.foodDescription,
+      this.foodImage,
+      this.foodRefId})
       : super(key: key);
 
   @override
@@ -39,7 +46,7 @@ class EditPostActivity extends StatefulWidget {
       content: this.content,
       displayName: this.displayName,
       avatar: this.avatar,
-  location: this.location);
+      location: this.location);
 }
 
 class _EditPostActivityState extends State<EditPostActivity> {
@@ -59,7 +66,12 @@ class _EditPostActivityState extends State<EditPostActivity> {
   TextEditingController contentController = TextEditingController();
 
   _EditPostActivityState(
-      {this.id, this.medias, this.content, this.displayName, this.avatar, this.location});
+      {this.id,
+      this.medias,
+      this.content,
+      this.displayName,
+      this.avatar,
+      this.location});
 
 /*  Widget buildPostHeader() {
     return ListTile(
@@ -69,10 +81,10 @@ class _EditPostActivityState extends State<EditPostActivity> {
               backgroundImage: NetworkImage(avatar),
             )
           : CircleAvatar(
-              *//*child: Image.asset("assets/images/default_avatar.png",
+              */ /*child: Image.asset("assets/images/default_avatar.png",
                                     width: size.width * 0.20,
                                     height: size.width * 0.20,
-                                    fit: BoxFit.fill),*//*
+                                    fit: BoxFit.fill),*/ /*
               backgroundColor: Colors.grey,
               backgroundImage: AssetImage('assets/images/default_avatar.png')),
       title: GestureDetector(
@@ -87,6 +99,52 @@ class _EditPostActivityState extends State<EditPostActivity> {
       ),
     );
   }*/
+  Widget _buildFoodRef() {
+    final Size size = MediaQuery.of(context).size;
+    return Container(
+        margin: EdgeInsets.only(left: 8, right: 8, bottom: 8),
+        decoration: BoxDecoration(border: Border.all(color: appPrimaryColor)),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              margin: EdgeInsets.all(8),
+              decoration: BoxDecoration(shape: BoxShape.circle),
+              child: Image.network(
+                widget.foodImage,
+                fit: BoxFit.cover,
+                width: size.width * 0.2,
+                height: size.height * 0.1,
+              ),
+            ),
+            Flexible(
+              child: Container(
+                margin: EdgeInsets.only(top: 8, right: 8),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.foodName,
+                      style:
+                      TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      widget.foodDescription,
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                      softWrap: false,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            )
+          ],
+        ),
+      );
+  }
   Widget buildPostHeader() {
     final double width = MediaQuery.of(context).size.width;
     return Padding(
@@ -96,19 +154,19 @@ class _EditPostActivityState extends State<EditPostActivity> {
         children: [
           (avatar != null)
               ? CircleAvatar(
-            radius: 17,
-            backgroundColor: Colors.grey,
-            backgroundImage: NetworkImage(avatar),
-          )
+                  radius: 17,
+                  backgroundColor: Colors.grey,
+                  backgroundImage: NetworkImage(avatar),
+                )
               : CircleAvatar(
-            /*child: Image.asset("assets/images/default_avatar.png",
+                  /*child: Image.asset("assets/images/default_avatar.png",
                                       width: size.width * 0.20,
                                       height: size.width * 0.20,
                                       fit: BoxFit.fill),*/
-              radius: 17,
-              backgroundColor: Colors.grey,
-              backgroundImage:
-              AssetImage('assets/images/default_avatar.png')),
+                  radius: 17,
+                  backgroundColor: Colors.grey,
+                  backgroundImage:
+                      AssetImage('assets/images/default_avatar.png')),
           SizedBox(
             width: width * 0.04,
           ),
@@ -116,16 +174,22 @@ class _EditPostActivityState extends State<EditPostActivity> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               displayName != null
-                    ? Text(displayName, style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-              ))
-                    : Text("user", style: TextStyle(
-                color: Colors.black,
-                fontWeight: FontWeight.bold,
-              )),
-
-              location != null ? Text(location, style: TextStyle(fontSize: 12),) : Container()
+                  ? Text(displayName,
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ))
+                  : Text("user",
+                      style: TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      )),
+              location != null
+                  ? Text(
+                      location,
+                      style: TextStyle(fontSize: 12),
+                    )
+                  : Container()
             ],
           ),
         ],
@@ -192,7 +256,6 @@ class _EditPostActivityState extends State<EditPostActivity> {
                             content: contentController.text,
                             addImages: objectName,
                             deleteImages: deleteImages,
-                            name: "string",
                             location: location),
                         this.id);
                     setState(() {
@@ -220,8 +283,12 @@ class _EditPostActivityState extends State<EditPostActivity> {
     return SingleChildScrollView(
       child: Column(
         children: [
-          SizedBox(height: 7,),
+          SizedBox(
+            height: 7,
+          ),
           buildPostHeader(),
+          SizedBox(height: 16,),
+          widget.foodRefId != "" ? _buildFoodRef() : Container(),
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8),
             child: TextFormField(

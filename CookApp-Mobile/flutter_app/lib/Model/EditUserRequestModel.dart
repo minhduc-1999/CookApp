@@ -9,7 +9,7 @@ class EditUserRequestModel {
   String firstName;
   String lastName;
   String sex;
-
+  String bio;
   EditUserRequestModel(
       {this.displayName,
         this.avatar,
@@ -18,7 +18,8 @@ class EditUserRequestModel {
         this.birthDate,
         this.firstName,
         this.lastName,
-        this.sex});
+        this.sex,
+      this.bio});
 
   EditUserRequestModel.fromJson(Map<String, dynamic> json) {
     displayName = json['displayName'];
@@ -29,6 +30,7 @@ class EditUserRequestModel {
     firstName = json['firstName'];
     lastName = json['lastName'];
     sex = json['sex'];
+    bio = json['bio'];
   }
 
   Map<String, dynamic> toJson() {
@@ -37,7 +39,9 @@ class EditUserRequestModel {
       data['displayName'] = this.displayName;
     }
 
+    if (this.avatar != null && this.avatar != "") {
       data['avatar'] = this.avatar;
+    }
 
     if (this.height != "") {
       data['height'] = this.height;
@@ -56,6 +60,9 @@ class EditUserRequestModel {
     }
     if (this.sex != "") {
       data['sex'] = this.sex;
+    }
+    if (this.bio != ""){
+      data['bio'] = this.bio;
     }
     return data;
   }

@@ -50,11 +50,11 @@ class _ChatBotActivityState extends State<ChatBotActivity> {
         ),
         title: Row(
           children: [
-            /*CircleAvatar(
+            CircleAvatar(
               radius: 15,
               backgroundColor: Colors.grey,
-              backgroundImage: NetworkImage(widget.cover),
-            ),*/
+              backgroundImage: AssetImage('assets/images/diet.png'),
+            ),
             SizedBox(
               width: size.width * 0.04,
             ),
@@ -68,6 +68,7 @@ class _ChatBotActivityState extends State<ChatBotActivity> {
       body: Container(
         child: Column(
           children: <Widget>[
+            SizedBox(height: 5,),
             Flexible(
                 child: ListView.builder(
                     reverse: true,
@@ -248,7 +249,7 @@ class _ChatBotActivityState extends State<ChatBotActivity> {
                   child: CircleAvatar(
                     radius: 15,
                     backgroundColor: Colors.grey,
-                    backgroundImage: NetworkImage(message.avatar),
+                    backgroundImage: AssetImage('assets/images/diet.png'),
                   ),
                 )
               : Container(),

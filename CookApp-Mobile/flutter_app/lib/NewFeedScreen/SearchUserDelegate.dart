@@ -67,6 +67,7 @@ class SearchUserDelegate extends SearchDelegate<UserDelegateModel>{
   }
   Future<UserDelegateModel> getUserByQuery () async {
     var data = APIService.getUserByQuery(0, query);
+
     return data;
   }
   Stream<UserDelegateModel> userStream() => Stream.periodic(Duration(seconds: 1)).asyncMap((event) => getUserByQuery());
@@ -76,19 +77,14 @@ class SearchUserDelegate extends SearchDelegate<UserDelegateModel>{
         child: Row(
           children: <Widget>[
             SizedBox(
-              width: (user.avatar != null) ? 25 : 20,
+              width: 25
             ),
-            (user.avatar != null)
-                ? CircleAvatar(
+            CircleAvatar(
               radius: size.width * 0.06,
               backgroundImage:
               NetworkImage(user.avatar.url),
-            )
-                : Image.asset(
-                "assets/images/default_avatar.png",
-                width: size.width * 0.14,
-                height: size.width * 0.14,
-                fit: BoxFit.fitHeight),
+            ),
+
             SizedBox(
               width: (user.avatar != null) ? 25 : 20,
             ),

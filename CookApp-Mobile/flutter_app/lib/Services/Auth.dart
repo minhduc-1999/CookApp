@@ -29,6 +29,7 @@ class Auth implements AuthBase {
     if (googleUser != null) {
       final googleAuth = await googleUser.authentication;
       return googleUser.serverAuthCode;
+
       /*if (googleAuth.idToken != null) {
         print("idToken: " + googleAuth.idToken);
         print("accessToken: " + googleAuth.accessToken);

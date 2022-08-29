@@ -4,17 +4,22 @@ import 'package:carousel_slider/carousel_slider.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
-import 'package:geocoding/geocoding.dart';
-import 'package:geolocator/geolocator.dart';
+/*import 'package:geocoding/geocoding.dart';
+import 'package:geolocator/geolocator.dart';*/
 import 'package:image_picker/image_picker.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
+import 'package:string_to_hex/string_to_hex.dart';
 import 'package:tastify/Model/FoodRespondModel.dart';
-import 'package:location/location.dart' as loca;
+//import 'package:location/location.dart' as loca;
 import 'package:tastify/Model/PostRequestModel.dart';
 import 'package:tastify/Model/PresignedLinkedRequestModel.dart';
 import 'package:tastify/Model/UserRespondModel.dart';
+import 'package:tastify/ProfileScreen/EditProfileActivity.dart';
 import 'package:tastify/Services/APIService.dart';
+import 'package:tastify/UploadScreen/TagsActivity.dart';
+import 'package:tastify/config.dart';
 import '../constants.dart';
+import '../main.dart';
 
 class ShareFoodActivity extends StatefulWidget {
   final String foodId;
@@ -29,7 +34,7 @@ class ShareFoodActivity extends StatefulWidget {
 
 class _ShareFoodActivityState extends State<ShareFoodActivity> {
   Foods food;
-  Placemark userLocation;
+  //Placemark userLocation;
   bool isAPIcallProcess = false;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   bool circular = true;
@@ -44,15 +49,20 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
   TextEditingController descriptionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
 
+
+  List<Topic> userTags = [];
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
-    _initLocation();
+    //_initLocation();
+
     fetchData();
+
     fToast = FToast();
     fToast.init(context);
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +83,8 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
         actions: <Widget>[
           FlatButton(
               onPressed: () async {
-                if (files.length > 0) {
+                if (files.length > 0 && userTags.length > 0) {
+                  FocusScope.of(context).unfocus();
                   setState(() {
                     isAPIcallProcess = true;
                   });
@@ -92,14 +103,19 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         files[i], response.data.items[i].signedLink);
                     objectName.add(response.data.items[i].objectName);
                   }
+                  List<String> tags = [];
+                  for (var i in userTags){
+                    tags.add(i.title);
+                  }
                   print("object name " + objectName.length.toString());
                   await APIService.uploadPost(
                     PostRequestModel(
                         content: descriptionController.text,
                         images: objectName,
                         videos: video,
-                        location: locationController.text,
-                        kind: "MOMENT",
+
+                        tags: tags,
+                        kind: Config.postFoodShareType,
                         name: "string",
                         foodRefId: widget.food.id),
                   );
@@ -107,8 +123,10 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                     isAPIcallProcess = false;
                   });
                   Navigator.of(context).pop();
-                } else {
+                } else if (files.length == 0) {
                   _showToast("You have to add photos first!", size);
+                } else if (userTags.length == 0){
+                  _showToast("You have to add tags first!", size);
                 }
               },
               child: IconButton(icon: Icon(Icons.send, color: Colors.white)))
@@ -276,11 +294,101 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         .toList(),
                   ))
                 : Container(),
+              ListTile(
+                leading: Icon(Icons.tag),
+                title: Container(
+                    child: TextField(
+                      enableInteractiveSelection: false, //
+                      focusNode: new AlwaysDisabledFocusNode(),
+                      decoration: InputDecoration(
+                          hintText: "Tags", border: InputBorder.none),
+                    )),
+
+                trailing: IconButton(
+                  icon: Icon(Icons.attachment),
+                  onPressed: () {
+                    FocusScope.of(context).unfocus();
+                    return showModalBottomSheet(
+                      context: context,
+                      builder: (BuildContext context) {
+                        return TagsActivity(
+                          tags: tagsInit,
+                        );
+                      },
+                      isScrollControlled: true,
+                      backgroundColor: Colors.transparent,
+                    ).then((value){
+                      if (value != null) {
+                        if (!userTags.contains(value)) {
+                          setState(() {
+                            userTags.add(value);
+                          });
+                        }
+                      }
+                      return FocusScope.of(context).unfocus();
+
+                    });
+                  },
+                ),
+              ),
+              Divider(),
+              userTags.length <= 0 ?Container(
+              ) : SizedBox(
+                height: 35,
+                child: ListView.separated(
+                  scrollDirection: Axis.horizontal,
+                  shrinkWrap: true,
+                  itemCount: userTags.length,
+                  separatorBuilder: (context, index) {
+                    return SizedBox(width: 5,);
+                  },
+                  itemBuilder: (context, index) {
+
+                    return Stack(
+                      children: [
+                        Container(
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 15, top: 8, bottom: 8, right: 15),
+                            child: Text(userTags[index].title, style: TextStyle(color: Colors.white),),
+                          ),
+                          decoration: BoxDecoration(
+                              color: userTags[index].title != "Gymer" ? Color(StringToHex.toColor(userTags[index].title)): Color(defaultTagsColor) ,
+                              borderRadius: BorderRadius.circular(10)
+                          ),
+                        ),
+                        Positioned(
+                            top: 0,
+                            right: 3,
+                            child: GestureDetector(
+                              onTap: () {
+                                setState(() {
+                                  userTags.remove(userTags[index]);
+                                });
+                              },
+                              child: Container(
+                                height: 15,
+                                width: 15,
+                                child: Icon(
+                                  Icons.clear,
+                                  color: Colors.white
+                                      .withOpacity(0.8),
+                                  size: 15,
+                                ),
+                              ),
+                            )),
+                      ],
+                    );
+
+                  },
+                ),
+              ),
             ListTile(
               leading: Icon(Icons.comment),
               title: Container(
                 width: 1000.0,
                 child: TextField(
+                  minLines: 1,
+                  maxLines: 6,
                   cursorColor: appPrimaryColor,
                   controller: descriptionController,
                   decoration: InputDecoration(
@@ -289,7 +397,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
               ),
             ),
             Divider(),
-            ListTile(
+           /* ListTile(
               leading: Icon(Icons.pin_drop),
               title: Container(
                 width: 1000.0,
@@ -302,8 +410,8 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                 ),
               ),
             ),
-            Divider(),
-            (userLocation == null)
+            Divider(),*/
+           /* (userLocation == null)
                 ? Container()
                 : SingleChildScrollView(
                     scrollDirection: Axis.horizontal,
@@ -315,11 +423,11 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
                         buildLocationButton(userLocation.administrativeArea),
                         buildLocationButton(userLocation.country),
                       ],
-                    ))
+                    ))*/
           ]));
   }
 
-  buildLocationButton(String locationName) {
+  /*buildLocationButton(String locationName) {
     if (locationName != null ?? locationName.isNotEmpty) {
       return InkWell(
         onTap: () {
@@ -398,7 +506,7 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
     // When we reach here, permissions are granted and we can
     // continue accessing the position of the device.
     return await Geolocator.getCurrentPosition();
-  }
+  }*/
 
   Widget _buildFoodRef() {
     final Size size = MediaQuery.of(context).size;
@@ -465,4 +573,9 @@ class _ShareFoodActivityState extends State<ShareFoodActivity> {
       ingredients = temp;
     });
   }
+}
+
+class AlwaysDisabledFocusNode extends FocusNode {
+  @override
+  bool get hasFocus => false;
 }

@@ -1,4 +1,6 @@
 import 'dart:convert';
+
+import 'AlbumDetailsRespondModel.dart';
 ConversationsRespondModel conversationsRespondModel(String str) =>
     ConversationsRespondModel.fromJson(json.decode(str));
 class ConversationsRespondModel {
@@ -129,9 +131,11 @@ class LastMessage {
   int updatedAt;
   String content;
   String type;
+  ConfigImage config;
+  Sender sender;
 
   LastMessage(
-      {this.createdAt, this.id, this.updatedAt, this.content, this.type});
+      {this.createdAt, this.id, this.updatedAt, this.content, this.type, this.config, this.sender});
 
   LastMessage.fromJson(Map<String, dynamic> json) {
     createdAt = json['createdAt'];
@@ -139,6 +143,10 @@ class LastMessage {
     updatedAt = json['updatedAt'];
     content = json['content'];
     type = json['type'];
+    sender =
+    json['sender'] != null ? new Sender.fromJson(json['sender']) : null;
+    config =
+    json['config'] != null ? new ConfigImage.fromJson(json['config']) : null;
   }
 
   Map<String, dynamic> toJson() {
@@ -148,10 +156,57 @@ class LastMessage {
     data['updatedAt'] = this.updatedAt;
     data['content'] = this.content;
     data['type'] = this.type;
+    if (this.config != null) {
+      data['config'] = this.config.toJson();
+    }
+    if (this.sender != null) {
+      data['sender'] = this.sender.toJson();
+    }
     return data;
   }
 }
+class Sender {
+  String id;
+  Avatar avatar;
+  String displayName;
 
+  Sender({this.id, this.avatar, this.displayName});
+
+  Sender.fromJson(Map<String, dynamic> json) {
+    id = json['id'];
+    avatar =
+    json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
+    displayName = json['displayName'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['id'] = this.id;
+    if (this.avatar != null) {
+      data['avatar'] = this.avatar.toJson();
+    }
+    data['displayName'] = this.displayName;
+    return data;
+  }
+}
+class ConfigImage {
+  int width;
+  int height;
+
+  ConfigImage({this.width, this.height});
+
+  ConfigImage.fromJson(Map<String, dynamic> json) {
+    width = json['width'];
+    height = json['height'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['width'] = this.width;
+    data['height'] = this.height;
+    return data;
+  }
+}
 class Metadata {
   int page;
   int pageSize;

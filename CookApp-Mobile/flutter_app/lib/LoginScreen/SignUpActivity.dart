@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
-import 'package:tastify/LoginScreen/LoginButton.dart';
-import 'package:tastify/LoginScreen/TextFieldContainer.dart';
+import 'Components/LoginButton.dart';
+import 'Components/TextFieldContainer.dart';
 import 'package:tastify/Model/RegisterRequestModel.dart';
 import 'package:tastify/Services/APIService.dart';
 import 'package:snippet_coder_utils/FormHelper.dart';
@@ -9,8 +9,8 @@ import 'package:snippet_coder_utils/ProgressHUD.dart';
 
 import '../config.dart';
 import '../constants.dart';
-import 'RoundedPasswordFeild.dart';
-import 'RoundedTextField.dart';
+import 'Components/RoundedPasswordFeild.dart';
+import 'Components/RoundedTextField.dart';
 
 class SignUpActivity extends StatefulWidget {
   @override
@@ -19,8 +19,9 @@ class SignUpActivity extends StatefulWidget {
 
 class _SignUpActivityState extends State<SignUpActivity> {
   bool isAPIcallProcess = false;
-  bool hidePassword = true;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
+  bool hidePassword = true;
+
   String username;
   String password;
   String email;
@@ -96,6 +97,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                 }, (onSavedVal) {
               username = onSavedVal;
             },
+                showPrefixIcon: true,
                 prefixIcon: const Icon(Icons.person),
                 prefixIconColor: appPrimaryColor,
                 borderRadius: 10,
@@ -118,6 +120,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                 }, (onSavedVal) {
               password = onSavedVal;
             },
+                showPrefixIcon: true,
                 prefixIcon: const Icon(Icons.vpn_key_rounded),
                 prefixIconColor: appPrimaryColor,
                 borderRadius: 10,
@@ -149,6 +152,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                 }, (onSavedVal) {
               email = onSavedVal;
             },
+                showPrefixIcon: true,
                 prefixIcon: const Icon(Icons.email),
                 prefixIconColor: appPrimaryColor,
                 borderRadius: 10,
@@ -162,7 +166,9 @@ class _SignUpActivityState extends State<SignUpActivity> {
               child: LoginButton(
                 text: "Register",
                 press: () {
+                  FocusScope.of(context).unfocus();
                   if (validateAndSave()) {
+
                     setState(() {
                       isAPIcallProcess = true;
                     });
@@ -203,6 +209,7 @@ class _SignUpActivityState extends State<SignUpActivity> {
                         }
                       else
                         {
+
                           showDialog(
                             context: context,
                             builder: (_) => new AlertDialog(

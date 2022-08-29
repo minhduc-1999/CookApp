@@ -3,17 +3,21 @@ import 'dart:async';
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:snippet_coder_utils/ProgressHUD.dart';
 import 'package:tastify/MessageScreen/ConversationsActivity.dart';
 import 'package:tastify/MessageScreen/MessageActivity.dart';
 import 'package:tastify/Model/AlbumRespondModel.dart';
 import 'package:tastify/Model/CreateConversationRequestModel.dart';
+import 'package:tastify/Model/NewFeedRespondModel.dart';
 import 'package:tastify/ProfileScreen/AlbumDetailsActivity.dart';
 import 'package:tastify/ProfileScreen/CreateAlbumActivity.dart';
+import 'package:tastify/ProfileScreen/EditTopicActivity.dart';
 import 'package:tastify/SavedPostScreen/SavedPostActivity.dart';
 import 'package:tastify/Services/Auth.dart';
 import 'package:tastify/Services/SharedService.dart';
 import 'package:tastify/SettingsScreen/SettingsActivity.dart';
+import 'package:tastify/config.dart';
 import '../NewFeedScreen/PostDetail.dart';
 import '../NewFeedScreen/Post.dart';
 
@@ -37,15 +41,22 @@ class ProfileActivity extends StatefulWidget {
   _ProfileActivityState createState() => _ProfileActivityState(this.userId);
 }
 
-class _ProfileActivityState extends State<ProfileActivity> {
+class _ProfileActivityState extends State<ProfileActivity>
+    with TickerProviderStateMixin {
   final String profileId;
   ScrollController _scrollController = ScrollController();
   UserWallRespondModel user;
-  List<Posts> posts;
-  int offsetPost = 0;
-  int offsetAlbum = 0;
-  int totalPagePost = 1000;
-  int totalPageAlbum = 1000;
+  List<Posts> postsMoment;
+  List<Posts> postsFoodShare;
+  List<Posts> postsRecommendation;
+  int offsetPostsMoment = 0;
+  int offsetPostsFoodShare = 0;
+  int offsetPostsRecommendation = 0;
+  int offsetAlbums = 0;
+  int totalPagePostsMoment = 1000;
+  int totalPagePostsFoodShare = 1000;
+  int totalPagePostsRecommendation = 1000;
+  int totalPageAlbums = 1000;
   List<Album> albums;
   bool isFollowing = false;
   String view = "grid";
@@ -56,6 +67,8 @@ class _ProfileActivityState extends State<ProfileActivity> {
   bool isAPIcallProcess = false;
   GlobalKey<FormState> globalFormKey = GlobalKey<FormState>();
   EditProfileActivity editProfile = new EditProfileActivity();
+  TabController _tabController;
+  int indexTab = 0;
 
   _ProfileActivityState(this.profileId);
 
@@ -82,6 +95,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
     super.initState();
 
     fetchData();
+
     _scrollController.addListener(() {
       if (_scrollController.position.pixels ==
           _scrollController.position.maxScrollExtent) {
@@ -90,11 +104,22 @@ class _ProfileActivityState extends State<ProfileActivity> {
     });
   }
 
-  void fetchData() async {
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    _tabController.dispose();
+    super.dispose();
+  }
 
+  void fetchData() async {
     var response = await APIService.getUserWall(profileId);
-    var listPosts = await APIService.getUserWallPosts(profileId,offsetPost);
-    var listAlbum = await APIService.getAlbum(profileId,offsetAlbum);
+    var listPostsMoment = await APIService.getUserWallPosts(
+        profileId, offsetPostsMoment, Config.postMomentType);
+    var listPostsFoodShare = await APIService.getUserWallPosts(
+        profileId, offsetPostsFoodShare, Config.postFoodShareType);
+    var listPostsRecommendation = await APIService.getUserWallPosts(
+        profileId, offsetPostsRecommendation, Config.postRecommendType);
+    var listAlbum = await APIService.getAlbum(profileId, offsetAlbums);
     List<Album> temp = [];
     if (response.data.id == currentUserId) {
       temp.add(Album(isCreateItem: true, id: "", name: "", url: ""));
@@ -104,28 +129,45 @@ class _ProfileActivityState extends State<ProfileActivity> {
       temp.add(Album(
           isCreateItem: false, id: i.id, name: i.name, url: i.medias[0].url));
     }
+    if (response.data.isNutritionist) {
+      _tabController = TabController(initialIndex: 0, length: 4, vsync: this);
+    } else {
+      _tabController = TabController(initialIndex: 0, length: 3, vsync: this);
+    }
     print('ln');
     setState(() {
-      if (listPosts.data.posts.length > 0) {
-        totalPagePost = listPosts.data.metadata.totalPage;
+      if (listPostsMoment.data.posts.length > 0) {
+        totalPagePostsMoment = listPostsMoment.data.metadata.totalPage;
+      }
+      if (listPostsFoodShare.data.posts.length > 0) {
+        totalPagePostsFoodShare = listPostsFoodShare.data.metadata.totalPage;
+      }
+      if (listPostsRecommendation.data.posts.length > 0) {
+        totalPagePostsRecommendation =
+            listPostsRecommendation.data.metadata.totalPage;
       }
       if (listAlbum.data.albums.length > 0) {
-        totalPageAlbum = listAlbum.data.metadata.totalPage;
+        totalPageAlbums = listAlbum.data.metadata.totalPage;
       }
       isFollowing = response.data.isFollowed;
       user = response;
-      posts = listPosts.data.posts;
+      postsMoment = listPostsMoment.data.posts;
+      postsFoodShare = listPostsFoodShare.data.posts;
+      postsRecommendation = listPostsRecommendation.data.posts;
       albums = temp;
       postCount = response.data.numberOfPost;
       followerCount = user.data.numberOfFollower;
       followingCount = user.data.numberOfFollowing;
       circular = false;
-      offsetAlbum++;
-      offsetPost++;
+      offsetPostsMoment++;
+      offsetAlbums++;
+      offsetPostsFoodShare++;
+      offsetPostsRecommendation++;
     });
   }
-  FutureOr reloadAlbum (dynamic value) async{
-    var listAlbum = await APIService.getAlbum(profileId,0);
+
+  FutureOr reloadAlbum(dynamic value) async {
+    var listAlbum = await APIService.getAlbum(profileId, 0);
     List<Album> temp = [];
     temp.add(Album(isCreateItem: true, id: "", name: "", url: ""));
     for (var i in listAlbum.data.albums) {
@@ -134,12 +176,13 @@ class _ProfileActivityState extends State<ProfileActivity> {
     }
     setState(() {
       albums = temp;
-      offsetAlbum = 1;
+      offsetAlbums = 1;
       if (listAlbum.data.albums.length > 0) {
-        totalPageAlbum = listAlbum.data.metadata.totalPage;
+        totalPageAlbums = listAlbum.data.metadata.totalPage;
       }
     });
   }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -151,14 +194,14 @@ class _ProfileActivityState extends State<ProfileActivity> {
           Text(
             number.toString(),
             style: TextStyle(
-                fontSize: size.width * 0.05, fontWeight: FontWeight.bold),
+                fontSize: size.width * 0.055, fontWeight: FontWeight.bold),
           ),
           Container(
               margin: const EdgeInsets.only(top: 4.0),
               child: Text(
                 label,
                 style: TextStyle(
-                    color: Colors.grey,
+                    color: Colors.black,
                     fontSize: size.width * 0.035,
                     fontWeight: FontWeight.w400),
               ))
@@ -174,8 +217,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
         Function function,
         bool isUser}) {
       return Container(
-        padding: EdgeInsets.only(top: 2.0),
-        child: FlatButton(
+        child: TextButton(
             onPressed: function,
             child: Container(
               decoration: BoxDecoration(
@@ -186,8 +228,7 @@ class _ProfileActivityState extends State<ProfileActivity> {
               child: Text(text,
                   style:
                       TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-              width: isUser ? size.width * 0.6 : size.width * 0.25,
-              height: 27.0,
+              height: size.height * 0.045,
             )),
       );
     }
@@ -207,22 +248,27 @@ class _ProfileActivityState extends State<ProfileActivity> {
       if (isFollowing) {
         return Row(
           children: [
-            buildFollowButton(
-              text: "Unfollow",
-              backgroundcolor: Colors.white,
-              textColor: Colors.black,
-              borderColor: Colors.grey,
-              function: unfollowUser,
-              isUser: false,
+            Flexible(
+              flex: 1,
+              child: buildFollowButton(
+                text: "Unfollow",
+                backgroundcolor: Colors.white,
+                textColor: Colors.black,
+                borderColor: Colors.grey,
+                function: unfollowUser,
+                isUser: false,
+              ),
             ),
-            buildFollowButton(
-              text: "Message",
-              backgroundcolor: Colors.white,
-              textColor: Colors.black,
-              borderColor: Colors.grey,
-              function: openMessage,
-              isUser: false,
-            )
+            Flexible(
+                flex: 1,
+                child: buildFollowButton(
+                  text: "Message",
+                  backgroundcolor: Colors.white,
+                  textColor: Colors.black,
+                  borderColor: Colors.grey,
+                  function: openMessage,
+                  isUser: false,
+                ))
           ],
         );
       }
@@ -230,21 +276,27 @@ class _ProfileActivityState extends State<ProfileActivity> {
       if (!isFollowing) {
         return Row(
           children: [
-            buildFollowButton(
-              text: "Follow",
-              backgroundcolor: Colors.blue,
-              textColor: Colors.white,
-              borderColor: Colors.blue,
-              function: followUser,
-              isUser: false,
+            Flexible(
+              flex: 1,
+              child: buildFollowButton(
+                text: "Follow",
+                backgroundcolor: Colors.blue,
+                textColor: Colors.white,
+                borderColor: Colors.blue,
+                function: followUser,
+                isUser: false,
+              ),
             ),
-            buildFollowButton(
-              text: "Message",
-              backgroundcolor: Colors.white,
-              textColor: Colors.black,
-              borderColor: Colors.grey,
-              function: openMessage,
-              isUser: false,
+            Flexible(
+              flex: 1,
+              child: buildFollowButton(
+                text: "Message",
+                backgroundcolor: Colors.white,
+                textColor: Colors.black,
+                borderColor: Colors.grey,
+                function: openMessage,
+                isUser: false,
+              ),
             )
           ],
         );
@@ -295,39 +347,200 @@ class _ProfileActivityState extends State<ProfileActivity> {
       //currentUser = null;
     }
 
-    Widget buildUserPosts() {
-      return view == "grid"
-          ? posts.length == 0
-              ? Center(
-                  child: Padding(
-                    padding: const EdgeInsets.only(top: 20),
-                    child: Text(
-                      "Nothing to show!",
-                      style: TextStyle(fontSize: 16),
-                    ),
+    _showModalBottomSheet(BuildContext context) {
+      return showModalBottomSheet(
+          context: context,
+          builder: (context) {
+            return Container(
+              color: Color(0xFF737373),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.only(
+                    topLeft: const Radius.circular(29),
+                    topRight: const Radius.circular(29),
                   ),
-                )
-              : GridView.count(
-                  crossAxisCount: 3,
-                  childAspectRatio: 1.0,
-                  padding: const EdgeInsets.all(0.5),
-                  mainAxisSpacing: 1.5,
-                  crossAxisSpacing: 1.5,
-                  controller: _scrollController,
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: List.generate(posts.length, (index) {
-                    if(index == posts.length){
-                      return offsetPost < totalPagePost
-                          ? CupertinoActivityIndicator()
-                          : SizedBox(
-                        height: 8,
-                      );
-                    }
-                    return ImageTile(posts[index]);
-                  }))
+                ),
+                padding:
+                    EdgeInsets.only(top: 15, left: 5, bottom: 15, right: 5),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    ListTile(
+                      leading: Icon(
+                        Icons.settings_outlined,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Settings",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SettingsActivity()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        Icons.topic,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Topics",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      onTap: () async {
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                            context,
+                            PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        EditTopicActivity(),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  const begin = Offset(1.0, 0.0);
+                                  const end = Offset.zero;
+                                  const curve = Curves.easeOut;
 
-          : albums.length == 0
+                                  var tween = Tween(begin: begin, end: end)
+                                      .chain(CurveTween(curve: curve));
+
+                                  return SlideTransition(
+                                    position: animation.drive(tween),
+                                    child: child,
+                                  );
+                                }));
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        Icons.save_outlined,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Saved",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      onTap: () {
+                        Navigator.of(context).pop();
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (context) => SavedPostActivity()),
+                        );
+                      },
+                    ),
+                    ListTile(
+                      leading: Icon(
+                        Icons.logout,
+                        color: Colors.black,
+                      ),
+                      title: Text(
+                        "Log out",
+                        style: TextStyle(fontSize: 16),
+                      ),
+                      onTap: () async {
+                        Navigator.of(context).pop();
+                        setState(() {
+                          isAPIcallProcess = true;
+                        });
+                        await _signOut();
+                        await SharedService.logout(context);
+                        setState(() {
+                          isAPIcallProcess = false;
+                        });
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            );
+          });
+    }
+
+    Widget buildTabBar() {
+      return !user.data.isNutritionist
+          ? Container(
+              child: TabBar(
+                  onTap: (index) {
+                    setState(() {
+                      indexTab = index;
+                    });
+                  },
+                  controller: _tabController,
+                  indicatorColor: Colors.grey,
+                  indicatorWeight: 1,
+                  labelColor: Colors.black,
+                  unselectedLabelColor: Colors.black26,
+                  tabs: [
+                  Tab(
+                    icon: Icon(
+                      Icons.grid_on,
+                      color: indexTab == 0 ? appPrimaryColor : Colors.black26,
+                    ),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.share_outlined,
+                      color: indexTab == 1 ? appPrimaryColor : Colors.black26,
+                    ),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.photo_album,
+                      color: indexTab == 2 ? appPrimaryColor : Colors.black26,
+                    ),
+                  ),
+                ]))
+          : Container(
+              child: TabBar(
+                  onTap: (index) {
+                    setState(() {
+                      indexTab = index;
+                    });
+                  },
+                  controller: _tabController,
+                  indicatorColor: Colors.grey,
+                  indicatorWeight: 1,
+                  labelColor: Colors.black,
+                  unselectedLabelColor: Colors.black26,
+                  tabs: [
+                  Tab(
+                    icon: Icon(
+                      Icons.grid_on,
+                      color: indexTab == 0 ? appPrimaryColor : Colors.black26,
+                    ),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.share_outlined,
+                      color: indexTab == 1 ? appPrimaryColor : Colors.black26,
+                    ),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.photo_album,
+                      color: indexTab == 2 ? appPrimaryColor : Colors.black26,
+                    ),
+                  ),
+                  Tab(
+                    icon: Icon(
+                      Icons.recommend,
+                      color: indexTab == 3 ? appPrimaryColor : Colors.black26,
+                    ),
+                  )
+                ]));
+    }
+
+    Widget buildUserPosts() {
+      return indexTab == 0
+          ? postsMoment.length == 0
               ? Center(
                   child: Padding(
                     padding: const EdgeInsets.only(top: 20),
@@ -337,45 +550,190 @@ class _ProfileActivityState extends State<ProfileActivity> {
                     ),
                   ),
                 )
-              : GridView.count(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.9,
-                  padding: const EdgeInsets.all(10),
-                  mainAxisSpacing: 15,
-                  crossAxisSpacing: 15,
-                  controller: _scrollController,
+              : GridView.builder(
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3, childAspectRatio: 1),
+                  physics: NeverScrollableScrollPhysics(),
                   shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  children: List.generate(albums.length, (index) {
-                    if(index == albums.length){
-                      return offsetAlbum < totalPageAlbum
-                          ? CupertinoActivityIndicator()
-                          : SizedBox(
-                        height: 8,
-                      );
+                  itemCount: offsetPostsMoment < totalPagePostsMoment
+                      ? postsMoment.length + 2
+                      : postsMoment.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    if (index == postsMoment.length) {
+                      return Container();
                     }
-                    return AlbumTile(
-                      album: albums[index],
-                      reloadFunction: reloadAlbum,
-                      userId: user.data.id,
-                    );
-                  }));
+                    if (index == postsMoment.length + 1) {
+                      return CupertinoActivityIndicator();
+                    }
+
+                    return ImageTile(postsMoment[index]);
+                  })
+          : indexTab == 1
+              ? postsFoodShare.length == 0
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 20),
+                        child: Text(
+                          "Nothing to show!",
+                          style: TextStyle(fontSize: 16),
+                        ),
+                      ),
+                    )
+                  : GridView.builder(
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 3, childAspectRatio: 1),
+                      physics: NeverScrollableScrollPhysics(),
+                      shrinkWrap: true,
+                      itemCount: offsetPostsFoodShare < totalPagePostsFoodShare
+                          ? postsFoodShare.length + 2
+                          : postsFoodShare.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        if (index == postsFoodShare.length) {
+                          return Container();
+                        }
+                        if (index == postsFoodShare.length + 1) {
+                          return CupertinoActivityIndicator();
+                        }
+
+                        return ImageTile(postsFoodShare[index]);
+                      })
+              : indexTab == 2
+                  ? albums.length == 0
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 20),
+                            child: Text(
+                              "Nothing to show!",
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ),
+                        )
+                      : GridView.count(
+                          crossAxisCount: 2,
+                          childAspectRatio: 0.9,
+                          padding: const EdgeInsets.all(10),
+                          mainAxisSpacing: 15,
+                          crossAxisSpacing: 15,
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          children: List.generate(albums.length, (index) {
+                            if (index == albums.length) {
+                              return offsetAlbums < totalPageAlbums
+                                  ? CupertinoActivityIndicator()
+                                  : SizedBox(
+                                      height: 8,
+                                    );
+                            }
+                            return AlbumTile(
+                              album: albums[index],
+                              reloadFunction: reloadAlbum,
+                              userId: user.data.id,
+                            );
+                          }))
+                  : indexTab == 3
+                      ? postsRecommendation.length == 0
+                          ? Center(
+                              child: Padding(
+                                padding: const EdgeInsets.only(top: 20),
+                                child: Text(
+                                  "Nothing to show!",
+                                  style: TextStyle(fontSize: 16),
+                                ),
+                              ),
+                            )
+                          : ListView.builder(
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              itemBuilder: (context, i) {
+                                if (i == postsRecommendation.length) {
+                                  if (offsetPostsRecommendation <
+                                      totalPagePostsRecommendation) {
+                                    return CupertinoActivityIndicator();
+                                  }
+                                  return SizedBox(
+                                    height: 10,
+                                  );
+                                }
+                                return Post(
+                                  id: postsRecommendation[i].id,
+                                  userId: postsRecommendation[i].author.id,
+                                  location: postsRecommendation[i].location,
+                                  content: postsRecommendation[i].content,
+                                  kind: postsRecommendation[i].kind,
+                                  medias: postsRecommendation[i].medias != null
+                                      ? postsRecommendation[i].medias
+                                      : [],
+                                  avatar:
+                                      postsRecommendation[i].author.avatar.url,
+                                  displayName:
+                                      postsRecommendation[i].author.displayName,
+                                  numOfReaction:
+                                      postsRecommendation[i].numOfReaction,
+                                  numOfComment:
+                                      postsRecommendation[i].numOfComment,
+                                  dateTime: DateTime.fromMillisecondsSinceEpoch(
+                                      postsRecommendation[i].createdAt),
+                                  isLike:
+                                      postsRecommendation[i].reaction != null,
+                                  saved: postsRecommendation[i].saved,
+                                  foodRefId: postsRecommendation[i].ref != null
+                                      ? postsRecommendation[i].ref.id
+                                      : "",
+                                  totalTime: postsRecommendation[i].ref != null
+                                      ? postsRecommendation[i].ref.totalTime
+                                      : 0,
+                                  servings: postsRecommendation[i].ref != null
+                                      ? postsRecommendation[i].ref.servings
+                                      : 0,
+                                  foodName: postsRecommendation[i].ref != null
+                                      ? postsRecommendation[i].ref.name
+                                      : "",
+                                  foodDescription: postsRecommendation[i].ref !=
+                                          null
+                                      ? postsRecommendation[i].ref.description
+                                      : "",
+                                  foodImage: postsRecommendation[i].ref != null
+                                      ? postsRecommendation[i].ref.photos[0].url
+                                      : "",
+                                  tags: postsRecommendation[i].tags,
+                                  should:
+                                      postsRecommendation[i].recomendation !=
+                                              null
+                                          ? postsRecommendation[i]
+                                              .recomendation
+                                              .should
+                                          : null,
+                                  shouldNot:
+                                      postsRecommendation[i].recomendation !=
+                                              null
+                                          ? postsRecommendation[i]
+                                              .recomendation
+                                              .shouldNot
+                                          : null,
+                                  isNutritionist: user.data.isNutritionist,
+                                );
+                              },
+                              itemCount: postsRecommendation.length + 1,
+                            )
+                      : Container();
     }
 
     Widget buildMoreVert() {
-      return DraggableScrollableSheet(
-        maxChildSize: 0.3,
-        minChildSize: 0.2,
-        initialChildSize: 0.3,
-        builder: (_, controller) => Container(
+      return Container(
+        color: Color(0xFF737373),
+        child: Container(
           decoration: BoxDecoration(
             color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(29),
+              topRight: const Radius.circular(29),
+            ),
           ),
-          padding: EdgeInsets.only(top: 10, left: 5, bottom: 10, right: 5),
-          child: ListView(
-            controller: controller,
-            children: [
+          padding: EdgeInsets.only(top: 15, left: 5, bottom: 15, right: 5),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
               ListTile(
                 leading: Icon(
                   Icons.settings_outlined,
@@ -391,6 +749,39 @@ class _ProfileActivityState extends State<ProfileActivity> {
                     context,
                     MaterialPageRoute(builder: (context) => SettingsActivity()),
                   );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.topic,
+                  color: Colors.black,
+                ),
+                title: Text(
+                  "Topics",
+                  style: TextStyle(fontSize: 16),
+                ),
+                onTap: () async {
+                  Navigator.of(context).pop();
+                  Navigator.push(
+                      context,
+                      PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  EditTopicActivity(),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            const begin = Offset(1.0, 0.0);
+                            const end = Offset.zero;
+                            const curve = Curves.easeOut;
+
+                            var tween = Tween(begin: begin, end: end)
+                                .chain(CurveTween(curve: curve));
+
+                            return SlideTransition(
+                              position: animation.drive(tween),
+                              child: child,
+                            );
+                          }));
                 },
               ),
               ListTile(
@@ -462,10 +853,9 @@ class _ProfileActivityState extends State<ProfileActivity> {
           profileId == currentUserId
               ? IconButton(
                   onPressed: () {
+                    //_showModalBottomSheet(context);
                     return showModalBottomSheet(
                         context: context,
-                        isScrollControlled: true,
-                        backgroundColor: Colors.transparent,
                         builder: (context) => buildMoreVert());
                   },
                   icon: Icon(Icons.more_vert))
@@ -481,29 +871,21 @@ class _ProfileActivityState extends State<ProfileActivity> {
               child: Form(
                 key: globalFormKey,
                 child: ListView(
+                  controller: _scrollController,
                   children: <Widget>[
                     Padding(
                       padding: const EdgeInsets.all(16.0),
                       child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: <Widget>[
                           Row(
                             children: <Widget>[
-                              (user.data.avatar.url != null)
-                                  ? CircleAvatar(
-                                      radius: size.width * 0.11,
-                                      backgroundColor: Colors.grey,
-                                      backgroundImage:
-                                          NetworkImage(user.data.avatar.url),
-                                    )
-                                  : CircleAvatar(
-                                      /*child: Image.asset("assets/images/default_avatar.png",
-                                        width: size.width * 0.20,
-                                        height: size.width * 0.20,
-                                        fit: BoxFit.fill),*/
-                                      radius: size.width * 0.11,
-                                      backgroundColor: Colors.grey,
-                                      backgroundImage: AssetImage(
-                                          'assets/images/default_avatar.png')),
+                              CircleAvatar(
+                                radius: size.width * 0.11,
+                                backgroundColor: Colors.grey,
+                                backgroundImage:
+                                    NetworkImage(user.data.avatar.url),
+                              ),
                               Expanded(
                                 flex: 1,
                                 child: Column(
@@ -513,19 +895,21 @@ class _ProfileActivityState extends State<ProfileActivity> {
                                       mainAxisAlignment:
                                           MainAxisAlignment.spaceEvenly,
                                       children: <Widget>[
-                                        buildStatColumn("posts", postCount),
                                         buildStatColumn(
-                                            "followers", followerCount),
+                                            postCount > 1 ? "Posts" : "Post",
+                                            postCount),
                                         buildStatColumn(
-                                            "following", followingCount),
+                                            followerCount > 1
+                                                ? "Followers"
+                                                : "Follower",
+                                            followerCount),
+                                        buildStatColumn(
+                                            followingCount > 1
+                                                ? "Followings"
+                                                : "Following",
+                                            followingCount),
                                       ],
                                     ),
-                                    Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceEvenly,
-                                        children: <Widget>[
-                                          buildProfileFollowButton(context)
-                                        ]),
                                   ],
                                 ),
                               )
@@ -533,17 +917,46 @@ class _ProfileActivityState extends State<ProfileActivity> {
                           ),
                           Container(
                               alignment: Alignment.centerLeft,
-                              padding: const EdgeInsets.only(top: 15.0),
-                              child: Text(
-                                user.data.displayName,
-                                style: TextStyle(fontWeight: FontWeight.bold),
+                              padding: const EdgeInsets.only(top: 5.0),
+                              child: Row(
+                                children: [
+                                  Text(
+                                    user.data.displayName,
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 15),
+                                  ),
+                                  SizedBox(
+                                    width: 3,
+                                  ),
+                                  user.data.isNutritionist
+                                      ? Icon(
+                                          Icons.check_circle,
+                                          color: Colors.blue,
+                                          size: 15,
+                                        )
+                                      : Container()
+                                ],
                               )),
+                          user.data.bio != null
+                              ? Container(
+                                  alignment: Alignment.centerLeft,
+                                  padding: const EdgeInsets.only(top: 5.0),
+                                  child: Text(
+                                    user.data.bio,
+                                    maxLines: 5,
+                                    style: TextStyle(fontSize: 15),
+                                  ))
+                              : Container(),
+                          SizedBox(
+                            height: 5,
+                          ),
+                          buildProfileFollowButton(context),
                         ],
                       ),
                     ),
                     Divider(),
-                    buildImageViewButtonBar(),
-                    Divider(height: 0.0),
+                    buildTabBar(),
                     buildUserPosts(),
                   ],
                 ),
@@ -594,15 +1007,37 @@ class _ProfileActivityState extends State<ProfileActivity> {
   }
 
   void _getMoreData() async {
-    print("get more");
-    var listPosts = await APIService.getUserWallPosts(profileId,offsetPost);
-    setState(() {
-      if (listPosts.data.posts.length > 0) {
-        totalPagePost = listPosts.data.metadata.totalPage;
-      }
-      posts.addAll(listPosts.data.posts);
-      offsetPost++;
-    });
+    if (indexTab == 0) {
+      var listPosts = await APIService.getUserWallPosts(
+          profileId, offsetPostsMoment, Config.postMomentType);
+      setState(() {
+        if (listPosts.data.posts.length > 0) {
+          totalPagePostsMoment = listPosts.data.metadata.totalPage;
+        }
+        postsMoment.addAll(listPosts.data.posts);
+        offsetPostsMoment++;
+      });
+    } else if (indexTab == 1) {
+      var listPosts = await APIService.getUserWallPosts(
+          profileId, offsetPostsFoodShare, Config.postFoodShareType);
+      setState(() {
+        if (listPosts.data.posts.length > 0) {
+          totalPagePostsFoodShare = listPosts.data.metadata.totalPage;
+        }
+        postsFoodShare.addAll(listPosts.data.posts);
+        offsetPostsFoodShare++;
+      });
+    } else if (indexTab == 3) {
+      var listPosts = await APIService.getUserWallPosts(
+          profileId, offsetPostsFoodShare, Config.postRecommendType);
+      setState(() {
+        if (listPosts.data.posts.length > 0) {
+          totalPagePostsRecommendation = listPosts.data.metadata.totalPage;
+        }
+        postsRecommendation.addAll(listPosts.data.posts);
+        offsetPostsRecommendation++;
+      });
+    }
   }
 }
 
@@ -617,22 +1052,24 @@ class ImageTile extends StatelessWidget {
 
   Widget build(BuildContext context) {
     return GestureDetector(
-        onTap: () => clickedImage(context),
-        child: CachedNetworkImage(
-
-          imageUrl: posts.medias[0].url,
-          imageBuilder: (context, imageProvider) => Container(
-            decoration: BoxDecoration(
-              image: DecorationImage(
-                image: imageProvider,
-                fit: BoxFit.cover,
-              ),
+      onTap: () => clickedImage(context),
+      child: CachedNetworkImage(
+        imageUrl: posts.medias[0].url,
+        imageBuilder: (context, imageProvider) => Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: imageProvider,
+              fit: BoxFit.cover,
             ),
           ),
-          placeholder: (context, url) => Center(child: CircularProgressIndicator(color: Colors.white30,)),
-          errorWidget: (context, url, error) => Icon(Icons.error),
-        ),);
-
+        ),
+        placeholder: (context, url) => Center(
+            child: CircularProgressIndicator(
+          color: Colors.white30,
+        )),
+        errorWidget: (context, url, error) => Icon(Icons.error),
+      ),
+    );
   }
 }
 
@@ -640,7 +1077,9 @@ class AlbumTile extends StatefulWidget {
   final Album album;
   final Function reloadFunction;
   final String userId;
-  const AlbumTile({Key key, this.album, this.reloadFunction, this.userId}) : super(key: key);
+
+  const AlbumTile({Key key, this.album, this.reloadFunction, this.userId})
+      : super(key: key);
 
   @override
   State<AlbumTile> createState() =>
@@ -692,13 +1131,22 @@ class _AlbumTileState extends State<AlbumTile> {
             onTap: () {
               Navigator.push(
                 context,
-                MaterialPageRoute(builder: (context) => AlbumDetailsActivity(userId: widget.userId, albumId: widget.album.id, name: widget.album.name,)),
+                MaterialPageRoute(
+                    builder: (context) => AlbumDetailsActivity(
+                          userId: widget.userId,
+                          albumId: widget.album.id,
+                          name: widget.album.name,
+                        )),
               );
             },
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(child: Container( width: 1000, height: 1000,child: Image.network(url, fit: BoxFit.cover))),
+                Expanded(
+                    child: Container(
+                        width: 1000,
+                        height: 1000,
+                        child: Image.network(url, fit: BoxFit.cover))),
                 SizedBox(
                   height: 5,
                 ),

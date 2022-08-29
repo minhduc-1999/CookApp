@@ -1,5 +1,7 @@
 import 'dart:convert';
 
+import 'package:tastify/config.dart';
+
 
 FoodDetailsRespondModel foodDetailsRespondModel(String str) =>
     FoodDetailsRespondModel.fromJson(json.decode(str));
@@ -51,6 +53,7 @@ class Data {
   int updatedAt;
   int servings;
   String name;
+  String saveType;
   String description;
   List<Photos> photos;
   int totalTime;
@@ -71,7 +74,8 @@ class Data {
         this.steps,
         this.ingredients,
         this.author,
-        this.rating});
+        this.rating,
+      this.saveType});
 
   Data.fromJson(Map<String, dynamic> json) {
     createdAt = json['createdAt'];
@@ -102,6 +106,7 @@ class Data {
     author =
     json['author'] != null ? new Author.fromJson(json['author']) : null;
     rating = json['rating'];
+    saveType = json['saveType'] != null ? json['saveType'] : Config.foodUnsaved;
   }
 
   Map<String, dynamic> toJson() {
@@ -126,6 +131,7 @@ class Data {
       data['author'] = this.author.toJson();
     }
     data['rating'] = this.rating;
+    data['saveType'] = this.saveType;
     return data;
   }
 }
@@ -194,7 +200,7 @@ class Steps {
 
 class Ingredients {
   String name;
-  int quantity;
+  num quantity;
   String unit;
 
   Ingredients({this.name, this.quantity, this.unit});
@@ -218,14 +224,15 @@ class Author {
   String id;
   Avatar avatar;
   String displayName;
-
-  Author({this.id, this.avatar, this.displayName});
+  bool isNutritionist;
+  Author({this.id, this.avatar, this.displayName, this.isNutritionist});
 
   Author.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     avatar =
     json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
     displayName = json['displayName'];
+    isNutritionist = json['isNutritionist'] != null ? json['isNutritionist'] : false;
   }
 
   Map<String, dynamic> toJson() {
@@ -235,6 +242,7 @@ class Author {
       data['avatar'] = this.avatar.toJson();
     }
     data['displayName'] = this.displayName;
+    data['isNutritionist'] = this.isNutritionist;
     return data;
   }
 }

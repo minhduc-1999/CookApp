@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
+import 'package:tastify/SettingsScreen/ChangePasswordActivity.dart';
 import 'package:tastify/SettingsScreen/NotificationSettingsActivity.dart';
 
 import '../config.dart';
@@ -12,10 +14,7 @@ class SettingsActivity extends StatelessWidget {
         brightness: Brightness.dark,
         title: Text(
           Config.settings,
-          style: TextStyle(
-              fontFamily: 'Billabong',
-              fontSize: 32,
-              fontStyle: FontStyle.italic),
+
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -49,6 +48,19 @@ class SettingsActivity extends StatelessWidget {
                   Navigator.push(
                     context,
                     MaterialPageRoute(builder: (context) => NotificationSettingsActivity()),
+                  );
+                },
+              ),
+              ListTile(
+                leading: Icon(
+                  Icons.vpn_key_outlined,
+                  color: Colors.black,
+                ),
+                title: Text("Change Password", style: TextStyle(fontSize: 16),),
+                onTap: (){
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => ChangePasswordActivity()),
                   );
                 },
               )
