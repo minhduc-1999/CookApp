@@ -1,6 +1,7 @@
 //import 'package:firebase_messaging/firebase_messaging.dart';
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_client_sse/flutter_client_sse.dart';
@@ -51,7 +52,7 @@ class HomeActivityState extends State<HomeActivity> with Observer{
 
   final AuthBase auth;
   DateTime currentBackPressTime;
-  StreamSubscription<SSEModel> sseModelSubscription;
+
   PageController _pageController = PageController(initialPage: 0);
 
   List<NavigationItem> allNavigationItems = <NavigationItem>[
@@ -83,6 +84,9 @@ class HomeActivityState extends State<HomeActivity> with Observer{
         (OSNotificationReceivedEvent event) {
       // Will be called whenever a notification is received in foreground
       // Display Notification, pass null param for not displaying the notification
+          setState(() {
+            allNavigationItems[3].totalNew++;
+          });
       event.complete(event.notification);
     });
     OneSignal.shared.setNotificationOpenedHandler(
@@ -98,6 +102,7 @@ class HomeActivityState extends State<HomeActivity> with Observer{
       }
     });
     OneSignal.shared.setExternalUserId(currentUserId);
+
     /*sseModel.listen((event) async {
       print("home event messages: " + event.data);
       var temp = await APIService.getTotalNewMessage();
@@ -116,10 +121,13 @@ class HomeActivityState extends State<HomeActivity> with Observer{
   @override
   update(Observable observable, String notifyName, Map map) async{
     // TODO: implement update
+    print('update mess');
     if (notifyName == "new_message"){
       if (_currentIndex != 2) {
         print("home noti");
         var temp = await APIService.getTotalNewMessage();
+        print("total new mess: " + temp.toString());
+
         setState(() {
           allNavigationItems[2].totalNew = temp.data.newMessage;
         });
@@ -158,72 +166,247 @@ class HomeActivityState extends State<HomeActivity> with Observer{
               });
             },
             items: allNavigationItems.map((NavigationItem navigationItem) {
-              return BottomNavigationBarItem(
-                  icon: navigationItem.totalNew <= 0
-                      ? Icon(
-                          navigationItem.icon,
-                          color: appPrimaryColor,
-                        )
-                      : Stack(
-                          children: [
-                            Icon(
+              if (navigationItem.title != 'Notifications') {
+                return BottomNavigationBarItem(
+                                  icon: navigationItem.totalNew <= 0
+                                      ? Icon(
+                                          navigationItem.icon,
+                                          color: appPrimaryColor,
+                                        )
+                                      : Stack(
+                                          children: [
+                                            Icon(
+                                              navigationItem.icon,
+                                              color: appPrimaryColor,
+                                            ),
+                                            Positioned(
+                                              bottom: 13,
+                                              right: 0,
+                                              child: Container(
+                                                  height: 11,
+                                                  width: 11,
+                                                  decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: totalNewBackgroundColor),
+                                                  child: Center(
+                                                    child: Text(
+                                                      navigationItem.totalNew.toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 10, color: Colors.white),
+                                                    ),
+                                                  )),
+                                            ),
+                                          ],
+                                        ),
+                                  activeIcon: navigationItem.totalNew <= 0
+                                      ? Icon(
+                                          navigationItem.selectedIcon,
+                                          color: appPrimaryColor,
+                                        )
+                                      : Stack(
+                                          children: [
+                                            Icon(
+                                              navigationItem.selectedIcon,
+                                              color: appPrimaryColor,
+                                            ),
+                                            Positioned(
+                                              bottom: 13,
+                                              right: 0,
+                                              child: Container(
+                                                  height: 11,
+                                                  width: 11,
+                                                  decoration: BoxDecoration(
+                                                      shape: BoxShape.circle,
+                                                      color: totalNewBackgroundColor),
+                                                  child: Center(
+                                                    child: Text(
+                                                      navigationItem.totalNew.toString(),
+                                                      style: TextStyle(
+                                                          fontSize: 10, color: Colors.white),
+                                                    ),
+                                                  )),
+                                            ),
+                                          ],
+                                        ),
+                                  backgroundColor: appBackgroundLightColor,
+                                  title: Text(
+                                    navigationItem.title,
+                                    style: TextStyle(color: appPrimaryColor),
+                                  ));
+              } else {
+                return BottomNavigationBarItem(
+                    icon: StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('modules')
+                            .doc('notification')
+                            .collection('users')
+                            .doc(currentUserId)
+                            .collection('badge')
+                            .orderBy('createdAt',descending: true)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Icon(
                               navigationItem.icon,
                               color: appPrimaryColor,
-                            ),
-                            Positioned(
-                              bottom: 13,
-                              right: 0,
-                              child: Container(
-                                  height: 11,
-                                  width: 11,
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: totalNewBackgroundColor),
-                                  child: Center(
-                                    child: Text(
-                                      navigationItem.totalNew.toString(),
-                                      style: TextStyle(
-                                          fontSize: 10, color: Colors.white),
-                                    ),
-                                  )),
-                            ),
-                          ],
-                        ),
-                  activeIcon: navigationItem.totalNew <= 0
-                      ? Icon(
-                          navigationItem.selectedIcon,
-                          color: appPrimaryColor,
-                        )
-                      : Stack(
-                          children: [
-                            Icon(
+                            );
+                          } else if (!snapshot.hasData || snapshot.connectionState == ConnectionState.none) {
+                            return Icon(
+                              navigationItem.icon,
+                              color: appPrimaryColor,
+                            );
+                          } else if (snapshot.hasData){
+                            int totalNew = 0;
+                            for( var i in snapshot.data.docs){
+                              if(!i['isRead']){
+                                totalNew++;
+                              }
+                            }
+                            print("total new: " + totalNew.toString() );
+                            return totalNew <= 0
+                                ? Icon(
+                              navigationItem.icon,
+                              color: appPrimaryColor,
+                            )
+                                : Stack(
+                              children: [
+                                Icon(
+                                  navigationItem.icon,
+                                  color: appPrimaryColor,
+                                ),
+                                Positioned(
+                                  bottom: 13,
+                                  right: 0,
+                                  child: Container(
+                                      height: 11,
+                                      width: 11,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: totalNewBackgroundColor),
+                                      child: Center(
+                                        child: Text(
+                                          totalNew.toString(),
+                                          style: TextStyle(
+                                              fontSize: 10, color: Colors.white),
+                                        ),
+                                      )),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Icon(
+                              navigationItem.icon,
+                              color: appPrimaryColor,
+                            );
+                          }
+                        }
+
+                    ),
+                    activeIcon: StreamBuilder(
+                        stream: FirebaseFirestore.instance
+                            .collection('modules')
+                            .doc('notification')
+                            .collection('users')
+                            .doc(currentUserId)
+                            .collection('badge')
+                            .orderBy('createdAt',descending: true)
+                            .snapshots(),
+                        builder: (context, snapshot) {
+                          if (snapshot.connectionState == ConnectionState.waiting) {
+                            return Icon(
                               navigationItem.selectedIcon,
                               color: appPrimaryColor,
-                            ),
-                            Positioned(
-                              bottom: 13,
-                              right: 0,
-                              child: Container(
-                                  height: 11,
-                                  width: 11,
-                                  decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: totalNewBackgroundColor),
-                                  child: Center(
-                                    child: Text(
-                                      navigationItem.totalNew.toString(),
-                                      style: TextStyle(
-                                          fontSize: 10, color: Colors.white),
-                                    ),
-                                  )),
-                            ),
-                          ],
+                            );
+                          } else if (!snapshot.hasData || snapshot.connectionState == ConnectionState.none) {
+                            return Icon(
+                              navigationItem.selectedIcon,
+                              color: appPrimaryColor,
+                            );
+                          } else if (snapshot.hasData){
+                            int totalNew = 0;
+                            print("total: " + snapshot.data.docs.length.toString());
+                            for( var i in snapshot.data.docs){
+                              if(!i['isRead']){
+                                totalNew++;
+                              }
+                            }
+                            print("total new: " + totalNew.toString() );
+                            return totalNew <= 0
+                                ? Icon(
+                              navigationItem.selectedIcon,
+                              color: appPrimaryColor,
+                            )
+                                : Stack(
+                              children: [
+                                Icon(
+                                  navigationItem.selectedIcon,
+                                  color: appPrimaryColor,
+                                ),
+                                Positioned(
+                                  bottom: 13,
+                                  right: 0,
+                                  child: Container(
+                                      height: 11,
+                                      width: 11,
+                                      decoration: BoxDecoration(
+                                          shape: BoxShape.circle,
+                                          color: totalNewBackgroundColor),
+                                      child: Center(
+                                        child: Text(
+                                          totalNew.toString(),
+                                          style: TextStyle(
+                                              fontSize: 10, color: Colors.white),
+                                        ),
+                                      )),
+                                ),
+                              ],
+                            );
+                          } else {
+                            return Icon(
+                              navigationItem.selectedIcon,
+                              color: appPrimaryColor,
+                            );
+                          }
+                        }
+
+                    ),
+
+                    /*navigationItem.totalNew <= 0
+                        ? Icon(
+                      navigationItem.selectedIcon,
+                      color: appPrimaryColor,
+                    )
+                        : Stack(
+                      children: [
+                        Icon(
+                          navigationItem.selectedIcon,
+                          color: appPrimaryColor,
                         ),
-                  backgroundColor: appBackgroundLightColor,
-                  title: Text(
-                    navigationItem.title,
-                    style: TextStyle(color: appPrimaryColor),
-                  ));
+                        Positioned(
+                          bottom: 13,
+                          right: 0,
+                          child: Container(
+                              height: 11,
+                              width: 11,
+                              decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: totalNewBackgroundColor),
+                              child: Center(
+                                child: Text(
+                                  navigationItem.totalNew.toString(),
+                                  style: TextStyle(
+                                      fontSize: 10, color: Colors.white),
+                                ),
+                              )),
+                        ),
+                      ],
+                    ),*/
+                    backgroundColor: appBackgroundLightColor,
+                    title: Text(
+                      navigationItem.title,
+                      style: TextStyle(color: appPrimaryColor),
+                    ));
+              }
             }).toList(),
           ),
         ),

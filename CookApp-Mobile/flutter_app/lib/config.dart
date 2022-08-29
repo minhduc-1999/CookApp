@@ -28,16 +28,21 @@ class Config {
   static const String reactAPI = "/api/users/reaction";
   static const String userFeedAPI = "/api/users/feeds/posts";
   static const String foodAPI = "/api/foods";
+  static const String foodCensoredAPI = "/api/foods/censored";
+  static const String foodSaveAPI = "/api/foods/save";
   static const String resendEmailAPI = "/api/resend-email-verification";
-
+  static const String topicsAPI = "/api/topics";
+  static const String interestsTopicAPI = "/api/topics/interests";
+  static const String interestedTopicAPI = "/api/topics/interested";
   static const String ingredientsAPI = "/api/ingredients";
   static const String unitsAPI = "/api/units";
   static const String statusMessagesAPI = "/api/messages/status";
   static const String conversationsAPI = "/api/conversations";
   static const String savedPostsAPI = "/api/users/posts/save";
-
+  static const String changePasswordAPI = "/api/password/change";
   static const String albumAPI = "/api/users/albums";
-
+  static const String verifyEmailAPI = "/api/email-verification/callback";
+  static const String resetPasswordAPI = "/api/password/reset";
   static const String sendMessage = "/api/messages";
   static const String botAPI = "/api/messages/bot";
 
@@ -47,5 +52,14 @@ class Config {
   static const String postReactType = "POST";
   static const String imageReactType = "POST_MEDIA";
   static const String albumReactType = "ALBUM";
+  static const String postRecommendType = "RECOMMENDATION";
+  static const String postMomentType = "MOMENT";
+  static const String postFoodShareType = "FOOD_SHARE";
   static const String textType = "TEXT";
+  static const String nutritionistRole = "nutritionist";
+  static const String shouldFoodType = "should";
+  static const String shouldnotFoodType = "should_not";
+  static const String foodUnsaved = "unsaved";
+  static const String messageTextType = "TEXT";
+  static const String messageImageType = "IMAGE";
 }

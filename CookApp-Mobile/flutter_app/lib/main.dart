@@ -1,3 +1,4 @@
+import 'package:api_cache_manager/utils/cache_manager.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/foundation.dart';
 //import 'package:firebase_messaging/firebase_messaging.dart';
@@ -5,9 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_observer/Observable.dart';
 import 'package:onesignal_flutter/onesignal_flutter.dart';
+import 'package:tastify/ChooseTopicScreen/ChooseTopicActivity.dart';
 import 'package:tastify/HomeScreen/HomeActivity.dart';
 import 'package:tastify/LoginScreen/LoginActivity.dart';
 import 'package:tastify/LoginScreen/SignUpActivity.dart';
+import 'package:tastify/LoginScreen/VerifyActivity.dart';
+
+import 'package:tastify/UploadScreen/RecommendedPostActivity.dart';
 import 'dart:convert';
 //import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:tastify/UploadScreen/UploadActivity.dart';
@@ -16,14 +21,15 @@ import 'package:socket_io_client/socket_io_client.dart' as IO;
 import 'package:web_socket_channel/io.dart';
 import 'Model/LoginRespondModel.dart';
 import 'ProfileScreen/EditProfileActivity.dart';
+import 'Services/APIService.dart';
 import 'Services/Auth.dart';
 import 'Services/SharedService.dart';
 import 'config.dart';
 import 'package:web_socket_channel/web_socket_channel.dart';
 import 'package:web_socket_channel/status.dart' as status;
 String currentUserId;
-Stream<SSEModel> sseModel;
-
+String role;
+List<Topic> tagsInit = [];
 LoginRespondModel loginDetail;
 Widget _defaultHome = LoginActivity(
   auth: Auth(),
@@ -50,30 +56,41 @@ Future<void> main() async {
   await Firebase.initializeApp();
 
   bool isLoggedIn = await SharedService.isLoggedIn();
+
   if (isLoggedIn) {
     var loginDetails = await SharedService.loginDetails();
+    var dataTags = await APIService.getTags();
+    tagsInit.clear();
+    for (var i in dataTags.data.topics) {
+      tagsInit.add(Topic(id: i.id,title: i.title));
+
+    }
+    print("ln");
     currentUserId = loginDetails.data.userId;
-    /*IO.Socket socket =
-        IO.io(Config.chatURL,
-            IO.OptionBuilder()
-                .disableAutoConnect()
-                .setQuery({"token": loginDetails.data.accessToken})
-            .setTimeout(60000)
-                .build()
-        );
-    socket.on("connect", (data) =>  print("socket: connected"));
-    socket.on("connect_error", (data) =>  print("socket: connect_error : " + data));
-    socket.on("disconnect", (data) =>  print("socket: disconnect"));
-    socket.connect();*/
-    await SharedService.chatSSEService();
-    sseModel.listen((event) {
+    role = loginDetails.data.role;
+    var userTopic = await APIService.getUsersTopics();
+    await SharedService.chatService();
+
+    /*sseModel.listen((event) {
+      print("sse: aaa" );
       Map<dynamic,dynamic> data = json.decode(event.data);
       Observable.instance.notifyObservers(["_MessageActivityState","HomeActivityState","_ConversationsActivityState"], notifyName: "new_message",map: data);
     });
-    _defaultHome = HomeActivity(
-      auth: Auth(),
-    );
+    sseModel.handleError((e){
+      print("sse: error " + e );
+    });*/
+
+    if (userTopic.data.topics.length > 0) {
+      _defaultHome = HomeActivity(
+            auth: Auth(),
+          );
+    } else {
+      _defaultHome = ChooseTopicActivity();
+    }
+
+    //_defaultHome = UploadActivity();
   }
+
   runApp(MyApp());
 }
 

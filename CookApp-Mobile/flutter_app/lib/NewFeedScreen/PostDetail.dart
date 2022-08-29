@@ -56,7 +56,7 @@ class _PostDetailState extends State<PostDetail> {
   void fetchData() async {
     PostDetailRespondModel res = await APIService.getPostDetail(id);
 
-    Post temp = Post(
+  /*  Post temp = Post(
       id: res.data.id,
       userId: res.data.author.id,
       location: res.data.location,
@@ -70,6 +70,32 @@ class _PostDetailState extends State<PostDetail> {
       numOfReaction: res.data.numOfReaction,
       isLike: res.data.reaction != null,
       saved: res.data.saved,
+    );*/
+    var i = res.data;
+    Post temp = Post(
+      id: i.id,
+      userId: i.author.id,
+      location: i.location,
+      content: i.content,
+      kind: i.kind,
+      medias: i.medias != null ? i.medias : [],
+      avatar: i.author.avatar.url,
+      displayName: i.author.displayName,
+      numOfReaction: i.numOfReaction,
+      numOfComment: i.numOfComment,
+      dateTime: DateTime.fromMillisecondsSinceEpoch(i.createdAt),
+      isLike: i.reaction != null,
+      saved: i.saved,
+      foodRefId: i.ref != null ? i.ref.id : "",
+      totalTime: i.ref != null ? i.ref.totalTime : 0,
+      servings: i.ref != null ? i.ref.servings : 0,
+      foodName: i.ref != null ? i.ref.name : "",
+      foodDescription: i.ref != null ? i.ref.description : "",
+      foodImage: i.ref != null ? i.ref.photos[0].url : "",
+      tags: i.tags,
+      should: i.recomendation != null ? i.recomendation.should : null,
+      shouldNot: i.recomendation != null ? i.recomendation.shouldNot : null,
+      isNutritionist: i.author.isNutritionist,
     );
     setState(() {
       post = temp;

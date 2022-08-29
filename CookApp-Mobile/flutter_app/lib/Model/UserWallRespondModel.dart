@@ -52,7 +52,8 @@ class Data {
   int numberOfFollowing;
   bool isFollowed;
   Conversation conversation;
-
+  bool isNutritionist;
+  String bio;
   Data(
       {this.id,
         this.avatar,
@@ -61,7 +62,9 @@ class Data {
         this.numberOfFollower,
         this.numberOfFollowing,
         this.isFollowed,
-        this.conversation});
+        this.conversation,
+      this.bio,
+      this.isNutritionist});
 
   Data.fromJson(Map<String, dynamic> json) {
     id = json['id'];
@@ -72,6 +75,8 @@ class Data {
     numberOfFollower = json['numberOfFollower'];
     numberOfFollowing = json['numberOfFollowing'];
     isFollowed = json['isFollowed'];
+    isNutritionist = json['isNutritionist'] != null ? json['isNutritionist'] : false;
+    bio = json['bio'] != null ? json['bio'] : null;
     conversation = json['conversation'] != null
         ? new Conversation.fromJson(json['conversation'])
         : null;
@@ -88,6 +93,7 @@ class Data {
     data['numberOfFollower'] = this.numberOfFollower;
     data['numberOfFollowing'] = this.numberOfFollowing;
     data['isFollowed'] = this.isFollowed;
+    data['isNutritionist'] = this.isNutritionist;
     if (this.conversation != null) {
       data['conversation'] = this.conversation.toJson();
     }

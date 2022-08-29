@@ -82,7 +82,7 @@ class Users {
 
   Users.fromJson(Map<String, dynamic> json) {
     id = json['id'];
-    json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
+    avatar = json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
     displayName = json['displayName'];
   }
 

@@ -88,6 +88,8 @@ class Posts {
   String reaction;
   String kind;
   String location;
+  List<String> tags;
+  Recomendation recomendation;
   bool saved;
   Ref ref;
   Posts(
@@ -103,9 +105,11 @@ class Posts {
         this.reaction,
         this.kind,
         this.location,
-        this.saved});
+        this.saved,
+      this.tags});
 
   Posts.fromJson(Map<String, dynamic> json) {
+
     id = json['id'];
     createdAt = json['createdAt'];
     updatedAt = json['updatedAt'];
@@ -117,6 +121,9 @@ class Posts {
         medias.add(new Medias.fromJson(v));
       });
     }
+    recomendation = json['recomendation'] != null
+        ? new Recomendation.fromJson(json['recomendation'])
+        : null;
     author =
     json['author'] != null ? new Author.fromJson(json['author']) : null;
     numOfReaction = json['numOfReaction'];
@@ -126,6 +133,7 @@ class Posts {
     location = json['location'];
     saved = json['saved'];
     ref = json['ref'] != null ? new Ref.fromJson(json['ref']) : null;
+    tags = json['tags'].cast<String>();
   }
 
   Map<String, dynamic> toJson() {
@@ -143,6 +151,9 @@ class Posts {
     }
     data['numOfReaction'] = this.numOfReaction;
     data['numOfComment'] = this.numOfComment;
+    if (this.recomendation != null) {
+      data['recomendation'] = this.recomendation.toJson();
+    }
     data['reaction'] = this.reaction;
     data['kind'] = this.kind;
     data['location'] = this.location;
@@ -150,23 +161,144 @@ class Posts {
     if (this.ref != null) {
       data['ref'] = this.ref.toJson();
     }
+    data['tags'] = this.tags;
+    return data;
+  }
+}
+class Recomendation {
+  Should should;
+  Should shouldNot;
+
+  Recomendation({this.should, this.shouldNot});
+
+  Recomendation.fromJson(Map<String, dynamic> json) {
+    should =
+    json['should'] != null ? new Should.fromJson(json['should']) : null;
+    shouldNot = json['shouldNot'] != null
+        ? new Should.fromJson(json['shouldNot'])
+        : null;
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    if (this.should != null) {
+      data['should'] = this.should.toJson();
+    }
+    if (this.shouldNot != null) {
+      data['shouldNot'] = this.shouldNot.toJson();
+    }
     return data;
   }
 }
 
+class Should {
+  String advice;
+  List<Foods> foods;
 
+  Should({this.advice, this.foods});
+
+  Should.fromJson(Map<String, dynamic> json) {
+    advice = json['advice'];
+    if (json['foods'] != null) {
+      foods = <Foods>[];
+      json['foods'].forEach((v) {
+        foods.add(new Foods.fromJson(v));
+      });
+    }
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['advice'] = this.advice;
+    if (this.foods != null) {
+      data['foods'] = this.foods.map((v) => v.toJson()).toList();
+    }
+    return data;
+  }
+}
+class Foods {
+  int createdAt;
+  String id;
+  int updatedAt;
+  int servings;
+  String name;
+  String description;
+  List<Photos> photos;
+  int totalTime;
+/*  List<Null>? steps;
+  List<Null>? ingredients;*/
+  String videoUrl;
+  Author author;
+  num rating;
+
+  Foods(
+      {this.createdAt,
+        this.id,
+        this.updatedAt,
+        this.servings,
+        this.name,
+        this.description,
+        this.photos,
+        this.totalTime,
+
+        this.videoUrl,
+        this.author,
+        this.rating});
+
+  Foods.fromJson(Map<String, dynamic> json) {
+    createdAt = json['createdAt'];
+    id = json['id'];
+    updatedAt = json['updatedAt'];
+    servings = json['servings'];
+    name = json['name'];
+    description = json['description'];
+    if (json['photos'] != null) {
+      photos = <Photos>[];
+      json['photos'].forEach((v) {
+        photos.add(new Photos.fromJson(v));
+      });
+    }
+    totalTime = json['totalTime'];
+    videoUrl = json['videoUrl'];
+    author =
+    json['author'] != null ? new Author.fromJson(json['author']) : null;
+    rating = json['rating'];
+  }
+
+  Map<String, dynamic> toJson() {
+    final Map<String, dynamic> data = new Map<String, dynamic>();
+    data['createdAt'] = this.createdAt;
+    data['id'] = this.id;
+    data['updatedAt'] = this.updatedAt;
+    data['servings'] = this.servings;
+    data['name'] = this.name;
+    data['description'] = this.description;
+    if (this.photos != null) {
+      data['photos'] = this.photos.map((v) => v.toJson()).toList();
+    }
+    data['totalTime'] = this.totalTime;
+
+    data['videoUrl'] = this.videoUrl;
+    if (this.author != null) {
+      data['author'] = this.author.toJson();
+    }
+    data['rating'] = this.rating;
+    return data;
+  }
+}
 class Author {
   String id;
   Avatar avatar;
   String displayName;
-
-  Author({this.id, this.avatar, this.displayName});
+  bool isNutritionist;
+  Author({this.id, this.avatar, this.displayName,this.isNutritionist});
 
   Author.fromJson(Map<String, dynamic> json) {
     id = json['id'];
     avatar =
     json['avatar'] != null ? new Avatar.fromJson(json['avatar']) : null;
     displayName = json['displayName'];
+    isNutritionist = json['isNutritionist'] != null ? json['isNutritionist'] : false;
   }
 
   Map<String, dynamic> toJson() {
@@ -176,6 +308,7 @@ class Author {
       data['avatar'] = this.avatar.toJson();
     }
     data['displayName'] = this.displayName;
+    data['isNutritionist'] = this.isNutritionist;
     return data;
   }
 }

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tastify/FoodScreen/FoodInstructionWidget.dart';
 
 import 'package:tastify/NewFeedScreen/PostDetail.dart';
 import 'package:tastify/ProfileScreen/ProfileActivity.dart';
@@ -168,6 +169,14 @@ class _NotificationWidgetState extends State<NotificationWidget> {
                 userId: data['followerID'],
               )));
 
+    } else if (templateID == "new_food" || templateID == "food_confirmation") {
+      Navigator.push(
+          context,
+          MaterialPageRoute(
+              builder: (context) => FoodInstructionWidget(
+                id: data['foodID'],
+                name: data['foodName']
+              )));
     }
   }
 

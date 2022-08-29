@@ -19,6 +19,8 @@ class _NotificationSettingsActivityState
   bool isCommentOn = true;
   bool isFollowOn = true;
   bool circular = true;
+  bool isNewFoodOn = true;
+  bool isFoodConfirmationOn = true;
   @override
   void initState() {
     // TODO: implement initState
@@ -35,9 +37,7 @@ class _NotificationSettingsActivityState
         title: Text(
           Config.notifications,
           style: TextStyle(
-              fontFamily: 'Billabong',
-              fontSize: 32,
-              fontStyle: FontStyle.italic),
+              ),
         ),
         flexibleSpace: Container(
           decoration: BoxDecoration(
@@ -73,6 +73,68 @@ class _NotificationSettingsActivityState
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
+                    "Confirm food",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  Switch.adaptive(
+                    value: isFoodConfirmationOn,
+                    onChanged: (value) {
+                      FirebaseFirestore.instance
+                          .collection('modules')
+                          .doc('configurations')
+                          .collection('notifications')
+                          .doc(currentUserId)
+                          .update({
+                        "foodConfirmation": value,
+                      });
+                      setState(() {
+                        isFoodConfirmationOn = value;
+                      });
+                    },
+                    activeColor: appPrimaryColor,
+                  )
+                ],
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "New food",
+                    style: TextStyle(
+                      fontSize: 16,
+                    ),
+                  ),
+                  Switch.adaptive(
+                    value: isNewFoodOn,
+                    onChanged: (value) {
+                      FirebaseFirestore.instance
+                          .collection('modules')
+                          .doc('configurations')
+                          .collection('notifications')
+                          .doc(currentUserId)
+                          .update({
+                        "newFood": value,
+                      });
+                      setState(() {
+                        isNewFoodOn = value;
+                      });
+                    },
+                    activeColor: appPrimaryColor,
+                  )
+                ],
+              ),
+              SizedBox(
+                height: 5,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
                     "New post",
                     style: TextStyle(
                       fontSize: 16,
@@ -87,7 +149,7 @@ class _NotificationSettingsActivityState
                           .collection('notifications')
                           .doc(currentUserId)
                           .update({
-                        "new_post": value,
+                        "newPost": value,
                       });
                       setState(() {
                         isNewPostOn = value;
@@ -118,7 +180,7 @@ class _NotificationSettingsActivityState
                           .collection('notifications')
                           .doc(currentUserId)
                           .update({
-                        "post_reaction": value,
+                        "postReaction": value,
                       });
                       setState(() {
                         isLikeOn = value;
@@ -149,7 +211,7 @@ class _NotificationSettingsActivityState
                           .collection('notifications')
                           .doc(currentUserId)
                           .update({
-                        "post_comment": value,
+                        "postComment": value,
                       });
                       setState(() {
                         isCommentOn = value;
@@ -180,7 +242,7 @@ class _NotificationSettingsActivityState
                           .collection('notifications')
                           .doc(currentUserId)
                           .update({
-                        "new_follower": value,
+                        "newFollower": value,
                       });
                       setState(() {
                         isFollowOn = value;
@@ -193,6 +255,7 @@ class _NotificationSettingsActivityState
               SizedBox(
                 height: 5,
               ),
+
             ],
           ),
         ),
@@ -209,11 +272,14 @@ class _NotificationSettingsActivityState
         .doc(currentUserId);
     var result = await _documentRef.get();
     setState(() {
-      isNewPostOn = result["new_post"];
-      isLikeOn = result["post_reaction"];
-      isCommentOn = result["post_comment"];
-      isFollowOn = result["new_follower"];
+      isNewPostOn = result["newPost"];
+      isLikeOn = result["postReaction"];
+      isCommentOn = result["postComment"];
+      isFollowOn = result["newFollower"];
+      isNewFoodOn = result["newFood"];
+      isFoodConfirmationOn = result["foodConfirmation"];
       circular = false;
+
     });
   }
 }
